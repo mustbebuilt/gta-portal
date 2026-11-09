@@ -69,4 +69,14 @@ class User extends Authenticatable
             UserRole::Mentor,
         ]);
     }
+
+    public function staffDevelopmentRecords(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(StaffDevelopmentRecord::class, 'user_id', 'id');
+    }
+
+    public function staffDevelopmentTargets(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(StaffDevelopmentTarget::class, 'user_id', 'id');
+    }
 }

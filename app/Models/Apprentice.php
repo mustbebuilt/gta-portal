@@ -91,5 +91,15 @@ class Apprentice extends Model
     {
         return $this->hasMany(SupportPlan::class, 'apprentice_id', 'apprentice_id');
     }
+
+    public function careerDiscussions(): HasMany
+    {
+        return $this->hasMany(CareerDiscussion::class, 'apprentice_id', 'apprentice_id');
+    }
+
+    public function tutorGroups(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(TutorGroup::class, 'apprentice_tutor_groups', 'apprentice_id', 'tutor_group_id');
+    }
 }
 

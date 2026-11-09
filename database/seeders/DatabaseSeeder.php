@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CurriculumSeeder::class,
             FictionalApprenticeSeeder::class,
+            CareerAndStaffSeeder::class,
         ]);
     }
 }

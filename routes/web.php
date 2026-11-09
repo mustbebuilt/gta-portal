@@ -1,14 +1,20 @@
 <?php
 
 use App\Http\Controllers\ApprenticeJourneyController;
+use App\Http\Controllers\ApprenticeManagementController;
 use App\Http\Controllers\ApprenticeTaskController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CaseStudyController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GroupManagementController;
+use App\Http\Controllers\HelpGuideController;
 use App\Http\Controllers\InspectionOverviewController;
 use App\Http\Controllers\OtjController;
 use App\Http\Controllers\ProgressReviewController;
+use App\Http\Controllers\ReportingController;
+use App\Http\Controllers\StaffDevelopmentController;
 use App\Http\Controllers\SupportPlanController;
 use App\Http\Controllers\TaskMarkingController;
 use Illuminate\Support\Facades\Route;
@@ -60,6 +66,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/journey', [ApprenticeJourneyController::class, 'show'])->name('journey.show');
     Route::get('/apprentice/{apprentice}/journey', [ApprenticeJourneyController::class, 'show'])->name('apprentice.journey');
 
+    // Careers & Guidance (Strictly firewalled: Employers 403 barred)
+    Route::get('/careers', [CareerController::class, 'index'])->name('careers.index');
+    Route::get('/apprentice/{apprentice}/careers', [CareerController::class, 'index'])->name('apprentice.careers');
+    Route::post('/apprentice/{apprentice}/careers', [CareerController::class, 'store'])->name('careers.store')->middleware('role:admin,trainer,moderator,mentor');
+
+    // Staff Development & CPD
+    Route::get('/staff-development', [StaffDevelopmentController::class, 'index'])->name('staff-development.index')->middleware('role:admin,trainer,moderator,mentor');
+    Route::post('/staff-development/{user}/record', [StaffDevelopmentController::class, 'storeRecord'])->name('staff-development.record')->middleware('role:admin,moderator');
+    Route::post('/staff-development/{user}/target', [StaffDevelopmentController::class, 'storeTarget'])->name('staff-development.target')->middleware('role:admin,moderator');
+
+    // General Reporting Home & Report Directory
+    Route::get('/reports', [ReportingController::class, 'index'])->name('reports.index')->middleware('role:admin,trainer,moderator,mentor');
+
+    // Help & How-To Guides (Role-scoped)
+    Route::get('/help', [HelpGuideController::class, 'index'])->name('help.index');
+
     // Marking SLA Queue (GTA Tutors & Quality Staff)
     Route::middleware('role:admin,trainer,moderator')->group(function () {
         Route::get('/marking', [TaskMarkingController::class, 'index'])->name('marking.index');
@@ -80,8 +102,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/support/{supportPlan}', [SupportPlanController::class, 'show'])->name('support.show');
     });
 
-    // Inspection Overview & Printable Dossier (Admins / CEO Only)
+    // Administrator Only Area
     Route::middleware('role:admin')->group(function () {
+        // Apprentices list & Add apprentice (Programme & Staff Setup)
+        Route::get('/admin/apprentices', [ApprenticeManagementController::class, 'index'])->name('admin.apprentices.index');
+        Route::get('/admin/apprentices/create', [ApprenticeManagementController::class, 'create'])->name('admin.apprentices.create');
+        Route::post('/admin/apprentices', [ApprenticeManagementController::class, 'store'])->name('admin.apprentices.store');
+
+        // Group creation and tutor assignments
+        Route::get('/admin/groups', [GroupManagementController::class, 'index'])->name('admin.groups.index');
+        Route::post('/admin/groups', [GroupManagementController::class, 'store'])->name('admin.groups.store');
+        Route::post('/admin/groups/{group}/assign', [GroupManagementController::class, 'assign'])->name('admin.groups.assign');
+        Route::delete('/admin/groups/{group}/apprentices/{apprentice}', [GroupManagementController::class, 'remove'])->name('admin.groups.remove');
+
+        // Inspection Overview & Printable Dossier (Admins / CEO Only)
         Route::get('/inspection-overview', [InspectionOverviewController::class, 'index'])->name('inspection.overview');
         Route::get('/inspection-overview/print', [InspectionOverviewController::class, 'printDossier'])->name('inspection.print');
     });

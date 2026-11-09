@@ -1,0 +1,98 @@
+{
+  "checked": "2026-11-05",
+  "resources": [
+    {
+      "id": "imi-autocity",
+      "title": "IMI Autocity",
+      "category": "motor",
+      "areas": [
+        "national"
+      ],
+      "description": "Explore automotive roles, including light vehicles, heavy vehicles, accident repair, motorcycles and parts.",
+      "audience": "Automotive career exploration",
+      "url": "https://www.theimi.org.uk/careers/autocity",
+      "source": "https://www.theimi.org.uk/careers/autocity",
+      "checked": "2026-11-05"
+    },
+    {
+      "id": "national-careers",
+      "title": "Get careers information and advice",
+      "category": "planning",
+      "areas": [
+        "national"
+      ],
+      "description": "Explore job profiles, skills and training options on the national careers website.",
+      "audience": "Online information for all ages. Adviser telephone support below is for adults aged 18+ living in England.",
+      "phone": "0800 072 0288",
+      "phoneLabel": "DWP careers adviser \u00b7 18+ in England",
+      "contactNote": "Monday to Friday, 8am\u20136pm; closed bank holidays. Under 18 and in training? Ask your GTA careers adviser.",
+      "url": "https://nationalcareers.service.gov.uk/",
+      "source": "https://nationalcareers.service.gov.uk/help-and-support",
+      "additionalSource": "https://nationalcareers.service.gov.uk/service-is-changing",
+      "checked": "2026-11-05"
+    },
+    {
+      "id": "advance-doncaster",
+      "title": "Advance Employment Hub",
+      "category": "local",
+      "areas": [
+        "doncaster"
+      ],
+      "description": "Local support with job searches, CVs, skills and career options.",
+      "audience": "Doncaster \u00b7 employment support enquiries for people aged 16+",
+      "phone": "01302 735 554",
+      "email": "advanceemploymenthub@doncaster.gov.uk",
+      "url": "https://advancedoncaster.co.uk/contact",
+      "source": "https://advancedoncaster.co.uk/contact",
+      "checked": "2026-11-05"
+    },
+    {
+      "id": "opportunity-sheffield",
+      "title": "Opportunity Sheffield",
+      "category": "local",
+      "areas": [
+        "sheffield"
+      ],
+      "description": "Council employment support, including CVs, interviews and progression or training enquiries.",
+      "audience": "Sheffield / South Yorkshire \u00b7 check the service for programme eligibility",
+      "phone": "0114 229 6188",
+      "email": "opportunity@sheffield.gov.uk",
+      "url": "https://www.sheffield.gov.uk/job-vacancies/training-and-employment-support/employment-skills",
+      "source": "https://www.sheffield.gov.uk/job-vacancies/training-and-employment-support/employment-skills",
+      "checked": "2026-11-05",
+      "additionalSource": "https://pathways-to-work.campaign.sheffield.gov.uk/make-referral"
+    },
+    {
+      "id": "find-apprenticeship",
+      "title": "Find an apprenticeship",
+      "category": "vacancies",
+      "areas": [
+        "national"
+      ],
+      "description": "Search apprenticeship vacancies in England. If you need a replacement employer, discuss suitable vacancies with GTA.",
+      "audience": "Vacancy search \u00b7 confirm suitability with your adviser",
+      "url": "https://www.gov.uk/apply-apprenticeship",
+      "source": "https://www.gov.uk/apply-apprenticeship",
+      "checked": "2026-11-05"
+    },
+    {
+      "id": "find-job",
+      "title": "Find a job",
+      "category": "vacancies",
+      "areas": [
+        "national"
+      ],
+      "description": "Search full-time and part-time vacancies. A job listing is not confirmation that it can support your apprenticeship.",
+      "audience": "England, Scotland and Wales",
+      "url": "https://www.gov.uk/find-a-job",
+      "source": "https://www.gov.uk/find-a-job",
+      "checked": "2026-11-05"
+    }
+  ],
+  "verification": {
+    "method": "Public primary-source content retrieval; not browser or contact-service testing",
+    "checked": "2026-11-05",
+    "result": "All six existing entries supported by retrieved primary sources; no resource removed or replaced",
+    "sheffieldAccessNote": "Direct retrieval initially returned HTTP 403; the official /business/employment-skills route resolved to the existing URL and returned content. Pathways to Work independently confirms the current telephone/email."
+  }
+}
