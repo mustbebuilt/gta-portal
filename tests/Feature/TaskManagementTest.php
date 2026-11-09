@@ -63,12 +63,53 @@ class TaskManagementTest extends TestCase
     {
         $response = $this->actingAs($this->apprenticeUser)->get(route('tasks.index'));
         $response->assertOk();
+        $response->assertSee('Block plan');
+        $response->assertSee('Block calendar and task records');
+        $response->assertSee('bp-work-table', false);
+        $response->assertSee('Gateway readiness &bull; Blocks 11&ndash;12', false);
         $response->assertSee('Motor Vehicle Foundation Skills');
         $response->assertSee('Task 2: Job Card from Employer');
 
         $taskResponse = $this->actingAs($this->apprenticeUser)->get(route('tasks.show', $this->task->at_id));
         $taskResponse->assertOk();
         $taskResponse->assertSee('Task Evidence & Submissions');
+    }
+
+    public function test_user_can_submit_block_change_request_and_admin_can_decide(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+
+        // 1. Submit request
+        $response = $this->actingAs($this->tutor)
+            ->post(route('tasks.block-request', $this->apprentice->apprentice_id), [
+                'block_num' => 1,
+                'request_type' => 'early',
+                'reason' => 'Apprentice accelerated workplace tasks ahead of scheduled calendar.',
+            ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('block_change_requests', [
+            'apprentice_id' => $this->apprentice->apprentice_id,
+            'block_num' => 1,
+            'request_type' => 'early',
+            'status' => 'Requested',
+        ]);
+
+        $reqId = \Illuminate\Support\Facades\DB::table('block_change_requests')->where('apprentice_id', $this->apprentice->apprentice_id)->value('id');
+
+        // 2. Admin approves request
+        $decideResponse = $this->actingAs($admin)
+            ->post(route('tasks.block-decide', $reqId), [
+                'decision' => 'Approve',
+                'decision_reason' => 'Reviewed against KSB allocation and approved.',
+            ]);
+
+        $decideResponse->assertRedirect();
+        $this->assertDatabaseHas('block_change_requests', [
+            'id' => $reqId,
+            'status' => 'Approved',
+            'decision_reason' => 'Reviewed against KSB allocation and approved.',
+        ]);
     }
 
     public function test_apprentice_can_upload_evidence_and_submit_task(): void

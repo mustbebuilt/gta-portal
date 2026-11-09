@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
     // 10-Block Curriculum & Task Workspace
     Route::get('/tasks', [ApprenticeTaskController::class, 'index'])->name('tasks.index');
     Route::get('/apprentice/{apprentice}/tasks', [ApprenticeTaskController::class, 'index'])->name('apprentice.tasks');
+    Route::post('/apprentice/{apprentice}/block-request', [ApprenticeTaskController::class, 'storeBlockRequest'])->name('tasks.block-request');
+    Route::post('/block-request/{id}/decide', [ApprenticeTaskController::class, 'decideBlockRequest'])->name('tasks.block-decide')->middleware('role:admin');
     Route::get('/tasks/{task}', [ApprenticeTaskController::class, 'show'])->name('tasks.show');
     Route::post('/tasks/{task}/upload', [ApprenticeTaskController::class, 'uploadEvidence'])->name('tasks.upload');
     Route::post('/tasks/{task}/submit', [ApprenticeTaskController::class, 'submitForMarking'])->name('tasks.submit');

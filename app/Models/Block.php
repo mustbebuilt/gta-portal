@@ -18,11 +18,17 @@ class Block extends Model
         'title',
         'primary_themes',
         'nominal_hours',
+        'start_date',
+        'end_date',
+        'configured',
     ];
 
     protected $casts = [
         'block_num' => 'integer',
         'nominal_hours' => 'integer',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'configured' => 'boolean',
     ];
 
     public function standard(): BelongsTo
