@@ -25,6 +25,37 @@ class ApprenticeManagementController extends Controller
     ) {}
 
     /**
+     * Display the Administrator Command Hub linking all admin capabilities.
+     */
+    public function hub(): View
+    {
+        $totalApprentices = Apprentice::count();
+        $liveApprentices = Apprentice::where('status', 'Live')->count();
+        $totalGroups = TutorGroup::count();
+        $totalStaff = User::whereIn('role', [
+            UserRole::Admin,
+            UserRole::Moderator,
+            UserRole::Trainer,
+            UserRole::Mentor,
+        ])->count();
+
+        $careerCount = DB::table('career_discussions')->count();
+        $staffDevCount = DB::table('staff_development_records')->count();
+        $helpGuidesPath = resource_path('data/help-guides.json');
+        $helpCount = file_exists($helpGuidesPath) ? count(json_decode(file_get_contents($helpGuidesPath), true) ?? []) : 26;
+
+        return view('admin.hub', compact(
+            'totalApprentices',
+            'liveApprentices',
+            'totalGroups',
+            'totalStaff',
+            'careerCount',
+            'staffDevCount',
+            'helpCount'
+        ));
+    }
+
+    /**
      * Display the apprentice roster with search, filtering, and RAG status.
      */
     public function index(Request $request): View

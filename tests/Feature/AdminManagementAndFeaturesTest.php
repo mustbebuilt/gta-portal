@@ -71,6 +71,28 @@ class AdminManagementAndFeaturesTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_access_admin_hub_and_menu_contains_all_required_admin_features(): void
+    {
+        $response = $this->actingAs($this->admin)->get('/admin');
+        $response->assertStatus(200);
+        $response->assertSee('Administrator Center');
+        $response->assertSee('Apprentices List &amp; Add Apprentice', false);
+        $response->assertSee('Group Creation &amp; Tutor Assignments', false);
+        $response->assertSee('Careers &amp; Progression', false);
+        $response->assertSee('Staff Development', false);
+        $response->assertSee('General Reports Area', false);
+        $response->assertSee('Help Guides', false);
+
+        // Verify that Admin menu system contains all requested links
+        $response->assertSee('Apprentices list');
+        $response->assertSee('Add apprentice');
+        $response->assertSee('Group creation &amp; tutors', false);
+        $response->assertSee('Careers');
+        $response->assertSee('Staff development');
+        $response->assertSee('A general reports area');
+        $response->assertSee('Help guides');
+    }
+
     public function test_admin_can_access_apprentices_list_and_create_page(): void
     {
         $response = $this->actingAs($this->admin)->get('/admin/apprentices');

@@ -65,7 +65,7 @@ class ReportingController extends Controller
         $behindOtj = 0;
         foreach ($apprentices as $app) {
             $metrics = $this->otjService->computeMetrics($app);
-            if ($metrics['rag']['rating'] === 'Green') $onTrackOtj++;
+            if (($metrics['rag_rating'] ?? '') === \App\Services\OtjCalculationService::RAG_GREEN) $onTrackOtj++;
             else $behindOtj++;
         }
 

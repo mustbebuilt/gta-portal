@@ -1,13 +1,16 @@
 <?php
 
+use App\Http\Controllers\ActionPlanController;
 use App\Http\Controllers\ApprenticeJourneyController;
 use App\Http\Controllers\ApprenticeManagementController;
 use App\Http\Controllers\ApprenticeTaskController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AttentionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CaseStudyController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EnglishMathsController;
 use App\Http\Controllers\GroupManagementController;
 use App\Http\Controllers\HelpGuideController;
 use App\Http\Controllers\InspectionOverviewController;
@@ -66,6 +69,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/journey', [ApprenticeJourneyController::class, 'show'])->name('journey.show');
     Route::get('/apprentice/{apprentice}/journey', [ApprenticeJourneyController::class, 'show'])->name('apprentice.journey');
 
+    // Needs Attention Watchlist (Staff Only)
+    Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index')->middleware('role:admin,trainer,moderator,mentor');
+
+    // Action Plan (Agreed SMART targets)
+    Route::get('/action-plan', [ActionPlanController::class, 'index'])->name('action-plan.index');
+    Route::post('/apprentice/{apprentice}/action-plan', [ActionPlanController::class, 'store'])->name('action-plan.store');
+    Route::post('/action-plan/item/{item}/complete', [ActionPlanController::class, 'complete'])->name('action-plan.complete');
+
+    // English & Maths Summary (Assessment & Topics)
+    Route::get('/english-maths', [EnglishMathsController::class, 'index'])->name('english-maths.index');
+
     // Careers & Guidance (Strictly firewalled: Employers 403 barred)
     Route::get('/careers', [CareerController::class, 'index'])->name('careers.index');
     Route::get('/apprentice/{apprentice}/careers', [CareerController::class, 'index'])->name('apprentice.careers');
@@ -104,6 +118,9 @@ Route::middleware('auth')->group(function () {
 
     // Administrator Only Area
     Route::middleware('role:admin')->group(function () {
+        // Admin Command Hub
+        Route::get('/admin', [ApprenticeManagementController::class, 'hub'])->name('admin.index');
+
         // Apprentices list & Add apprentice (Programme & Staff Setup)
         Route::get('/admin/apprentices', [ApprenticeManagementController::class, 'index'])->name('admin.apprentices.index');
         Route::get('/admin/apprentices/create', [ApprenticeManagementController::class, 'create'])->name('admin.apprentices.create');

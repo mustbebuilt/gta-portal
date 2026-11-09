@@ -43,7 +43,7 @@ class GroupManagementController extends Controller
         TutorGroup::create([
             'group_name' => $validated['group_name'],
             'group_code' => $validated['group_code'],
-            'tutor_id' => $validated['tutor_id'],
+            'tutor_user_id' => $validated['tutor_id'],
         ]);
 
         return redirect()->route('admin.groups.index')->with('success', "Tutor group '{$validated['group_name']}' created successfully.");
@@ -75,8 +75,8 @@ class GroupManagementController extends Controller
             ]);
 
             // Sync the assigned GTA tutor to match the group tutor
-            if ($group->tutor_id) {
-                $apprentice->trainer_id = $group->tutor_id;
+            if ($group->tutor_user_id) {
+                $apprentice->trainer_id = $group->tutor_user_id;
                 $apprentice->save();
             }
         });

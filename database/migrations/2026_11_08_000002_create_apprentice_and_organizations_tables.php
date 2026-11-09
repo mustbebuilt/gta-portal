@@ -41,6 +41,7 @@ return new class extends Migration {
         Schema::create('tutor_groups', function (Blueprint $table) {
             $table->increments('tutor_group_id');
             $table->string('group_name', 100);
+            $table->string('group_code', 50)->nullable();
             $table->foreignId('tutor_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });

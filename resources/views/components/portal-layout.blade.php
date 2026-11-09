@@ -13,8 +13,8 @@
         /* Bridge styles to ensure Laravel blade route links inherit exact preview button styles */
         .sim-nav a {
             background: transparent;
-            color: #c8d0df;
-            border: 1px solid #40495c;
+            color: #e1e7ec;
+            border: 1px solid #3d5061;
             border-radius: 8px;
             font-weight: 500;
             margin: 0;
@@ -23,29 +23,30 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 9px 13px;
+            padding: 10px 14px;
             font-size: 13px;
             cursor: pointer;
             transition: all 0.15s;
         }
         .sim-nav a:hover {
-            background: #2a3041;
+            background: #24394b;
+            border-color: #7693a8;
             color: #fff;
         }
         .sim-nav a[aria-pressed="true"],
         .sim-nav a.active {
-            background: #b5a1f5 !important;
-            border-color: #b5a1f5 !important;
-            color: #201834 !important;
+            background: #254c6a !important;
+            border-color: #466e8b !important;
+            color: #ffffff !important;
             font-weight: 700 !important;
         }
         .sim-nav-header {
-            font-size: 10px;
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #64748b;
+            letter-spacing: 0.9px;
+            color: #8da4be;
             font-weight: 700;
-            padding: 10px 4px 2px;
+            padding: 12px 4px 4px;
             width: 100%;
         }
 
@@ -201,35 +202,67 @@
 
         <!-- Navigation matching sample's sim-nav -->
         <nav id="portal-navigation" class="sim-nav" aria-label="Portal navigation" data-nav-closed="true">
-            <span class="sim-nav-header">Navigation</span>
+            <span class="sim-nav-header">Core Navigation</span>
             <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('dashboard') ? 'true' : 'false' }}">
-                Dashboard
+                Apprentice profile
             </a>
-            <a href="{{ route('help.index') }}" class="{{ request()->routeIs('help.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('help.*') ? 'true' : 'false' }}">
-                Help &amp; how to
-            </a>
-
-            @if(Auth::user()->role === \App\Enums\UserRole::Admin)
-                <span class="sim-nav-header">Administration</span>
-                <a href="{{ route('admin.apprentices.index') }}" class="{{ request()->routeIs('admin.apprentices.index') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('admin.apprentices.index') ? 'true' : 'false' }}">
-                    View Apprentices
-                </a>
-                <a href="{{ route('admin.apprentices.create') }}" class="{{ request()->routeIs('admin.apprentices.create') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('admin.apprentices.create') ? 'true' : 'false' }}">
-                    Add Apprentice
-                </a>
-                <a href="{{ route('admin.groups.index') }}" class="{{ request()->routeIs('admin.groups.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('admin.groups.*') ? 'true' : 'false' }}">
-                    Manage Groups
+            @if(Auth::user()->role !== \App\Enums\UserRole::Admin)
+                <a href="{{ route('help.index') }}" class="{{ request()->routeIs('help.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('help.*') ? 'true' : 'false' }}">
+                    Help &amp; how to
                 </a>
             @endif
 
-            <span class="sim-nav-header">Training &amp; Tasks</span>
+            @if(Auth::user()->isStaff())
+                <a href="{{ route('attention.index') }}" class="{{ request()->routeIs('attention.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('attention.*') ? 'true' : 'false' }}">
+                    Needs attention
+                </a>
+            @endif
+
+            @if(Auth::user()->role === \App\Enums\UserRole::Admin)
+                <span class="sim-nav-header">Administration</span>
+                <a href="{{ route('admin.index') }}" class="{{ request()->routeIs('admin.index') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('admin.index') ? 'true' : 'false' }}">
+                    Admin Hub
+                </a>
+                <a href="{{ route('admin.apprentices.index') }}" class="{{ request()->routeIs('admin.apprentices.index') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('admin.apprentices.index') ? 'true' : 'false' }}">
+                    Apprentices list
+                </a>
+                <a href="{{ route('admin.apprentices.create') }}" class="{{ request()->routeIs('admin.apprentices.create') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('admin.apprentices.create') ? 'true' : 'false' }}">
+                    Add apprentice
+                </a>
+                <a href="{{ route('admin.groups.index') }}" class="{{ request()->routeIs('admin.groups.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('admin.groups.*') ? 'true' : 'false' }}">
+                    Group creation &amp; tutors
+                </a>
+                <a href="{{ route('careers.index') }}" class="{{ request()->routeIs('careers.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('careers.*') ? 'true' : 'false' }}">
+                    Careers
+                </a>
+                <a href="{{ route('staff-development.index') }}" class="{{ request()->routeIs('staff-development.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('staff-development.*') ? 'true' : 'false' }}">
+                    Staff development
+                </a>
+                <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('reports.*') ? 'true' : 'false' }}">
+                    A general reports area
+                </a>
+                <a href="{{ route('help.index') }}" class="{{ request()->routeIs('help.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('help.*') ? 'true' : 'false' }}">
+                    Help guides
+                </a>
+                <a href="{{ route('inspection.overview') }}" class="{{ request()->routeIs('inspection.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('inspection.*') ? 'true' : 'false' }}">
+                    Inspection Overview
+                </a>
+            @endif
+
+            <span class="sim-nav-header">Training &amp; Curriculum</span>
             <a href="{{ route('tasks.index') }}" class="{{ request()->routeIs('tasks.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('tasks.*') ? 'true' : 'false' }}">
-                10-Block Curriculum
+                Block plan
+            </a>
+            <a href="{{ route('action-plan.index') }}" class="{{ request()->routeIs('action-plan.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('action-plan.*') ? 'true' : 'false' }}">
+                Action Plan
+            </a>
+            <a href="{{ route('english-maths.index') }}" class="{{ request()->routeIs('english-maths.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('english-maths.*') ? 'true' : 'false' }}">
+                English &amp; Maths
             </a>
 
             @if(Auth::user()->isStaff())
                 <a href="{{ route('marking.index') }}" class="{{ request()->routeIs('marking.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('marking.*') ? 'true' : 'false' }}">
-                    Tutor Marking
+                    Tutor marking
                 </a>
             @endif
 
@@ -241,41 +274,38 @@
                 Off-The-Job (OTJ)
             </a>
             <a href="{{ route('reviews.index') }}" class="{{ request()->routeIs('reviews.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('reviews.*') ? 'true' : 'false' }}">
-                Progress Reviews
+                Review monitoring
             </a>
             <a href="{{ route('journey.show') }}" class="{{ request()->routeIs('journey.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('journey.*') ? 'true' : 'false' }}">
                 Apprentice Journey
             </a>
 
             @if(Auth::user()->role !== \App\Enums\UserRole::Employer)
-                <span class="sim-nav-header">Support &amp; Careers</span>
-                <a href="{{ route('careers.index') }}" class="{{ request()->routeIs('careers.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('careers.*') ? 'true' : 'false' }}">
-                    Careers
-                </a>
+                <span class="sim-nav-header">Support &amp; Inclusion</span>
+                @if(Auth::user()->role !== \App\Enums\UserRole::Admin)
+                    <a href="{{ route('careers.index') }}" class="{{ request()->routeIs('careers.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('careers.*') ? 'true' : 'false' }}">
+                        Careers
+                    </a>
+                @endif
                 @if(Auth::user()->isStaff())
                     <a href="{{ route('support.index') }}" class="{{ request()->routeIs('support.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('support.*') ? 'true' : 'false' }}">
-                        Support &amp; Concerns
+                        Support &amp; concerns
                     </a>
                 @endif
             @endif
 
             @if(Auth::user()->isStaff())
-                <span class="sim-nav-header">Quality &amp; Reports</span>
-                <a href="{{ route('staff-development.index') }}" class="{{ request()->routeIs('staff-development.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('staff-development.*') ? 'true' : 'false' }}">
-                    Staff Development
-                </a>
-                <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('reports.*') ? 'true' : 'false' }}">
-                    Reporting Home
-                </a>
+                <span class="sim-nav-header">Quality &amp; Standards</span>
+                @if(Auth::user()->role !== \App\Enums\UserRole::Admin)
+                    <a href="{{ route('staff-development.index') }}" class="{{ request()->routeIs('staff-development.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('staff-development.*') ? 'true' : 'false' }}">
+                        Staff Development
+                    </a>
+                    <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('reports.*') ? 'true' : 'false' }}">
+                        Reporting home
+                    </a>
+                @endif
                 <a href="{{ route('case-studies.index') }}" class="{{ request()->routeIs('case-studies.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('case-studies.*') ? 'true' : 'false' }}">
-                    Case Studies
-                </a>
-            @endif
-
-            @if(Auth::user()->role === \App\Enums\UserRole::Admin)
-                <span class="sim-nav-header">Inspection &amp; Audit</span>
-                <a href="{{ route('inspection.overview') }}" class="{{ request()->routeIs('inspection.*') ? 'active' : '' }}" aria-pressed="{{ request()->routeIs('inspection.*') ? 'true' : 'false' }}">
-                    Inspection Overview
+                    Case studies
                 </a>
             @endif
         </nav>

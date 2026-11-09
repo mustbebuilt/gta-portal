@@ -15,6 +15,7 @@ class TutorGroup extends Model
 
     protected $fillable = [
         'group_name',
+        'group_code',
         'tutor_user_id',
     ];
 

@@ -50,7 +50,7 @@ class PortalFrontendNavigationTest extends TestCase
     {
         $this->actingAs($this->apprenticeUser)->get(route('dashboard'))->assertOk()->assertSee('My Apprenticeship Workspace');
         $this->actingAs($this->apprenticeUser)->get(route('tasks.index'))->assertOk()->assertSee('10-Block Training Curriculum');
-        $this->actingAs($this->apprenticeUser)->get(route('attendance.index'))->assertOk()->assertSee('Attendance &amp; Session Registers', false);
+        $this->actingAs($this->apprenticeUser)->get(route('attendance.index'))->assertOk()->assertSee('Attendance Ledger');
         $this->actingAs($this->apprenticeUser)->get(route('otj.index'))->assertOk()->assertSee('Off-The-Job (OTJ) Training Tracker');
         $this->actingAs($this->apprenticeUser)->get(route('journey.show'))->assertOk()->assertSee('Apprentice Journey &amp; Visual Roadmap', false);
     }
