@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'GTA portal v1.2.6 | Apprentice Course Management' }}</title>
+    <title>{{ $title ?? 'GTA portal v1.2.8 | Apprentice Course Management' }}</title>
 
     <!-- Full Authentic Preview Stylesheet from GTA_Portal_v1.2.6_Complete_Developer_Pack/preview/index.html -->
     <link rel="stylesheet" href="{{ asset('css/gta-preview.css') }}">
@@ -170,9 +170,9 @@
 
             <div class="sim-banner-actions">
                 <div id="portal-release" class="portal-release">
-                    <strong>v1.2.6</strong>
+                    <strong>v1.2.8</strong>
                     <span>Live Portal</span>
-                    <small>Build 2026.11.08.6</small>
+                    <small>Build 2026.11.10.3</small>
                 </div>
 
                 <div class="btn-user-pill">
@@ -312,7 +312,62 @@
 
         <!-- Main Content Area -->
         <main class="main" id="sim-main-content">
+            @if(Auth::user()->role === \App\Enums\UserRole::Admin)
+                <!-- Administrator Area Launcher (v1.2.8) -->
+                <details class="role-launcher" style="margin-bottom: 20px; background: var(--portal-panel); border: 1px solid var(--sim-line); border-radius: 10px; padding: 12px 16px;">
+                    <summary style="font-weight: 650; cursor: pointer; color: var(--sim-text);">Open an area (Administrator Launcher)</summary>
+                    <nav class="role-area-grid" aria-label="Administrator areas" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px;">
+                        <a href="{{ route('admin.apprentices.index') }}" style="text-decoration: none; color: inherit; padding: 14px; background: var(--sim-soft); border: 1px solid var(--sim-line); border-radius: 8px; font-weight: 600; font-size: 14px; display: block;">Apprentices</a>
+                        <a href="{{ route('admin.groups.index') }}" style="text-decoration: none; color: inherit; padding: 14px; background: var(--sim-soft); border: 1px solid var(--sim-line); border-radius: 8px; font-weight: 600; font-size: 14px; display: block;">Groups &amp; sessions</a>
+                        <a href="{{ route('reviews.index') }}" style="text-decoration: none; color: inherit; padding: 14px; background: var(--sim-soft); border: 1px solid var(--sim-line); border-radius: 8px; font-weight: 600; font-size: 14px; display: block;">Reviews</a>
+                        <a href="{{ route('reports.index') }}" style="text-decoration: none; color: inherit; padding: 14px; background: var(--sim-soft); border: 1px solid var(--sim-line); border-radius: 8px; font-weight: 600; font-size: 14px; display: block;">Reports</a>
+                        <a href="{{ route('attention.index') }}" style="text-decoration: none; color: inherit; padding: 14px; background: var(--sim-soft); border: 1px solid var(--sim-line); border-radius: 8px; font-weight: 600; font-size: 14px; display: block;">Support &amp; retention</a>
+                        <a href="{{ route('careers.index') }}" style="text-decoration: none; color: inherit; padding: 14px; background: var(--sim-soft); border: 1px solid var(--sim-line); border-radius: 8px; font-weight: 600; font-size: 14px; display: block;">Careers</a>
+                        <a href="{{ route('staff-development.index') }}" style="text-decoration: none; color: inherit; padding: 14px; background: var(--sim-soft); border: 1px solid var(--sim-line); border-radius: 8px; font-weight: 600; font-size: 14px; display: block;">Staff development</a>
+                        <a href="{{ route('case-studies.index') }}" style="text-decoration: none; color: inherit; padding: 14px; background: var(--sim-soft); border: 1px solid var(--sim-line); border-radius: 8px; font-weight: 600; font-size: 14px; display: block;">Case studies</a>
+                        <a href="{{ route('help.index') }}" style="text-decoration: none; color: inherit; padding: 14px; background: var(--sim-soft); border: 1px solid var(--sim-line); border-radius: 8px; font-weight: 600; font-size: 14px; display: block;">Help &amp; how to</a>
+                    </nav>
+                </details>
+            @endif
+
             {{ $slot }}
+
+            <!-- Shared In-Place Rating Guide (v1.2.8) -->
+            <details class="portal-status-guide" id="portal-status-guide">
+                <summary id="portal-status-guide-toggle">How ratings work</summary>
+                <div id="portal-status-guide-content">
+                    <p>Read the status wording as well as the colour. Percent complete and schedule status are different measures.</p>
+                    <ul class="status-key">
+                        <li>
+                            <span class="status-word" data-status-tone="blue">Completed / Achieved</span>
+                            <span>Only where completion or achievement is recorded. A blue chart segment can show the completed portion; the whole record may still be in progress.</span>
+                        </li>
+                        <li>
+                            <span class="status-word" data-status-tone="green">On track / Up to date</span>
+                            <span>Meets the relevant rule for the loaded scope.</span>
+                        </li>
+                        <li>
+                            <span class="status-word" data-status-tone="amber">Needs attention / Due soon</span>
+                            <span>Near a deadline or within the area’s amber band.</span>
+                        </li>
+                        <li>
+                            <span class="status-word" data-status-tone="red">Overdue / Off track</span>
+                            <span>Past a valid deadline or below the area’s red threshold.</span>
+                        </li>
+                        <li>
+                            <span class="status-word" data-status-tone="unknown">Not rated</span>
+                            <span>Information is missing, incomplete or insufficient to rate.</span>
+                        </li>
+                    </ul>
+                    <h3 style="font-size: 16px; margin: 16px 0 8px;">Rules for each area</h3>
+                    <p style="font-size: 13px; color: var(--portal-muted);">These are GTA operational rules for this portal, not national inspection grades. They describe only the permitted loaded records.</p>
+                    <p style="font-size: 13px;"><strong>Attendance:</strong> on track at 90% or above; needs attention from 80% to below 90%; off track below 80%. Missing marks prevent a final rating.</p>
+                    <p style="font-size: 13px;"><strong>Marking:</strong> current waiting work is overdue after 7 calendar days.</p>
+                    <p style="font-size: 13px;"><strong>Reviews &amp; Actions:</strong> red after the recorded due date; amber when due within 14 calendar days; green when up to date.</p>
+                    <p style="font-size: 13px;"><strong>Off-the-Job (OTJ):</strong> confirmed subtotal of logged hours; a complete agreed cumulative ledger and individual target are checked separately.</p>
+                    <p style="font-size: 13px;"><strong>Progress:</strong> Completion percentages describe the loaded tasks or assigned topics. They do not establish schedule status or qualification achievement.</p>
+                </div>
+            </details>
         </main>
     </div>
 
@@ -355,6 +410,20 @@
                 }
             });
         }
+
+        // Rating Explained Modal/In-Place Focus (v1.2.8)
+        document.addEventListener('click', (event) => {
+            const link = event.target.closest?.('[data-rating-explained]');
+            if (!link) return;
+            event.preventDefault();
+            const guide = document.getElementById('portal-status-guide');
+            if (guide) {
+                guide.open = true;
+                const toggle = document.getElementById('portal-status-guide-toggle');
+                if (toggle) toggle.focus();
+                guide.scrollIntoView({ block: 'start', behavior: 'smooth' });
+            }
+        });
     </script>
 </body>
 </html>

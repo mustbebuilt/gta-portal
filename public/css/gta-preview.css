@@ -2364,3 +2364,373 @@ body.portal-dark #sim-app :is(.ap-panel,.ems-card,.rm-card,.sim-task-record,.att
 @media(max-width:700px){#sim-app .io-metrics,#sim-app .io-area-grid,#sim-app .io-case-grid{grid-template-columns:1fr}#sim-app #sim-inspection .rm-panel,#sim-app .io-case,#sim-app #sim-profile-metrics{padding:18px}#sim-app .io-section-head,#sim-app .dashboard-progress-heading{gap:16px}#sim-app #sim-reporting-home .rh-grid>article{padding:20px}#sim-app .io-section-head>button{width:100%}}
 }
 @media print{#sim-inspection .inspection-links,#sim-inspection button,#sim-inspection .io-case-filter{display:none!important}#sim-inspection .io-area-grid,#sim-inspection .io-case-grid,#sim-inspection .io-metrics{display:block}#sim-inspection .io-case,#sim-inspection .io-area{break-inside:avoid;border:1px solid #888;margin:16px 0;padding:14px}#sim-inspection .io-case dd{margin-left:0;white-space:pre-line}#sim-inspection .io-case dt{font-weight:bold;margin-top:10px}}
+
+
+/* ==========================================
+   Visual System v1.2.8
+   ========================================== */
+/* GTA visual revision 1.2.8. Screen presentation only.
+   Do not change source values, routing, hidden flags, print hierarchy or permissions. */
+@media screen {
+:root {
+ --gta-font: -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+ --gta-ink:#101c30; --gta-muted:#526477; --gta-panel:#ffffff;
+ --gta-background:#f3f6fa; --gta-line:#d2dde8; --gta-accent:#24678e;
+ --gta-soft:#edf4fa; --gta-focus:#007c91;
+ --gta-shadow:0 3px 12px rgba(22,45,72,.055);
+ --gta-radius:14px; --sim-blue:var(--gta-accent); --sim-text:var(--gta-ink);
+ --sim-line:var(--gta-line); --sim-soft:var(--gta-soft);
+ --portal-panel:var(--gta-panel); --portal-muted:var(--gta-muted); --portal-track:#e0e7ee;
+ --dark-blue:#153d60; --view-blue:#24678e; --blue-table-border:var(--gta-line);
+ --blue-table-bg:#f2f6fa; --instruction-bg-blue:#edf4fa; --instruction-border-blue:#cbdde9;
+}
+body {font-family:var(--gta-font);color:var(--gta-ink);background:var(--gta-background);line-height:1.6;-webkit-font-smoothing:antialiased}
+#sim-app {font-family:var(--gta-font);background:var(--gta-background);color:var(--gta-ink)}
+#sim-app [hidden] {display:none!important}
+#sim-app *,#sim-app *::before,#sim-app *::after {box-sizing:border-box}
+#sim-app :is(input,select,textarea,button) {font-family:var(--gta-font);font-size:16px;letter-spacing:normal}
+#sim-app :is(h1,h2,h3,h4) {font-family:var(--gta-font);color:var(--gta-ink);font-weight:700;text-wrap:balance;overflow-wrap:anywhere}
+#sim-app h1 {font-size:clamp(28px,3.2vw,42px);line-height:1.15;letter-spacing:-1px;margin:0 0 14px}
+#sim-app h2 {font-size:clamp(21px,2vw,28px);line-height:1.3;letter-spacing:-.45px;margin:0 0 16px}
+#sim-app h3 {font-size:20px;line-height:1.35;letter-spacing:-.25px}
+#sim-app h4 {font-size:18px;line-height:1.4}
+#sim-app :is(p,li,dd) {line-height:1.65;overflow-wrap:anywhere}
+#sim-app small {font-size:13px;line-height:1.6}
+#sim-app .sim-banner {background:linear-gradient(110deg,#17212b,#213343);padding:22px 26px;gap:20px;border-bottom:1px solid #344c60;box-shadow:none}
+#sim-app .approved-brand {gap:16px;align-items:center}
+#sim-app .approved-brand strong {font-size:23px;letter-spacing:-.5px;line-height:1.3}
+#sim-app .approved-brand p {font-size:12px;color:#d2e0ea;margin-top:6px;max-width:760px}
+#sim-app .approved-logo {width:60px;height:60px;padding:4px;border-radius:10px;background:#fff;filter:none;object-fit:contain;flex:none}
+#sim-app .sim-banner button {background:#284a61;color:#fff;border:1px solid #708eaa;min-height:46px;border-radius:9px;padding:11px 16px}
+#sim-app .portal-release {border-color:#64809a;border-radius:9px;padding:10px 14px;line-height:1.5}
+#sim-app .sim-nav {background:linear-gradient(165deg,#17212b,#1b2a38);border:0;padding:18px 12px;gap:8px;border-radius:0 0 14px 0;scrollbar-width:thin;scrollbar-color:#64809a #17212b}
+#sim-app .sim-nav button {font-size:15px;line-height:1.5;font-weight:550;border:1px solid transparent;color:#e5edf4;border-radius:9px;padding:13px 14px;min-height:48px;background:transparent;white-space:normal}
+#sim-app .sim-nav button:hover {background:#294154;border-color:#6b8aa3;color:#fff}
+#sim-app .sim-nav button[aria-pressed=true] {background:linear-gradient(110deg,#235e80,#347ba2);border-color:#4e8db1;color:#fff;box-shadow:0 2px 5px #0002}
+#sim-app #sim-status {border:1px solid #ccdeeb;border-left:4px solid var(--gta-accent);background:#edf4fa;color:#294b64;border-radius:10px;padding:15px 20px;line-height:1.65;margin-top:20px}
+#sim-app .joined-staff-bar {background:var(--gta-panel);border:1px solid var(--gta-line);border-radius:var(--gta-radius);padding:20px 24px;box-shadow:var(--gta-shadow);gap:18px}
+#sim-app .joined-staff-bar label {font-weight:650;color:var(--gta-ink)}
+#sim-app .sim-review {font-family:var(--gta-font);padding-top:24px;color:var(--gta-ink)}
+#sim-app :is(.ap-head,.rh-controls,.ap-toolbar,.ap-actions,.sim-actions,.rm-actions,.setup-actions) {gap:14px;align-items:center;flex-wrap:wrap}
+#sim-app .ap-head {align-items:flex-start;margin-bottom:24px;padding-bottom:8px}
+#sim-app .ap-head p {color:var(--gta-muted);margin:8px 0 0}
+#sim-app :is(.panel,.rm-panel,.ap-panel,.sim-section,.task-panel,.fst-panel,.ems-card,.case-form-section,.case-report,.help-detail,.attention-empty,.mark-empty,.ap-summary,.ap-head-panel) {background:var(--gta-panel);border:1px solid var(--gta-line);border-radius:var(--gta-radius);box-shadow:var(--gta-shadow);padding:24px;min-width:0;color:var(--gta-ink)}
+#sim-app :is(.rm-panel,.ap-panel,.sim-section,.task-panel,.fst-panel,.help-detail)+:is(.rm-panel,.ap-panel,.sim-section,.task-panel,.fst-panel,.help-detail) {margin-top:22px}
+#sim-app .sim-review details {border:1px solid var(--gta-line);border-radius:12px;background:var(--gta-panel);margin:18px 0;min-width:0;overflow:visible}
+#sim-app .sim-review summary {padding:17px 20px;background:var(--gta-soft);color:var(--gta-ink);font-weight:650;line-height:1.5;border-radius:11px;min-height:48px;cursor:pointer;list-style-position:inside}
+#sim-app .sim-review details[open]>summary {border-bottom:1px solid var(--gta-line);border-radius:11px 11px 0 0;margin-bottom:16px}
+#sim-app :is(.sim-note,.ap-context,.sim-placeholder,.dc-empty,.case-empty) {background:var(--gta-soft);border-color:#b8d1e2;color:#355166;border-radius:10px;padding:16px 18px;line-height:1.65}
+#sim-app .sim-review label {line-height:1.5;font-weight:600;overflow-wrap:anywhere}
+#sim-app .sim-review fieldset {min-width:0;border-color:var(--gta-line);border-radius:10px;margin-top:20px}
+#sim-app .sim-review legend {color:var(--gta-ink);font-weight:650;padding:0 8px;line-height:1.5}
+#sim-app :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]),select,textarea) {color:var(--gta-ink);background:var(--gta-panel);border:1px solid #aabccc;border-radius:9px;max-width:100%;min-width:0;line-height:1.5;padding:11px 12px;box-shadow:inset 0 1px 2px #142c3b04}
+#sim-app :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=range]),select) {min-height:48px}
+#sim-app textarea {min-height:112px;resize:vertical}
+#sim-app :is(input[type=checkbox],input[type=radio]) {accent-color:var(--gta-accent);flex-shrink:0}
+#sim-app input[type=file] {white-space:normal;overflow-wrap:anywhere;font-size:14px;padding:8px}
+#sim-app input[type=file]::file-selector-button {font:inherit;background:var(--gta-soft);color:var(--gta-ink);border:1px solid #b2c6d6;border-radius:6px;padding:8px 10px;margin:0 10px 4px 0}
+#sim-app .sim-review :is(button,.btn,.button),#sim-app .developer-review button {min-height:46px;padding:11px 17px;border:1px solid #b0c3d3;border-radius:9px;background:var(--gta-panel);color:var(--gta-accent);line-height:1.5;font-weight:600;text-align:center;white-space:normal;overflow-wrap:anywhere;max-width:100%;box-shadow:0 1px 2px #142c3b05}
+#sim-app .sim-review :is(button,.btn,.button):hover:not(:disabled) {border-color:var(--gta-accent);background:var(--gta-soft)}
+#sim-app .sim-review :is(.sim-primary,.btn-primary,.primary),#sim-profile .action-stack .btn {background:linear-gradient(110deg,#235e80,#347ba2);border-color:#286d94;color:#fff}
+#sim-app .sim-review :is(.sim-primary,.btn-primary,.primary):hover:not(:disabled) {background:#1d5373;color:#fff}
+#sim-app button:disabled {box-shadow:none;opacity:.7;cursor:not-allowed}
+#sim-app :is(button,a,input,select,textarea,summary):focus-visible {outline:3px solid var(--gta-focus);outline-offset:4px}
+#sim-app :is(.sim-error,.rm-alert,.sim-overdue) {color:var(--portal-red)}
+#sim-app .sim-review :is(table,.dashTbl) {border-collapse:separate;border-spacing:0;max-width:100%;font-size:14px}
+#sim-app .sim-review :is(th,td) {padding:15px 16px;vertical-align:top;border-color:var(--gta-line);line-height:1.6;overflow-wrap:anywhere;color:var(--gta-ink)}
+#sim-app .sim-review th {font-weight:650;background:var(--gta-soft);color:var(--gta-ink);text-align:left}
+#sim-app .sim-review td button {margin:4px 6px 4px 0;min-height:44px}
+#sim-app .sim-review caption {text-align:left;line-height:1.6;padding:12px 0;color:var(--gta-muted)}
+#sim-app #sim-reporting-home {--rh-bg:var(--gta-background);--rh-panel:var(--gta-panel);--rh-ink:var(--gta-ink);--rh-muted:var(--gta-muted);--rh-line:var(--gta-line);--rh-accent:var(--gta-accent);--rh-track:var(--portal-track);--rh-violet:#417796;--rh-cyan:#377fa6;--rh-other:#aebfce;--rh-unknown:#718190;background:transparent}
+#sim-app :is(.rh-grid,.sim-progress-cards,.io-metrics,.io-area-grid,.io-case-grid,.developer-review-grid) {gap:20px;align-items:stretch}
+#sim-app :is(.theme-stat,.rh-grid>article,.io-metric,.io-area,.io-case,.attention-count-button,.mark-own-card,.career-resource-card,.ln-card,.lg-card) {background:var(--gta-panel);border:1px solid var(--gta-line);border-radius:var(--gta-radius);box-shadow:var(--gta-shadow);padding:22px;min-width:0;color:var(--gta-ink)}
+#sim-app .theme-stat {align-items:center;text-align:center;gap:14px}
+#sim-app .theme-stat h4 {width:100%;min-height:54px;display:flex;align-items:center;justify-content:center;gap:12px;margin:0}
+#sim-app .theme-stat h4 svg {width:42px;height:42px;padding:8px;color:#185b86;background:#e4f1fb;border-radius:50%;flex:none}
+#sim-app .theme-ring {width:126px;height:126px;padding:10px;margin:5px auto;border-radius:50%}
+#sim-app .theme-ring>span {background:var(--gta-panel)}
+#sim-app .theme-ring b {font-size:31px;letter-spacing:-1px;line-height:1.1}
+#sim-app .theme-stat>small {border:0;background:var(--gta-soft);padding:10px 12px;border-radius:9px;line-height:1.55;font-size:14px;width:100%;margin:0;color:var(--gta-ink)}
+#sim-app .theme-stat>b {font-size:29px;line-height:1.4;letter-spacing:-.5px}
+#sim-app #sim-reporting-home .rh-grid>article {padding:24px}
+#sim-app #sim-reporting-home .rh-value {font-size:36px;font-weight:700;line-height:1.2;letter-spacing:-1px;margin:14px 0}
+#sim-app #sim-reporting-home .rh-card-note {line-height:1.6;color:var(--gta-muted)}
+#sim-app .rh-card-heading svg {width:38px;height:38px;border-radius:50%;background:#e4f1fb;color:#185b86;padding:7px}
+#sim-app .dc-upcoming {border-radius:var(--gta-radius);box-shadow:var(--gta-shadow);padding:24px}
+#sim-app .dc-deadline-list button {background:var(--gta-panel);border:1px solid var(--gta-line);border-radius:11px;padding:18px!important;gap:16px}
+#sim-app .dc-date-tile {border-radius:9px;background:#e4f1fb;color:#185b86;padding:12px 8px;font-size:13px}
+#sim-app .io-area {border-top:3px solid #72a5c4}
+#sim-app .io-case {border-top:3px solid var(--gta-accent);gap:12px}
+#sim-app .io-case button {margin-top:16px}
+#sim-app .io-case dd {line-height:1.7}
+#sim-app .developer-review {border-radius:var(--gta-radius);box-shadow:var(--gta-shadow)}
+#sim-app .developer-review>summary {background:var(--gta-soft);border-radius:13px;color:var(--gta-ink);padding:20px 24px}
+#sim-app .developer-review-grid article {background:var(--gta-panel);border:1px solid var(--gta-line);padding:22px;border-radius:12px;box-shadow:var(--gta-shadow)}
+#sim-app .developer-review-grid h3 {font-size:20px}
+#sim-app .developer-review-grid button {align-self:flex-start;margin-top:auto}
+#sim-profile .profile {background:var(--gta-panel);border:1px solid var(--gta-line);border-radius:var(--gta-radius);box-shadow:var(--gta-shadow)}
+#sim-profile .accordion {margin-top:18px;border:1px solid var(--gta-line);border-radius:12px;box-shadow:var(--gta-shadow)}
+#sim-profile .accordion-head {padding:20px 22px;background:var(--gta-panel);border-radius:11px;color:var(--gta-ink);gap:16px}
+#sim-profile .accordion-body {padding:22px;background:var(--gta-panel)}
+#sim-app .sim-review :is(.help-list button,.ap-lane-button,.ln-counts button) {border-radius:10px;text-align:left;line-height:1.6}
+#sim-app .sim-review :is(.map-stop,.je-card,.journey-event,.jr-event) {border-color:var(--gta-line);border-radius:12px;background:var(--gta-panel)}
+/* Ratings retain the original data-rag-tone and category meanings. Never infer a rating here. */
+body.portal-dark {--gta-ink:#edf4fa;--gta-muted:#b8c9d7;--gta-panel:#1c2c3c;--gta-background:#111c28;--gta-line:#40586f;--gta-accent:#9bc7e3;--gta-soft:#263c50;--gta-focus:#78dce9;--gta-shadow:0 3px 12px #0002;background:var(--gta-background)}
+body.portal-dark #sim-app {--sim-blue:var(--gta-accent);--sim-text:var(--gta-ink);--sim-line:var(--gta-line);--sim-soft:var(--gta-soft);--portal-panel:var(--gta-panel);--portal-muted:var(--gta-muted);--portal-track:#3a5267;background:var(--gta-background);color:var(--gta-ink)}
+body.portal-dark #sim-app .sim-nav {background:#101b26}
+body.portal-dark #sim-app :is(#sim-status,.sim-note,.sim-placeholder,.ap-context,.dc-empty,.case-empty) {background:var(--gta-soft);color:#cce0ee;border-color:#6087a5}
+body.portal-dark #sim-app :is(.theme-stat h4 svg,.rh-card-heading svg,.dc-date-tile) {background:#294b66;color:#b9def5}
+body.portal-dark #sim-app .sim-review :is(.sim-primary,.btn-primary,.primary),body.portal-dark #sim-profile .action-stack .btn {background:#285f82;color:#fff;border-color:#719bb8}
+body.portal-dark #sim-app .sim-review :is(input,select,textarea) {color-scheme:dark}
+body.portal-dark #sim-app :is(#review-sign-pad,#plan-version-pad) {background:white;color:#17212b}
+/* Use the available content area; no fixed desktop maximum width. */
+@media(min-width:1100px) {
+ #sim-app>:not(.sim-banner):not(.sim-nav) {max-width:none!important;width:calc(100% - 272px)!important;margin-left:248px!important;margin-right:24px!important}
+ #sim-app .sim-progress-cards {grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+ #sim-app .developer-review-grid {grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(min-width:801px) and (max-width:1099px) {
+ #sim-app>:not(.sim-banner):not(.sim-nav) {max-width:none!important;width:calc(100% - 48px)!important;margin-left:24px!important;margin-right:24px!important}
+}
+@media(max-width:1099px) {
+ #sim-app .sim-banner {flex-wrap:wrap}
+ #sim-app .sim-nav {border-radius:12px;max-height:55vh;gap:10px;padding:14px}
+ #sim-app .developer-review-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:800px) {
+ #sim-app {width:100%;min-width:0}
+ #sim-app .sim-banner {padding:18px 16px;gap:14px}
+ #sim-app .approved-brand strong {font-size:21px}
+ #sim-app .approved-logo {width:50px;height:50px}
+ #sim-app .joined-staff-bar {padding:18px 16px;gap:14px}
+ #sim-app .sim-review {padding-top:18px}
+ #sim-app :is(.panel,.rm-panel,.ap-panel,.sim-section,.task-panel,.fst-panel,.ems-card,.case-form-section,.case-report,.help-detail) {padding:20px 16px}
+ #sim-app .sim-review :is(th,td) {padding:12px}
+ #sim-app .sim-review :is(.ap-grid,.setup-grid,.ap-target-grid,.rm-grid,.ems-grid,.io-metrics,.io-case-grid) {grid-template-columns:minmax(0,1fr)}
+ #sim-app .sim-review :is(.ap-head,.ap-toolbar,.rh-controls,.sim-actions,.rm-actions) {gap:12px}
+ #sim-app :is(.sim-progress-cards,.io-area-grid) {grid-template-columns:repeat(2,minmax(0,1fr))}
+ #sim-app .theme-ring {width:116px;height:116px}
+ #sim-app .dc-upcoming {padding:20px 16px}
+ #sim-app .developer-review-body {padding:18px 16px}
+ #sim-app .developer-review>summary {padding:18px 16px}
+ #sim-app .sim-review :is(canvas,svg,img) {max-width:100%}
+}
+@media(max-width:540px) {
+ #sim-app h1 {font-size:28px;letter-spacing:-.65px}
+ #sim-app h2 {font-size:23px}
+ #sim-app :is(.sim-progress-cards,.io-area-grid,.developer-review-grid,.dc-deadline-list) {grid-template-columns:minmax(0,1fr)}
+ #sim-app .theme-stat {padding:22px 18px;gap:12px}
+ #sim-app .theme-stat h4 {min-height:0;font-size:20px}
+ #sim-app .theme-ring {width:132px;height:132px}
+ #sim-app .theme-ring b {font-size:34px}
+ #sim-app .sim-review :is(.sim-actions,.rm-actions,.ap-actions)>:is(button,a) {flex:1 1 145px;min-width:0}
+ #sim-app .joined-staff-bar select {width:100%;margin-top:8px}
+ #sim-app input[type=file] {font-size:13px}
+ #sim-app .dc-deadline-list button {grid-template-columns:68px minmax(0,1fr) 16px;gap:12px}
+ #sim-profile .accordion-body {padding:18px 14px}
+}
+@media(prefers-reduced-motion:reduce) {#sim-app *,#sim-app *::before,#sim-app *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(forced-colors:active) {#sim-app :is(.theme-stat,.rh-grid>article,.io-area,.io-case,button,input,select,textarea) {border:1px solid CanvasText;box-shadow:none}}
+}
+
+
+/* ==========================================
+   Status Guide v1.2.8
+   ========================================== */
+/* Text labels survive without colour. No generated CSS content or record classification. */
+#sim-app .status-word {display:inline-block;font-size:14px;font-weight:650;line-height:1.5;border:1px solid currentColor;border-radius:6px;padding:4px 9px;max-width:100%;overflow-wrap:anywhere}
+#sim-app [data-status-tone=blue] {color:var(--portal-complete)}
+#sim-app [data-status-tone=green] {color:var(--portal-green)}
+#sim-app [data-status-tone=amber] {color:var(--portal-amber)}
+#sim-app [data-status-tone=red] {color:var(--portal-red)}
+#sim-app [data-status-tone=unknown] {color:var(--portal-muted,var(--gta-muted))}
+#sim-app .status-key {list-style:none;padding:0;display:grid;gap:12px}
+#sim-app .status-key li {display:grid;grid-template-columns:minmax(170px,220px) minmax(0,1fr);gap:12px;align-items:start}
+#sim-app .portal-status-guide {box-sizing:border-box;padding:12px 16px;border:1px solid var(--sim-line);border-radius:10px;background:var(--portal-panel);color:var(--sim-text);margin-top:14px;margin-bottom:14px}
+#sim-app .portal-status-guide summary {cursor:pointer;font-weight:650;min-height:44px;display:list-item;align-content:center}
+#sim-app .portal-status-guide p {line-height:1.6}
+#sim-app .status-threshold-note {margin:8px 0;line-height:1.5}
+@media(max-width:540px){#sim-app .status-key li {grid-template-columns:minmax(0,1fr);gap:6px}#sim-app .portal-status-guide {padding:12px}}
+@media print {#sim-app .portal-status-guide {display:none}}
+
+#sim-app .status-explained-link {display:inline-flex;align-items:center;min-height:44px;font-size:14px;line-height:1.5;text-decoration:underline;text-underline-offset:3px;margin:4px 0;max-width:100%;overflow-wrap:anywhere}
+#sim-app .status-explained-link:focus-visible {outline:2px solid currentColor;outline-offset:4px}
+
+
+/* ==========================================
+   Apprentice Dashboard v1.2.8
+   ========================================== */
+/* Compact approved visual direction; original forms and source detail remain available. */
+@media screen {
+#sim-app #sim-profile-metrics {padding:20px;min-width:0}
+#sim-app .ad-heading {margin-bottom:18px}
+#sim-app .ad-heading h2 {font-size:26px;line-height:1.2;margin:8px 0}
+#sim-app .ad-heading p,#sim-app .ad-boundary {color:var(--portal-muted);line-height:1.6}
+#sim-app .ad-progress-cards {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:stretch}
+#sim-app .ad-progress-cards .theme-stat {margin:0;padding:18px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0;text-align:center}
+#sim-app .ad-progress-cards .theme-stat h4 {font-size:18px;line-height:1.35;min-height:48px;margin:0;display:flex;align-items:center;justify-content:center;gap:8px}
+#sim-app .ad-progress-cards .theme-stat h4 svg {width:26px;height:26px;flex-shrink:0}
+#sim-app .ad-progress-cards .theme-stat .theme-ring {width:108px;height:108px;flex-shrink:0}
+#sim-app .ad-progress-cards .theme-stat small {margin-top:0;line-height:1.5;font-size:14px;overflow-wrap:anywhere}
+#sim-app .ad-progress-cards .status-word {margin-top:auto}
+#sim-app .ad-progress-cards .status-explained-link {margin:0}
+#sim-app .ad-boundary {font-size:13px;margin:14px 0 18px}
+#sim-app :is(.ad-strip,.ad-journey,.ad-detailed-progress) {background:var(--portal-panel);border:1px solid var(--sim-line);border-radius:12px;margin:16px 0;padding:18px;min-width:0}
+#sim-app .ad-strip-title {display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+#sim-app .ad-strip h2,#sim-app .ad-journey h2 {font-size:20px;line-height:1.4;margin:0 0 10px}
+#sim-app .ad-qualification-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:12px}
+#sim-app .ad-qualification-subject h3 {font-size:16px;margin:0 0 8px}
+#sim-app .ad-qualification-subject>div {display:flex;align-items:start;flex-wrap:wrap;gap:8px;margin:10px 0}
+#sim-app .ad-qualification-subject small {width:100%;font-size:14px;line-height:1.5;color:var(--portal-muted);overflow-wrap:anywhere}
+#sim-app .ad-otj {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+#sim-app .ad-otj p {margin:6px 0;color:var(--portal-muted);line-height:1.5}
+#sim-app .ad-work-grid {display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px;align-items:start}
+#sim-app .ad-work-grid>section {width:auto!important;min-width:0;margin:0!important;box-sizing:border-box}
+#sim-app .ad-journey {display:grid;grid-template-columns:minmax(100px,150px) minmax(0,1fr);align-items:center;gap:24px}
+#sim-app .ad-road {display:block;width:100%;max-width:260px;height:auto;overflow:visible;padding-top:20px;box-sizing:border-box}
+#sim-app .ad-road path {fill:none;stroke-linecap:round;stroke-linejoin:round}
+#sim-app .ad-road .ad-road-edge {stroke:#c6cfd6;stroke-width:30}
+#sim-app .ad-road .ad-road-surface {stroke:#52606d;stroke-width:25}
+#sim-app .ad-road .ad-road-centre {stroke:white;stroke-width:1.8;stroke-dasharray:7 7}
+#sim-app .ad-road .ad-pin {fill:#087f8c;stroke:white;stroke-width:2}
+#sim-app .ad-journey p {font-size:16px;line-height:1.6}
+#sim-app .ad-detailed-progress>summary {font-weight:650;cursor:pointer;min-height:44px;align-content:center;line-height:1.5}
+#sim-app #profile-next-steps h2 {font-size:23px}
+#sim-journey .jr-top h2 {font-size:24px}
+#sim-journey .jr-next strong {font-size:20px}
+@media(max-width:1100px){#sim-app .ad-work-grid {grid-template-columns:minmax(0,1fr)}}
+@media(max-width:1250px){#sim-app .ad-progress-cards {grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){
+ #sim-app #sim-profile-metrics {padding:16px 12px}
+ #sim-app .ad-progress-cards {grid-template-columns:minmax(0,1fr)}
+ #sim-app .ad-progress-cards .theme-stat {display:grid;grid-template-columns:82px minmax(0,1fr);gap:8px 14px;text-align:left;align-items:center}
+ #sim-app .ad-progress-cards .theme-stat h4 {grid-column:2;min-height:0;justify-content:start;font-size:18px}
+ #sim-app .ad-progress-cards .theme-stat .theme-ring {grid-column:1;grid-row:1/5;width:80px;height:80px;padding:6px}
+ #sim-app .ad-progress-cards .theme-ring b {font-size:23px}
+ #sim-app .ad-progress-cards .theme-stat>small,#sim-app .ad-progress-cards .status-word,#sim-app .ad-progress-cards .status-explained-link {grid-column:2;justify-self:start}
+ #sim-app .ad-progress-cards .theme-stat>b {grid-column:1;grid-row:1/5;font-size:18px}
+ #sim-app .ad-qualification-grid {grid-template-columns:minmax(0,1fr);gap:12px}
+ #sim-app .ad-strip-title button {width:100%}
+ #sim-app .ad-journey {grid-template-columns:minmax(0,1fr);gap:12px}
+ #sim-app .ad-road {width:160px;margin:auto}
+ #sim-app .ad-journey button {width:100%}
+}
+}
+
+
+/* ==========================================
+   Portal Polish v1.2.8
+   ========================================== */
+/* Final shared presentation: source controls, fields, visibility and status text remain authoritative. */
+@media screen {
+#sim-app {font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+#sim-app .role-context {padding:12px 16px;margin:0 0 20px;border:1px solid var(--sim-line);border-radius:10px;background:var(--portal-panel);color:var(--sim-text);min-width:0}
+#sim-app .role-context-line {display:flex;align-items:start;gap:16px;line-height:1.6}
+#sim-app .role-context-line strong {flex-shrink:0;font-size:14px;color:var(--portal-muted)}
+#sim-app .role-context-line span {font-size:14px;min-width:0}
+#sim-app .role-launcher {margin-top:12px;border-top:1px solid var(--sim-line);padding-top:8px}
+#sim-app .role-launcher summary {min-height:44px;align-content:center;cursor:pointer;font-weight:650}
+#sim-app .role-area-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:12px 0}
+#sim-app .role-area-grid button {text-align:left;padding:20px;font-size:17px;border:1px solid var(--sim-line);background:var(--sim-soft);color:var(--sim-text);min-width:0}
+#sim-app .staff-headlines {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}
+#sim-app .staff-headlines>button {display:flex;align-items:start;gap:12px;padding:18px;text-align:left;background:var(--portal-panel);color:var(--sim-text);border:1px solid var(--sim-line);border-radius:12px;min-width:0}
+#sim-app .staff-headlines>button>span:last-child {display:flex;flex-direction:column;gap:6px;min-width:0;overflow-wrap:anywhere}
+#sim-app .staff-headlines strong {font-size:21px;line-height:1.3}
+#sim-app .staff-headlines small {font-size:13px;line-height:1.5}
+#sim-app .staff-headlines [data-rag-tone=red] small {color:var(--portal-red)}
+#sim-app .staff-headlines [data-rag-tone=amber] small {color:var(--portal-amber)}
+#sim-app .staff-headlines [data-rag-tone=green] small {color:var(--portal-green)}
+#sim-app .sim-review h1 {font-size:30px;line-height:1.2;letter-spacing:-.7px;margin:0 0 10px}
+#sim-app .sim-review h2 {font-size:22px;line-height:1.35;letter-spacing:-.3px}
+#sim-app .sim-review h3 {font-size:18px;line-height:1.4}
+#sim-app .sim-review .ap-head {gap:18px;align-items:start;margin-bottom:20px}
+#sim-app .sim-review :is(.ap-toolbar,.sim-actions,.ret-controls,.mark-header-actions,.review-monitor-controls,.attention-header-actions) {gap:12px;flex-wrap:wrap;align-items:end}
+#sim-app .sim-review :is(.ap-counts,.mark-counts,.career-counts,.sd-stats) {gap:14px;margin:18px 0}
+#sim-app :is(#attention-counts,#mark-counts,#career-summary,#career-work-counts,#ret-counts) {display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px}
+#sim-app :is(#attention-counts,#mark-counts,#career-summary,#career-work-counts,#ret-counts)>* {box-sizing:border-box;min-width:0;border-radius:12px;padding:18px;line-height:1.5}
+#sim-app .sim-review :is(th,td) {vertical-align:top;line-height:1.6}
+#sim-app .sim-review :is(form,fieldset,.task-field,.case-form-section) {min-width:0}
+#sim-app .sim-review label {line-height:1.5}
+#sim-app .sim-review label>:is(input:not([type=checkbox]):not([type=radio]),select,textarea) {margin-top:7px}
+#sim-app .sim-review textarea {min-height:120px;resize:vertical;box-sizing:border-box}
+#sim-app .sim-review input[type=file] {max-width:100%;min-height:48px;box-sizing:border-box;padding:10px}
+#sim-app .sim-review :is(.task-field,.case-form-section) {padding-bottom:16px}
+#sim-app :is(#sim-task3,#sim-training-topic) form {padding:18px;border:1px solid var(--sim-line);border-radius:12px;margin:18px 0;background:var(--portal-panel)}
+#sim-app :is(#sim-task3,#sim-training-topic) :is(.sim-actions,.task-actions) {margin-top:20px;border-top:1px solid var(--sim-line);padding-top:18px;gap:12px}
+#sim-app :is(.review-section-nav,.asp-section-nav) {gap:12px;padding:16px;border:1px solid var(--sim-line);border-radius:12px;background:var(--portal-panel)}
+#sim-app .io-area-grid {gap:14px}
+#sim-app .io-area {padding:18px}
+#sim-app .io-case-grid {gap:16px}
+#sim-app :is(.rh-progress-panel,.rh-priority-panel,.rh-chart-panel,.io-case) {padding:20px}
+#sim-app .rh-chart-heading {gap:16px;align-items:start;flex-wrap:wrap}
+#sim-app .rh-chart-heading button {flex-shrink:0}
+#sim-app :is(.rh-section-heading,.rh-card-top) {gap:12px;flex-wrap:wrap}
+#sim-app :is(.sim-back,.sim-download) {min-height:44px;display:inline-flex;align-items:center;margin:6px 12px 12px 0}
+@media(max-width:1250px){#sim-app .staff-headlines {grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){
+ #sim-app .role-context-line {flex-direction:column;gap:6px}
+ #sim-app .role-area-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+ #sim-app .sim-review h1 {font-size:26px}
+ #sim-app .sim-review h2 {font-size:21px}
+ #sim-app .sim-review .ap-head>div {min-width:0;max-width:100%}
+ #sim-app .sim-review .ap-toolbar>label {flex:1 1 180px;min-width:0}
+ #sim-app .sim-review .ap-toolbar>label>select {width:100%}
+}
+@media(max-width:540px){
+ #sim-app .staff-headlines,#sim-app .role-area-grid {grid-template-columns:minmax(0,1fr)}
+ #sim-app .role-area-grid button {padding:16px}
+ #sim-app :is(#attention-counts,#mark-counts,#career-summary,#career-work-counts,#ret-counts) {grid-template-columns:minmax(0,1fr)}
+ #sim-app .sim-review :is(.sim-grid,.ap-grid,.sd-grid,.ap-toolbar) {grid-template-columns:minmax(0,1fr)}
+ #sim-app .sim-review :is(.sim-actions,.task-actions)>button {width:100%;margin:0}
+ #sim-app .sim-review :is(button,input,select) {min-height:48px}
+ #sim-app .sim-review :is(form,fieldset) {max-width:100%;box-sizing:border-box}
+ #sim-app .sim-review :is(input[type=checkbox],input[type=radio]) {min-height:20px}
+ #sim-app .rh-chart-heading button {width:100%}
+}
+}
+@media print {#sim-app .role-context,#sim-app .staff-headlines {display:none!important}}
+
+
+/* ==========================================
+   Retention Outcomes v1.2.8
+   ========================================== */
+@media screen {
+#sim-app .ra-fields {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:20px 0}
+#sim-app .ra-fields label {display:flex;flex-direction:column;gap:8px;min-width:0;font-weight:600}
+#sim-app .ra-fields input,#sim-app .ra-fields select {width:100%;box-sizing:border-box;min-height:46px;margin:0}
+#sim-app .ra-cards {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:22px 0}
+#sim-app .ra-cards article {padding:20px;border:1px solid var(--gta-line,#d5dfe8);border-radius:12px;background:var(--gta-panel,#fff)}
+#sim-app .ra-cards h3 {font-size:15px;margin:0 0 10px}#sim-app .ra-cards strong {font-size:30px}
+#sim-app .ra-bar-row {display:grid;grid-template-columns:130px minmax(0,1fr) 45px;gap:14px;align-items:center;margin:14px 0}
+#sim-app .ra-track {height:16px;background:var(--gta-line,#e1e7ed);border-radius:7px;overflow:hidden}#sim-app .ra-bar{display:block;height:100%}.ra-blue{background:#24678e}.ra-red{background:#ad2435}.ra-grey{background:#667585}
+#sim-app .ra-checks article {display:flex;justify-content:space-between;align-items:center;gap:18px;padding:18px 0;border-bottom:1px solid var(--gta-line,#d5dfe8)}
+#sim-app .ra-checks button {flex-shrink:0;margin:0}#sim-app .ra-checks p {margin:8px 0;overflow-wrap:anywhere}
+#sim-app #ra-report-panel table {min-width:680px}#sim-app #ra-editor summary{font-weight:700}#sim-app #ra-report-panel h3{margin-top:28px}
+@media(max-width:800px){#sim-app .ra-fields,#sim-app .ra-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){#sim-app .ra-fields,#sim-app .ra-cards{grid-template-columns:minmax(0,1fr)}#sim-app .ra-checks article{display:grid;grid-template-columns:minmax(0,1fr)}#sim-app .ra-checks button{width:100%}#sim-app .ra-bar-row{grid-template-columns:90px minmax(0,1fr) 30px;gap:10px}#sim-app #ra-report-panel .sim-actions{display:flex;flex-wrap:wrap;gap:12px}}
+}
+
+
+/* ==========================================
+   Entry Visual v1.2.8
+   ========================================== */
+/* Entry-page visual layer only; original vehicle/logo, forms and login preview behaviour retained. */
+@media screen {
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.6;color:#101c30;background:#111c28;-webkit-font-smoothing:antialiased}
+.identity strong{font-size:20px;letter-spacing:-.4px;color:#fff}
+h1{letter-spacing:-1.2px;line-height:1.12;font-weight:750}
+.card,.entry{border-radius:16px;border:1px solid #d2dde8;box-shadow:0 18px 50px #0002;padding:30px;min-width:0}
+.primary,dialog button{background:linear-gradient(110deg,#235e80,#347ba2);border:1px solid #286d94;color:white;min-height:48px;border-radius:9px;padding:13px 18px;font:inherit;font-weight:650;line-height:1.5;white-space:normal}
+.primary:hover{background:#1d5373}
+input,select,textarea{font-family:inherit;font-size:16px;min-height:48px;border:1px solid #aabccc;border-radius:9px;line-height:1.5;padding:11px 12px;max-width:100%}
+label{font-weight:650;line-height:1.5}
+.entry-label,.entry .help{color:#24678e}
+a,button{overflow-wrap:anywhere}
+:is(a,button,input,summary):focus-visible{outline:3px solid #007c91;outline-offset:4px}
+.logo{width:58px;height:58px;object-fit:contain;border-radius:10px;padding:4px;background:white;filter:none}
+.toplinks{gap:12px;flex-wrap:wrap}.toplinks a{min-height:44px;padding:10px 12px;display:inline-flex;align-items:center}
+[hidden]{display:none!important}
+@media(max-width:800px){.card,.entry{padding:24px 20px}.identity strong{font-size:18px}h1{font-size:clamp(32px,8vw,52px)}.hero,.layout,.main{min-width:0}}
+@media(max-width:480px){.card,.entry{padding:22px 16px}.logo{width:48px;height:48px}.identity{gap:12px;min-width:0}.identity strong{font-size:17px;max-width:185px}.toplinks{gap:8px}.primary{width:100%}.release-preview{font-size:12px;overflow-wrap:anywhere}dialog{max-width:calc(100% - 28px)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+}
