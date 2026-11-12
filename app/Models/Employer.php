@@ -4,27 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Employer extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'employer_id';
+    protected $attributes = ['active' => true, 'record_version' => 1];
 
-    protected $fillable = [
-        'employer_name',
-        'company_reg_number',
-        'address_line1',
-        'postcode',
-        'contact_name',
-        'contact_email',
-        'contact_phone',
-    ];
+    protected $fillable = ['reference', 'name', 'contact_name', 'contact_email', 'contact_phone', 'size_band', 'active'];
 
-    public function apprentices(): HasMany
+    protected function casts(): array
     {
-        return $this->hasMany(Apprentice::class, 'employer_id', 'employer_id');
+        return ['active' => 'boolean', 'record_version' => 'integer'];
     }
 }
-

@@ -10,33 +10,22 @@ class CareerDiscussion extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'discussion_id';
+    protected $attributes = ['version' => 1];
 
-    protected $fillable = [
-        'apprentice_id',
-        'adviser_id',
-        'discussion_type',
-        'discussion_date',
-        'goals',
-        'options_discussed',
-        'advice_given',
-        'outcome',
-        'referral_to',
-        'next_steps',
-    ];
+    protected $fillable = ['apprentice_id', 'adviser_id', 'recorded_by', 'type', 'discussion_date', 'goals', 'options', 'advice', 'outcome', 'next_step', 'referral'];
 
-    protected $casts = [
-        'discussion_date' => 'date',
-    ];
+    protected function casts(): array
+    {
+        return ['discussion_date' => 'date', 'actions' => 'array', 'followups' => 'array', 'history' => 'array', 'version' => 'integer'];
+    }
 
     public function apprentice(): BelongsTo
     {
-        return $this->belongsTo(Apprentice::class, 'apprentice_id', 'apprentice_id');
+        return $this->belongsTo(Apprentice::class);
     }
 
     public function adviser(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'adviser_id', 'id');
+        return $this->belongsTo(User::class, 'adviser_id');
     }
 }
-

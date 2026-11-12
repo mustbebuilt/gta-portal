@@ -1,141 +1,161 @@
 <?php
 
-use App\Http\Controllers\ActionPlanController;
-use App\Http\Controllers\ApprenticeJourneyController;
-use App\Http\Controllers\ApprenticeManagementController;
-use App\Http\Controllers\ApprenticeTaskController;
+use App\Http\Controllers\ApprenticeController;
 use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\AttentionController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\CareerController;
+use App\Http\Controllers\CareersController;
 use App\Http\Controllers\CaseStudyController;
+use App\Http\Controllers\CurriculumReferenceController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\EnglishMathsController;
-use App\Http\Controllers\GroupManagementController;
-use App\Http\Controllers\HelpGuideController;
-use App\Http\Controllers\InspectionOverviewController;
-use App\Http\Controllers\OtjController;
+use App\Http\Controllers\ExecutiveAccessController;
+use App\Http\Controllers\ExtraTrainingController;
+use App\Http\Controllers\HelpController;
+use App\Http\Controllers\LearningTaskController;
+use App\Http\Controllers\MonthlyScorecardController;
 use App\Http\Controllers\ProgressReviewController;
-use App\Http\Controllers\ReportingController;
+use App\Http\Controllers\RetentionReportController;
+use App\Http\Controllers\SessionController;
+use App\Http\Controllers\SmartActionController;
 use App\Http\Controllers\StaffDevelopmentController;
-use App\Http\Controllers\SupportPlanController;
-use App\Http\Controllers\TaskMarkingController;
+use App\Http\Controllers\SupportController;
+use App\Http\Controllers\SurveyReceiptController;
+use App\Http\Controllers\TrainingPlanController;
+use App\Http\Middleware\ActiveAccount;
 use Illuminate\Support\Facades\Route;
 
-// Public Welcome Page (Vehicle showcase)
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
-
-// Guest Authentication Routes
+Route::get('/', fn () => redirect()->route('apprentices.index'));
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
+    Route::get('/login', [SessionController::class, 'create'])->name('login');
+    Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
-
-// Authenticated Protected Routes
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // 10-Block Curriculum & Task Workspace
-    Route::get('/tasks', [ApprenticeTaskController::class, 'index'])->name('tasks.index');
-    Route::get('/apprentice/{apprentice}/tasks', [ApprenticeTaskController::class, 'index'])->name('apprentice.tasks');
-    Route::post('/apprentice/{apprentice}/block-request', [ApprenticeTaskController::class, 'storeBlockRequest'])->name('tasks.block-request');
-    Route::post('/block-request/{id}/decide', [ApprenticeTaskController::class, 'decideBlockRequest'])->name('tasks.block-decide')->middleware('role:admin');
-    Route::get('/tasks/{task}', [ApprenticeTaskController::class, 'show'])->name('tasks.show');
-    Route::post('/tasks/{task}/upload', [ApprenticeTaskController::class, 'uploadEvidence'])->name('tasks.upload');
-    Route::post('/tasks/{task}/submit', [ApprenticeTaskController::class, 'submitForMarking'])->name('tasks.submit');
-    Route::get('/tasks/{task}/uploads/{upload}/download', [ApprenticeTaskController::class, 'downloadEvidence'])->name('tasks.download');
-
-    // Attendance Registers & RAG Metrics
-    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
-    Route::get('/attendance/apprentice/{apprentice}', [AttendanceController::class, 'apprentice'])->name('attendance.apprentice');
-    Route::post('/attendance/store', [AttendanceController::class, 'store'])->name('attendance.store')->middleware('role:admin,trainer,moderator');
-
-    // Off-The-Job (OTJ) Hours Tracking
-    Route::get('/otj', [OtjController::class, 'index'])->name('otj.index');
-    Route::get('/apprentice/{apprentice}/otj', [OtjController::class, 'index'])->name('apprentice.otj');
-    Route::post('/apprentice/{apprentice}/otj', [OtjController::class, 'store'])->name('otj.store');
-    Route::post('/otj/{otj}/verify', [OtjController::class, 'verify'])->name('otj.verify')->middleware('role:admin,trainer');
-
-    // Progress Reviews & Tripartite Signatures
+Route::middleware(['auth', ActiveAccount::class])->group(function () {
+    Route::get('/apprentices/{apprentice}/learning', [LearningTaskController::class, 'index'])->name('learning.index');
+    Route::post('/apprentices/{apprentice}/learning', [LearningTaskController::class, 'allocate'])->name('learning.allocate');
+    Route::get('/tasks/{task}', [LearningTaskController::class, 'show'])->name('tasks.show');
+    Route::post('/tasks/{task}', [LearningTaskController::class, 'save'])->name('tasks.save');
+    Route::post('/tasks/{task}/decision', [LearningTaskController::class, 'decide'])->name('tasks.decide');
+    Route::post('/tasks/{task}/deadline', [LearningTaskController::class, 'deadline'])->name('tasks.deadline');
+    Route::post('/tasks/{task}/evidence', [LearningTaskController::class, 'upload'])->name('tasks.upload');
+    Route::get('/tasks/{task}/original-pdf', [LearningTaskController::class, 'pdf'])->name('tasks.pdf');
+    Route::get('/tasks/{task}/evidence/{evidence}', [LearningTaskController::class, 'download'])->name('tasks.evidence.download');
+    Route::get('/maths-english', [EnglishMathsController::class, 'caseload'])->name('em.caseload');
+    Route::get('/apprentices/{apprentice}/maths-english', [EnglishMathsController::class, 'index'])->name('em.index');
+    Route::post('/apprentices/{apprentice}/topics', [EnglishMathsController::class, 'assign'])->name('topics.assign');
+    Route::get('/topics/{topic}', [EnglishMathsController::class, 'topic'])->name('topics.show');
+    Route::post('/topics/{topic}/evidence', [EnglishMathsController::class, 'evidence'])->name('topics.evidence');
+    Route::post('/topics/{topic}/update', [EnglishMathsController::class, 'updateTopic'])->name('topics.update');
+    Route::post('/topics/{topic}/files', [EnglishMathsController::class, 'upload'])->name('topics.upload');
+    Route::get('/topics/{topic}/files/{file}', [EnglishMathsController::class, 'download'])->name('topics.download');
+    Route::get('/apprentices/{apprentice}/qualifications/create', [EnglishMathsController::class, 'qualificationForm'])->name('qualifications.create');
+    Route::post('/apprentices/{apprentice}/qualifications', [EnglishMathsController::class, 'saveQualification'])->name('qualifications.store');
+    Route::get('/apprentices/{apprentice}/qualifications/{qualification}/edit', [EnglishMathsController::class, 'qualificationForm'])->name('qualifications.edit');
+    Route::put('/apprentices/{apprentice}/qualifications/{qualification}', [EnglishMathsController::class, 'saveQualification'])->name('qualifications.update');
+    Route::post('/qualifications/{qualification}/files', [EnglishMathsController::class, 'uploadQualification'])->name('qualifications.upload');
+    Route::get('/qualifications/{qualification}/files/{file}', [EnglishMathsController::class, 'downloadQualification'])->name('qualifications.download');
+    Route::get('/apprentices/{apprentice}/actions', [SmartActionController::class, 'index'])->name('actions.index');
+    Route::get('/apprentices/{apprentice}/actions/create', [SmartActionController::class, 'form'])->name('actions.create');
+    Route::post('/apprentices/{apprentice}/actions', [SmartActionController::class, 'save'])->name('actions.store');
+    Route::get('/apprentices/{apprentice}/actions/{action}/edit', [SmartActionController::class, 'form'])->name('actions.edit');
+    Route::put('/apprentices/{apprentice}/actions/{action}', [SmartActionController::class, 'save'])->name('actions.update');
+    Route::post('/actions/{action}/progress', [SmartActionController::class, 'progress'])->name('actions.progress');
+    Route::get('/sessions', [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::post('/sessions', [AttendanceController::class, 'create'])->name('attendance.create');
+    Route::get('/sessions/{session}', [AttendanceController::class, 'show'])->name('attendance.show');
+    Route::post('/sessions/{session}', [AttendanceController::class, 'save'])->name('attendance.save');
+    Route::post('/sessions/{session}/cancel', [AttendanceController::class, 'cancel'])->name('attendance.cancel');
+    Route::get('/apprentices/{apprentice}/attendance', [AttendanceController::class, 'apprentice'])->name('attendance.apprentice');
+    Route::get('/careers', [CareersController::class, 'worklist'])->name('careers.worklist');
+    Route::get('/careers/resources', [CareersController::class, 'resources'])->name('careers.resources');
+    Route::get('/apprentices/{apprentice}/careers', [CareersController::class, 'index'])->name('careers.index');
+    Route::post('/apprentices/{apprentice}/careers', [CareersController::class, 'save'])->name('careers.save');
+    Route::post('/apprentices/{apprentice}/careers/{discussion}', [CareersController::class, 'save'])->name('careers.amend');
+    Route::post('/career-discussions/{discussion}/actions', [CareersController::class, 'action'])->name('careers.action');
+    Route::post('/career-discussions/{discussion}/followups', [CareersController::class, 'followup'])->name('careers.followup');
+    Route::get('/support', [SupportController::class, 'worklist'])->name('support.worklist');
+    Route::get('/apprentices/{apprentice}/support', [SupportController::class, 'index'])->name('support.index');
+    Route::post('/apprentices/{apprentice}/support', [SupportController::class, 'raise'])->name('support.raise');
+    Route::post('/apprentices/{apprentice}/markers', [SupportController::class, 'markers'])->name('support.markers');
+    Route::post('/concerns/{concern}/classify', [SupportController::class, 'classify'])->name('support.classify');
+    Route::post('/concerns/{concern}/followup', [SupportController::class, 'followup'])->name('support.followup');
+    Route::post('/concerns/{concern}/close', [SupportController::class, 'close'])->name('support.close');
+    Route::post('/apprentices/{apprentice}/instructions', [SupportController::class, 'instruction'])->name('support.instruction');
+    Route::get('/apprentices/{apprentice}/instructions', [SupportController::class, 'instructions'])->name('support.instructions');
+    Route::post('/instructions/{instruction}/amend', [SupportController::class, 'amendInstruction'])->name('support.instruction.amend');
+    Route::post('/instructions/{instruction}/withdraw', [SupportController::class, 'withdrawInstruction'])->name('support.instruction.withdraw');
+    Route::post('/instructions/{instruction}/release', [SupportController::class, 'release'])->name('support.release');
+    Route::post('/instructions/{instruction}/acknowledge', [SupportController::class, 'acknowledgeInstruction'])->name('support.instruction.ack');
+    Route::get('/apprentices/{apprentice}/support-plans/new', [SupportController::class, 'plan'])->name('support.plan.new');
+    Route::get('/apprentices/{apprentice}/support-plans/{plan}', [SupportController::class, 'plan'])->name('support.plan');
+    Route::post('/apprentices/{apprentice}/support-plans', [SupportController::class, 'savePlan'])->name('support.plan.create');
+    Route::post('/apprentices/{apprentice}/support-plans/{plan}', [SupportController::class, 'savePlan'])->name('support.plan.save');
+    Route::post('/support-plans/{plan}/approve', [SupportController::class, 'approvePlan'])->name('support.plan.approve');
+    Route::post('/support-plans/{plan}/activities', [SupportController::class, 'supportActivity'])->name('support.activity');
+    Route::post('/support-plans/{plan}/files', [SupportController::class, 'uploadPlanEvidence'])->name('support.files.upload');
+    Route::get('/support-plans/{plan}/files/{file}', [SupportController::class, 'downloadPlanEvidence'])->name('support.files.download');
+    Route::post('/support-plans/{plan}/review', [SupportController::class, 'reviewPlan'])->name('support.plan.review');
+    Route::post('/support-plans/{plan}/close', [SupportController::class, 'closePlan'])->name('support.plan.close');
+    Route::get('/help', [HelpController::class, 'index'])->name('help.index');
+    Route::get('/apprentices/{apprentice}/curriculum-reference', [CurriculumReferenceController::class, 'show'])->name('curriculum.show');
+    Route::get('/apprentices/{apprentice}/training-plan', [TrainingPlanController::class, 'show'])->name('plans.show');
+    Route::post('/apprentices/{apprentice}/training-plan/proposal', [TrainingPlanController::class, 'proposal'])->name('plans.proposal');
+    Route::post('/apprentices/{apprentice}/training-plan/rpl', [TrainingPlanController::class, 'rpl'])->name('plans.rpl');
+    Route::post('/apprentices/{apprentice}/training-plan/rpl-review', [TrainingPlanController::class, 'review'])->name('plans.review');
+    Route::get('/ceo/emergency', [ExecutiveAccessController::class, 'index'])->name('executive.index');
+    Route::post('/ceo/emergency', [ExecutiveAccessController::class, 'begin'])->name('executive.begin');
+    Route::post('/ceo/emergency/end', [ExecutiveAccessController::class, 'end'])->name('executive.end');
+    Route::get('/apprentices/{apprentice}/extra-training', [ExtraTrainingController::class, 'index'])->name('extra.index');
+    Route::post('/apprentices/{apprentice}/extra-training', [ExtraTrainingController::class, 'create'])->name('extra.create');
+    Route::post('/extra-training/{extra}/agreement', [ExtraTrainingController::class, 'agreement'])->name('extra.agreement');
+    Route::post('/extra-training/{extra}/compensation', [ExtraTrainingController::class, 'compensation'])->name('extra.compensation');
+    Route::post('/extra-training/{extra}/approve', [ExtraTrainingController::class, 'approve'])->name('extra.approve');
+    Route::post('/extra-training/{extra}/withdraw', [ExtraTrainingController::class, 'withdraw'])->name('extra.withdraw');
+    Route::get('/extra-training/{extra}/file', [ExtraTrainingController::class, 'download'])->name('extra.download');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::get('/reports/operational', [DashboardController::class, 'report'])->name('dashboard.report');
+    Route::get('/reports/inspection', [DashboardController::class, 'inspection'])->name('inspection.index');
+    Route::get('/apprentices/{apprentice}/journey', [DashboardController::class, 'journey'])->name('journey.show');
     Route::get('/reviews', [ProgressReviewController::class, 'index'])->name('reviews.index');
-    Route::get('/apprentice/{apprentice}/reviews', [ProgressReviewController::class, 'index'])->name('apprentice.reviews');
-    Route::get('/reviews/{review}', [ProgressReviewController::class, 'show'])->name('reviews.show');
-    Route::post('/apprentice/{apprentice}/reviews/schedule', [ProgressReviewController::class, 'schedule'])->name('reviews.schedule');
-    Route::post('/reviews/{review}/conduct', [ProgressReviewController::class, 'conduct'])->name('reviews.conduct');
-    Route::post('/reviews/{review}/sign', [ProgressReviewController::class, 'sign'])->name('reviews.sign');
-
-    // Visual Apprentice Journey Roadmap
-    Route::get('/journey', [ApprenticeJourneyController::class, 'show'])->name('journey.show');
-    Route::get('/apprentice/{apprentice}/journey', [ApprenticeJourneyController::class, 'show'])->name('apprentice.journey');
-
-    // Needs Attention Watchlist (Staff Only)
-    Route::get('/attention', [AttentionController::class, 'index'])->name('attention.index')->middleware('role:admin,trainer,moderator,mentor');
-
-    // Action Plan (Agreed SMART targets)
-    Route::get('/action-plan', [ActionPlanController::class, 'index'])->name('action-plan.index');
-    Route::post('/apprentice/{apprentice}/action-plan', [ActionPlanController::class, 'store'])->name('action-plan.store');
-    Route::post('/action-plan/item/{item}/complete', [ActionPlanController::class, 'complete'])->name('action-plan.complete');
-
-    // English & Maths Summary (Assessment & Topics)
-    Route::get('/english-maths', [EnglishMathsController::class, 'index'])->name('english-maths.index');
-
-    // Careers & Guidance (Strictly firewalled: Employers 403 barred)
-    Route::get('/careers', [CareerController::class, 'index'])->name('careers.index');
-    Route::get('/apprentice/{apprentice}/careers', [CareerController::class, 'index'])->name('apprentice.careers');
-    Route::post('/apprentice/{apprentice}/careers', [CareerController::class, 'store'])->name('careers.store')->middleware('role:admin,trainer,moderator,mentor');
-
-    // Staff Development & CPD
-    Route::get('/staff-development', [StaffDevelopmentController::class, 'index'])->name('staff-development.index')->middleware('role:admin,trainer,moderator,mentor');
-    Route::post('/staff-development/{user}/record', [StaffDevelopmentController::class, 'storeRecord'])->name('staff-development.record')->middleware('role:admin,moderator');
-    Route::post('/staff-development/{user}/target', [StaffDevelopmentController::class, 'storeTarget'])->name('staff-development.target')->middleware('role:admin,moderator');
-
-    // General Reporting Home & Report Directory
-    Route::get('/reports', [ReportingController::class, 'index'])->name('reports.index')->middleware('role:admin,trainer,moderator,mentor');
-
-    // Help & How-To Guides (Role-scoped)
-    Route::get('/help', [HelpGuideController::class, 'index'])->name('help.index');
-
-    // Marking SLA Queue (GTA Tutors & Quality Staff)
-    Route::middleware('role:admin,trainer,moderator')->group(function () {
-        Route::get('/marking', [TaskMarkingController::class, 'index'])->name('marking.index');
-        Route::post('/marking/{task}/approve', [TaskMarkingController::class, 'approve'])->name('marking.approve');
-        Route::post('/marking/{task}/refer', [TaskMarkingController::class, 'refer'])->name('marking.refer');
-    });
-
-    // Case Studies Bank (Staff Only)
-    Route::middleware('role:admin,trainer,moderator,mentor')->group(function () {
-        Route::get('/case-studies', [CaseStudyController::class, 'index'])->name('case-studies.index');
-        Route::get('/case-studies/create', [CaseStudyController::class, 'create'])->name('case-studies.create');
-        Route::post('/case-studies', [CaseStudyController::class, 'store'])->name('case-studies.store');
-        Route::get('/case-studies/{caseStudy}', [CaseStudyController::class, 'show'])->name('case-studies.show');
-        Route::post('/case-studies/{caseStudy}/approve', [CaseStudyController::class, 'approve'])->name('case-studies.approve');
-
-        // Additional Learning Support (ALS) Plans
-        Route::get('/support', [SupportPlanController::class, 'index'])->name('support.index');
-        Route::get('/support/{supportPlan}', [SupportPlanController::class, 'show'])->name('support.show');
-    });
-
-    // Administrator Only Area
-    Route::middleware('role:admin')->group(function () {
-        // Admin Command Hub
-        Route::get('/admin', [ApprenticeManagementController::class, 'hub'])->name('admin.index');
-
-        // Apprentices list & Add apprentice (Programme & Staff Setup)
-        Route::get('/admin/apprentices', [ApprenticeManagementController::class, 'index'])->name('admin.apprentices.index');
-        Route::get('/admin/apprentices/create', [ApprenticeManagementController::class, 'create'])->name('admin.apprentices.create');
-        Route::post('/admin/apprentices', [ApprenticeManagementController::class, 'store'])->name('admin.apprentices.store');
-
-        // Group creation and tutor assignments
-        Route::get('/admin/groups', [GroupManagementController::class, 'index'])->name('admin.groups.index');
-        Route::post('/admin/groups', [GroupManagementController::class, 'store'])->name('admin.groups.store');
-        Route::post('/admin/groups/{group}/assign', [GroupManagementController::class, 'assign'])->name('admin.groups.assign');
-        Route::delete('/admin/groups/{group}/apprentices/{apprentice}', [GroupManagementController::class, 'remove'])->name('admin.groups.remove');
-
-        // Inspection Overview & Printable Dossier (Admins / CEO Only)
-        Route::get('/inspection-overview', [InspectionOverviewController::class, 'index'])->name('inspection.overview');
-        Route::get('/inspection-overview/print', [InspectionOverviewController::class, 'printDossier'])->name('inspection.print');
+    Route::get('/apprentices/{apprentice}/reviews/new', [ProgressReviewController::class, 'form'])->name('reviews.create');
+    Route::get('/apprentices/{apprentice}/reviews/{review}', [ProgressReviewController::class, 'form'])->name('reviews.edit');
+    Route::post('/apprentices/{apprentice}/reviews', [ProgressReviewController::class, 'save'])->name('reviews.store');
+    Route::post('/apprentices/{apprentice}/reviews/{review}', [ProgressReviewController::class, 'save'])->name('reviews.update');
+    Route::get('/staff-development', [StaffDevelopmentController::class, 'index'])->name('staff.index');
+    Route::get('/staff-development/{target}', [StaffDevelopmentController::class, 'show'])->name('staff.show');
+    Route::post('/staff-development/{target}/manager', [StaffDevelopmentController::class, 'manager'])->name('staff.manager');
+    Route::post('/staff-development/{target}/entry', [StaffDevelopmentController::class, 'entry'])->name('staff.entry');
+    Route::post('/staff-development/{target}/comment', [StaffDevelopmentController::class, 'comment'])->name('staff.comment');
+    Route::post('/staff-development/{target}/action', [StaffDevelopmentController::class, 'action'])->name('staff.action');
+    Route::post('/staff-development/{target}/action-progress', [StaffDevelopmentController::class, 'actionProgress'])->name('staff.action.progress');
+    Route::post('/staff-development/{target}/schedule', [StaffDevelopmentController::class, 'schedule'])->name('staff.schedule');
+    Route::post('/staff-development/{target}/schedule-change', [StaffDevelopmentController::class, 'changeSchedule'])->name('staff.schedule.change');
+    Route::post('/staff-development/{target}/impact', [StaffDevelopmentController::class, 'impact'])->name('staff.impact');
+    Route::post('/staff-development/{target}/month', [StaffDevelopmentController::class, 'captureMonth'])->name('staff.month');
+    Route::post('/staff-development/{target}/upload', [StaffDevelopmentController::class, 'upload'])->name('staff.upload');
+    Route::get('/staff-development/{target}/files/{entry}/{file}', [StaffDevelopmentController::class, 'download'])->name('staff.download');
+    Route::get('/case-studies', [CaseStudyController::class, 'index'])->name('cases.index');
+    Route::get('/case-studies/create', [CaseStudyController::class, 'form'])->name('cases.create');
+    Route::post('/case-studies', [CaseStudyController::class, 'save'])->name('cases.store');
+    Route::get('/case-studies/{case}', [CaseStudyController::class, 'form'])->name('cases.show');
+    Route::post('/case-studies/{case}', [CaseStudyController::class, 'save'])->name('cases.save');
+    Route::post('/case-studies/{case}/transition', [CaseStudyController::class, 'transition'])->name('cases.transition');
+    Route::get('/apprentices/{apprentice}/surveys', [SurveyReceiptController::class, 'index'])->name('surveys.index');
+    Route::post('/apprentices/{apprentice}/surveys', [SurveyReceiptController::class, 'save'])->name('surveys.save');
+    Route::post('/apprentices/{apprentice}/surveys/{receipt}', [SurveyReceiptController::class, 'save'])->name('surveys.update');
+    Route::post('/survey-receipts/{receipt}/check', [SurveyReceiptController::class, 'check'])->name('surveys.check');
+    Route::get('/reports/retention', [RetentionReportController::class, 'report'])->name('retention.report');
+    Route::get('/apprentices/{apprentice}/outcome', [RetentionReportController::class, 'edit'])->name('retention.edit');
+    Route::post('/apprentices/{apprentice}/outcome', [RetentionReportController::class, 'save'])->name('retention.save');
+    Route::get('/apprentices/{apprentice}/monthly-snapshot', [MonthlyScorecardController::class, 'index'])->name('scorecards.index');
+    Route::post('/apprentices/{apprentice}/monthly-snapshot', [MonthlyScorecardController::class, 'save'])->name('scorecards.save');
+    Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
+    Route::resource('apprentices', ApprenticeController::class)->except('destroy');
+    Route::prefix('directories')->name('directories.')->whereIn('kind', ['employers', 'programmes', 'groups', 'staff'])->group(function () {
+        Route::get('/{kind}', [DirectoryController::class, 'index'])->name('index');
+        Route::get('/{kind}/create', [DirectoryController::class, 'create'])->name('create');
+        Route::post('/{kind}', [DirectoryController::class, 'store'])->name('store');
+        Route::get('/{kind}/{record}', [DirectoryController::class, 'show'])->whereNumber('record')->name('show');
+        Route::get('/{kind}/{record}/edit', [DirectoryController::class, 'edit'])->whereNumber('record')->name('edit');
+        Route::put('/{kind}/{record}', [DirectoryController::class, 'update'])->whereNumber('record')->name('update');
     });
 });

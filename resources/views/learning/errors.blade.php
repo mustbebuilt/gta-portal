@@ -1,0 +1,1 @@
+@if($errors->any())<div class="errors" role="alert"><h2>Check before saving</h2><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif

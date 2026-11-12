@@ -2,159 +2,119 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\UserRole;
 use App\Models\Apprentice;
-use App\Models\ProgressReview;
-use App\Models\ReviewSignature;
-use App\Services\ReviewScheduleService;
+use App\Models\LearningTask;
+use App\Models\MonthlyScorecard;
+use App\Models\ProgressReviewDraft;
+use App\Models\Qualification;
+use App\Models\SmartAction;
+use App\Models\TrainingSession;
+use App\Models\TrainingTopic;
+use App\Support\LearningAccess as Access;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class ProgressReviewController extends Controller
 {
-    public function __construct(
-        protected ReviewScheduleService $scheduleService
-    ) {}
-
-    /**
-     * List all 10-week and 70-day progress reviews for an apprentice.
-     */
-    public function index(Request $request, ?Apprentice $apprentice = null): View
+    private function allowed(Request $r, Apprentice $a): bool
     {
-        $user = Auth::user();
+        return Access::manager($r->user()) || Access::tutor($r->user(), $a) || ($r->user()->role === 'mentor' && $a->mentor_id === $r->user()->id);
+    }
 
-        if (!$apprentice || !$apprentice->exists) {
-            if ($user->role === UserRole::Apprentice) {
-                $apprentice = Apprentice::where('user_id', $user->id)->firstOrFail();
-            } else {
-                $apprentice = Apprentice::where('status', 'Live')->firstOrFail();
+    public function index(Request $r): View
+    {
+        abort_unless(in_array($r->user()->role, ['admin', 'ceo', 'tutor', 'mentor'], true), 403);
+        $q = Apprentice::with(['mentor', 'tutor']);
+        if (! Access::manager($r->user())) {
+            $q->where($r->user()->role === 'mentor' ? 'mentor_id' : 'tutor_id', $r->user()->id);
+        }
+
+        return view('reviews.index', ['apprentices' => $q->orderBy('last_name')->get()]);
+    }
+
+    public function form(Request $r, Apprentice $apprentice, ?ProgressReviewDraft $review = null): View
+    {
+        abort_unless($this->allowed($r, $apprentice), 403);
+        if ($review) {
+            abort_unless($review->apprentice_id === $apprentice->id, 404);
+        }
+
+        return view('reviews.form', ['apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $review?->source_snapshot ?? $this->snapshot($apprentice, []), 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
+    }
+
+    public function save(Request $r, Apprentice $apprentice, ?ProgressReviewDraft $review = null): RedirectResponse
+    {
+        abort_unless($this->allowed($r, $apprentice), 403);
+        if ($review) {
+            abort_unless($review->apprentice_id === $apprentice->id, 404);
+        }
+        $rules = ['version' => $review ? ['required', 'integer'] : ['prohibited'], 'fields' => ['required', 'array']];
+        foreach (['reviewDate', 'trainingFrom'] as $key) {
+            $rules['fields.'.$key] = ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'];
+        }
+        foreach (['mentor', 'tutor', 'employerRep', 'absence', 'learning', 'progressDiscussion', 'previousNotes', 'planChangeNotes', 'sharedSupport', 'summary'] as $key) {
+            $rules['fields.'.$key] = ['nullable', 'string', 'max:20000'];
+        }
+        foreach (['method' => ['Face to face', 'Video meeting', 'Telephone', 'Email'], 'attendance' => ['Present', 'Absent — opportunity to contribute recorded'], 'judgement' => ['On track', 'Behind plan', 'Unable to confirm'], 'previousCheck' => ['Existing action plan checked', 'First review — no previous review actions', 'Unable to check'], 'planChange' => ['No', 'Yes'], 'newNeeds' => ['No', 'Yes — follow up in restricted support record']] as $key => $values) {
+            $rules['fields.'.$key] = ['nullable', Rule::in($values)];
+        }
+        foreach (['trainingChecked', 'shareSupport', 'targetsAgreed', 'providerPrepared'] as $key) {
+            $rules['fields.'.$key] = ['sometimes', 'boolean'];
+        }
+        $data = $r->validate($rules);
+        $keys = array_map(fn ($key) => substr($key, 7), array_filter(array_keys($rules), fn ($key) => str_starts_with($key, 'fields.')));
+        $fields = collect($data['fields'])->only($keys)->all();
+        if (filled($fields['trainingFrom'] ?? null) && filled($fields['reviewDate'] ?? null) && $fields['trainingFrom'] > $fields['reviewDate']) {
+            throw ValidationException::withMessages(['fields.trainingFrom' => 'The training period cannot start after the actual meeting date.']);
+        }
+        $fields['nextReview'] = filled($fields['reviewDate'] ?? null) ? Carbon::parse($fields['reviewDate'])->addDays(70)->toDateString() : null;
+        $saved = DB::transaction(function () use ($r, $apprentice, $review, $fields) {
+            $row = $review ? ProgressReviewDraft::whereKey($review->id)->lockForUpdate()->firstOrFail() : new ProgressReviewDraft(['apprentice_id' => $apprentice->id, 'author_id' => $r->user()->id]);
+            if ($row->exists && $row->version !== $r->integer('version')) {
+                throw ValidationException::withMessages(['version' => 'This review draft changed. Reopen before saving.']);
+            }$history = $row->history ?? [];
+            if ($row->exists) {
+                $history[] = ['fields' => $row->fields, 'source_snapshot' => $row->source_snapshot, 'saved_by' => $r->user()->id, 'saved_at' => now()->toIso8601String()];
+                $row->version++;
+            }$row->fields = $fields;
+            $row->source_snapshot = $this->snapshot($apprentice, $fields);
+            $row->history = $history;
+            $row->save();
+            DB::table('learning_events')->insert(['user_id' => $r->user()->id, 'apprentice_id' => $apprentice->id, 'kind' => 'review_draft', 'record_id' => $row->id, 'event' => 'draft_saved', 'created_at' => now()]);
+
+            return $row;
+        });
+
+        return to_route('reviews.edit', [$apprentice, $saved])->with('status', 'Review draft saved privately. It is not completed, signed or shared, and does not reset the review cycle.');
+    }
+
+    private function snapshot(Apprentice $a, array $fields): array
+    {
+        $tasks = LearningTask::where('apprentice_id', $a->id)->get();
+        $topics = TrainingTopic::where('apprentice_id', $a->id)->get();
+        $qualifications = Qualification::where('apprentice_id', $a->id)->get();
+        $delivered = [];
+        $planned = [];
+        if (filled($fields['reviewDate'] ?? null)) {
+            $end = Carbon::parse($fields['reviewDate'])->addDays(70)->toDateString();
+            $sessions = TrainingSession::with(['marks' => fn ($q) => $q->where('apprentice_id', $a->id)])->whereJsonContains('members', $a->id)->where('state', '!=', 'Cancelled')->orderBy('session_date')->get();
+            foreach ($sessions as $s) {
+                $date = $s->session_date->toDateString();
+                $row = ['date' => $date, 'name' => $s->name, 'subjects' => $s->delivered_learning];
+                if (filled($fields['trainingFrom'] ?? null) && $date >= $fields['trainingFrom'] && $date <= $fields['reviewDate'] && $s->ended() && in_array($s->marks->first()?->code, ['O', 'T'], true)) {
+                    $delivered[] = $row;
+                }if ($date > $fields['reviewDate'] && $date <= $end) {
+                    $planned[] = ['date' => $date, 'name' => $s->name, 'subjects' => $s->planned_learning];
+                }
             }
         }
 
-        Gate::authorize('view', $apprentice);
-
-        $reviews = ProgressReview::where('apprentice_id', $apprentice->apprentice_id)
-            ->with(['trainer', 'signatures'])
-            ->orderBy('review_sequence')
-            ->get();
-
-        $nextDueDate = $this->scheduleService->calculateNextDueDate($apprentice);
-
-        return view('reviews.index', compact('apprentice', 'reviews', 'nextDueDate'));
-    }
-
-    /**
-     * Display a single review document with tripartite signature status.
-     */
-    public function show(ProgressReview $review): View
-    {
-        $review->load(['apprentice.user', 'apprentice.employer', 'trainer', 'signatures.user']);
-        Gate::authorize('view', $review->apprentice);
-
-        $signaturesByRole = $review->signatures->keyBy('party_role');
-
-        return view('reviews.show', compact('review', 'signaturesByRole'));
-    }
-
-    /**
-     * Schedule a new progress review using the 10-week / 70-day cadence.
-     */
-    public function schedule(Request $request, Apprentice $apprentice): RedirectResponse
-    {
-        $user = Auth::user();
-
-        if (!$user->isStaff()) {
-            abort(403, 'Only staff can schedule progress reviews.');
-        }
-
-        $lastSeq = ProgressReview::where('apprentice_id', $apprentice->apprentice_id)->max('review_sequence') ?? 0;
-        $nextSeq = $lastSeq + 1;
-        $dueDate = $this->scheduleService->calculateNextDueDate($apprentice);
-
-        ProgressReview::create([
-            'apprentice_id' => $apprentice->apprentice_id,
-            'trainer_id' => $apprentice->trainer_id ?: $user->id,
-            'review_sequence' => $nextSeq,
-            'due_date' => $dueDate->toDateString(),
-            'status' => 'Scheduled',
-        ]);
-
-        return redirect()->back()->with('success', "Progress Review #{$nextSeq} scheduled for {$dueDate->format('d M Y')}.");
-    }
-
-    /**
-     * Conduct the meeting and record agreed progress discussion.
-     */
-    public function conduct(Request $request, ProgressReview $review): RedirectResponse
-    {
-        $user = Auth::user();
-
-        if (!$user->isStaff()) {
-            abort(403, 'Only GTA staff can record meeting outcomes.');
-        }
-
-        $request->validate([
-            'meeting_date' => ['required', 'date'],
-            'progress_summary' => ['required', 'string', 'min:15'],
-        ]);
-
-        $review->update([
-            'meeting_date' => $request->input('meeting_date'),
-            'progress_summary' => $request->input('progress_summary'),
-            'status' => 'Conducted',
-        ]);
-
-        return redirect()->back()->with('success', 'Progress review discussion recorded. Ready for tripartite signatures.');
-    }
-
-    /**
-     * Sign the review as Apprentice, Employer, or Progress Mentor.
-     */
-    public function sign(Request $request, ProgressReview $review): RedirectResponse
-    {
-        $user = Auth::user();
-        $request->validate([
-            'signatory_name' => ['required', 'string', 'min:3', 'max:150'],
-        ]);
-
-        // Determine party role based on user account
-        $partyRole = match ($user->role) {
-            UserRole::Apprentice => 'apprentice',
-            UserRole::Employer => 'employer',
-            default => 'mentor',
-        };
-
-        // Prevent unauthorized signature attempts
-        if ($partyRole === 'apprentice' && $user->id !== $review->apprentice->user_id) {
-            abort(403, 'You can only sign your own apprentice review.');
-        }
-
-        $docHash = $this->scheduleService->generateDocumentHash($review);
-
-        ReviewSignature::updateOrCreate(
-            [
-                'review_id' => $review->id,
-                'party_role' => $partyRole,
-            ],
-            [
-                'user_id' => $user->id,
-                'signatory_name' => $request->input('signatory_name'),
-                'signed_at' => now(),
-                'ip_address' => $request->ip(),
-                'document_snapshot_hash' => $docHash,
-            ]
-        );
-
-        // If all 3 distinct parties have signed, update review status to Signed
-        $signedPartiesCount = ReviewSignature::where('review_id', $review->id)->count();
-        if ($signedPartiesCount >= 3) {
-            $review->update(['status' => 'Signed']);
-        }
-
-        return redirect()->back()->with('success', 'Your digital signature has been verified and recorded.');
+        return ['captured_at' => now()->toIso8601String(), 'scope_note' => 'Current source records captured when this draft was saved; not a reconstructed historical whole-plan assessment.', 'whole_plan' => 'Not linked — individual plan applicability and KSB/block coverage cannot be confirmed', 'approved_tasks' => $tasks->where('status', 'Approved')->count(), 'assigned_tasks' => $tasks->count(), 'blocks' => $tasks->groupBy('block')->map(fn ($rows) => ['title' => $rows->first()->theme, 'approved' => $rows->where('status', 'Approved')->count(), 'assigned' => $rows->count()])->all(), 'topics' => $topics->map(fn ($t) => $t->only('subject', 'level', 'topic', 'planned_hours', 'status', 'completion_date'))->all(), 'qualifications' => $qualifications->map(fn ($q) => [...$q->only('subject', 'title', 'level', 'status', 'result'), 'target' => $q->target()?->toDateString()])->all(), 'delivered' => $delivered, 'planned' => $planned, 'forecast_complete' => false, 'monthly_snapshots' => MonthlyScorecard::where('apprentice_id', $a->id)->when(filled($fields['trainingFrom'] ?? null), fn ($q) => $q->where('month', '>=', substr($fields['trainingFrom'], 0, 7)))->when(filled($fields['reviewDate'] ?? null), fn ($q) => $q->where('month', '<=', substr($fields['reviewDate'], 0, 7)))->get(['month', 'scores', 'comment'])->toArray(),
+            'training_plan_source' => 'Reference remains the supplied scheme of work; no substitute individual plan created'];
     }
 }
-

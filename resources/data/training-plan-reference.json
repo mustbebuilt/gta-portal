@@ -1,0 +1,2016 @@
+{
+  "id": "autocare-st0499-v1.3-af1.10-v1.0-reference",
+  "standard": "Autocare Technician Level 2 · ST0499 v1.3",
+  "status": "Programme reference only; individual applicability not confirmed",
+  "source": {
+    "filename": "AF1.10_Training_Plan_Autocare_L2_26-27_v1.0.xlsx",
+    "revision": "10",
+    "libraryFileId": "libfile_53912045ef2081918f477fea2b5677ce",
+    "checked": "2026-11-04",
+    "controlledVersion": "v1.0 · 2026/27"
+  },
+  "supportingSource": "Autocare_Technician_L2_SOW_v4.4(3).docx",
+  "notes": [
+    "Teaching links can repeat across blocks and are not evidence of achievement.",
+    "Block 1 uses a separate controlled Foundation Skills cross-reference; it is not loaded here.",
+    "No individual RPL, dates, planned hours or assessment results are imported."
+  ],
+  "ksbs": [
+    {
+      "code": "K1",
+      "type": "Knowledge",
+      "description": "The automotive industry and the role of the autocare technician. Limits of autonomy and reporting channels.",
+      "teachingBlocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K2",
+      "type": "Knowledge",
+      "description": "Vehicle safety inspections and routine maintenance: manufacturers specifications or approved schedules. The use of vehicle specific data and the legal requirements for wear and serviceability.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K3",
+      "type": "Knowledge",
+      "description": "Awareness of health and safety regulations, standards, and guidance and impact on role. Safe working procedures, COSHH, fire safety, good housekeeping, hazards and risks, manual handling, PPE, safety equipment and signage, slips, trips and falls, LOLER and PUWER.",
+      "teachingBlocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K4",
+      "type": "Knowledge",
+      "description": "Environment and sustainability guidance relevant to the occupation and the autocare technician's responsibilities. Recycling, reuse and safe disposal of waste.",
+      "teachingBlocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K5",
+      "type": "Knowledge",
+      "description": "Tools and equipment used in the automotive industry: purpose and operation.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K6",
+      "type": "Knowledge",
+      "description": "Maintenance and storage methods for tools and equipment, including calibration checks.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K7",
+      "type": "Knowledge",
+      "description": "Workplace instructions: purpose and use for inspection, maintenance and replacement.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K8",
+      "type": "Knowledge",
+      "description": "Vehicle service records, owner's manuals and warranties: purpose and use.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K9",
+      "type": "Knowledge",
+      "description": "Tyres: legislation, replacement, repair and technical information including tyre labelling, TPMS, sidewall markings and homologated fitments.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K10",
+      "type": "Knowledge",
+      "description": "Steering systems: purpose, function and location of systems and components for inspection, removal and replacement.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K11",
+      "type": "Knowledge",
+      "description": "Suspension systems: purpose, function and location of systems and components for inspection, removal and replacement.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K12",
+      "type": "Knowledge",
+      "description": "Braking systems: purpose, function and location of systems and components for inspection, removal and replacement, including wheel bearings.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K13",
+      "type": "Knowledge",
+      "description": "Emission control systems: purpose, function and location of systems and components for inspection, removal and replacement.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K14",
+      "type": "Knowledge",
+      "description": "Vehicle heating, ventilation and air conditioning systems: purpose, function and location for inspection, maintenance and replacement.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K15",
+      "type": "Knowledge",
+      "description": "Low voltage batteries, starting and charging systems: purpose, function and location.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K16",
+      "type": "Knowledge",
+      "description": "Maintenance and replacement of low voltage batteries, starting and charging systems.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K17",
+      "type": "Knowledge",
+      "description": "Awareness of ADAS and the impact of repair work, including static and dynamic calibration methods and equipment.",
+      "teachingBlocks": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "mappingNote": "GTA curriculum amendment: K17 included in Block 4, confirmed 6 November 2026. Earlier teaching links retained; no weekly session or achievement inferred. GTA ADAS release confirmed 6 November 2026: K17 included in Blocks 5, 6, 7 and 8 as task-specific knowledge reinforcement. Two portal answers are checked in each released task; no automatic competence, hours or achievement.",
+      "plannedActivities": [
+        {
+          "code": "K17",
+          "block": 5,
+          "taskId": "b5-t4",
+          "week": null,
+          "instruction": "For suspension replacement and alignment preparation, use manufacturer information for a vehicle or a clearly labelled case study:\n1. Explain whether the work could affect ADAS and identify the required checks.\n2. Explain any relevant static and dynamic calibration methods and equipment, or why specialist advice is needed.\n3. Record your information source and referral decision. Do not assume every repair requires calibration or carry out work beyond your authorised role.",
+          "answerFields": [
+            "b5_t4_adas_k17"
+          ]
+        },
+        {
+          "code": "K17",
+          "block": 6,
+          "taskId": "b6-t3",
+          "week": null,
+          "instruction": "For electrical diagnostic testing, use manufacturer information for a vehicle or a clearly labelled case study:\n1. Explain whether the work could affect ADAS and identify the required checks.\n2. Explain any relevant static and dynamic calibration methods and equipment, or why specialist advice is needed.\n3. Record your information source and referral decision. Do not assume every repair requires calibration or carry out work beyond your authorised role.",
+          "answerFields": [
+            "b6_t3_adas_k17"
+          ]
+        },
+        {
+          "code": "K17",
+          "block": 7,
+          "taskId": "b7-t3",
+          "week": null,
+          "instruction": "For steering component replacement and alignment checks, use manufacturer information for a vehicle or a clearly labelled case study:\n1. Explain whether the work could affect ADAS and identify the required checks.\n2. Explain any relevant static and dynamic calibration methods and equipment, or why specialist advice is needed.\n3. Record your information source and referral decision. Do not assume every repair requires calibration or carry out work beyond your authorised role.",
+          "answerFields": [
+            "b7_t3_adas_k17"
+          ]
+        },
+        {
+          "code": "K17",
+          "block": 8,
+          "taskId": "b8-t4",
+          "week": null,
+          "instruction": "For tyre wear and geometry investigation, use manufacturer information for a vehicle or a clearly labelled case study:\n1. Explain whether the work could affect ADAS and identify the required checks.\n2. Explain any relevant static and dynamic calibration methods and equipment, or why specialist advice is needed.\n3. Record your information source and referral decision. Do not assume every repair requires calibration or carry out work beyond your authorised role.",
+          "answerFields": [
+            "b8_t4_adas_k17"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "K18",
+      "type": "Knowledge",
+      "description": "ADAS levels of autonomy: passive and active advanced driver assistance systems.",
+      "teachingBlocks": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "mappingNote": "GTA curriculum amendment: K18 included in Block 4, confirmed 6 November 2026. Earlier teaching links retained; no weekly session or achievement inferred. GTA planning correction confirmed 6 November 2026: K18 included in Block 9. During the ADAS activity, explain passive and active driver assistance and levels of autonomy. Give one example of each and explain the driver responsibility and referral limits. Record the explanation in the existing work/findings field; the tutor checks understanding. Planned coverage only; original tasks/PDFs and historic evidence remain unchanged. GTA ADAS release confirmed 6 November 2026: K18 included in Blocks 5, 6, 7 and 8 as task-specific knowledge reinforcement. Two portal answers are checked in each released task; no automatic competence, hours or achievement.",
+      "plannedActivities": [
+        {
+          "code": "K18",
+          "block": 9,
+          "taskId": "b9-t4",
+          "week": 91,
+          "instruction": "During the ADAS activity, explain passive and active driver assistance and levels of autonomy. Give one example of each and explain the driver responsibility and referral limits. Record the explanation in the existing work/findings field; the tutor checks understanding.",
+          "answerFields": [
+            "b9_t4_work_findings"
+          ]
+        },
+        {
+          "code": "K18",
+          "block": 5,
+          "taskId": "b5-t4",
+          "week": null,
+          "instruction": "Use a vehicle or clearly labelled case study from the suspension/alignment task. Identify one affected driver-assistance feature and explain whether it is passive or active. Explain the driver’s responsibilities and, within the levels of driving automation, identify the level supported by the information provided. Name the information source; do not assume features or capabilities that the example does not show.",
+          "answerFields": [
+            "b5_t4_adas_k18"
+          ]
+        },
+        {
+          "code": "K18",
+          "block": 6,
+          "taskId": "b6-t3",
+          "week": null,
+          "instruction": "Use a clearly labelled driver-assistance electrical fault case. Identify the feature, whether it is passive or active, and how the described fault changes the warning or assistance available. Explain the driver’s responsibilities and, within the levels of driving automation, identify the level supported by the information provided. Name the information source; do not assume features or capabilities that the example does not show.",
+          "answerFields": [
+            "b6_t3_adas_k18"
+          ]
+        },
+        {
+          "code": "K18",
+          "block": 7,
+          "taskId": "b7-t3",
+          "week": null,
+          "instruction": "Use a clearly labelled steering/ADAS case. Compare a warning-only feature with an active assistance feature, and explain the difference for the driver. Explain the driver’s responsibilities and, within the levels of driving automation, identify the level supported by the information provided. Name the information source; do not assume features or capabilities that the example does not show.",
+          "answerFields": [
+            "b7_t3_adas_k18"
+          ]
+        },
+        {
+          "code": "K18",
+          "block": 8,
+          "taskId": "b8-t4",
+          "week": null,
+          "instruction": "Use a vehicle or clearly labelled case study from the tyre/geometry task. Identify a related driver-assistance feature and explain whether it warns the driver or actively assists. Explain the driver’s responsibilities and, within the levels of driving automation, identify the level supported by the information provided. Name the information source; do not assume features or capabilities that the example does not show.",
+          "answerFields": [
+            "b8_t4_adas_k18"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "K19",
+      "type": "Knowledge",
+      "description": "Four-wheel geometry principles including wheel alignment, Ackermann principle, toe, camber, thrust angle and adjustment methods.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K20",
+      "type": "Knowledge",
+      "description": "Vehicle fluid and filtration systems: brake fluid, oil and oil filters, air filters.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ],
+      "mappingNote": "GTA curriculum amendment: K20 included in Block 4, confirmed 6 November 2026. Earlier teaching links retained; no weekly session or achievement inferred."
+    },
+    {
+      "code": "K21",
+      "type": "Knowledge",
+      "description": "Awareness of electrified vehicle technologies and principles of operation, including high voltage battery and onboard charger condition monitoring.",
+      "teachingBlocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K22",
+      "type": "Knowledge",
+      "description": "Awareness of hydrogen-powered vehicle technologies and principles of operation, including storage and fuel-cell condition monitoring.",
+      "teachingBlocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K23",
+      "type": "Knowledge",
+      "description": "Safe working procedures for electrified vehicles, including high voltage systems and safe isolation.",
+      "teachingBlocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K24",
+      "type": "Knowledge",
+      "description": "Principles of customer care: pre- and post-vehicle service, identifying needs and handling challenging conversations.",
+      "teachingBlocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K25",
+      "type": "Knowledge",
+      "description": "Business operation considerations: efficiency, customer satisfaction, competitiveness, operational risk and ethical issues.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K26",
+      "type": "Knowledge",
+      "description": "Vehicle parts costings and procurement: customer, organisation and vehicle needs.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K27",
+      "type": "Knowledge",
+      "description": "Materials, resources and stock storage used in the automotive industry. Stock and resource management processes.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K28",
+      "type": "Knowledge",
+      "description": "Principles of customer sales and financial compliance, including FCA and PCI requirements.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K29",
+      "type": "Knowledge",
+      "description": "Principles of sales processes.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K30",
+      "type": "Knowledge",
+      "description": "Team-working principles.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "K31",
+      "type": "Knowledge",
+      "description": "Principles of equity, diversity and inclusion in the workplace and the impact on work.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "K32",
+      "type": "Knowledge",
+      "description": "Verbal communication techniques: giving and receiving information and matching style to audience.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "K33",
+      "type": "Knowledge",
+      "description": "Written communication techniques, electronic and paper, using autocare industry terminology.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "K34",
+      "type": "Knowledge",
+      "description": "Information and digital technology, including email, collaboration packages, databases, digital interfaces, management information systems, point of sale, GDPR and cyber security.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S1",
+      "type": "Skill",
+      "description": "Comply with health and safety procedures in the workplace in line with regulations, standards and guidance.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S2",
+      "type": "Skill",
+      "description": "Prepare the vehicle and working area before the work activity.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S3",
+      "type": "Skill",
+      "description": "Maintain and restore the work area during and on completion of the activity.",
+      "teachingBlocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S4",
+      "type": "Skill",
+      "description": "Store and maintain tools and equipment, including calibration checks, and return them to storage.",
+      "teachingBlocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S5",
+      "type": "Skill",
+      "description": "Access vehicle technical data to inform inspections and make judgements on wear and serviceability.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S6",
+      "type": "Skill",
+      "description": "Comply with environmental and sustainability procedures and segregate resources for reuse, recycling and disposal.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "mappingNote": "GTA curriculum amendment: S6 included in Block 2, confirmed 6 November 2026. Earlier Blocks 3–10 links retained; no weekly session or achievement inferred."
+    },
+    {
+      "code": "S7",
+      "type": "Skill",
+      "description": "Apply vehicle safety inspection and routine maintenance procedures using vehicle-specific data.",
+      "teachingBlocks": [
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S8",
+      "type": "Skill",
+      "description": "Select and use tools and equipment, including mechanical and electrical measuring tools and diagnostic equipment.",
+      "teachingBlocks": [
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S9",
+      "type": "Skill",
+      "description": "Remove, repair and replace vehicle tyre and balance wheel assemblies, including specialist tyre types.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "referenceRole": "Teaching reference only; removed from v1.3 mandatory KSBs"
+    },
+    {
+      "code": "S10",
+      "type": "Skill",
+      "description": "Inspect, remove and replace components in steering, suspension, braking, emission, air conditioning, battery/charging and fluid/filtration systems.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S11",
+      "type": "Skill",
+      "description": "Apply state-of-health condition monitoring tests to high voltage batteries and chargers for electrified vehicles.",
+      "teachingBlocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S12",
+      "type": "Skill",
+      "description": "Apply four-wheel geometry checks and adjustments.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S13",
+      "type": "Skill",
+      "description": "Apply safe working practices and procedures to isolate electrified vehicles for maintenance.",
+      "teachingBlocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S14",
+      "type": "Skill",
+      "description": "Record vehicle service, maintenance, parts replacement or repair.",
+      "teachingBlocks": [
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "mappingNote": "GTA curriculum amendment: S14 included in Block 9, confirmed 6 November 2026. Evidence expectation: completed job card or service/check record; discussion alone is insufficient. Earlier links retained; no weekly session or achievement inferred."
+    },
+    {
+      "code": "S15",
+      "type": "Skill",
+      "description": "Apply customer-service principles and organisational customer-care practices.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S16",
+      "type": "Skill",
+      "description": "Provide quotations and order automotive parts, products and consumables applicable to the vehicle.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S17",
+      "type": "Skill",
+      "description": "Apply procedures for stock and parts storage, including ordering, checking and rotation.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S18",
+      "type": "Skill",
+      "description": "Apply organisational sales processes.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S19",
+      "type": "Skill",
+      "description": "Apply team-working principles.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S20",
+      "type": "Skill",
+      "description": "Comply with equity, diversity and inclusion guidance.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "plannedActivities": [
+        {
+          "code": "S20",
+          "block": 9,
+          "taskId": "b9-t3",
+          "week": 84,
+          "instruction": "During the customer handover, use an inclusive communication scenario: give clear, accessible charging/advice instructions, check the customer understands, and explain how you followed equality, diversity and inclusion guidance. Use a fictional customer scenario; do not record disability or other sensitive personal details. Record the approach in Customer advice summary; the tutor observes/checks the interaction.",
+          "answerFields": [
+            "b9_t3_tech_3_right"
+          ]
+        }
+      ],
+      "mappingNote": " GTA planning correction confirmed 6 November 2026: S20 included in Block 9. During the customer handover, use an inclusive communication scenario: give clear, accessible charging/advice instructions, check the customer understands, and explain how you followed equality, diversity and inclusion guidance. Use a fictional customer scenario; do not record disability or other sensitive personal details. Record the approach in Customer advice summary; the tutor observes/checks the interaction. Planned coverage only; original tasks/PDFs and historic evidence remain unchanged."
+    },
+    {
+      "code": "S21",
+      "type": "Skill",
+      "description": "Communicate verbally with customers, suppliers and colleagues.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S22",
+      "type": "Skill",
+      "description": "Communicate in writing with internal and external customers, colleagues and managers.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S23",
+      "type": "Skill",
+      "description": "Use information and digital technology systems and comply with GDPR and cyber security.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S24",
+      "type": "Skill",
+      "description": "Complete and record learning and development activities.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "plannedActivities": [
+        {
+          "code": "S24",
+          "block": 9,
+          "taskId": "b9-t5",
+          "week": null,
+          "instruction": "Use the existing Learning Impact Record to describe learning actually completed, give an evidence example with your role and result, and identify the next development step. The tutor checks the record against the referenced learning/evidence. Completing reflection scores alone does not establish competence.",
+          "answerFields": [
+            "end_new_capability",
+            "evidence_example_1"
+          ]
+        }
+      ],
+      "mappingNote": " GTA planning correction confirmed 6 November 2026: S24 included in Block 9. Use the existing Learning Impact Record to describe learning actually completed, give an evidence example with your role and result, and identify the next development step. The tutor checks the record against the referenced learning/evidence. Completing reflection scores alone does not establish competence. Planned coverage only; original tasks/PDFs and historic evidence remain unchanged."
+    },
+    {
+      "code": "S25",
+      "type": "Skill",
+      "description": "Apply procedures to check and replace fluids and filtration parts.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B1",
+      "type": "Behaviour",
+      "description": "Put health and safety first.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B2",
+      "type": "Behaviour",
+      "description": "Consider the environmental impact when using resources and carrying out work.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B3",
+      "type": "Behaviour",
+      "description": "Respond and adapt to changing work demands.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B4",
+      "type": "Behaviour",
+      "description": "Seek learning and development opportunities and continual professional development.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B5",
+      "type": "Behaviour",
+      "description": "Support an inclusive workplace and respect different views.",
+      "teachingBlocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "block": 1,
+      "title": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+      "summary": "Safety, tools, electrical awareness, measurement, technical information, documentation and professional practice.",
+      "teachingLinks": "Controlled Foundation Skills KSB cross-reference",
+      "referenceHours": 45
+    },
+    {
+      "block": 2,
+      "title": "Vehicle Inspection, Servicing and Customer Interaction",
+      "summary": "Vehicle intake, routine inspection, servicing, customer communication and reporting.",
+      "teachingLinks": "K2, K5-K16, K19, K20, K25-K34; S1, S2, S5, S7-S10, S12, S14-S25; B1-B5",
+      "referenceHours": 55
+    },
+    {
+      "block": 3,
+      "title": "Workshop Processes, Tools and Environmental Awareness",
+      "summary": "Workshop workflow, service and repair routines, parts, stock, waste and environmental controls.",
+      "teachingLinks": "K1-K16, K19-K34; S1-S25; B1-B5",
+      "referenceHours": 55
+    },
+    {
+      "block": 4,
+      "title": "Emerging Technology and Driveline Systems",
+      "summary": "Driveline, steering geometry, tyres, warranty, EV and hybrid introduction and quality controls.",
+      "teachingLinks": "K1-K16, K19, K21-K34; S1-S6, S9-S13, S15-S25; B1-B5",
+      "referenceHours": 55
+    },
+    {
+      "block": 5,
+      "title": "Diagnostic Thinking and Complex Repair Activities",
+      "summary": "Electrical testing, technical data, structured diagnosis, complex repair and verification.",
+      "teachingLinks": "K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K30, K31, K32, K33, K34; S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, S25; B1, B2, B3, B4, B5",
+      "referenceHours": 55,
+      "originalTeachingLinks": "K1-K16, K19-K34; S1-S25; B1-B5"
+    },
+    {
+      "block": 6,
+      "title": "Vehicle Systems Integration and Advanced Diagnostics",
+      "summary": "Integrated systems, climate control, EV awareness, diagnostic workflow and compliance.",
+      "teachingLinks": "K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K30, K31, K32, K33, K34; S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, S25; B1, B2, B3, B4, B5",
+      "referenceHours": 55,
+      "originalTeachingLinks": "K1-K16, K19-K34; S1-S25; B1-B5"
+    },
+    {
+      "block": 7,
+      "title": "Advanced Workshop Practice and Technical Communication",
+      "summary": "Advanced inspection and repair, quality assurance, customer updates and professional communication.",
+      "teachingLinks": "K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K30, K31, K32, K33, K34; S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, S25; B1, B2, B3, B4, B5",
+      "referenceHours": 55,
+      "originalTeachingLinks": "K1-K16, K19-K34; S1-S25; B1-B5"
+    },
+    {
+      "block": 8,
+      "title": "Advanced Diagnostics and Workshop Organisation",
+      "summary": "Root cause, repair planning, task organisation, documentation, quality and workshop control.",
+      "teachingLinks": "K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K30, K31, K32, K33, K34; S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, S25; B1, B2, B3, B4, B5",
+      "referenceHours": 55,
+      "originalTeachingLinks": "K1-K16, K19-K34; S1-S25; B1-B5"
+    },
+    {
+      "block": 9,
+      "title": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness",
+      "summary": "EV and hybrid, charging, ADAS, oscilloscope awareness, hydrogen safety and referral boundaries.",
+      "teachingLinks": "K1-K19, K21-K29; S1, S5-S7, S9-S25; B1-B5",
+      "referenceHours": 77,
+      "originalTeachingLinks": "K1-K17, K19, K21-K29; S1, S5-S7, S9-S13, S15-S19, S21-S23, S25; B1-B5"
+    },
+    {
+      "block": 10,
+      "title": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+      "summary": "Capstone activity, KSB gap learning, evidence quality, mock activity and gateway readiness training.",
+      "teachingLinks": "K1-K34; S1-S25; B1-B5",
+      "referenceHours": 104.5
+    },
+    {
+      "block": 11,
+      "title": "Gateway Readiness and Confirmation",
+      "summary": "Gateway confirmation, final evidence checks and EPA mobilisation after practical training ends.",
+      "teachingLinks": "Not applicable - gateway activity",
+      "referenceHours": 0
+    },
+    {
+      "block": 12,
+      "title": "End-Point Assessment",
+      "summary": "Independent end-point assessment within the planned apprenticeship end month.",
+      "teachingLinks": "Not applicable - EPA activity",
+      "referenceHours": 0
+    }
+  ],
+  "portalAmendment": {
+    "id": "gta-specialist-six-hour-day-2026-11-06",
+    "date": "2026-11-06",
+    "scope": "Specialist Blocks 2–10: six planned occupational hours per session; Foundation and assessment allocations unchanged."
+  },
+  "sourceAlignment": {
+    "id": "gta-autocare-source-alignment-2026-11-06",
+    "document": "GTA_Autocare_Source_Alignment_Amendment_2026-11-06.docx",
+    "mandatoryExcludedCodes": [
+      "S9"
+    ],
+    "calculationStatus": "Retained GTA planning basis; published mandatory catalogue and primary allocation reconciliation pending"
+  },
+  "curriculumAmendment": {
+    "id": "gta-autocare-block2-s6-block4-k17-k18-k20-block9-s14-block9-plan-adas5-8-r2-2026-11-06",
+    "date": "2026-11-06",
+    "basis": "User separately confirmed Block 2 S6, then selected option 1 to include K17, K18 and K20 in Block 4. User then confirmed including S14 in Block 9, supported by a completed job card or service/check record. Jon then accepted moving Block 9 K18 to ADAS, removing unsupported K20 hydrogen links, and planning S20 customer-handling and S24 reflection activities. Jon then confirmed release of revised K17/K18 knowledge reinforcement questions in existing Blocks 5-8 tasks.",
+    "decisions": [
+      {
+        "code": "S6",
+        "block": 2,
+        "decision": "Include in Block 2",
+        "previousTeachingBlocks": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      },
+      {
+        "code": "K17",
+        "block": 4,
+        "decision": "Include in Block 4",
+        "previousTeachingBlocks": [
+          9,
+          10
+        ]
+      },
+      {
+        "code": "K18",
+        "block": 4,
+        "decision": "Include in Block 4",
+        "previousTeachingBlocks": [
+          10
+        ]
+      },
+      {
+        "code": "K20",
+        "block": 4,
+        "decision": "Include in Block 4",
+        "previousTeachingBlocks": [
+          2,
+          3,
+          5,
+          6,
+          7,
+          8,
+          10
+        ]
+      },
+      {
+        "code": "S14",
+        "block": 9,
+        "decision": "Include in Block 9",
+        "previousTeachingBlocks": [
+          2,
+          3,
+          5,
+          6,
+          7,
+          8,
+          10
+        ],
+        "evidenceExpectation": "Completed job card or service/check record; not discussion alone."
+      },
+      {
+        "code": "K18",
+        "block": 9,
+        "decision": "Include in Block 9",
+        "previousTeachingBlocks": [
+          4,
+          10
+        ],
+        "evidenceExpectation": "During the ADAS activity, explain passive and active driver assistance and levels of autonomy. Give one example of each and explain the driver responsibility and referral limits. Record the explanation in the existing work/findings field; the tutor checks understanding."
+      },
+      {
+        "code": "S20",
+        "block": 9,
+        "decision": "Include in Block 9",
+        "previousTeachingBlocks": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          10
+        ],
+        "evidenceExpectation": "During the customer handover, use an inclusive communication scenario: give clear, accessible charging/advice instructions, check the customer understands, and explain how you followed equality, diversity and inclusion guidance. Use a fictional customer scenario; do not record disability or other sensitive personal details. Record the approach in Customer advice summary; the tutor observes/checks the interaction."
+      },
+      {
+        "code": "S24",
+        "block": 9,
+        "decision": "Include in Block 9",
+        "previousTeachingBlocks": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          10
+        ],
+        "evidenceExpectation": "Use the existing Learning Impact Record to describe learning actually completed, give an evidence example with your role and result, and identify the next development step. The tutor checks the record against the referenced learning/evidence. Completing reflection scores alone does not establish competence."
+      },
+      {
+        "code": "K20",
+        "block": 9,
+        "decision": "Exclude unsupported Block 9 hydrogen association; retain existing servicing-block links",
+        "previousTeachingBlocks": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          10
+        ]
+      },
+      {
+        "code": "K17",
+        "block": 5,
+        "decision": "Include in Block 5",
+        "previousTeachingBlocks": [
+          4,
+          9,
+          10
+        ],
+        "evidenceExpectation": "Answer the released contextual knowledge question; GTA tutor checks the whole task. No automatic KSB achievement.",
+        "weeklySessionAssigned": false
+      },
+      {
+        "code": "K17",
+        "block": 6,
+        "decision": "Include in Block 6",
+        "previousTeachingBlocks": [
+          4,
+          9,
+          10
+        ],
+        "evidenceExpectation": "Answer the released contextual knowledge question; GTA tutor checks the whole task. No automatic KSB achievement.",
+        "weeklySessionAssigned": false
+      },
+      {
+        "code": "K17",
+        "block": 7,
+        "decision": "Include in Block 7",
+        "previousTeachingBlocks": [
+          4,
+          9,
+          10
+        ],
+        "evidenceExpectation": "Answer the released contextual knowledge question; GTA tutor checks the whole task. No automatic KSB achievement.",
+        "weeklySessionAssigned": false
+      },
+      {
+        "code": "K17",
+        "block": 8,
+        "decision": "Include in Block 8",
+        "previousTeachingBlocks": [
+          4,
+          9,
+          10
+        ],
+        "evidenceExpectation": "Answer the released contextual knowledge question; GTA tutor checks the whole task. No automatic KSB achievement.",
+        "weeklySessionAssigned": false
+      },
+      {
+        "code": "K18",
+        "block": 5,
+        "decision": "Include in Block 5",
+        "previousTeachingBlocks": [
+          4,
+          9,
+          10
+        ],
+        "evidenceExpectation": "Answer the released contextual knowledge question; GTA tutor checks the whole task. No automatic KSB achievement.",
+        "weeklySessionAssigned": false
+      },
+      {
+        "code": "K18",
+        "block": 6,
+        "decision": "Include in Block 6",
+        "previousTeachingBlocks": [
+          4,
+          9,
+          10
+        ],
+        "evidenceExpectation": "Answer the released contextual knowledge question; GTA tutor checks the whole task. No automatic KSB achievement.",
+        "weeklySessionAssigned": false
+      },
+      {
+        "code": "K18",
+        "block": 7,
+        "decision": "Include in Block 7",
+        "previousTeachingBlocks": [
+          4,
+          9,
+          10
+        ],
+        "evidenceExpectation": "Answer the released contextual knowledge question; GTA tutor checks the whole task. No automatic KSB achievement.",
+        "weeklySessionAssigned": false
+      },
+      {
+        "code": "K18",
+        "block": 8,
+        "decision": "Include in Block 8",
+        "previousTeachingBlocks": [
+          4,
+          9,
+          10
+        ],
+        "evidenceExpectation": "Answer the released contextual knowledge question; GTA tutor checks the whole task. No automatic KSB achievement.",
+        "weeklySessionAssigned": false
+      }
+    ],
+    "weeklySessionAssigned": true,
+    "primaryAllocationApproved": false,
+    "individualApplicabilityConfirmed": false,
+    "history": [
+      {
+        "id": "gta-autocare-block2-s6-2026-11-06",
+        "date": "2026-11-06",
+        "basis": "User selected option 1: include S6 in Block 2; task reference is correct.",
+        "decisions": [
+          {
+            "code": "S6",
+            "block": 2,
+            "decision": "Include in Block 2",
+            "previousTeachingBlocks": [
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ]
+          }
+        ],
+        "weeklySessionAssigned": false,
+        "primaryAllocationApproved": false,
+        "individualApplicabilityConfirmed": false
+      },
+      {
+        "id": "gta-autocare-block2-s6-block4-k17-k18-k20-2026-11-06",
+        "date": "2026-11-06",
+        "basis": "User separately confirmed Block 2 S6, then selected option 1 to include K17, K18 and K20 in Block 4.",
+        "decisions": [
+          {
+            "code": "S6",
+            "block": 2,
+            "decision": "Include in Block 2",
+            "previousTeachingBlocks": [
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ]
+          },
+          {
+            "code": "K17",
+            "block": 4,
+            "decision": "Include in Block 4",
+            "previousTeachingBlocks": [
+              9,
+              10
+            ]
+          },
+          {
+            "code": "K18",
+            "block": 4,
+            "decision": "Include in Block 4",
+            "previousTeachingBlocks": [
+              10
+            ]
+          },
+          {
+            "code": "K20",
+            "block": 4,
+            "decision": "Include in Block 4",
+            "previousTeachingBlocks": [
+              2,
+              3,
+              5,
+              6,
+              7,
+              8,
+              10
+            ]
+          }
+        ],
+        "weeklySessionAssigned": false,
+        "primaryAllocationApproved": false,
+        "individualApplicabilityConfirmed": false
+      },
+      {
+        "id": "gta-autocare-block2-s6-block4-k17-k18-k20-block9-s14-2026-11-06",
+        "date": "2026-11-06",
+        "basis": "User separately confirmed Block 2 S6, then selected option 1 to include K17, K18 and K20 in Block 4. User then confirmed including S14 in Block 9, supported by a completed job card or service/check record.",
+        "decisions": [
+          {
+            "code": "S6",
+            "block": 2,
+            "decision": "Include in Block 2",
+            "previousTeachingBlocks": [
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ]
+          },
+          {
+            "code": "K17",
+            "block": 4,
+            "decision": "Include in Block 4",
+            "previousTeachingBlocks": [
+              9,
+              10
+            ]
+          },
+          {
+            "code": "K18",
+            "block": 4,
+            "decision": "Include in Block 4",
+            "previousTeachingBlocks": [
+              10
+            ]
+          },
+          {
+            "code": "K20",
+            "block": 4,
+            "decision": "Include in Block 4",
+            "previousTeachingBlocks": [
+              2,
+              3,
+              5,
+              6,
+              7,
+              8,
+              10
+            ]
+          },
+          {
+            "code": "S14",
+            "block": 9,
+            "decision": "Include in Block 9",
+            "previousTeachingBlocks": [
+              2,
+              3,
+              5,
+              6,
+              7,
+              8,
+              10
+            ],
+            "evidenceExpectation": "Completed job card or service/check record; not discussion alone."
+          }
+        ],
+        "weeklySessionAssigned": false,
+        "primaryAllocationApproved": false,
+        "individualApplicabilityConfirmed": false
+      },
+      {
+        "id": "gta-autocare-block2-s6-block4-k17-k18-k20-block9-s14-block9-plan-2026-11-06",
+        "date": "2026-11-06",
+        "basis": "User separately confirmed Block 2 S6, then selected option 1 to include K17, K18 and K20 in Block 4. User then confirmed including S14 in Block 9, supported by a completed job card or service/check record. Jon then accepted moving Block 9 K18 to ADAS, removing unsupported K20 hydrogen links, and planning S20 customer-handling and S24 reflection activities.",
+        "decisions": [
+          {
+            "code": "S6",
+            "block": 2,
+            "decision": "Include in Block 2",
+            "previousTeachingBlocks": [
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ]
+          },
+          {
+            "code": "K17",
+            "block": 4,
+            "decision": "Include in Block 4",
+            "previousTeachingBlocks": [
+              9,
+              10
+            ]
+          },
+          {
+            "code": "K18",
+            "block": 4,
+            "decision": "Include in Block 4",
+            "previousTeachingBlocks": [
+              10
+            ]
+          },
+          {
+            "code": "K20",
+            "block": 4,
+            "decision": "Include in Block 4",
+            "previousTeachingBlocks": [
+              2,
+              3,
+              5,
+              6,
+              7,
+              8,
+              10
+            ]
+          },
+          {
+            "code": "S14",
+            "block": 9,
+            "decision": "Include in Block 9",
+            "previousTeachingBlocks": [
+              2,
+              3,
+              5,
+              6,
+              7,
+              8,
+              10
+            ],
+            "evidenceExpectation": "Completed job card or service/check record; not discussion alone."
+          },
+          {
+            "code": "K18",
+            "block": 9,
+            "decision": "Include in Block 9",
+            "previousTeachingBlocks": [
+              4,
+              10
+            ],
+            "evidenceExpectation": "During the ADAS activity, explain passive and active driver assistance and levels of autonomy. Give one example of each and explain the driver responsibility and referral limits. Record the explanation in the existing work/findings field; the tutor checks understanding."
+          },
+          {
+            "code": "S20",
+            "block": 9,
+            "decision": "Include in Block 9",
+            "previousTeachingBlocks": [
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              10
+            ],
+            "evidenceExpectation": "During the customer handover, use an inclusive communication scenario: give clear, accessible charging/advice instructions, check the customer understands, and explain how you followed equality, diversity and inclusion guidance. Use a fictional customer scenario; do not record disability or other sensitive personal details. Record the approach in Customer advice summary; the tutor observes/checks the interaction."
+          },
+          {
+            "code": "S24",
+            "block": 9,
+            "decision": "Include in Block 9",
+            "previousTeachingBlocks": [
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              10
+            ],
+            "evidenceExpectation": "Use the existing Learning Impact Record to describe learning actually completed, give an evidence example with your role and result, and identify the next development step. The tutor checks the record against the referenced learning/evidence. Completing reflection scores alone does not establish competence."
+          },
+          {
+            "code": "K20",
+            "block": 9,
+            "decision": "Exclude unsupported Block 9 hydrogen association; retain existing servicing-block links",
+            "previousTeachingBlocks": [
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              10
+            ]
+          }
+        ],
+        "weeklySessionAssigned": true,
+        "primaryAllocationApproved": false,
+        "individualApplicabilityConfirmed": false,
+        "block9Planning": {
+          "id": "gta-autocare-block9-planning-correction-2026-11-06",
+          "referenceId": "autocare-st0499-v1.3-af1.10-v1.0-reference",
+          "block": 9,
+          "date": "2026-11-06",
+          "approvedPlanning": true,
+          "basis": "Jon accepted the recommended four Block 9 planning decisions after delegating the planning choice. This records planned coverage, not actual delivery or individual applicability.",
+          "weeklyChanges": [
+            {
+              "week": 91,
+              "removeCodes": [
+                "S20",
+                "S24"
+              ],
+              "addCodes": [
+                "K18"
+              ]
+            },
+            {
+              "week": 93,
+              "removeCodes": [
+                "K18"
+              ],
+              "addCodes": []
+            },
+            {
+              "week": 94,
+              "removeCodes": [
+                "K18",
+                "K20"
+              ],
+              "addCodes": []
+            },
+            {
+              "week": 84,
+              "removeCodes": [],
+              "addCodes": [
+                "S20"
+              ]
+            }
+          ],
+          "taskFocusExclusions": [
+            {
+              "taskId": "b9-t3",
+              "codes": [
+                "K20"
+              ],
+              "reason": "Original generic K20 evidence-focus reference is superseded for Block 9; fluids/filtration remain in the existing servicing blocks."
+            },
+            {
+              "taskId": "b9-t4",
+              "codes": [
+                "K20"
+              ],
+              "reason": "Original generic K20 evidence-focus reference is superseded for Block 9; fluids/filtration remain in the existing servicing blocks."
+            }
+          ],
+          "activities": [
+            {
+              "code": "K18",
+              "block": 9,
+              "taskId": "b9-t4",
+              "week": 91,
+              "instruction": "During the ADAS activity, explain passive and active driver assistance and levels of autonomy. Give one example of each and explain the driver responsibility and referral limits. Record the explanation in the existing work/findings field; the tutor checks understanding.",
+              "answerFields": [
+                "b9_t4_work_findings"
+              ]
+            },
+            {
+              "code": "S20",
+              "block": 9,
+              "taskId": "b9-t3",
+              "week": 84,
+              "instruction": "During the customer handover, use an inclusive communication scenario: give clear, accessible charging/advice instructions, check the customer understands, and explain how you followed equality, diversity and inclusion guidance. Use a fictional customer scenario; do not record disability or other sensitive personal details. Record the approach in Customer advice summary; the tutor observes/checks the interaction.",
+              "answerFields": [
+                "b9_t3_tech_3_right"
+              ]
+            },
+            {
+              "code": "S24",
+              "block": 9,
+              "taskId": "b9-t5",
+              "week": null,
+              "instruction": "Use the existing Learning Impact Record to describe learning actually completed, give an evidence example with your role and result, and identify the next development step. The tutor checks the record against the referenced learning/evidence. Completing reflection scores alone does not establish competence.",
+              "answerFields": [
+                "end_new_capability",
+                "evidence_example_1"
+              ]
+            }
+          ],
+          "additionalHours": 0,
+          "additionalTasks": 0,
+          "achievementInferred": false
+        }
+      }
+    ],
+    "block9Planning": {
+      "id": "gta-autocare-block9-planning-correction-2026-11-06",
+      "referenceId": "autocare-st0499-v1.3-af1.10-v1.0-reference",
+      "block": 9,
+      "date": "2026-11-06",
+      "approvedPlanning": true,
+      "basis": "Jon accepted the recommended four Block 9 planning decisions after delegating the planning choice. This records planned coverage, not actual delivery or individual applicability.",
+      "weeklyChanges": [
+        {
+          "week": 91,
+          "removeCodes": [
+            "S20",
+            "S24"
+          ],
+          "addCodes": [
+            "K18"
+          ]
+        },
+        {
+          "week": 93,
+          "removeCodes": [
+            "K18"
+          ],
+          "addCodes": []
+        },
+        {
+          "week": 94,
+          "removeCodes": [
+            "K18",
+            "K20"
+          ],
+          "addCodes": []
+        },
+        {
+          "week": 84,
+          "removeCodes": [],
+          "addCodes": [
+            "S20"
+          ]
+        }
+      ],
+      "taskFocusExclusions": [
+        {
+          "taskId": "b9-t3",
+          "codes": [
+            "K20"
+          ],
+          "reason": "Original generic K20 evidence-focus reference is superseded for Block 9; fluids/filtration remain in the existing servicing blocks."
+        },
+        {
+          "taskId": "b9-t4",
+          "codes": [
+            "K20"
+          ],
+          "reason": "Original generic K20 evidence-focus reference is superseded for Block 9; fluids/filtration remain in the existing servicing blocks."
+        }
+      ],
+      "activities": [
+        {
+          "code": "K18",
+          "block": 9,
+          "taskId": "b9-t4",
+          "week": 91,
+          "instruction": "During the ADAS activity, explain passive and active driver assistance and levels of autonomy. Give one example of each and explain the driver responsibility and referral limits. Record the explanation in the existing work/findings field; the tutor checks understanding.",
+          "answerFields": [
+            "b9_t4_work_findings"
+          ]
+        },
+        {
+          "code": "S20",
+          "block": 9,
+          "taskId": "b9-t3",
+          "week": 84,
+          "instruction": "During the customer handover, use an inclusive communication scenario: give clear, accessible charging/advice instructions, check the customer understands, and explain how you followed equality, diversity and inclusion guidance. Use a fictional customer scenario; do not record disability or other sensitive personal details. Record the approach in Customer advice summary; the tutor observes/checks the interaction.",
+          "answerFields": [
+            "b9_t3_tech_3_right"
+          ]
+        },
+        {
+          "code": "S24",
+          "block": 9,
+          "taskId": "b9-t5",
+          "week": null,
+          "instruction": "Use the existing Learning Impact Record to describe learning actually completed, give an evidence example with your role and result, and identify the next development step. The tutor checks the record against the referenced learning/evidence. Completing reflection scores alone does not establish competence.",
+          "answerFields": [
+            "end_new_capability",
+            "evidence_example_1"
+          ]
+        }
+      ],
+      "additionalHours": 0,
+      "additionalTasks": 0,
+      "achievementInferred": false
+    },
+    "adasRelease": {
+      "id": "gta-adas-blocks5-8-release-r2-2026-11-06",
+      "referenceId": "autocare-st0499-v1.3-af1.10-v1.0-reference",
+      "date": "2026-11-06",
+      "revision": 2,
+      "approvedPlanning": true,
+      "releasedTaskContent": true,
+      "basis": "Jon confirmed completion after reviewing and being asked to confirm intended teaching in Blocks 5-8. Release the revised questions as knowledge reinforcement in the four existing tasks.",
+      "targets": [
+        {
+          "block": 5,
+          "taskId": "b5-t4",
+          "context": "suspension replacement and alignment preparation",
+          "prompts": [
+            {
+              "code": "K17",
+              "question": "For suspension replacement and alignment preparation, use manufacturer information for a vehicle or a clearly labelled case study:\n1. Explain whether the work could affect ADAS and identify the required checks.\n2. Explain any relevant static and dynamic calibration methods and equipment, or why specialist advice is needed.\n3. Record your information source and referral decision. Do not assume every repair requires calibration or carry out work beyond your authorised role."
+            },
+            {
+              "code": "K18",
+              "question": "Use a vehicle or clearly labelled case study from the suspension/alignment task. Identify one affected driver-assistance feature and explain whether it is passive or active. Explain the driver’s responsibilities and, within the levels of driving automation, identify the level supported by the information provided. Name the information source; do not assume features or capabilities that the example does not show."
+            }
+          ]
+        },
+        {
+          "block": 6,
+          "taskId": "b6-t3",
+          "context": "electrical diagnostic testing",
+          "prompts": [
+            {
+              "code": "K17",
+              "question": "For electrical diagnostic testing, use manufacturer information for a vehicle or a clearly labelled case study:\n1. Explain whether the work could affect ADAS and identify the required checks.\n2. Explain any relevant static and dynamic calibration methods and equipment, or why specialist advice is needed.\n3. Record your information source and referral decision. Do not assume every repair requires calibration or carry out work beyond your authorised role."
+            },
+            {
+              "code": "K18",
+              "question": "Use a clearly labelled driver-assistance electrical fault case. Identify the feature, whether it is passive or active, and how the described fault changes the warning or assistance available. Explain the driver’s responsibilities and, within the levels of driving automation, identify the level supported by the information provided. Name the information source; do not assume features or capabilities that the example does not show."
+            }
+          ]
+        },
+        {
+          "block": 7,
+          "taskId": "b7-t3",
+          "context": "steering component replacement and alignment checks",
+          "prompts": [
+            {
+              "code": "K17",
+              "question": "For steering component replacement and alignment checks, use manufacturer information for a vehicle or a clearly labelled case study:\n1. Explain whether the work could affect ADAS and identify the required checks.\n2. Explain any relevant static and dynamic calibration methods and equipment, or why specialist advice is needed.\n3. Record your information source and referral decision. Do not assume every repair requires calibration or carry out work beyond your authorised role."
+            },
+            {
+              "code": "K18",
+              "question": "Use a clearly labelled steering/ADAS case. Compare a warning-only feature with an active assistance feature, and explain the difference for the driver. Explain the driver’s responsibilities and, within the levels of driving automation, identify the level supported by the information provided. Name the information source; do not assume features or capabilities that the example does not show."
+            }
+          ]
+        },
+        {
+          "block": 8,
+          "taskId": "b8-t4",
+          "context": "tyre wear and geometry investigation",
+          "prompts": [
+            {
+              "code": "K17",
+              "question": "For tyre wear and geometry investigation, use manufacturer information for a vehicle or a clearly labelled case study:\n1. Explain whether the work could affect ADAS and identify the required checks.\n2. Explain any relevant static and dynamic calibration methods and equipment, or why specialist advice is needed.\n3. Record your information source and referral decision. Do not assume every repair requires calibration or carry out work beyond your authorised role."
+            },
+            {
+              "code": "K18",
+              "question": "Use a vehicle or clearly labelled case study from the tyre/geometry task. Identify a related driver-assistance feature and explain whether it warns the driver or actively assists. Explain the driver’s responsibilities and, within the levels of driving automation, identify the level supported by the information provided. Name the information source; do not assume features or capabilities that the example does not show."
+            }
+          ]
+        }
+      ],
+      "additionalHours": 0,
+      "additionalTasks": 0,
+      "achievementInferred": false,
+      "history": []
+    }
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "checkpoint": "v0.7.0",
+  "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
+  "batches": [
+    {
+      "batch": "Core profiles and linked directories",
+      "status": "working_tested",
+      "remaining": "Live schema migration and production deployment pending"
+    },
+    {
+      "batch": "Autocare task workspaces",
+      "status": "working_tested_core",
+      "remaining": "Approved ADAS release and Block 9 source guidance now included, older schemas retained. Sequential block releases/exceptions, formal block/KSB sign-off, other programmes and filled-PDF export remain."
+    },
+    {
+      "batch": "Maths/English training and qualifications",
+      "status": "working_tested_core",
+      "remaining": "Full authoritative topic catalogue reconciliation and external result import remain. Private certificate/evidence uploads now work without setting achievement."
+    },
+    {
+      "batch": "SMART Action Plan",
+      "status": "working_tested_core",
+      "remaining": "Review auto-targets and remaining source-linked action types pending; manual actions and referred-task links work"
+    },
+    {
+      "batch": "Sessions and registers",
+      "status": "working_tested_core",
+      "remaining": "Actual extra/out-of-hours training, agreement/actual-compensation gates, tutor approval, bidirectional overlap prevention and withdrawal now work. Recurring session planning, formal reopen/correction workflow, complete historical OTJ coverage, approved individual targets and pace reporting remain."
+    },
+    {
+      "batch": "Private Careers",
+      "status": "working_tested_core",
+      "remaining": "Amendments, To do action revisions and current adviser worklist now work. Block 10 trigger depends on individual block plan; notification delivery remains."
+    },
+    {
+      "batch": "Support and retention cases",
+      "status": "working_tested_core",
+      "remaining": "Granular multi-role capabilities, marker-history audit expansion and configurable team scope pending"
+    },
+    {
+      "batch": "Private Apprentice Support Plans",
+      "status": "working_tested_core",
+      "remaining": "Delivered support activities and private evidence now work. Consent-controlled sharing and original source PDF exports remain."
+    },
+    {
+      "batch": "Approved tutor instructions",
+      "status": "working_tested_core",
+      "remaining": "Amendment/replacement/withdrawal and explicit authenticated CEO emergency override now work. Granular support duties/area scopes and their administration remain."
+    },
+    {
+      "batch": "Training plans, RPL and curriculum/KSB coverage",
+      "status": "working_tested_preparation_and_assessment",
+      "remaining": "Portal-first draft projection, proposal inputs and source-bound individual RPL assessment/review now work. Formal plan approval/application, primary KSB allocation, S9 internal basis reconciliation, Foundation/individual applicability, revised block calendar, signatures and final gateway source checks remain."
+    },
+    {
+      "batch": "Ten-week progress reviews",
+      "status": "working_tested_drafts",
+      "remaining": "Original fields, scoped mentor/tutor worklist, locked source snapshot, register subjects, booked next-period subjects and monthly snapshots. Drafts do not complete a review or reset its clock. Whole-plan comparison, completion/history scheduling, three signatures, sharing and original PDF workflow remain."
+    },
+    {
+      "batch": "Monthly apprentice scorecard",
+      "status": "working_tested_core",
+      "remaining": "Calendar-month main-tutor record, five conduct-informed areas, Not observed, source register link and review snapshot. Descriptors are explicitly proposed GTA configuration, not approved industry benchmarks. No grade/ranking. User acceptance pending."
+    },
+    {
+      "batch": "Retention and early-leaver analysis",
+      "status": "working_tested_core",
+      "remaining": "Admin-only source-referenced programme outcome/context and descriptive comparable start-cohort report; completion separate from achievement. Historical employer/tutor coverage, retention interval days, destinations verification and approved KPI policy remain."
+    },
+    {
+      "batch": "Dashboards, journey and management/inspection reports",
+      "status": "working_tested_core",
+      "remaining": "Scoped actual-source dashboard, operational summary, date-based visual journey and partial inspection evidence with approved cases. Full management report contents/KPIs, provider outcome/governance sources and controlled exports remain."
+    },
+    {
+      "batch": "Case studies",
+      "status": "working_tested_core",
+      "remaining": "All non-apprentice authors can draft their own anonymised cases. Independent administrator/CEO approves an exact submitted version. Amendments remove the case from current inspection evidence until reapproved. External publication consent/authority not implied."
+    },
+    {
+      "batch": "Staff development",
+      "status": "working_tested_core",
+      "remaining": "Employee/manager core, private evidence, actual planned review links, reasoned reschedule/cancel and source-linked development impact work. Fuller team reporting and remaining detailed template reconciliation remain."
+    },
+    {
+      "batch": "Induction/wellbeing surveys",
+      "status": "working_tested_receipt_tracking",
+      "remaining": "Original induction/six-week/voluntary ongoing timing retained; private receipt versus versioned Inclusion check and existing concern link. No questionnaire answers stored. Actual external respondent forms/questionnaire source reconciliation remain."
+    },
+    {
+      "batch": "Help and optional voice explanations",
+      "status": "working_tested_core",
+      "remaining": "Role-scoped core guides now also cover plan preparation, extra training and CEO emergency access. Actual device voice/browser availability and visual acceptance remain unverified."
+    },
+    {
+      "batch": "Reminder delivery and account administration",
+      "status": "not_ported",
+      "remaining": "Local password command works; production invitations/recovery/MFA, mail/queue/schedules and employer-account mapping pending"
+    },
+    {
+      "batch": "Polishing and acceptance",
+      "status": "partial",
+      "remaining": "Shared responsive layout, clear source/unknown labels, aligned control grids and section navigation. No browser/phone/keyboard/print visual acceptance; unchanged original assets and 41 PDFs verified."
+    },
+    {
+      "batch": "Laravel Cloud release",
+      "status": "blocked_live_environment",
+      "remaining": "Martin must supply/review actual Cloud/database/storage/mail/backup environment and release process; local guard intentionally remains"
+    }
+  ]
+}

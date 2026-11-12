@@ -2,62 +2,67 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\UserRole;
 use App\Models\Apprentice;
-use App\Models\ApprenticeTask;
 use App\Models\CaseStudy;
+use App\Models\LearningTask;
+use App\Models\Qualification;
+use App\Models\SmartAction;
+use App\Models\SupportConcern;
+use App\Models\SupportPlan;
+use App\Models\TrainingTopic;
+use App\Models\TutorGroup;
+use App\Support\JourneyEvents;
+use App\Support\LearningAccess as Access;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $r): View
     {
-        $user = Auth::user();
+        return view('dashboard.index', $this->data($r));
+    }
 
-        if ($user->role === UserRole::Apprentice) {
-            $apprentice = Apprentice::with([
-                'standard',
-                'trainer',
-                'employer',
-                'functionalSkills',
-                'mandatoryQualifications',
-                'actionPlans.items',
-            ])->where('user_id', $user->id)
-                ->first();
+    public function report(Request $r): View
+    {
+        return view('dashboard.report', $this->data($r));
+    }
 
-            $completedTasksCount = $apprentice
-                ? ApprenticeTask::where('apprentice_id', $apprentice->apprentice_id)->where('status', 'Completed')->count()
-                : 0;
+    public function inspection(Request $r): View
+    {
+        abort_unless(Access::manager($r->user()), 403);
 
-            $submittedTasksCount = $apprentice
-                ? ApprenticeTask::where('apprentice_id', $apprentice->apprentice_id)->where('status', 'Submitted')->count()
-                : 0;
+        return view('dashboard.inspection', ['apprentices' => Apprentice::count(), 'concerns' => SupportConcern::where('status', '!=', 'Closed')->count(), 'plans' => SupportPlan::where('status', 'Active')->count(), 'tasks' => LearningTask::count(), 'topics' => TrainingTopic::count(), 'qualifications' => Qualification::count(), 'cases' => CaseStudy::where('status', 'Approved')->get()->filter(fn ($c) => $c->currentApprovedCopy())]);
+    }
 
-            return view('dashboard.apprentice', compact('apprentice', 'completedTasksCount', 'submittedTasksCount'));
+    public function journey(Request $r, Apprentice $apprentice): View
+    {
+        abort_unless(Access::training($r->user(), $apprentice), 403);
+
+        return view('dashboard.journey', ['apprentice' => $apprentice, 'events' => JourneyEvents::for($apprentice)]);
+    }
+
+    private function data(Request $r): array
+    {
+        abort_unless(in_array($r->user()->role, ['admin', 'ceo', 'tutor', 'apprentice'], true), 403);
+        $visible = Apprentice::visibleTo($r->user())->with('groupRecord')->orderBy('last_name')->get();
+        $groups = TutorGroup::whereIn('id', $visible->pluck('tutor_group_id')->filter())->orderBy('name')->get();
+        $scope = $visible;
+        if ($r->filled('group')) {
+            $scope = $scope->where('tutor_group_id', (int) $r->query('group'));
         }
+        if ($r->filled('apprentice')) {
+            $a = $scope->firstWhere('id', (int) $r->query('apprentice'));
+            abort_unless($a, 404);
+            $scope = collect([$a]);
+        }
+        $ids = $scope->pluck('id');
+        $tasks = LearningTask::with('apprentice')->whereIn('apprentice_id', $ids)->get();
+        $topics = TrainingTopic::whereIn('apprentice_id', $ids)->get();
+        $qualifications = Qualification::whereIn('apprentice_id', $ids)->get();
+        $actions = SmartAction::with(['task', 'apprentice'])->whereIn('apprentice_id', $ids)->get();
+        $metrics = ['apprentices' => $scope->count(), 'approved' => $tasks->where('status', 'Approved')->count(), 'tasks' => $tasks->count(), 'awaiting' => $tasks->where('status', 'Awaiting marking')->count(), 'overdue_marking' => $tasks->filter(fn ($t) => $t->markingOverdue())->count(), 'marking_date_checks' => $tasks->filter(fn ($t) => $t->status === 'Awaiting marking' && ! $t->submitted_at)->count(), 'overdue_actions' => $actions->filter(fn ($a) => $a->overdue())->count(), 'qualifications_achieved' => $qualifications->filter(fn ($q) => $q->achieved())->count(), 'qualifications_overdue' => $qualifications->filter(fn ($q) => $q->position() === 'Overdue')->count(), 'qualification_date_checks' => $qualifications->filter(fn ($q) => $q->position() === 'Date check')->count()];
 
-        // Staff & Employer Dashboard
-        $totalApprentices = Apprentice::where('status', 'Live')->count();
-        $pendingMarking = ApprenticeTask::pendingMarking()->count();
-        $overdueMarking = ApprenticeTask::overdueMarking()->count();
-        $approvedCaseStudies = CaseStudy::where('status', 'Approved')->count();
-
-        // Recent submitted tasks for review
-        $recentSubmissions = ApprenticeTask::with(['apprentice.user'])
-            ->pendingMarking()
-            ->orderBy('submitted_at', 'asc')
-            ->limit(5)
-            ->get();
-
-        return view('dashboard.staff', compact(
-            'totalApprentices',
-            'pendingMarking',
-            'overdueMarking',
-            'approvedCaseStudies',
-            'recentSubmissions'
-        ));
+        return ['apprentices' => $scope, 'visible' => $visible, 'groups' => $groups, 'metrics' => $metrics, 'tasks' => $tasks, 'topics' => $topics, 'qualifications' => $qualifications, 'actions' => $actions, 'manager' => Access::manager($r->user())];
     }
 }
-

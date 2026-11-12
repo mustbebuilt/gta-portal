@@ -1,0 +1,95 @@
+{
+  "referenceId": "autocare-st0499-v1.3-af1.10-v1.0-reference",
+  "programme": "Autocare Technician Level 2 · ST0499 v1.3",
+  "sowVersion": "v4.4",
+  "guideVersion": "v1.8",
+  "guideLibraryFileId": "libfile_593ef368a4d081919a9ddb25058e3c68",
+  "sowLibraryFileId": "libfile_a1abc42e75708191ab32824876c81e87",
+  "confirmed": "2026-11-06",
+  "expectedUniqueKsbs": 64,
+  "plannedEligibleHours": 663,
+  "variableAllocation": 7150,
+  "primaryAllocationConfirmed": false,
+  "individualApplicabilityConfirmed": false,
+  "blocks": [
+    {
+      "block": 1,
+      "title": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+      "plannedEligibleHours": 45
+    },
+    {
+      "block": 2,
+      "title": "Vehicle Inspection, Servicing and Customer Interaction",
+      "plannedEligibleHours": 60
+    },
+    {
+      "block": 3,
+      "title": "Workshop Processes, Tools and Environmental Awareness",
+      "plannedEligibleHours": 60
+    },
+    {
+      "block": 4,
+      "title": "Emerging Technology and Driveline Systems",
+      "plannedEligibleHours": 60
+    },
+    {
+      "block": 5,
+      "title": "Diagnostic Thinking and Complex Repair Activities",
+      "plannedEligibleHours": 60
+    },
+    {
+      "block": 6,
+      "title": "Vehicle Systems Integration and Advanced Diagnostics",
+      "plannedEligibleHours": 60
+    },
+    {
+      "block": 7,
+      "title": "Advanced Workshop Practice and Technical Communication",
+      "plannedEligibleHours": 60
+    },
+    {
+      "block": 8,
+      "title": "Advanced Diagnostics and Workshop Organisation",
+      "plannedEligibleHours": 60
+    },
+    {
+      "block": 9,
+      "title": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness",
+      "plannedEligibleHours": 84
+    },
+    {
+      "block": 10,
+      "title": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+      "plannedEligibleHours": 114
+    },
+    {
+      "block": 11,
+      "title": "Gateway Readiness and Confirmation",
+      "plannedEligibleHours": 0
+    },
+    {
+      "block": 12,
+      "title": "End-Point Assessment",
+      "plannedEligibleHours": 0
+    }
+  ],
+  "portalAmendment": {
+    "id": "gta-specialist-six-hour-day-2026-11-06",
+    "date": "2026-11-06",
+    "authority": "Jon: specialist blocks only; Foundation allocation unchanged",
+    "previousProgrammeHours": 611.5,
+    "previousSpecialistSessionHours": 5.5,
+    "specialistSessionHours": 6,
+    "specialistSessionCount": 103,
+    "additionalHours": 51.5,
+    "originalSowFileUnchanged": true
+  },
+  "sourceAlignment": {
+    "id": "gta-autocare-source-alignment-2026-11-06",
+    "document": "GTA_Autocare_Source_Alignment_Amendment_2026-11-06.docx",
+    "mandatoryExcludedCodes": [
+      "S9"
+    ],
+    "calculationStatus": "Retained GTA planning basis; published mandatory catalogue and primary allocation reconciliation pending"
+  }
+}

@@ -2,47 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SupportPlan extends Model
 {
-    use HasFactory;
+    protected $attributes = ['version' => 1, 'status' => 'Draft'];
 
-    protected $fillable = [
-        'apprentice_id',
-        'plan_number',
-        'plan_type',
-        'status',
-        'primary_support_need',
-        'authorized_teaching_adjustments',
-        'confidential_case_notes',
-        'referral_date',
-        'plan_lead_user_id',
-        'info_sharing_consent',
-    ];
+    protected $fillable = ['apprentice_id', 'concern_ids', 'draft'];
 
-    protected $casts = [
-        'referral_date' => 'date',
-        'info_sharing_consent' => 'boolean',
-        'plan_number' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return ['concern_ids' => 'array', 'draft' => 'array', 'active_plan' => 'array', 'history' => 'array', 'reviews' => 'array', 'activities' => 'array', 'files' => 'array', 'version' => 'integer'];
+    }
 
     public function apprentice(): BelongsTo
     {
-        return $this->belongsTo(Apprentice::class, 'apprentice_id', 'apprentice_id');
+        return $this->belongsTo(Apprentice::class);
     }
 
-    public function planLead(): BelongsTo
+    public function nextReview(): ?string
     {
-        return $this->belongsTo(User::class, 'plan_lead_user_id', 'id');
-    }
-
-    public function actions(): HasMany
-    {
-        return $this->hasMany(SupportAction::class, 'support_plan_id', 'id');
+        return (collect($this->reviews ?? [])->filter(fn ($r) => ($r['active_snapshot']['approved_at'] ?? null) === ($this->active_plan['approved_at'] ?? null))->last()['next'] ?? null) ?? ($this->active_plan['fields']['review'] ?? null);
     }
 }
-

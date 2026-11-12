@@ -1,0 +1,47 @@
+{
+  "id": "gta-autocare-source-alignment-2026-11-06",
+  "checked": "2026-11-06",
+  "document": "GTA_Autocare_Source_Alignment_Amendment_2026-11-06.docx",
+  "scope": "Autocare specialist Blocks 2-10 only; Foundation and other routes keep their controlled allocations",
+  "sow": {
+    "filename": "Autocare_Technician_L2_SOW_v4.4(3).docx",
+    "libraryFileId": "libfile_a1abc42e75708191ab32824876c81e87",
+    "sha256": "e6af8a8274eca7c1ee1bcb6aa47fb6abc7f8cb042618f165181fe152703f9055"
+  },
+  "guide": {
+    "filename": "GTA_SOW_Design_and_RPL_Adjustment_Guide_v1.8.docx",
+    "libraryFileId": "libfile_593ef368a4d081919a9ddb25058e3c68",
+    "version": 1,
+    "sha256": "7b99ab9062dcc4d684bb3b346d797e84521ea2301311dccd5a06bbc51de3d779"
+  },
+  "mandatoryExcludedCodes": [
+    "S9"
+  ],
+  "classification": "S9 is retained as a teaching reference, not a v1.3 mandatory requirement. This does not change saved evidence or the retained 64-entry internal allocation basis.",
+  "calculationStatus": "Retained GTA planning basis; published mandatory catalogue and primary allocation reconciliation pending",
+  "supersedes": {
+    "programmeHours": 611.5,
+    "specialistSessionHours": 5.5,
+    "durationAlternative": "27 practical months plus one assessment month",
+    "s9Warning": "Version confirmation pending"
+  },
+  "current": {
+    "programmeHours": 663,
+    "specialistSessionHours": 6,
+    "specialistSessionCount": 103,
+    "foundationHours": 45,
+    "specialistHours": 618,
+    "additionalHours": 51.5,
+    "specialistNonOtjHours": 0,
+    "foundationNonOtjHours": 15,
+    "internalPlanningEntries": 64
+  },
+  "sourceDecisionPending": [
+    "Block 9 summary versus weekly links: K18, K20, S20, S24",
+    "Task-focus codes unsupported by this block’s current SOW links",
+    "Approved primary KSB allocation before block-level RPL",
+    "Reconcile S9 teaching entry with approved internal time and cost basis",
+    "Foundation approval and individual programme applicability"
+  ],
+  "individualPlanApproved": false
+}

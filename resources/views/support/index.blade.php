@@ -1,59 +1,29 @@
-<x-portal-layout>
-    <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 16px;">
-        <div>
-            <h2 style="font-size: 22px; font-weight: 700; color: #0f172a;">Additional Learning Support (ALS) &amp; Support Plans</h2>
-            <p style="font-size: 13px; color: #64748b; margin-top: 4px;">
-                Authorized teaching adjustments and learning accommodations.
-                <strong>Confidentiality Notice:</strong> Employers are strictly excluded from private support plans.
-            </p>
-        </div>
-    </div>
-
-    <!-- Active Support Plans Roster -->
-    <div class="gta-card">
-        <header>
-            <h3 style="font-size: 16px; font-weight: 700;">Active Learner Support Plans</h3>
-            <span style="font-size: 12px; color: #64748b;">{{ $plans->count() }} Support Plans</span>
-        </header>
-
-        @if($plans->isEmpty())
-            <div style="padding: 32px; text-align: center; color: #64748b; font-size: 13px;">
-                No active ALS support plans currently recorded.
-            </div>
-        @else
-            <table class="gta-table">
-                <thead>
-                    <tr>
-                        <th>Apprentice</th>
-                        <th>Plan Type</th>
-                        <th>Primary Support Need</th>
-                        <th>Designated Lead</th>
-                        <th>Referral Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($plans as $plan)
-                        <tr>
-                            <td><strong>{{ $plan->apprentice->user->full_name }}</strong></td>
-                            <td><span style="text-transform: capitalize;">{{ $plan->plan_type }} Touch</span></td>
-                            <td>{{ $plan->primary_support_need }}</td>
-                            <td>{{ $plan->planLead?->full_name ?? 'GTA ALS Lead' }}</td>
-                            <td>{{ $plan->referral_date ? $plan->referral_date->format('d M Y') : 'N/A' }}</td>
-                            <td>
-                                <span class="badge badge-green">{{ $plan->status }}</span>
-                            </td>
-                            <td>
-                                <a href="{{ route('support.show', $plan->id) }}" style="font-size: 12px; color: #254c6a; font-weight: 600; text-decoration: underline;">
-                                    View Teaching Instructions &rarr;
-                                </a>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-    </div>
-</x-portal-layout>
-
+@extends('layout')
+@section('title','Support and concerns')
+@section('content')
+<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Support and concerns</h1><p>Raise a concern or work through its existing actions.</p></div>@if($team)<a class="button" href="{{ route('support.worklist') }}">Back to support worklist</a>@elseif(auth()->user()->can('view',$apprentice))<a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a>@endif</header>
+@include('learning.errors')
+<p class="test-notice">Routine inclusion and retention only. Do not enter safeguarding-specific details. Private records and teaching instructions have separate access.</p>
+@if($team)
+<section class="panel"><h2>Inclusion markers</h2><a class="button" href="{{ route('surveys.index',$apprentice) }}">Wellbeing survey follow-up</a>@if(array_diff($markers,['IM18','IM19','IM27','IM28','IM32','IM33']))<p><strong>Apprentice Support Plan required.</strong> A selected marker is not an approved plan.</p>@else<p>No marker currently creates a support-plan requirement. Missing information is not evidence that no support is needed.</p>@endif @forelse($markers as $code)<p>{{ $code }} · {{ $codes[$code] }}</p>@empty<p>No markers recorded.</p>@endforelse
+@if($lead)<details><summary>Edit markers (multiple selections allowed)</summary><form method="post" action="{{ route('support.markers',$apprentice) }}">@csrf<input type="hidden" name="version" value="{{ $apprentice->version }}">@foreach(['Learning difficulty or disability'=>range(1,19),'Circumstances'=>range(20,28),'Provision and funding'=>range(29,33),'Retention'=>range(34,40)] as $group=>$numbers)<details><summary>{{ $group }}</summary>@foreach($numbers as $number)@php($code='IM'.$number)<label class="check"><input type="checkbox" name="codes[]" value="{{ $code }}" @checked(in_array($code,$markers,true))>{{ $code }} · {{ $codes[$code] }}</label>@endforeach</details>@endforeach<label class="check"><input type="checkbox" name="confirmed" value="1" required>I checked these selections. Prefer not to say and Not provided do not, by themselves, trigger an ASP.</label><button>Save markers</button></form></details>@endif</section>
+<section class="panel"><header class="page-heading"><h2>Apprentice Support Plans</h2><a class="button primary" href="{{ route('support.plan.new',$apprentice) }}">Create support-plan draft</a></header>@forelse($plans as $plan)<article class="work-row"><div><h3>Support Plan {{ $plan->id }} · {{ $plan->status }}</h3><p>Next review: {{ $plan->nextReview()??'Not set' }}</p></div><a class="button" href="{{ route('support.plan',[$apprentice,$plan]) }}">Open plan</a></article>@empty<p>No plan recorded. Classify a concern before linking it to a plan.</p>@endforelse</section>
+@endif
+<section class="panel"><h2>Raise a new concern</h2><p>Briefly describe what needs checking. The inclusion lead or administrator will acknowledge it and select the relevant code.</p><form method="post" action="{{ route('support.raise',$apprentice) }}">@csrf<label for="initial-note">Concern</label><textarea id="initial-note" name="initial_note" required>{{ old('initial_note') }}</textarea><div class="form-actions"><button class="primary">Raise concern</button></div></form></section>
+@forelse($concerns as $c)<section class="panel" id="concern-{{ $c->id }}"><header class="page-heading"><div><h2>Concern {{ $c->id }} · {{ $c->status }}</h2><p>Raised {{ $c->created_at->format('d M Y') }}</p></div><span class="status {{ $c->status!=='Closed'&&$c->action_due?->lt(today())?'red':'neutral' }}">{{ $c->status!=='Closed'&&$c->action_due?->lt(today())?'Overdue action':($c->acknowledged_at?'Acknowledged':'Awaiting acknowledgement') }}</span></header><p class="recorded-answer">{{ $c->initial_note }}</p>
+@if($team)<dl class="details-grid"><div><dt>Marker</dt><dd>{{ $c->code?($c->code.' · '.$codes[$c->code]):'Not classified' }}</dd></div><div><dt>Owner</dt><dd>{{ $c->owner?->name??'Not assigned' }}</dd></div><div><dt>Next action</dt><dd>{{ $c->next_action??'Not recorded' }}</dd></div><div><dt>Due</dt><dd>{{ $c->action_due?->format('d M Y')??'Not set' }}</dd></div></dl>
+@if($lead && $c->status!=='Closed')<details><summary>Acknowledge / classify / assign</summary><form method="post" action="{{ route('support.classify',$c) }}">@csrf<input type="hidden" name="version" value="{{ $c->version }}"><div class="form-grid"><div><label for="code-{{ $c->id }}">Relevant marker</label><select id="code-{{ $c->id }}" name="code" required><option value="">Choose</option>@foreach($codes as $code=>$label)<option value="{{ $code }}" @selected($c->code===$code)>{{ $code }} · {{ $label }}</option>@endforeach</select></div><div><label for="other-{{ $c->id }}">Describe Other (IM40 only)</label><input id="other-{{ $c->id }}" name="other_code" value="{{ $c->other_code }}"></div><div><label for="owner-{{ $c->id }}">Concern owner</label><select id="owner-{{ $c->id }}" name="owner_id" required><option value="">Choose</option>@foreach($owners as $owner)<option value="{{ $owner->id }}" @selected($c->owner_id===$owner->id)>{{ $owner->name }}</option>@endforeach</select></div><div><label for="due-{{ $c->id }}">Next action due</label><input id="due-{{ $c->id }}" name="action_due" type="date" value="{{ $c->action_due?->format('Y-m-d') }}" required></div><div><label for="review-{{ $c->id }}">Next weekly team follow-up</label><input id="review-{{ $c->id }}" name="next_review" type="date" value="{{ $c->next_review?->format('Y-m-d') }}" required></div><div class="full"><label for="next-{{ $c->id }}">Next action</label><textarea id="next-{{ $c->id }}" name="next_action" required>{{ $c->next_action }}</textarea></div></div><button>Save acknowledgement and classification</button></form></details>@endif
+@if($c->status!=='Closed' && $c->acknowledged_at)<details><summary>Record weekly follow-up and target</summary><form method="post" action="{{ route('support.followup',$c) }}">@csrf<input type="hidden" name="version" value="{{ $c->version }}"><div class="form-grid"><div><label for="follow-date-{{ $c->id }}">Actual discussion date</label><input id="follow-date-{{ $c->id }}" name="date" type="date" max="{{ today()->toDateString() }}" required></div><div><label for="follow-outcome-{{ $c->id }}">Progress since last follow-up</label><select id="follow-outcome-{{ $c->id }}" name="outcome" required><option value="">Choose</option>@foreach(['Progress made','More support needed','No progress yet','Target completed'] as $v)<option>{{ $v }}</option>@endforeach</select></div>@foreach(['note'=>'What happened / review of previous target','target'=>'Specific next target','measure'=>'Observable completion check / evidence','owner'=>'Person responsible'] as $key=>$label)<div class="full"><label for="follow-{{ $key }}-{{ $c->id }}">{{ $label }}</label><textarea id="follow-{{ $key }}-{{ $c->id }}" name="{{ $key }}" required></textarea></div>@endforeach<div><label for="follow-due-{{ $c->id }}">Target deadline</label><input id="follow-due-{{ $c->id }}" name="due_date" type="date" required></div><div><label for="follow-review-{{ $c->id }}">Next weekly follow-up date</label><input id="follow-review-{{ $c->id }}" name="next_review" type="date" required></div></div><label class="check"><input name="agreed" value="1" type="checkbox" required>The target, completion check, support and deadline are agreed and realistic.</label><button>Save chronological follow-up</button></form></details>@endif
+<details open><summary>Chronological follow-ups</summary>@forelse($c->followups??[] as $f)<article class="work-row"><div><strong>{{ $f['date'] }} · {{ $f['outcome'] }}</strong><p>{{ $f['note'] }}</p><p>Target: {{ $f['target'] }} · {{ $f['owner'] }} · Due {{ $f['due_date'] }}</p><p>Completion check: {{ $f['measure'] }}</p></div></article>@empty<p>No follow-up recorded.</p>@endforelse</details>
+@if($c->status==='Closed')<p><strong>Closure outcome:</strong> {{ $c->outcome }}</p>@elseif($lead)<details><summary>Close concern</summary><form method="post" action="{{ route('support.close',$c) }}">@csrf<input type="hidden" name="version" value="{{ $c->version }}"><label for="close-{{ $c->id }}">Final outcome and evidence</label><textarea id="close-{{ $c->id }}" name="outcome" required></textarea><button>Close concern</button></form></details>@endif
+@else<p class="muted">Your concern has been received. Private inclusion-team records are not shown here.</p>@endif</section>
+@empty<section class="panel"><h2>No concerns visible in this scope</h2><p>This is not a statement that the apprentice has no additional needs.</p></section>@endforelse
+@if($team)<section class="panel"><h2>Teaching instructions</h2><p>Only named currently linked tutors receive an approved copy. A draft amendment does not alter that copy. Private case notes are excluded.</p>
+@forelse($instructions as $i)<article class="staff-entry"><h3>Instruction {{ $i->id }} · Draft revision {{ $i->draft_revision }}</h3><p class="recorded-answer">{{ $i->draft_text }}</p><p><strong>Private note:</strong> {{ $i->private_note??'None recorded' }}</p><p>{{ $i->hasUnreleasedDraft()?'Draft awaits approval':'Draft version already approved' }}</p>
+@if($i->currentRelease())<details><summary>Currently approved tutor copy</summary><p class="recorded-answer">{{ $i->release['text'] }}</p><p>Published version {{ $i->release['version'] }} · {{ $i->release['approved_at'] }}</p>@foreach($i->release['recipient_ids'] as $recipientId)<p>Recipient {{ $recipientId }} · {{ isset(($i->acknowledgements??[])[(string)$recipientId])?'Read acknowledged':'Not yet read' }}</p>@endforeach</details>@elseif($i->release)<p>No current tutor copy: withdrawn {{ $i->release['withdrawn_at'] }}.</p>@endif
+@if((in_array(auth()->user()->role,['inclusion_lead','inclusion_member'],true)||\App\Support\ExecutiveAccess::enabled(request())))<details><summary>Amend instruction draft</summary>@include('support.instruction-form',['instruction'=>$i])</details>@endif
+@if($i->hasUnreleasedDraft() && (auth()->user()->role==='inclusion_lead'||\App\Support\ExecutiveAccess::enabled(request())))<form method="post" action="{{ route('support.release',$i) }}">@csrf<input type="hidden" name="version" value="{{ $i->version }}"><label class="check"><input name="confirmed" value="1" type="checkbox" required>I checked the exact current draft and named recipients.</label><button>Approve this draft</button></form>@endif
+@if($i->currentRelease() && (auth()->user()->role==='inclusion_lead'||\App\Support\ExecutiveAccess::enabled(request())))<details><summary>Withdraw approved tutor copy</summary><form method="post" action="{{ route('support.instruction.withdraw',$i) }}">@csrf<input type="hidden" name="version" value="{{ $i->version }}"><input type="hidden" name="release_version" value="{{ $i->release['version'] }}"><label for="withdraw-{{ $i->id }}">Reason for withdrawal</label><textarea id="withdraw-{{ $i->id }}" name="reason" required></textarea><button>Withdraw approved copy</button></form></details>@endif
+<details><summary>Restricted amendment history</summary>@forelse($i->history??[] as $h)<p>{{ $h['event'] }} · {{ $h['at'] }}</p>@empty<p>No amendments or withdrawal recorded.</p>@endforelse</details></article>@empty<p>No instruction drafted.</p>@endforelse
+@if((in_array(auth()->user()->role,['inclusion_lead','inclusion_member'],true)||\App\Support\ExecutiveAccess::enabled(request())))<details><summary>Draft a new instruction for tutors</summary>@include('support.instruction-form',['instruction'=>null])</details>@endif</section>@endif
+@endsection

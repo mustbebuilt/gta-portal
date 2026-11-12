@@ -2,122 +2,86 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Apprentice extends Model
 {
     use HasFactory;
 
-    protected $table = 'apprentice';
-    protected $primaryKey = 'apprentice_id';
+    protected $attributes = ['version' => 1];
 
-    protected $fillable = [
-        'user_id',
-        'employer_id',
-        'trainer_id',
-        'standard_id',
-        'start_date',
-        'planned_end_date',
-        'actual_end_date',
-        'otj_target_hours',
-        'otj_hours_req_to_date',
-        'otj_hours_completed',
-        'status',
-        'achievement_status',
-        'achievement_date',
-        'withdrawal_reason',
-        'withdrawal_reason_basis',
-        'apprentice_voice',
-        'outcome_source_ref',
-        'destination_type',
-        'destination_date',
-        'destination_basis',
-        'destination_ref',
-        'employer_headcount_band',
-        'headcount_reference_date',
-        'additional_needs_recorded',
-        'ehcp_recorded',
-        'context_source_ref',
-    ];
+    protected $fillable = ['reference', 'first_name', 'last_name', 'email', 'programme', 'start_date', 'planned_end_date', 'employer', 'group_name', 'tutor_id', 'programme_id', 'employer_id', 'tutor_group_id', 'mentor_id', 'careers_adviser_id', 'maths_tutor_id', 'english_tutor_id'];
 
-    protected $casts = [
-        'start_date' => 'date',
-        'planned_end_date' => 'date',
-        'actual_end_date' => 'date',
-        'achievement_date' => 'date',
-        'destination_date' => 'date',
-        'headcount_reference_date' => 'date',
-        'otj_target_hours' => 'decimal:2',
-        'otj_hours_req_to_date' => 'decimal:2',
-        'otj_hours_completed' => 'decimal:2',
-    ];
-
-    public function user(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return ['start_date' => 'date', 'planned_end_date' => 'date', 'version' => 'integer'];
     }
 
-    public function trainer(): BelongsTo
+    public function tutor(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'trainer_id', 'id');
+        return $this->belongsTo(User::class, 'tutor_id');
     }
 
-    public function employer(): BelongsTo
+    public function programmeRecord(): BelongsTo
     {
-        return $this->belongsTo(Employer::class, 'employer_id', 'employer_id');
+        return $this->belongsTo(Programme::class, 'programme_id');
     }
 
-    public function standard(): BelongsTo
+    public function employerRecord(): BelongsTo
     {
-        return $this->belongsTo(Standard::class, 'standard_id', 'standard_id');
+        return $this->belongsTo(Employer::class, 'employer_id');
     }
 
-    public function tasks(): HasMany
+    public function groupRecord(): BelongsTo
     {
-        return $this->hasMany(ApprenticeTask::class, 'apprentice_id', 'apprentice_id');
+        return $this->belongsTo(TutorGroup::class, 'tutor_group_id');
     }
 
-    public function attendanceRecords(): HasMany
+    public function mentor(): BelongsTo
     {
-        return $this->hasMany(AttendanceRecord::class, 'apprentice_id', 'apprentice_id');
+        return $this->belongsTo(User::class, 'mentor_id');
     }
 
-    public function progressReviews(): HasMany
+    public function careersAdviser(): BelongsTo
     {
-        return $this->hasMany(ProgressReview::class, 'apprentice_id', 'apprentice_id');
+        return $this->belongsTo(User::class, 'careers_adviser_id');
     }
 
-    public function functionalSkills(): HasMany
+    public function mathsTutor(): BelongsTo
     {
-        return $this->hasMany(ApprenticeFunctionalSkill::class, 'apprentice_id', 'apprentice_id');
+        return $this->belongsTo(User::class, 'maths_tutor_id');
     }
 
-    public function mandatoryQualifications(): HasMany
+    public function englishTutor(): BelongsTo
     {
-        return $this->hasMany(ApprenticeMandatoryQual::class, 'apprentice_id', 'apprentice_id');
+        return $this->belongsTo(User::class, 'english_tutor_id');
     }
 
-    public function actionPlans(): HasMany
+    public function programmeLabel(): ?string
     {
-        return $this->hasMany(ActionPlan::class, 'apprentice_id', 'apprentice_id');
+        return $this->programmeRecord?->name ?? $this->programme;
     }
 
-    public function supportPlans(): HasMany
+    public function employerLabel(): ?string
     {
-        return $this->hasMany(SupportPlan::class, 'apprentice_id', 'apprentice_id');
+        return $this->employerRecord?->name ?? $this->employer;
     }
 
-    public function careerDiscussions(): HasMany
+    public function groupLabel(): ?string
     {
-        return $this->hasMany(CareerDiscussion::class, 'apprentice_id', 'apprentice_id');
+        return $this->groupRecord?->name ?? $this->group_name;
     }
 
-    public function tutorGroups(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        return $this->belongsToMany(TutorGroup::class, 'apprentice_tutor_groups', 'apprentice_id', 'tutor_group_id');
+        return match ($user->role) {
+            'admin', 'ceo' => $query,
+            'tutor' => $query->where('tutor_id', $user->id),
+            'apprentice' => $query->where('user_id', $user->id),
+            default => $query->whereRaw('1 = 0'),
+        };
     }
 }
-

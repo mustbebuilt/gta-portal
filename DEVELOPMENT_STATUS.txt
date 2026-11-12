@@ -1,0 +1,159 @@
+GTA Laravel v0.7.0 — 11 November 2026
+
+WORKING IN THE ACTUAL LOCAL LARAVEL APPLICATION
+The v0.2 profile/directory functions remain. This checkpoint adds:
+1. Autocare source task allocation (50 tasks in Blocks 1–10); all 41 original PDFs
+   unchanged; source version pinned; answers/drafts; own-work submission; locked
+   submitted versions; private evidence uploads/downloads; required inspection
+   checklist; paper knowledge results/scores; tutor referrals/resubmissions/approval;
+   seven-calendar-day marking overdue flag; stale-save guards and audit.
+2. Assigned Maths/English topics with individual planned hours; zero means Secure;
+   source-confirmed partial catalogue only; private evidence uploads/submissions;
+   subject-scoped tutor acceptance separate from training completion.
+3. Separate qualification status/result, actual achievement date, individually chosen
+   start and twelve-calendar-month target; source-safe status filters; amendment
+   reason for start changes; Functional Skills uses Achieved without grade bands.
+4. Guided SMART actions with objective completion checks, ownership, support and
+   agreement; To do/With tutor/Completed; source task links keep source dates/status;
+   owner/due/status filters; completion evidence and tutor checks.
+5. Session planning with roster snapshots, exclusions, actual registers and delivered
+   subjects; original attendance codes; late/partial attendance; confirmed minutes
+   only; overlap prevention; cancellation; own attendance view; two completed
+   consecutive weeks of non-attendance flag. This is a session OTJ subtotal only.
+6. Private Careers discussions, assigned-adviser access, two discussion types,
+   observable SMART actions and chronological follow-ups; apprentice own access;
+   employer/general tutor exclusion; original source resource catalogue.
+7. Inclusion markers IM1–40 with full descriptions and multiple selections; New
+   concerns, lead/admin acknowledgement/classification/ownership; chronological
+   weekly follow-ups/targets; closure and source-safe team worklist filters.
+8. Private ASP drafts and exact-version lead/admin approval; linked coded concerns;
+   active version preserved during amendments; formal support-impact reviews and
+   closure. No funding claim, OTJ or employer disclosure is automatically generated.
+9. Inclusion-team instruction drafts, lead approval, named linked tutor recipients,
+   read acknowledgement; private case note excluded from tutor projection.
+10. Local-only random password reset command and ten fictional demo accounts,
+    while keeping exactly two editable demo apprentice profiles.
+
+
+ADDED AND TESTED IN v0.4
+11. Scoped dashboard/operational summary and actual-date road-map journey. No
+    overall apprenticeship score or private case/Careers events are projected.
+12. Progress-review preparation: original fields; mentor/tutor worklist; fixed source
+    snapshot; actual delivered session subjects and explicitly incomplete booked
+    next-period subjects; monthly snapshot feedback. Drafts never complete or
+    reset a review. Meeting-based completion/signatures/PDF remain pending.
+13. Staff development: own employee versus assigned line-manager/CEO projection,
+    private manager notes/evidence, CPD, full observation versus brief note,
+    tutor HR3.9 headings, one-to-ones/appraisals, comments, SMART actions and
+    matching planned review completion. Ordinary admin has no blanket HR access.
+14. Anonymised case-study drafts, submit/withdraw/return, independent exact-version
+    approval, fixed approved copies and current approved-only inspection use.
+15. Private survey receipt and Inclusion-check tracking, concern links, corrective
+    history and check invalidation on date correction. No answers are stored.
+16. Programme outcome/context and descriptive retention comparisons. Completion
+    and achievement separate. Age bands rather than DOB. Source references for
+    material context; missing lifetime history remains unknown, not one or zero.
+17. Monthly main-tutor observed learning snapshot: five proposed GTA conduct-informed
+    areas, 0–5 or Not observed, short contextual comments, actual register link,
+    stale protection and review-source reuse. No total, ranking or discipline score.
+18. Source-faithful ADAS release for four new task schemas; both responses required
+    for submission, partial drafts allowed. Older saved tasks keep their schema.
+    Original PDFs remain available with pinned PDF hash, distinct from portal hash.
+    Approved Block 9 guidance shown separately without modifying original PDFs.
+19. Read-only original KSB/block reference and dated source amendments. S9 retained
+    as teaching reference, not mandatory. 663 hours are programme reference only.
+20. Role-scoped Help with optional generic-guide device read-aloud. No microphone,
+    automatic speech or apprentice/staff record text is read. Device support untested.
+
+ADDED AND TESTED IN v0.5
+21. Careers discussion amendments with original adviser attribution, previous terms,
+    source chronology and stale guards; only To do actions can be revised. Adviser
+    worklist shows actual type, current responsible person, due/status and source route.
+22. Tutor instruction drafts can be amended without changing an approved copy;
+    separate lead approval replaces the copy and resets acknowledgement for the new
+    release. Withdrawals require a reason and remove tutor visibility. Previous copies
+    and acknowledgements are retained in restricted history. No permission expansion.
+23. Manager-recorded staff impact reviews preserve source revision, evidence basis,
+    missing baseline/uncertainty and visibility controls. Sharing an impact cannot
+    expose an unshared underlying observation. No automatic target completion or grade.
+24. Individual staff review rescheduling/cancellation with reasons and stale checks.
+    Cancelled bookings cannot be completed by a development record.
+25. Private qualification evidence uploads/downloads within existing subject scope;
+    results and achievement remain separately entered. No auto-result from a file.
+26. Delivered support activities: original six source types, actual date, named staff
+    or reported other person, positive minutes or unknown, response/observed impact,
+    pinned active plan approval and duplicate-form protection. No auto-OTJ/ALS claim.
+27. Restricted support evidence for draft/active plans; optional original activity
+    link, original plan file ownership and private download. Closed records retain
+    history but cannot receive new files/activity. Audit failure cleans new uploads.
+
+ADDED AND TESTED IN v0.6
+28. Portal-first draft training-plan projection of existing people/dates, assigned
+    training topics and qualification aims; no duplicate source forms or private
+    case/Careers/staff notes. Programme reference remains distinct from applicability.
+29. Four explicit draft proposal inputs: programme version, proposed practical end,
+    proposed occupational hours and original planning basis. No automatic application.
+30. Individual source-bound KSB RPL assessment records, evidence references and exact
+    retained/omitted training statements. Blank outcomes stay unknown; exposure is
+    explicitly zero reduction. Positive omission requires its source and specific content.
+31. Admin/CEO assessment approval/return/withdrawal with current version and binding,
+    all valid assessed decisions and explicit checks. Changes invalidate approval;
+    unchanged resaving cannot clear Changes needed. Draft internal programme hours
+    and variable allocation only after all 64 retained source decisions are valid.
+    No individual target, price, dates, delivered hours or task results are changed.
+32. CEO explicit emergency session: current password/reason/confirmation; own signed-in
+    account/session binding; atomic use audit; end/logout removes authority; current
+    source/stale checks retained. Covers restricted teaching instruction draft/approval/
+    withdrawal gap; ordinary CEO oversight remains. No account can bypass authentication.
+
+ADDED AND TESTED IN v0.7
+33. Actual extra-training records, current group/main-tutor scope, same-day start/end,
+    exclusions, new learning and evidence; optional private source file. Creating a
+    record credits nothing. Outside-hours records require own apprentice confirmation
+    or a referenced recorded agreement, actual employer compensation with original
+    source/representative/date/minutes, and separate tutor eligibility approval.
+34. Bidirectional overlap checks between extra training and confirmed normal register
+    entries, and between extra records; common apprentice locking serialises checks.
+    Withdrawals require reasons, remove totals and retain original approvals/history.
+35. Connected normal-session/approved-extra OTJ record subtotals on attendance view.
+    No extra expected attendance sessions, historical completeness, individual target,
+    whole progress rating or compliance score is inferred.
+36. Help updated for the latest plan, extra-training and CEO session workflows.
+37. Positive form-write tests now assert successful redirect responses as well as no
+    validation errors. MariaDB exposed an overlong compensation audit label; a short
+    machine audit code fixes it without weakening atomic rollback or schema checks.
+    The focused MariaDB rerun and both complete strengthened suites pass.
+
+NOT COMPLETE / BLOCKED
+BATCH_QUEUE.json is the accurate remaining queue. The original v1.2.8 simulation
+still contains functions NOT ported here. Working core does not mean full area
+acceptance. Independent coding remains for block release, approved individual OTJ target/historical coverage, granular capabilities,
+controlled exports and reminder delivery. Whole-plan review completion and actual
+training-plan/RPL approval depend on unresolved individual applicability/primary
+allocation and source checks. Do not substitute a task percentage or guessed plan.
+No live deployment, real-data migration or background completion is implied.
+
+SOURCE / POLICY / LIVE BOUNDARIES
+The repaired SOW and dated amendments remain the reference, not the earlier
+27-month recollection. Foundation and primary allocation/application remain pending.
+S9 is the documented exclusion; S6 is not removed here. Gateway source conflicts
+are retained in gateway-source-reference.json, not silently resolved. Blocks 11–12
+are not filled with invented tasks. No financial/RPL reduction is applied.
+The full Maths/English catalogue is not in the loaded fixture: twelve source rows
+plus four confirmed English headings only. No example hours are copied as targets.
+Final management/KPI decisions, real questionnaire/HR template reconciliation and
+live integration remain pending. Provided blanks are not being requested again.
+Safeguarding case details stay excluded. No real apprentice/staff records used.
+Editable demo remains TWO apprentices; large disposable scope test uses 1,000 total
+fictional profiles, not the retained UI seed. Ten fictional local accounts are seeded.
+
+TEST AND DEPLOYMENT
+TEST_RESULTS.json records actual counts and limits. Both SQLite and isolated
+MariaDB 11.8.6 use the full suite; these are not additive distinct test scenarios.
+HTTP persistence checks use actual requests and a disposable SQLite file, no browser.
+All 41 original PDFs and original GTA/logo vehicle assets are unchanged.
+No browser, phone, keyboard or print visual acceptance, Windows-native run, Oracle
+MySQL or Laravel Cloud deployment verified. Local/testing-only guard remains.
+Laravel 13 / PHP 8.4.1+ / Laravel Cloud confirmed. This schema is not a drop-in
+migration of Martin's application. No populated DBs, credentials, logs or sessions
+belong in the handover. Functionality and polishing must not sacrifice quality.

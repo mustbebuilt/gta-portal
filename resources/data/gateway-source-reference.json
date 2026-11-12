@@ -1,0 +1,124 @@
+{
+  "checked": "2026-11-06",
+  "standard": "Autocare Technician ST0499 v1.3",
+  "versionLogUrl": "https://skillsengland.education.gov.uk/apprenticeships/st0499-v1-3?view=standard",
+  "startWindow": "19 September 2025 to 13 May 2027, as listed in the official version log. This is a source reference, not automatic selection of an apprentice\u2019s version.",
+  "futureVersion": "The revised version is listed for starts from 14 May 2027. Its draft must not replace current v1.3 requirements.",
+  "excludedDraftUrl": "https://skillsengland.education.gov.uk/media/w0mhstqb/st0499-autocare-technician-l2-epa-plan.pdf",
+  "excludedDraftReason": "The retrieved PDF identifies itself as EPA DRAFT PREVIEW. It has not been accepted as the applicable v1.3 plan.",
+  "imiPageUrl": "https://student.theimi.org.uk/progress-career/qualifications/AS-AC-EPA",
+  "imiGuidanceUrl": "https://student.theimi.org.uk/api/qualifications/download/43138",
+  "imiTripartyUrl": "https://student.theimi.org.uk/api/qualifications/download/27544",
+  "downloadStatus": "Supplied IMI guidance v1.3, official tri-party agreement and GTA gateway supplement have now been read. The earlier public-download 403 is historical; document receipt is no longer blocked. Receipt does not resolve source conflicts or confirm an apprentice\u2019s applicability.",
+  "ksbChange": "The official v1.3 version log confirms that S9 was removed because it duplicated S10. This does not authorise deleting S9 teaching content or changing the GTA scheme, KSB time/cost allocations or apprentice evidence automatically. S6 has not been treated as removed.",
+  "nextSource": "Main tutor: retain the official IMI form unaltered and obtain clarification of the source conflicts. Confirm the apprentice\u2019s registered standard/assessment plan and applicable rules, then link criterion-level evidence. No enquiry has been sent. Do not re-request the already supplied blank documents.",
+  "criteriaVerified": false,
+  "individualApplicabilityConfirmed": false,
+  "suppliedDocuments": [
+    {
+      "key": "guidance",
+      "filename": "Apprenticeship Guidance Autocare V1.3.pdf",
+      "libraryFileId": "libfile_772ee6837fbc8191b137a93af9111cab",
+      "version": 0,
+      "label": "Supplied IMI guidance v1.3",
+      "sha256": "40cc8e76b50775717c13abd3b958b5959e1e08de42f7c2d11c799d2eedda0ccf"
+    },
+    {
+      "key": "agreement",
+      "filename": "EPA Readiness-Tri-party Agreement ST0499 - Autocare.docx",
+      "libraryFileId": "libfile_10579cdbd0388191bbf53094b42da5ed",
+      "version": 0,
+      "label": "Supplied official IMI agreement",
+      "sha256": "a9f9676113441bebaf538c06d9bdb5f7c4388fd5848297725797035c502d2cf5"
+    },
+    {
+      "key": "supplement",
+      "filename": "GTA_Autocare_Gateway_Supplement_v1_0.docx",
+      "libraryFileId": "libfile_431222d1b6848191bb838221d2c54a37",
+      "version": 0,
+      "label": "Supplied GTA supplement v1.0",
+      "sha256": "2d4dca7050091f0bc1b7764d57d890c2fcce624869edb90cf7043572632ab847"
+    }
+  ],
+  "sourceConflicts": [
+    {
+      "key": "s9",
+      "source": "Guidance pp. 2 and 16; official agreement p. 3; GTA supplement p. 3",
+      "text": "The guidance change log records S9 removal, but its skills table and the supplied agreement still include S9. Retain the official form unchanged; seek IMI completion instructions. Do not mark a removed skill as achieved or renumber later skills."
+    },
+    {
+      "key": "duration",
+      "source": "Guidance p. 19; official agreement p. 1; GTA supplement p. 3",
+      "text": "The guidance states both 30-month and 12-month minima; the agreement specifies 12 months. Its blanket 20% training statement also needs cohort-specific checking. None is adopted here as a universal gateway threshold."
+    },
+    {
+      "key": "version",
+      "source": "Guidance pp. 25\u201327 compared with cover/change log",
+      "text": "Later page headers identify Level 3 / ST0499 v1.2 although the supplied guidance is labelled Autocare Level 2 v1.3. Confirm the applicable controlled source before using assessment detail."
+    }
+  ],
+  "preparationChecks": [
+    {
+      "key": "version",
+      "title": "Standard and assessment-plan version",
+      "source": "GTA supplement p. 1",
+      "note": "Confirm registered version and current official form."
+    },
+    {
+      "key": "duration",
+      "title": "Practical duration",
+      "source": "GTA supplement p. 1",
+      "note": "Record applicable required duration, actual duration and breaks."
+    },
+    {
+      "key": "otj",
+      "title": "Occupational training hours",
+      "source": "GTA supplement p. 1",
+      "note": "Reconcile required, planned and eligible actual hours with the applicable plan and rules."
+    },
+    {
+      "key": "ksb",
+      "title": "KSB mapping and employer competence",
+      "source": "GTA supplement p. 1",
+      "note": "Link the applicable mapping and employer evidence; task percentages alone are insufficient."
+    },
+    {
+      "key": "english",
+      "title": "English requirement",
+      "source": "GTA supplement p. 1",
+      "note": "Confirm applicable requirement, equivalent or reason it is not mandatory, with evidence."
+    },
+    {
+      "key": "maths",
+      "title": "Maths requirement",
+      "source": "GTA supplement p. 1",
+      "note": "Confirm applicable requirement, equivalent or reason it is not mandatory, with evidence."
+    },
+    {
+      "key": "fgas",
+      "title": "F-Gas qualification",
+      "source": "GTA supplement p. 1",
+      "note": "Verify exact required certificate title, awarding organisation and date against applicable sources."
+    },
+    {
+      "key": "isolation",
+      "title": "Safe-isolation qualification",
+      "source": "GTA supplement p. 1",
+      "note": "Verify the applicable electric/hybrid safe-isolation certificate."
+    },
+    {
+      "key": "portfolio",
+      "title": "Portfolio of evidence",
+      "source": "GTA supplement p. 1",
+      "note": "Check relevant KSB mapping and applicable IMI/assessment-plan requirements."
+    }
+  ],
+  "workflowNotes": [
+    "Use the supplied GTA supplement alongside the official IMI agreement, not as a replacement or customised IMI form.",
+    "The supplement separates outstanding actions, owners, due dates and completion evidence from the gateway decision. Reuse the original SMART Action Plan when the gateway workflow is connected.",
+    "A discussion acknowledgement is not permission to submit. Gateway submission, tri-party signatures and EPAO acceptance must remain separate records.",
+    "Keep assessment-support information minimal; do not place sensitive medical or safeguarding narratives in the gateway record."
+  ],
+  "sourceReceiptVerified": true,
+  "sourceConflictsResolved": false
+}

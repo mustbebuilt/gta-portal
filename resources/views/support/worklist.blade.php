@@ -1,0 +1,7 @@
+@extends('layout')
+@section('title','Support and retention')
+@section('content')
+<header class="page-heading"><div><h1>Support and retention</h1><p>Check new concerns, follow up actions and record the weekly team review.</p></div><button type="button" data-print>Print / Save PDF</button></header>
+<form class="panel search" method="get"><div><label for="support-state">Show concerns</label><select id="support-state" name="state">@foreach([''=>'All open concerns','new'=>'Awaiting acknowledgement','overdue'=>'Overdue action','weekly'=>'Weekly follow-up due / date check'] as $key=>$label)<option value="{{ $key }}" @selected(request('state','')===$key)>{{ $label }}</option>@endforeach</select></div><button>Apply filter</button></form>
+<section class="panel"><h2>Concerns requiring attention</h2>@forelse($concerns as $c)<article class="work-row"><div><h3>{{ $c->apprentice->first_name }} {{ $c->apprentice->last_name }}</h3><p>{{ $c->code?($c->code.' · '.$codes[$c->code]):'Awaiting classification' }}</p><p>Owner: {{ $c->owner?->name??'Not assigned' }} · Review: {{ $c->next_review?->format('d M Y')??'Not set' }}</p></div><span class="status {{ $c->action_due?->lt(today())?'red':'neutral' }}">{{ $c->action_due?->lt(today())?'Overdue action':$c->status }}</span><a class="button" href="{{ route('support.index',$c->apprentice) }}#concern-{{ $c->id }}">Open source concern</a></article>@empty<p>No concerns match this view. This does not confirm that every apprentice has been checked.</p>@endforelse</section>
+@endsection

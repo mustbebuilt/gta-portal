@@ -1,0 +1,7 @@
+@extends('layout')
+@section('title','Case studies')
+@section('content')
+<header class="page-heading"><div><h1>Case studies</h1><p>Record the challenge, GTA response, evidence and difference made.</p></div><a class="button primary" href="{{ route('cases.create') }}">Create anonymised case</a></header>
+<p class="muted">All active non-apprentice users can create their own case. Only an independent administrator can approve it for internal inspection evidence.</p><form class="panel search" method="get"><div><label for="case-filter">Status</label><select id="case-filter" name="status"><option value="">All permitted cases</option>@foreach(['Draft','For review','Changes requested','Approved'] as $s)<option @selected(request('status')===$s)>{{ $s }}</option>@endforeach</select></div><button>Apply filter</button></form>
+<section class="panel"><h2>Permitted case register</h2>@forelse($cases as $case)<article class="work-row"><div><h3>{{ $case->fields['title'] }}</h3><p>{{ $case->fields['category'] }} · {{ $case->status }} · Version {{ $case->version }}</p></div><a class="button" href="{{ route('cases.show',$case) }}">Open case</a></article>@empty<p>No case studies in this scope.</p>@endforelse</section>
+@endsection

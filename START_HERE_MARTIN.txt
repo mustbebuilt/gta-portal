@@ -1,0 +1,13 @@
+GTA PORTAL — START HERE, MARTIN
+12 November 2026 | Application checkpoint v0.7.0 | Handover instructions revision 1.0
+
+1. Extract the ZIP to a separate working folder/branch, not over the current portal.
+2. Give your development AI MARTIN_AI_INTEGRATION_INSTRUCTIONS.md and the complete source pack, in the context of your actual repository.
+3. Use the copy-and-paste instruction near the top of that file. Read the HTML guide if you prefer a printable version.
+4. Begin with README.md's fictional local installation, then map the code/schema/permissions to your actual application and test in staging.
+5. Follow the guide's specific local-only middleware and private-storage instructions before considering Cloud deployment.
+6. Keep the agreed design, GTA artwork, roadmap, source rules and all 41 original task PDFs. Implement functioning pages, not screenshots.
+7. The portal upgrade is unfinished. DEVELOPMENT_STATUS.txt and BATCH_QUEUE.json distinguish what works from remaining coding and business/source gaps.
+8. Return the reviewed diff, migration map, actual test results, staging screenshots, gap list and release/rollback runbook. Obtain Martin's explicit release approval before production or real-data import.
+
+This update adds instructions only. It does not change application code or claim new system tests. The retained application baseline is 259 tests/2,318 assertions on each of SQLite and MariaDB, plus 45 HTTP checks (11 November 2026). It was not a Cloud/live-portal test.

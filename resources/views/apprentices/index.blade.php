@@ -1,0 +1,9 @@
+@extends('layout')
+@section('title', 'Apprentices')
+@section('content')
+<header class="page-heading"><div><p class="eyebrow">{{ in_array(auth()->user()->role, ['admin', 'ceo']) ? 'Administration' : 'Your assigned records' }}</p><h1>Apprentices</h1><p class="muted">Find an apprentice and open their record.</p></div>@can('create', App\Models\Apprentice::class)<a class="button primary" href="{{ route('apprentices.create') }}">Add apprentice</a>@endcan</header>
+<section class="panel"><form class="search" method="get"><div><label for="search">Search by name or reference</label><input id="search" name="search" value="{{ $search }}" maxlength="100"></div><button class="primary">Search</button>@if($search)<a class="button" href="{{ route('apprentices.index') }}">Clear</a>@endif</form>
+<p class="muted">{{ $records->total() }} {{ $records->total() === 1 ? 'record' : 'records' }} in your current scope.</p>
+<div class="table-scroll"><table><caption class="sr-only">Apprentice records</caption><thead><tr><th>Name</th><th>Reference</th><th>Programme</th><th>Main tutor</th><th>Record</th></tr></thead><tbody>@forelse($records as $record)<tr><td><strong>{{ $record->first_name }} {{ $record->last_name }}</strong></td><td>{{ $record->reference }}</td><td>{{ $record->programmeLabel() ?? 'Not recorded' }}</td><td>{{ $record->tutor?->name ?? 'Not assigned' }}</td><td><a class="button" href="{{ route('apprentices.show', $record) }}">Open<span class="sr-only"> {{ $record->reference }}</span></a></td></tr>@empty<tr><td colspan="5">No matching apprentice records.</td></tr>@endforelse</tbody></table></div>
+<div class="pagination">@if($records->previousPageUrl())<a class="button" href="{{ $records->previousPageUrl() }}">Previous page</a>@endif<span>Page {{ $records->currentPage() }} of {{ $records->lastPage() }}</span>@if($records->nextPageUrl())<a class="button" href="{{ $records->nextPageUrl() }}">Next page</a>@endif</div></section>
+@endsection

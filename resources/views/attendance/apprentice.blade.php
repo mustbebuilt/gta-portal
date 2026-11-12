@@ -1,91 +1,10 @@
-<x-portal-layout>
-    <div style="margin-bottom: 20px;">
-        <a href="{{ route('attendance.index') }}" style="font-size: 13px; color: #64748b; text-decoration: none;">&larr; Back to Attendance Overview</a>
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-top: 10px; flex-wrap: wrap; gap: 14px;">
-            <div>
-                <h2 style="font-size: 22px; font-weight: 700; color: #0f172a;">Attendance Ledger: {{ $apprentice->user->full_name }}</h2>
-                <p style="font-size: 13px; color: #64748b; margin-top: 4px;">
-                    Employer: <strong>{{ $apprentice->employer?->employer_name ?? 'GTA Partner' }}</strong> &bull; Total Scheduled Sessions: <strong>{{ $rag['total_sessions'] }}</strong>
-                </p>
-            </div>
-            <div>
-                <span class="badge {{ $rag['badge_class'] }}" style="font-size: 14px; padding: 6px 16px; {{ $rag['badge_style'] }}">
-                    {{ $rag['label'] }}
-                </span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Attendance Breakdown Stats -->
-    <div class="gta-stat-grid">
-        <div class="gta-stat-card">
-            <small>Total Sessions</small>
-            <strong>{{ $rag['total_sessions'] }}</strong>
-        </div>
-        <div class="gta-stat-card">
-            <small>Attended Sessions</small>
-            <strong style="color: #15803d;">{{ $rag['attended_sessions'] }}</strong>
-        </div>
-        <div class="gta-stat-card">
-            <small>Attendance Percentage</small>
-            <strong style="color: #254c6a;">{{ $rag['percentage'] !== null ? $rag['percentage'] . '%' : 'N/A' }}</strong>
-        </div>
-    </div>
-
-    <!-- Attendance History Table -->
-    <div class="gta-card">
-        <header>
-            <h3 style="font-size: 16px; font-weight: 700;">Recorded Session History</h3>
-        </header>
-
-        @if($records->isEmpty())
-            <div style="padding: 24px; text-align: center; color: #64748b; font-size: 13px;">
-                No attendance sessions recorded yet for this learner.
-            </div>
-        @else
-            <table class="gta-table">
-                <thead>
-                    <tr>
-                        <th>Date &amp; Time</th>
-                        <th>Training Topic</th>
-                        <th>Attendance Status</th>
-                        <th>Authorised Code</th>
-                        <th>Arrival Time</th>
-                        <th>Marked By</th>
-                        <th>Comments</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($records as $rec)
-                        @php
-                            $statusBadge = match($rec->status) {
-                                'Present' => 'badge-green',
-                                'Late' => 'badge-amber',
-                                'Authorised Absence' => 'badge-blue',
-                                default => 'badge-red',
-                            };
-                        @endphp
-                        <tr>
-                            <td><strong>{{ $rec->session->session_datetime->format('d M Y, H:i') }}</strong></td>
-                            <td>{{ $rec->session->topic }}</td>
-                            <td>
-                                <span class="badge {{ $statusBadge }}">
-                                    {{ $rec->status }}
-                                </span>
-                            </td>
-                            <td>
-                                {{ $rec->authorised_code ? $rec->authorised_code : '-' }}
-                            </td>
-                            <td>
-                                {{ $rec->arrival_datetime ? $rec->arrival_datetime->format('H:i') : '-' }}
-                            </td>
-                            <td>{{ $rec->marker?->full_name ?? 'GTA Tutor' }}</td>
-                            <td>{{ $rec->comment ?? '-' }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-    </div>
-</x-portal-layout>
-
+@extends('layout')
+@section('title','Attendance and session OTJ')
+@section('content')
+<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Attendance and session OTJ</h1><p>Ended sessions only. Attendance is measured by sessions, not hours.</p></div><div class="toolbar"><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a><a class="button" href="{{ route('extra.index',$apprentice) }}">Extra training</a><button data-print type="button">Print / Save PDF</button></div></header>
+<div class="dashboard-grid"><section class="panel"><h2>Attendance</h2>@if($report['percent']!==null)<div class="progress-summary"><div class="progress-ring" style="--progress:{{ $report['percent'] }};--progress-color:var(--accent)"><strong>{{ round($report['percent'],1) }}%</strong></div><p>{{ $report['attended'] }} of {{ $report['expected'] }} expected sessions attended. No BRAG threshold has been assumed.</p></div>@else<p>{{ $report['unmarked']?'Awaiting register completion':'No expected sessions recorded' }}. No final percentage available.</p>@endif<p class="muted">{{ $report['excluded'] }} excluded · {{ $report['unmarked'] }} unmarked · {{ $report['cancelled'] }} cancelled</p></section><section class="panel"><h2>Confirmed session OTJ</h2><p class="big-number">{{ number_format($report['minutes']/60,2) }} hrs</p><p>Confirmed register subtotal only. Extra training is recorded separately below. No approved full individual target or overall OTJ progress rating is inferred.</p></section></div>
+<section class="panel"><h2>Connected OTJ record subtotals</h2><dl class="details-grid"><div><dt>Confirmed session hours</dt><dd>{{ number_format($report['minutes']/60,2) }}</dd></div><div><dt>Approved extra-training hours</dt><dd>{{ number_format($extraMinutes/60,2) }}</dd></div><div><dt>Combined loaded-record subtotal</dt><dd>{{ number_format(($report['minutes']+$extraMinutes)/60,2) }} hrs</dd></div><div><dt>Approved individual target / historical completeness</dt><dd>Not connected · not rated</dd></div></dl><p>Pending confirmations, withdrawn extras and cancelled sessions are excluded. Extra training does not add an expected register session or change attendance percentages.</p></section>
+@if($report['pairs'])<section class="panel"><h2>Attendance to check</h2><span class="status red">Two consecutive completed weeks without attendance</span>@foreach($report['pairs'] as $pair)<p>{{ $pair['from'] }} to {{ $pair['to'] }}</p>@endforeach<p>This is a follow-up flag, not an automatic support case or disclosure.</p></section>@endif
+<details class="panel"><summary>How attendance is calculated</summary><p>Attended and GTA technical course count as attended. Absent, approved holiday, sickness and kept at work count as missed expected sessions. GTA Closed, Break in learning and Awaiting EPA test or result are excluded. Cancelled sessions are excluded. Unmarked expected sessions prevent a final percentage.</p></details>
+<section class="panel"><h2>Session history</h2>@forelse($rows as $row)<article class="work-row"><div><h3>{{ $row['name'] }} · {{ $row['date'] }}</h3><p>{{ $row['cancelled']?'Cancelled':(\App\Support\AttendanceMath::CODES[$row['code']]??'Not marked') }}</p><p class="recorded-answer">{{ $row['delivered']??'Subjects delivered not recorded' }}</p></div><p>{{ $row['minutes']!==null?number_format($row['minutes']/60,2).' confirmed hours':'OTJ not confirmed' }}</p></article>@empty<p>No ended sessions recorded for this apprentice.</p>@endforelse</section>
+@endsection
