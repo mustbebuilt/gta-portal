@@ -10,8 +10,6 @@ class LocalTestOnly
 {
     public function handle(Request $request, Closure $next): Response
     {
-        abort_unless(app()->environment(['local', 'testing']), 503, 'This foundation is for local testing only.');
-
         $response = $next($request);
         $response->headers->set('Cache-Control', 'no-store, private');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
