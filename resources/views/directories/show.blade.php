@@ -3,6 +3,7 @@
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">{{ $title }}</p><h1>{{ $record->name }}</h1><p class="muted">{{ $record->active ? 'Active' : 'Inactive' }}</p></div><div class="toolbar"><a class="button" href="{{ route('directories.index',$kind) }}">Back to list</a><a class="button primary" href="{{ route('directories.edit',[$kind,$record->id]) }}">Edit record</a></div></header>
 @if($kind === 'staff')
+<p><a class="button" href="{{ route('assignment-checks.index',['staff'=>$record->id,'view'=>'all']) }}">View this person’s apprentice assignments</a></p>
 @include('directories.staff-duties')
 <p class="notice">Creating a staff directory record sends no message. Use the controlled staging onboarding queue to review the recorded role and email, then explicitly send an eligible test invitation.</p><a class="button" href="{{ route('onboarding.index') }}">Staff onboarding</a>
 @endif

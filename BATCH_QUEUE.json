@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-13",
+  "checkpoint": "development-pack-14",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -356,14 +356,19 @@
       "batch": "Development Pack13 \u2014 additional Maths/English duties",
       "status": "working_tested_scoped_subject_duties",
       "remaining": "Actual native engine/Cloud/browser acceptance, staff provisioning, curriculum decisions and real voice playback remain. No new content or automatic qualification achievement."
+    },
+    {
+      "batch": "Development Pack14 \u2014 management assignment checks",
+      "status": "working_tested_read_only_assignment_checks",
+      "remaining": "Actual target/native/browser/Cloud acceptance; intended staffing and optional roles still require deliberate provider decisions. Current eligibility is not proof of full access."
     }
   ],
-  "queue_review": "Pack13 adds explicit Maths/English duties on existing staff accounts; scoped by subject and apprentice. Actual Martin/Cloud acceptance and authoritative curriculum/source decisions remain.",
+  "queue_review": "Pack14 adds read-only management assignment checks. Real target integration and authoritative source decisions remain; no record is auto-fixed.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
   "next_priority": "Martin repository/Cloud acceptance and actual configuration remain essential. Pack 09 advances the account MFA pilot; it does not close production identity/security policy, complete recovery/relink or retained curriculum decisions.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "13",
+  "development_pack": "14",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",
