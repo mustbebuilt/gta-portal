@@ -29,6 +29,6 @@ class LearningAccess
 
     public static function subject(User $u, Apprentice $a, string $subject): bool
     {
-        return self::manager($u) || ($u->active && $u->role === 'functional_skills_tutor' && in_array($u->subject_scope, [$subject, 'both'], true) && $a->{$subject.'_tutor_id'} === $u->id);
+        return in_array($subject,['maths','english'],true) && (self::manager($u) || StaffDuties::assigned($u,$a,$subject.'_tutor'));
     }
 }

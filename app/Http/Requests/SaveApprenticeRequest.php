@@ -69,7 +69,7 @@ class SaveApprenticeRequest extends FormRequest
         foreach (['programme_id' => 'programmes', 'employer_id' => 'employers', 'tutor_group_id' => 'tutor_groups'] as $field => $table) {
             $rules[$field] = ['nullable', 'integer', Rule::exists($table, 'id')->where(fn ($q) => $q->where('active', true)->when($record?->$field, fn ($q) => $q->orWhere('id', $record->$field)))];
         }
-        foreach (['mentor_id' => 'mentor', 'careers_adviser_id' => 'careers_adviser', 'maths_tutor_id' => 'functional_skills_tutor', 'english_tutor_id' => 'functional_skills_tutor'] as $field => $role) {
+        foreach (['mentor_id' => 'mentor', 'careers_adviser_id' => 'careers_adviser', 'maths_tutor_id' => 'maths_tutor', 'english_tutor_id' => 'english_tutor'] as $field => $role) {
             $subject = $field === 'maths_tutor_id' ? 'maths' : ($field === 'english_tutor_id' ? 'english' : null);
             $rules[$field] = ['nullable', 'integer', Rule::exists('users', 'id')->where(function ($q) use ($role, $subject, $record, $field) {
                 $q->where(function ($q) use ($role, $subject) {

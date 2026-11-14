@@ -13,7 +13,7 @@ class StaffDutyController extends Controller
     {
         Gate::authorize('manage-directories');
         $data=$request->validate(['record_version'=>['required','integer','min:1'],'duty_version'=>['required','integer','min:0'],
-            'duties'=>['sometimes','array:careers_adviser,mentor'],'duties.careers_adviser'=>['sometimes','boolean'],'duties.mentor'=>['sometimes','boolean']]);
+            'duties'=>['sometimes','array:careers_adviser,mentor,maths_tutor,english_tutor'],'duties.careers_adviser'=>['sometimes','boolean'],'duties.mentor'=>['sometimes','boolean'],'duties.maths_tutor'=>['sometimes','boolean'],'duties.english_tutor'=>['sometimes','boolean']]);
         $changed=StaffDuties::save($user,$request->user(),$request->session()->get('auth_version'),$data['record_version'],$data['duty_version'],$data['duties']??[]);
         return to_route('directories.show',['staff',$user->id])->with('status',$changed?'Additional duties saved. Older sessions and pending account links were invalidated. Apprentice assignments and saved work were preserved.':'No additional-duty changes were needed.');
     }

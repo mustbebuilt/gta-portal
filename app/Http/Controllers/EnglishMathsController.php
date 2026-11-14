@@ -24,23 +24,19 @@ class EnglishMathsController extends Controller
     public function caseload(Request $r): View
     {
         $u = $r->user();
-        abort_unless($u->active && in_array($u->role, ['admin', 'ceo', 'tutor', 'apprentice', 'functional_skills_tutor'], true), 403);
+        abort_unless($u->active && (in_array($u->role, ['admin', 'ceo', 'tutor', 'apprentice', 'functional_skills_tutor'], true) || \App\Support\StaffDuties::has($u,'maths_tutor') || \App\Support\StaffDuties::has($u,'english_tutor')), 403);
         $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'subject' => ['nullable', Rule::in(['all', 'maths', 'english'])], 'view' => ['nullable', Rule::in(EnglishMathsFollowup::VIEWS)], 'page' => ['nullable', 'integer', 'min:1']]);
         $query = Apprentice::query();
-        if ($u->role === 'functional_skills_tutor') {
-            $query->where(function ($q) use ($u): void {
-                if (in_array($u->subject_scope, ['maths', 'both'], true)) {
-                    $q->where('maths_tutor_id', $u->id);
-                }
-                if (in_array($u->subject_scope, ['english', 'both'], true)) {
-                    $q->orWhere('english_tutor_id', $u->id);
-                }
-                if (! in_array($u->subject_scope, ['maths', 'english', 'both'], true)) {
-                    $q->whereRaw('1 = 0');
-                }
+        if (! Access::manager($u)) {
+            $maths=\App\Support\StaffDuties::has($u,'maths_tutor');
+            $english=\App\Support\StaffDuties::has($u,'english_tutor');
+            $query->where(function($q) use($u,$maths,$english) {
+                $q->whereRaw('1 = 0');
+                if($u->role==='tutor') { $q->orWhere('tutor_id',$u->id); }
+                if($u->role==='apprentice') { $q->orWhere('user_id',$u->id); }
+                if($maths) { $q->orWhere('maths_tutor_id',$u->id); }
+                if($english) { $q->orWhere('english_tutor_id',$u->id); }
             });
-        } else {
-            $query->visibleTo($u);
         }
 
         $search = trim($data['search'] ?? '');
@@ -90,7 +86,8 @@ class EnglishMathsController extends Controller
         $subject = str_starts_with($source['subject'], 'Maths') ? 'maths' : 'english';
         abort_unless(Access::subject($r->user(), $apprentice, $subject), 403);
         DB::transaction(function () use ($r, $apprentice, $source, $subject, $data): void {
-            Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            $fresh=Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless(Access::subject($r->user(),$fresh,$subject),403);
             $level = explode(': ', $source['subject'])[1];
             if (TrainingTopic::where(['apprentice_id' => $apprentice->id, 'subject' => $subject, 'level' => $level, 'topic' => $source['topic']])->exists()) {
                 throw ValidationException::withMessages(['catalogue_id' => 'This topic is already assigned.']);
@@ -117,6 +114,8 @@ class EnglishMathsController extends Controller
         DB::transaction(function () use ($r, $topic, $data): void {
             $t = TrainingTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $t);
+            $fresh=Apprentice::whereKey($t->apprentice_id)->lockForUpdate()->firstOrFail();
+            abort_unless(Access::learner($r->user(),$fresh),403);
             if (! $t->editable()) {
                 throw ValidationException::withMessages(['intent' => 'This topic evidence is locked.']);
             }if ($data['intent'] === 'submit') {
@@ -143,6 +142,8 @@ class EnglishMathsController extends Controller
         DB::transaction(function () use ($r, $topic, $data): void {
             $t = TrainingTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $t);
+            $fresh=Apprentice::whereKey($t->apprentice_id)->lockForUpdate()->firstOrFail();
+            abort_unless(Access::subject($r->user(),$fresh,$t->subject),403);
             if (((float) $t->planned_hours === 0.0) !== ($data['status'] === 'Secure')) {
                 throw ValidationException::withMessages(['status' => 'Zero-hour areas must remain Secure; only areas with planned training can be marked Completed.']);
             }
@@ -180,6 +181,8 @@ class EnglishMathsController extends Controller
             DB::transaction(function () use ($r, $topic, &$entry): void {
                 $t = TrainingTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
                 $this->version($r, $t);
+                $fresh=Apprentice::whereKey($t->apprentice_id)->lockForUpdate()->firstOrFail();
+                abort_unless(Access::learner($r->user(),$fresh)||Access::subject($r->user(),$fresh,$t->subject),403);
                 if (! $t->editable()) {
                     throw ValidationException::withMessages(['file' => 'Save is locked while evidence awaits review or training is complete.']);
                 }$entry = PrivateEvidence::store($r->file('file'), 'topic-evidence', $r->user()->id);
@@ -226,6 +229,8 @@ class EnglishMathsController extends Controller
         try {
             DB::transaction(function () use ($r, $qualification, $data, &$entry): void {
                 $q = Qualification::whereKey($qualification->id)->lockForUpdate()->firstOrFail();
+                $fresh=Apprentice::whereKey($q->apprentice_id)->lockForUpdate()->firstOrFail();
+                abort_unless(Access::subject($r->user(),$fresh,$q->subject),403);
                 if ($q->version !== $r->integer('version')) {
                     throw ValidationException::withMessages(['version' => 'This qualification changed. Reopen before uploading evidence.']);
                 }
@@ -281,6 +286,8 @@ class EnglishMathsController extends Controller
         }
         DB::transaction(function () use ($r, $apprentice, $qualification, $data): void {
             $q = $qualification ? Qualification::whereKey($qualification->id)->lockForUpdate()->firstOrFail() : new Qualification(['apprentice_id' => $apprentice->id]);
+            $fresh=Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless(Access::subject($r->user(),$fresh,$data['subject']) && (!$q->exists || Access::subject($r->user(),$fresh,$q->subject)),403);
             if ($q->exists) {
                 $this->version($r, $q);
                 if ($q->start_date?->toDateString() !== ($data['start_date'] ?? null) && ! filled($data['change_reason'] ?? null)) {

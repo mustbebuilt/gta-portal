@@ -104,7 +104,7 @@ class ApprenticeController extends Controller
         foreach (['programme_id' => Programme::class, 'employer_id' => Employer::class, 'tutor_group_id' => TutorGroup::class] as $field => $model) {
             $options[$field] = DirectoryCatalog::options($model::query(), $apprentice?->$field);
         }
-        foreach (['mentor_id' => 'mentor', 'careers_adviser_id' => 'careers_adviser', 'maths_tutor_id' => 'functional_skills_tutor', 'english_tutor_id' => 'functional_skills_tutor'] as $field => $role) {
+        foreach (['mentor_id' => 'mentor', 'careers_adviser_id' => 'careers_adviser', 'maths_tutor_id' => 'maths_tutor', 'english_tutor_id' => 'english_tutor'] as $field => $role) {
             $subject = $field === 'maths_tutor_id' ? 'maths' : ($field === 'english_tutor_id' ? 'english' : null);
             $query = isset(\App\Support\StaffDuties::LABELS[$role])
                 ? \App\Support\StaffDuties::query(User::query(), $role)

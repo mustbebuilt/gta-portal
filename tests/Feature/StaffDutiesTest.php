@@ -51,7 +51,7 @@ class StaffDutiesTest extends TestCase
         $this->assertSame($count,User::count());$this->assertSame('tutor',$staff->fresh()->role);$this->assertSame($password,$staff->fresh()->password);
         $this->assertSame(2,$staff->fresh()->auth_version);$this->assertSame(2,$staff->fresh()->record_version);
         $row=StaffDuty::findOrFail($staff->id);$this->assertTrue($row->careers_adviser);$this->assertTrue($row->mentor);
-        $this->assertSame(['careers_adviser'=>false,'mentor'=>false],$row->history[0]['before']);
+        $this->assertSame(['careers_adviser'=>false,'mentor'=>false,'maths_tutor'=>false,'english_tutor'=>false],$row->history[0]['before']);
         $this->assertSame($admin->id,$row->history[0]['by']);
         $this->assertDatabaseHas('account_access_events',['user_id'=>$staff->id,'event'=>'staff_duties_changed']);
         $this->assertSame($staff->id,$career->fresh()->careers_adviser_id);$this->assertSame($staff->id,$mentor->fresh()->mentor_id);

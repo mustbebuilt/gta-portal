@@ -49,7 +49,7 @@ class SupportController extends Controller
 
     private function recipients(Apprentice $a): array
     {
-        return User::whereIn('id', array_filter([$a->tutor_id, $a->maths_tutor_id, $a->english_tutor_id]))->where('active', true)->get()->filter(fn ($u) => Access::tutor($u, $a) || ($u->role === 'functional_skills_tutor' && (Access::subject($u, $a, 'maths') || Access::subject($u, $a, 'english'))))->pluck('id')->all();
+        return User::whereIn('id', array_filter([$a->tutor_id, $a->maths_tutor_id, $a->english_tutor_id]))->where('active', true)->get()->filter(fn ($u) => Access::tutor($u, $a) || (\App\Support\StaffDuties::assigned($u,$a,'maths_tutor') || \App\Support\StaffDuties::assigned($u,$a,'english_tutor')))->pluck('id')->all();
     }
 
     public function worklist(Request $r): View

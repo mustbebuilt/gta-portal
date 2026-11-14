@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-12",
+  "checkpoint": "development-pack-13",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -351,14 +351,19 @@
       "batch": "Development Pack12 \u2014 additional Careers and mentor duties on one staff account",
       "status": "working_tested_scoped_additional_duties",
       "remaining": "Actual Martin integration/native locking/browser/Cloud acceptance remain. Only Careers and Learning & Progress Mentor additions are included; no generic role hierarchy or extra Tutor/Maths/Admin/Inclusion permissions. Primary role, explicit apprentice assignments, MFA and saved histories are retained. Pack11 device voice choice is unchanged; actual Yorkshire voice availability is unverified."
+    },
+    {
+      "batch": "Development Pack13 \u2014 additional Maths/English duties",
+      "status": "working_tested_scoped_subject_duties",
+      "remaining": "Actual native engine/Cloud/browser acceptance, staff provisioning, curriculum decisions and real voice playback remain. No new content or automatic qualification achievement."
     }
   ],
-  "queue_review": "Pack12 addresses the duplicate-account workaround: staff can receive explicit additional Careers/mentor duties and be assigned in those capacities, with versioned access changes and preserved history. Pack11 voice/setup/support functionality remains; no actual users or hosted settings are provisioned.",
+  "queue_review": "Pack13 adds explicit Maths/English duties on existing staff accounts; scoped by subject and apprentice. Actual Martin/Cloud acceptance and authoritative curriculum/source decisions remain.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
   "next_priority": "Martin repository/Cloud acceptance and actual configuration remain essential. Pack 09 advances the account MFA pilot; it does not close production identity/security policy, complete recovery/relink or retained curriculum decisions.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "12",
+  "development_pack": "13",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",

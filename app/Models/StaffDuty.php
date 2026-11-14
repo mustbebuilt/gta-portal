@@ -12,6 +12,6 @@ class StaffDuty extends Model
 
     protected function casts(): array
     {
-        return ['user_id'=>'integer','careers_adviser'=>'boolean','mentor'=>'boolean','version'=>'integer','history'=>'array'];
+        return ['user_id'=>'integer','careers_adviser'=>'boolean','mentor'=>'boolean','maths_tutor'=>'boolean','english_tutor'=>'boolean','version'=>'integer','history'=>'array'];
     }
 }

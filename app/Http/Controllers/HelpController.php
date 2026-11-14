@@ -30,7 +30,7 @@ class HelpController extends Controller
             $guides[] = ['Tutor', 'Mark work and register attendance', 'Open assigned apprentice tasks to record the whole-task decision and feedback. Marking is overdue after more than seven calendar days. Plan a group session, then record actual attendance, delivered subjects and time. Do not record expected learning as delivered learning. Monthly snapshots use observed evidence and Not observed where you cannot judge.'];
             $guides[] = ['Tutor', 'Set a SMART action', 'Describe one clear outcome, choose a measurable quantity or observable success criteria, record relevance, support, owner and a realistic due date. Agree it with the apprentice. To do, With tutor and Completed are different states. A referred-task action opens the original task and follows its source status.'];
         }
-        if (in_array($role, ['admin', 'ceo', 'functional_skills_tutor'], true)) {
+        if (in_array($role, ['admin', 'ceo', 'functional_skills_tutor'], true) || \App\Support\StaffDuties::has($request->user(),'maths_tutor') || \App\Support\StaffDuties::has($request->user(),'english_tutor')) {
             $guides[] = ['Maths and English', 'Topics and qualifications', 'Assign only the apprentice’s required topics and planned hours. Zero planned hours means secure in that topic. Evidence, evidence acceptance and tutor-confirmed topic completion are separate steps. Record each qualification separately with its actual result, individually chosen start date and twelve-month target. Do not turn topic percentages into a qualification result.'];
         }
         if (in_array($role, ['admin', 'ceo', 'tutor'], true) || \App\Support\StaffDuties::has($request->user(),'mentor')) {

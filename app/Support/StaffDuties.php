@@ -8,14 +8,22 @@ use Illuminate\Validation\ValidationException;
 
 class StaffDuties
 {
-    public const LABELS = ['careers_adviser'=>'Careers adviser','mentor'=>'Learning & Progress Mentor'];
+    public const LABELS = ['careers_adviser'=>'Careers adviser','mentor'=>'Learning & Progress Mentor','maths_tutor'=>'Maths tutor','english_tutor'=>'English tutor'];
+
+    public static function primary(User $u, string $duty): bool
+    {
+        if (in_array($duty,['maths_tutor','english_tutor'],true)) {
+            return $u->role==='functional_skills_tutor' && in_array($u->subject_scope,[str_replace('_tutor','',$duty),'both'],true);
+        }
+        return isset(self::LABELS[$duty]) && $u->role===$duty;
+    }
 
     public static function has(User $user, string $duty): bool
     {
         if (! isset(self::LABELS[$duty])) { return false; }
         $u = User::whereKey($user->id)->when(DB::transactionLevel()>0,fn($q)=>$q->lockForUpdate())->first();
         if (! $u || ! $u->active || ! in_array($u->role,DirectoryCatalog::STAFF_ROLES,true)) { return false; }
-        return $u->role === $duty || (bool) StaffDuty::whereKey($u->id)->value($duty);
+        return self::primary($u,$duty) || (bool) StaffDuty::whereKey($u->id)->value($duty);
     }
 
     /** Compatible with Eloquent and the validation presence verifier's query builder. */
@@ -23,7 +31,11 @@ class StaffDuties
     {
         if (! isset(self::LABELS[$duty])) { throw new \InvalidArgumentException('Unknown staff duty.'); }
         return $query->where('active',true)->where(function($q) use($duty) {
-            $q->where('role',$duty)->orWhere(function($q) use($duty) {
+            $q->where(function($primary) use($duty) {
+                if(in_array($duty,['maths_tutor','english_tutor'],true)) {
+                    $primary->where('role','functional_skills_tutor')->whereIn('subject_scope',[str_replace('_tutor','',$duty),'both']);
+                } else { $primary->where('role',$duty); }
+            })->orWhere(function($q) use($duty) {
                 $q->whereIn('role',DirectoryCatalog::STAFF_ROLES)->whereExists(function($sub) use($duty) {
                     $sub->selectRaw('1')->from('staff_duties')->whereColumn('staff_duties.user_id','users.id')->where('staff_duties.'.$duty,true);
                 });
@@ -33,7 +45,7 @@ class StaffDuties
 
     public static function assigned(User $user, Apprentice $a, string $duty): bool
     {
-        $field = $duty === 'mentor' ? 'mentor_id' : 'careers_adviser_id';
+        $field = $duty.'_id';
         return isset(self::LABELS[$duty]) && $a->{$field} === $user->id && self::has($user,$duty);
     }
 
@@ -58,15 +70,15 @@ class StaffDuties
             if($u->record_version!==$recordVersion || ($row?->version??0)!==$dutyVersion) {
                 throw ValidationException::withMessages(['duties'=>'This account or its duties changed. Reopen the staff record.']);
             }
-            $before=['careers_adviser'=>(bool)($row?->careers_adviser),'mentor'=>(bool)($row?->mentor)];
-            $after=['careers_adviser'=>(bool)($flags['careers_adviser']??false),'mentor'=>(bool)($flags['mentor']??false)];
+            $before=[];$after=[];
+            foreach(self::LABELS as $key=>$label) { $before[$key]=(bool)($row?->{$key});$after[$key]=(bool)($flags[$key]??false); }
             if($before===$after) { return false; }
-            if(!$u->active && ($after['careers_adviser'] || $after['mentor'])) {
+            if(!$u->active && in_array(true,$after,true)) {
                 throw ValidationException::withMessages(['duties'=>'Activate and review the staff account before granting additional duties.']);
             }
             $row??=new StaffDuty(['user_id'=>$u->id,'version'=>0]);
             $history=$row->history??[];$history[]=['before'=>$before,'after'=>$after,'by'=>$admin->id,'at'=>now()->toIso8601String()];
-            $row->careers_adviser=$after['careers_adviser'];$row->mentor=$after['mentor'];$row->version++;$row->history=$history;$row->save();
+            $row->fill($after);$row->version++;$row->history=$history;$row->save();
             AccountAccess::invalidate($u,$admin->id,'staff_duties_changed','staff_duties');
             return true;
         });
