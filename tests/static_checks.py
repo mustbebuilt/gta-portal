@@ -17,6 +17,7 @@ for folder in ['app','bootstrap','config','database','routes','tests']:
 files.extend((root/'storage/framework/views').glob('*.php'))
 for file in files:run([args.php,'-l',str(file)])
 run([args.node,'--check','public/assets/portal.js'])
+run([args.node,'--check','public/assets/help-audio.js'])
 pdfs=json.loads((root/'resources/data/original-pdf-hashes.json').read_text())
 assert len(pdfs)==41
 for name,digest in pdfs.items():
@@ -47,6 +48,6 @@ assert not any("Storage::disk('local')" in p.read_text() for p in (root/'app/Htt
 assets=json.loads((root/'tests/original-brand-hashes.json').read_text())
 for name,digest in assets.items():assert hashlib.sha256((root/name).read_bytes()).hexdigest()==digest,name
 assert 'name="viewport"' in (root/'resources/views/layout.blade.php').read_text()
-result={'phpSyntaxFiles':len(files),'javascriptSyntaxFiles':1,'bladeCompilation':'passed','compiledBladeSyntax':'passed','originalPdfs':41,'pdfHashMatches':41,'additionalProgrammePdfs':programme_pdfs,'finalReleasePdfs':200,'priorFinalReleasePdfsRetained':200,'totalRetainedSourcePdfs':41+programme_pdfs+400,'additionalProgrammePdfHashes':'all match source receipts','privateEvidenceCallers':'all use the shared configured service','originalBrandAssets':'unchanged','brandAssetFiles':len(assets),'responsiveViewport':'present; layout not rendered','composerValidation':'Not performed by this script; see checkpoint-specific TEST_RESULTS.json','platformRequirements':'Not performed by this script; see checkpoint-specific TEST_RESULTS.json','visualBrowserVerification':False}
+result={'phpSyntaxFiles':len(files),'javascriptSyntaxFiles':2,'bladeCompilation':'passed','compiledBladeSyntax':'passed','originalPdfs':41,'pdfHashMatches':41,'additionalProgrammePdfs':programme_pdfs,'finalReleasePdfs':200,'priorFinalReleasePdfsRetained':200,'totalRetainedSourcePdfs':41+programme_pdfs+400,'additionalProgrammePdfHashes':'all match source receipts','privateEvidenceCallers':'all use the shared configured service','originalBrandAssets':'unchanged','brandAssetFiles':len(assets),'responsiveViewport':'present; layout not rendered','composerValidation':'Not performed by this script; see checkpoint-specific TEST_RESULTS.json','platformRequirements':'Not performed by this script; see checkpoint-specific TEST_RESULTS.json','visualBrowserVerification':False}
 if args.output:Path(args.output).write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps(result))

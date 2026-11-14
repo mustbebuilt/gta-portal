@@ -53,7 +53,7 @@ class ReferenceHelpTest extends TestCase
     {
         Apprentice::factory()->create(['first_name' => 'PrivateNeverReadOut']);
         $this->actingAs($this->actor('apprentice'))->get('/help')->assertOk()->assertSee('Submit work')->assertDontSee('Add and reopen an apprentice')->assertDontSee('Follow up a concern')->assertDontSee('PrivateNeverReadOut')->assertSee('never apprentice records')->assertSee('data-read-help', false);
-        $this->actingAs($this->actor('employer'))->get('/help')->assertOk()->assertSee('Show evidenced impact')->assertDontSee('Follow up a concern')->assertDontSee('Submit work');
+        $this->actingAs($this->actor('employer'))->get('/help')->assertOk()->assertSee('Use the employer action centre')->assertDontSee('Show evidenced impact')->assertDontSee('Follow up a concern')->assertDontSee('Submit work');
         $this->actingAs($this->actor('inclusion_member'))->get('/help')->assertOk()->assertSee('Follow up a concern')->assertDontSee('Add and reopen an apprentice');
     }
 

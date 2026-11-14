@@ -277,3 +277,11 @@ Artisan::command('gta:apprentice-alerts {--preview : Read source counts only} {-
 })->purpose('Configuration-only by default; explicitly preview, prepare or dispatch bounded apprentice reminders');
 \Illuminate\Support\Facades\Schedule::command('gta:apprentice-alerts --prepare --limit=250')->dailyAt('09:10')->timezone(config('app.timezone'))->withoutOverlapping(30)->when(fn()=>config('apprentice_notifications.enabled')===true&&config('apprentice_notifications.scheduled')===true);
 \Illuminate\Support\Facades\Schedule::command('gta:apprentice-alerts --send --limit=20')->everyMinute()->between('09:15','10:00')->timezone(config('app.timezone'))->withoutOverlapping(30)->when(fn()=>config('apprentice_notifications.enabled')===true&&config('apprentice_notifications.scheduled')===true);
+
+Artisan::command('gta:help-check {--records : Read narration readiness in staging} {--verify-files : Verify bounded stored recording bytes, also requiring records} {--limit=50 : Up to250 stored files verified}',function(){
+ if($this->option('verify-files')&&!$this->option('records')){$this->line('{"result":"records_option_required","writes_performed":false}');return 1;}
+ if($this->option('records')&&!app()->environment('staging')){$this->line('{"result":"staging_required","writes_performed":false}');return 1;}
+ if(!ctype_digit((string)$this->option('limit'))||(int)$this->option('limit')<1||(int)$this->option('limit')>250){$this->line('{"result":"invalid_verification_limit","writes_performed":false}');return 1;}
+ try{$r=\App\Support\HelpNarration::inspect((bool)$this->option('records'),(bool)$this->option('verify-files'),(int)$this->option('limit'));$r['result']='report';$this->line(json_encode($r,JSON_THROW_ON_ERROR));return isset($r['counts'])&&($r['counts']['integrity_checks']||$r['counts']['file_checks'])?1:0;}
+ catch(\Throwable){$this->line('{"result":"help_source_needs_checking","writes_performed":false,"private_error_printed":false}');return 1;}
+})->purpose('Read-only help catalogue and optional staging narration readiness; no speech provider request');

@@ -1,0 +1,481 @@
+[
+  {
+    "id": "start",
+    "audience": [
+      "all"
+    ],
+    "category": "Getting started",
+    "title": "Start here",
+    "body": "Open a section from the grouped menu, then choose the record you need. Save before leaving a form. A saved confirmation means the portal accepted that change; it does not automatically mean work is approved. If someone changed a record while you were editing, reopen the current page. Use Help with this page for the relevant guide. Search help by what you want to do, such as submit work, review, alerts or employer.",
+    "links": []
+  },
+  {
+    "id": "figures",
+    "audience": [
+      "all"
+    ],
+    "category": "Getting started",
+    "title": "Understand the figures",
+    "body": "Task approval, training-topic completion and qualification achievement are separate. A percentage describes only the records named beside it. Missing information stays unknown. Overdue items need action; a reference date is not always a booked appointment. Open the source before drawing a conclusion. Recorded OTJ hours are the valid loaded subtotal and may not be complete historical evidence. No overall apprenticeship achievement or inspection grade is inferred.",
+    "links": []
+  },
+  {
+    "id": "setup",
+    "audience": [
+      "manager"
+    ],
+    "category": "Administration",
+    "title": "Set up your account, staff and assignments",
+    "body": "Use Portal setup for the order of work. Martin provisions the first named Admin or CEO account. Add staff once, using their work email and primary role, and use staff onboarding to arrange their own sign-in. Assign each apprentice a tutor, Learning and Progress Mentor, Careers adviser and required Maths and English tutors. Additional staff duties can be recorded separately. Inclusion access is controlled in Support permissions. A staff Manager role is not an administrator account.",
+    "links": [
+      {
+        "label": "Open Portal setup",
+        "route": "setup.index"
+      }
+    ]
+  },
+  {
+    "id": "add-apprentice",
+    "audience": [
+      "manager"
+    ],
+    "category": "Administration",
+    "title": "Add and reopen an apprentice",
+    "body": "Create the employer, programme, tutor group and staff records first where needed. Add the apprentice using their learner reference and known details. Check programme version, dates and named staff, then reopen the saved profile. Link the correct individual apprentice login. Choose alert preferences and verify contacts before any sending. Assign training tasks explicitly. Saving a profile does not approve a training plan, RPL assessment or qualification result.",
+    "links": [
+      {
+        "label": "Open apprentices",
+        "route": "apprentices.index"
+      }
+    ]
+  },
+  {
+    "id": "staff-duties",
+    "audience": [
+      "manager",
+      "staff"
+    ],
+    "category": "Administration",
+    "title": "Choose staff duties and responsibilities",
+    "body": "A primary role and additional duties are separate. Administration can assign Careers, Learning and Progress Mentor, Maths or English duties to eligible staff, then link the correct people to apprentice profiles. Inclusion permissions have their own scope controls. My responsibilities brings together work available through current assignments. Old assignments and inactive accounts do not grant continuing access.",
+    "links": [
+      {
+        "label": "Open my responsibilities",
+        "route": "responsibilities.index"
+      }
+    ]
+  },
+  {
+    "id": "submit-work",
+    "audience": [
+      "learner"
+    ],
+    "category": "Apprentice training",
+    "title": "Submit work",
+    "body": "Open your tasks from My next step or your training page. Save a draft while working. Add the required evidence and a short explanation, then confirm the work is your own and submit. Submitted work is locked for checking. If referred, read the tutor feedback, correct the original task and resubmit. Extra uploads do not approve the task. A whole-task approval, topic completion and qualification result remain separate.",
+    "links": [
+      {
+        "label": "Open My next step",
+        "route": "experience.home"
+      }
+    ]
+  },
+  {
+    "id": "apprentice-home",
+    "audience": [
+      "learner"
+    ],
+    "category": "Apprentice training",
+    "title": "Your next step",
+    "body": "My next step shows available work, saved training sessions, review references and outstanding actions. A review due reference is not an appointment booking. Use the questionnaire and review sign-off links when requested. Your journey shows recorded milestones rather than guessing completion. If something is missing, ask the responsible member of staff. Do not enter a guessed result or date.",
+    "links": [
+      {
+        "label": "Open My next step",
+        "route": "experience.home"
+      }
+    ]
+  },
+  {
+    "id": "photos",
+    "audience": [
+      "learner"
+    ],
+    "category": "Apprentice training",
+    "title": "Add photo evidence",
+    "body": "Use your phone to open the relevant task and choose its evidence upload. Take or select a suitable workplace photo, add a short explanation and link it to the right task. Check that people or unrelated personal information are not visible. Uploading a photo does not submit or approve the whole task. The tutor checks whether it supports the task; keep the original work description clear.",
+    "links": [
+      {
+        "label": "Open My next step",
+        "route": "experience.home"
+      }
+    ]
+  },
+  {
+    "id": "marking",
+    "audience": [
+      "tutor",
+      "manager"
+    ],
+    "category": "Teaching and assessment",
+    "title": "Mark work and register attendance",
+    "body": "Use the marking worklist to open current submitted tasks. Check the whole task and record your decision and useful feedback in the original task. Marking is overdue after more than seven calendar days; missing or future submission dates need checking. A reminder marked seen does not approve work. For registers, record actual attendance, delivered subjects and time rather than expected learning.",
+    "links": [
+      {
+        "label": "Open marking worklist",
+        "route": "marking.index"
+      }
+    ]
+  },
+  {
+    "id": "smart-actions",
+    "audience": [
+      "training",
+      "mentor"
+    ],
+    "category": "Teaching and assessment",
+    "title": "Set a SMART action",
+    "body": "Agree one clear outcome, a measurable or observable success criterion, relevance, support, named owner and a realistic due date. To do, With tutor and Completed mean different things. Referred-task actions link to the original task and follow its source status. Use existing targets when relevant rather than duplicating them in a review. A suggested action is not an agreed target until the responsible people check and accept it.",
+    "links": []
+  },
+  {
+    "id": "maths-english",
+    "audience": [
+      "topic",
+      "learner"
+    ],
+    "category": "Teaching and assessment",
+    "title": "Topics and qualifications",
+    "body": "Only assigned Maths and English topics contribute to the training-topic position. Some topics have zero planned hours because prior assessment identified secure knowledge. Evidence acceptance and tutor-confirmed topic completion are different steps. Record the qualification separately, with its actual result, chosen start date and target. Do not turn a topic percentage or uploaded certificate into an automatic qualification achievement.",
+    "links": [
+      {
+        "label": "Open Maths and English",
+        "route": "em.caseload"
+      }
+    ]
+  },
+  {
+    "id": "blocks",
+    "audience": [
+      "manager"
+    ],
+    "category": "Teaching and assessment",
+    "title": "Release training blocks",
+    "body": "New task allocations can use sequence controls. A later block opens after the five source tasks in each earlier block are approved. Administration can record a reasoned exception through block controls. That exception releases work; it does not approve the task, a KSB, the programme or a training plan. Existing task sets stay as saved until their sequence controls are explicitly changed.",
+    "links": [
+      {
+        "label": "Open apprentices",
+        "route": "apprentices.index"
+      }
+    ]
+  },
+  {
+    "id": "registers",
+    "audience": [
+      "manager",
+      "tutor"
+    ],
+    "category": "Teaching and assessment",
+    "title": "Repeat a plan or correct a register",
+    "body": "Repeated weekly session plans create separate saved rosters and empty registers. Check closures, holidays and actual attendance for each session. To correct a saved register, reopen it with a reason and save the corrected actual information. Previous marks stay in history. New valid minutes replace the old subtotal; overlapping training cannot be counted twice.",
+    "links": [
+      {
+        "label": "Open groups and sessions",
+        "route": "attendance.index"
+      }
+    ]
+  },
+  {
+    "id": "otj",
+    "audience": [
+      "training"
+    ],
+    "category": "Teaching and assessment",
+    "title": "Record additional training",
+    "body": "Record actual additional training, its time, exclusions, new learning and evidence in the existing training workflow. Outside normal hours needs the apprentice agreement and evidence of compensation where required by that record. Pending or withdrawn records do not add hours. Overlapping recorded time cannot count twice. Compare valid loaded hours with the approved individual plan, and check gaps or missing historical sources rather than inventing hours.",
+    "links": []
+  },
+  {
+    "id": "review-preparation",
+    "audience": [
+      "review-staff"
+    ],
+    "category": "Reviews and sign-off",
+    "title": "Prepare a review draft",
+    "body": "Open Reviews and a saved editable draft. Choose the training period and generate factual preparation notes. The assistant uses attendance, task and block progress, dated feedback, actions, recorded OTJ, Maths and English, qualifications, sessions and approved blocks. Check and edit selected notes before applying them. Changed sources require fresh notes. Record the actual discussion, participation, judgement and agreed targets yourself. Save, complete preparation checks and freeze the review for signatures.",
+    "links": [
+      {
+        "label": "Open reviews",
+        "route": "reviews.index"
+      }
+    ]
+  },
+  {
+    "id": "review-signing",
+    "audience": [
+      "signer",
+      "review-staff"
+    ],
+    "category": "Reviews and sign-off",
+    "title": "Read and sign your review",
+    "body": "Open Review signing and Waiting for me. Read the same participant record and selected actions that the other named participants see. Type your recorded name, confirm this is your own decision and re-enter your current password. Decline with a private reason to GTA if the record needs correcting. All signed still needs an independent staff check. After checking, the original PDF is available. A withdrawn record keeps its history and is no longer a current completed-review reference.",
+    "links": [
+      {
+        "label": "Open Review signing",
+        "route": "electronic-reviews.index"
+      }
+    ]
+  },
+  {
+    "id": "review-release",
+    "audience": [
+      "review-staff"
+    ],
+    "category": "Reviews and sign-off",
+    "title": "Release and check a review record",
+    "body": "Prepare participant sign-off from a complete frozen review and current employer signing authority. Check every shared field and selected action before explicit release. Restricted support fields are excluded, but other free text still needs privacy checking. Each of the three participants uses their own account and password. A different administrator or CEO checks the three decisions and source before confirmation. Only that check creates the retained PDF and activates the actual meeting plus seventy days reference.",
+    "links": [
+      {
+        "label": "Open reviews",
+        "route": "reviews.index"
+      },
+      {
+        "label": "Open review signing",
+        "route": "electronic-reviews.index"
+      }
+    ]
+  },
+  {
+    "id": "employer-authority",
+    "audience": [
+      "manager"
+    ],
+    "category": "Reviews and sign-off",
+    "title": "Verify employer signing authority",
+    "body": "First verify the named employer account and its apprentice access. Record separate review-signing authority using actual identity and workplace-authority evidence and an expiry date. Ordinary employer reply access is not signing authority. Renewal, revocation, changed account or expiry can block pending review packets. Reconcile them explicitly rather than reusing another person or silently resetting signatures.",
+    "links": [
+      {
+        "label": "Open employer accounts",
+        "route": "employer-accounts.index"
+      }
+    ]
+  },
+  {
+    "id": "native-questionnaires",
+    "audience": [
+      "learner",
+      "inclusion"
+    ],
+    "category": "Questionnaires and support",
+    "title": "Complete a portal questionnaire",
+    "body": "Open Questionnaires, then the portal questionnaire worklist. Apprentices can save an incomplete private draft; the Inclusion Team sees its status but cannot read unfinished answers. Read the privacy information and submit explicitly when ready. A returned response has a message explaining what to check; resubmission keeps the previous response. Ongoing wellbeing is voluntary and has no deadline or overdue flag. For urgent help, speak directly to GTA staff rather than waiting for this inbox.",
+    "links": [
+      {
+        "label": "Open portal questionnaires",
+        "route": "portal-questionnaires.index"
+      }
+    ]
+  },
+  {
+    "id": "questionnaire-management",
+    "audience": [
+      "manager",
+      "inclusion"
+    ],
+    "category": "Questionnaires and support",
+    "title": "Manage questionnaire submissions",
+    "body": "Use the native questionnaire worklist within your current Inclusion scope. Assign an approved form revision and deliberate cycle reference; repeating the same form series and cycle does not duplicate it. Check only the latest submitted response, keep private notes separate from the apprentice message, and record follow-up. Link only a concern for the same apprentice. Resolve linked concerns in their original records before closing questionnaire follow-up. Form wording needs an authorised author and a different manager to publish it.",
+    "links": [
+      {
+        "label": "Open questionnaire worklist",
+        "route": "portal-questionnaires.index"
+      }
+    ]
+  },
+  {
+    "id": "external-questionnaires",
+    "audience": [
+      "learner",
+      "inclusion"
+    ],
+    "category": "Questionnaires and support",
+    "title": "Use an external questionnaire link",
+    "body": "Some questionnaires still open on an external service in a new tab. Read that service privacy information before answering. Opening a link does not record submission or completion in the portal. The Inclusion Team reconciles external receipts separately. Native portal submissions and old external receipts are not automatically merged. Use the questionnaire you have actually been asked to complete.",
+    "links": [
+      {
+        "label": "Open questionnaire links",
+        "route": "questionnaires.index"
+      }
+    ]
+  },
+  {
+    "id": "support",
+    "audience": [
+      "inclusion"
+    ],
+    "category": "Questionnaires and support",
+    "title": "Follow up a concern",
+    "body": "Open Support and retention within your authorised Inclusion scope. A new concern, acknowledgement, classification and support plan are separate stages. Assign an owner, record chronological follow-ups and measurable targets, and check the next review date. Keep approved teaching instructions separate from restricted case notes. Do not enter safeguarding case details into a general support field. Questionnaire checks do not automatically create or close a concern.",
+    "links": [
+      {
+        "label": "Open Support and retention",
+        "route": "support.worklist"
+      }
+    ]
+  },
+  {
+    "id": "help-request",
+    "audience": [
+      "learner"
+    ],
+    "category": "Questionnaires and support",
+    "title": "Ask GTA for help",
+    "body": "Use My help and achievements to send a task-help, employer-issue or private-support request to the appropriate team. Check your portal receipt and later response. It is not a continuously monitored emergency channel. Private support is restricted to the appropriate Inclusion team. For urgent help, speak directly to GTA staff. An achievement you record enters the checked journey only after the appropriate staff decision.",
+    "links": [
+      {
+        "label": "Open My help and achievements",
+        "route": "experience.index"
+      }
+    ]
+  },
+  {
+    "id": "careers",
+    "audience": [
+      "careers"
+    ],
+    "category": "Careers and employers",
+    "title": "Record advice",
+    "body": "Open Careers for apprentices currently assigned to you. Choose career progression or employment support, record the actual discussion, goals, advice and outcome, then agreed measurable actions with an owner and deadline. Employers do not receive Careers-record access. A seen reminder or prompt does not create an advice session or prove that support was delivered.",
+    "links": [
+      {
+        "label": "Open Careers",
+        "route": "careers.worklist"
+      }
+    ]
+  },
+  {
+    "id": "employer-actions",
+    "audience": [
+      "employer",
+      "manager",
+      "tutor"
+    ],
+    "category": "Careers and employers",
+    "title": "Use the employer action centre",
+    "body": "Employers open their own action centre to see specific requests shared with their verified account. Read the request and give the appropriate confirmation, change request or cannot-confirm response. A workplace confirmation does not approve an OTJ claim or qualification. Review content responses are separate from participant review signatures. GTA checks replies in the original workflow. Access ends when the employer grant or current authority no longer applies.",
+    "links": []
+  },
+  {
+    "id": "alerts",
+    "audience": [
+      "learner"
+    ],
+    "category": "Your account",
+    "title": "Choose text and email alerts",
+    "body": "Open Alert preferences to choose email, text, both or off. Keep contacts correct and complete the required verification; an entered phone number alone is not verified. GTA recommends keeping useful reminders on, but you can change your preferences. Generic reminders link back to your portal rather than sending task answers or private support details. An accepted delivery attempt is not proof that a message reached or was read on your phone.",
+    "links": [
+      {
+        "label": "Open Alert preferences",
+        "route": "alerts.index"
+      }
+    ]
+  },
+  {
+    "id": "reminder-management",
+    "audience": [
+      "manager"
+    ],
+    "category": "Administration",
+    "title": "Manage apprentice reminders",
+    "body": "Open Apprentice reminder delivery to preview eligible source items and prepared attempts. Current consent, verified contacts, approved recipient lists, programme status, budgets and pause controls apply. Prepare stores a digest without sending; explicit dispatch or an enabled schedule is separate. Pause this pipeline when investigating. Accepted is transport acceptance, not inbox or handset proof. Never reset a reserved, uncertain or rejected attempt to force a resend.",
+    "links": [
+      {
+        "label": "Open apprentice reminder delivery",
+        "route": "apprentice-notifications.index"
+      }
+    ]
+  },
+  {
+    "id": "staff-development",
+    "audience": [
+      "staff"
+    ],
+    "category": "Staff development",
+    "title": "Staff development privacy",
+    "body": "Open your own Staff development records and CPD. Assigned line managers and the CEO have the appropriate management access. Ordinary administrator access does not automatically expose another employee private HR information. A planned meeting and a completed linked record are different states. Use evidence and recorded outcomes; do not turn an unobserved activity into a judgement.",
+    "links": [
+      {
+        "label": "Open Staff development",
+        "route": "staff.index"
+      }
+    ]
+  },
+  {
+    "id": "case-studies",
+    "audience": [
+      "staff"
+    ],
+    "category": "Staff development",
+    "title": "Show evidenced impact",
+    "body": "Create an anonymous case study using its structured fields. Do not copy personal, health or safeguarding details. Record the starting point, response, evidenced difference, limitations and next check. A different administrator or CEO approves the exact version before it can appear in the internal inspection overview. Internal approval is not permission for external publication.",
+    "links": [
+      {
+        "label": "Open case studies",
+        "route": "cases.index"
+      }
+    ]
+  },
+  {
+    "id": "reporting",
+    "audience": [
+      "manager"
+    ],
+    "category": "Administration",
+    "title": "Reporting",
+    "body": "Operational reports link to connected source records. Retention and achievement are different measures. Unknown or incomplete historical data is shown explicitly. Management snapshots record the sources available at capture and do not silently change when source records change later. Open underlying records before acting on a flag. The inspection overview is partial evidence, not an inspection grade.",
+    "links": []
+  },
+  {
+    "id": "account",
+    "audience": [
+      "all"
+    ],
+    "category": "Your account",
+    "title": "Change your password and confirm your email",
+    "body": "Use Change password with your current password and a new passphrase of at least twelve characters. You will be signed out and older sessions are invalidated. Confirm your own email through the account workflow when requested. Staging recovery and invitation delivery need the configured mail service and actual mailbox acceptance. Ask GTA if access cannot be verified. Pending review signing may need a fresh source check after an account change.",
+    "links": [
+      {
+        "label": "Change password",
+        "route": "account.password"
+      },
+      {
+        "label": "Confirm email",
+        "route": "account.email"
+      }
+    ]
+  },
+  {
+    "id": "voice-help",
+    "audience": [
+      "all"
+    ],
+    "category": "Getting started",
+    "title": "Choose help audio",
+    "body": "Read the transcript on this page at any time. If an approved GTA Yorkshire recording is available, press Play GTA recording; it starts only when you choose. Stop or pause it using the player. Device read-aloud is a separate option whose accent depends on your device. No microphone is used. Only these general help guides are read, never apprentice records. Ask GTA to check missing or outdated guidance rather than reading private record information into an audio service.",
+    "links": []
+  },
+  {
+    "id": "ceo-access",
+    "audience": [
+      "ceo"
+    ],
+    "category": "Administration",
+    "title": "Emergency access",
+    "body": "Ordinary CEO oversight does not need emergency override. Use emergency access only when required, with a recorded reason, your current password and acknowledgement of the audit. It applies to the current session and ends on sign-out or explicit end. Current source, version, inactive-account and normal safety checks still apply.",
+    "links": [
+      {
+        "label": "Review emergency access",
+        "route": "executive.index"
+      }
+    ]
+  }
+]

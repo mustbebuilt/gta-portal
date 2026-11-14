@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack26.
+    // Presence-only contract from the unchanged reference migrations through Pack27.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -46,6 +46,8 @@ class ApplicationSchema
         'failed_jobs'=>['connection','exception','failed_at','id','payload','queue','uuid'],
         'gateway_readiness_checks'=>['binding_hash','checked_by','checked_on','created_at','criterion_key','evidence_reference','gateway_readiness_plan_id','history','id','note','state','updated_at','version'],
         'gateway_readiness_plans'=>['apprentice_id','approved_at','approved_by','basis','cohort','created_at','created_by','criteria','history','id','source_hash','source_reference','state','updated_at','version'],
+        'help_narration_events'=>['actor_id','created_at','event','id','private_note','record_id','record_version'],
+        'help_narration_records'=>['binding','created_at','file','guide_hash','guide_id','history','id','publication','publication_hash','published_guide_key','reviewed_at','reviewed_by','source_reference','state','transcript','updated_at','uploaded_by','version'],
         'historical_otj_records'=>['apprentice_id','created_at','data_import_batch_id','end_time','evidence_reference','excluded_minutes','fingerprint','history','id','minutes','programme_identity','start_time','topic','training_date','updated_at','version','withdrawn_at'],
         'individual_delivery_plans'=>['active','apprentice_id','approved','created_at','draft','history','id','updated_at','version'],
         'job_batches'=>['cancelled_at','created_at','failed_job_ids','failed_jobs','finished_at','id','name','options','pending_jobs','total_jobs'],

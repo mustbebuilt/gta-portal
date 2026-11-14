@@ -246,6 +246,13 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/support-plans/{plan}/files/{file}', [SupportController::class, 'downloadPlanEvidence'])->name('support.files.download');
     Route::post('/support-plans/{plan}/review', [SupportController::class, 'reviewPlan'])->name('support.plan.review');
     Route::post('/support-plans/{plan}/close', [SupportController::class, 'closePlan'])->name('support.plan.close');
+
+    Route::get('/help-recordings',[\App\Http\Controllers\HelpNarrationController::class,'index'])->name('help-narrations.index');
+    Route::post('/help-recordings',[\App\Http\Controllers\HelpNarrationController::class,'upload'])->name('help-narrations.upload');
+    Route::post('/help-recordings/{record}/decision',[\App\Http\Controllers\HelpNarrationController::class,'change'])->whereUuid('record')->name('help-narrations.change');
+    Route::get('/help-recordings/{record}/preview',[\App\Http\Controllers\HelpNarrationController::class,'preview'])->middleware('throttle:60,1')->whereUuid('record')->name('help-narrations.preview');
+    Route::get('/help/guides/{guide}/recordings/{record}',[\App\Http\Controllers\HelpNarrationController::class,'audio'])->where('guide','[a-z][a-z0-9-]{0,79}')->middleware('throttle:60,1')->whereUuid('record')->name('help.audio');
+
     Route::get('/help', [HelpController::class, 'index'])->name('help.index');
     Route::get('/apprentices/{apprentice}/curriculum-reference', [CurriculumReferenceController::class, 'show'])->name('curriculum.show');
     Route::get('/apprentices/{apprentice}/delivery-plan', [DeliveryPlanController::class, 'show'])->name('delivery.show');

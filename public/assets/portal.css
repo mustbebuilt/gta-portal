@@ -49,3 +49,5 @@ main:focus{outline:none}
 
 /* Pack21 apprentice journey: native progress and responsive cards, no script needed. */
 .experience-blocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;padding:0;list-style:none}.experience-blocks li{border:1px solid var(--border,#637082);border-radius:10px;padding:1rem;overflow-wrap:anywhere}.experience-blocks progress{width:100%;accent-color:#54c6a0}.experience-complete{border-left:5px solid #54c6a0!important}.experience-next{border-left:5px solid #79b8ff}.experience-next h2{overflow-wrap:anywhere}
+
+.help-recording audio{display:block;width:100%;max-width:42rem;margin:12px 0}

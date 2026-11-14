@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-26",
+  "checkpoint": "development-pack-27",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -421,14 +421,19 @@
       "batch": "Pack26 automated review preparation and participant sign-off",
       "status": "working_reference_code_target_acceptance_pending",
       "remaining": "Actual named participant authority/identity, provider acceptance of account/password sign-off, native transaction/concurrency/encrypted-file restore, browser/mobile/accessibility and Cloud acceptance. No certificate-based PDF signature or independent timestamp service."
+    },
+    {
+      "batch": "Pack27 current help, onboarding and controlled Yorkshire recordings",
+      "status": "working_reference_code_real_recordings_and_target_acceptance_pending",
+      "remaining": "33 current general scripts supplied. Real approved recordings/permission/accent listening needed; no paid speech provider or actual voice created. Native/Cloud/browser/phone playback, storage concurrency/restore and prior packs/source applicability acceptance remain."
     }
   ],
-  "queue_review": "Pack26 consolidates expanded factual review preparation with named signing authority, source-bound shared participant records, three account/password sign-offs, decline/withdraw/reissue, independent checked PDF, legacy signed-record/cycle/reminder integration and audit. Actual source/native/Cloud/browser/provider acceptance remains.",
+  "queue_review": "Pack27 consolidates 33 current role-aware searchable/contextual general-help guides and the controlled prerecorded Yorkshire narration lifecycle: exact script binding, independent approval, private bounded audio/range playback, no autoplay, device fallback, archive/history and bounded readiness checks. No real Yorkshire recording supplied/listened to, external speech provider or live deployment acceptance.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Accept the expanded review workflow and earlier packs in the actual target; consistent Yorkshire narration remains distinct development. Actual provider policy on account sign-off, authoritative curriculum/cohort/Gateway decisions, source completeness and deployment acceptance remain separate.",
+  "next_priority": "Integrate and accept current packs in the actual target. Obtain suitable approved Yorkshire recordings against exact current scripts, complete native/browser/phone/storage/backup/provider rollout and authoritative source checks. Existing source/content gaps and actual deployment remain separate; no whole-portal completion claim.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "26",
+  "development_pack": "27",
   "questionnaire_update": {
     "pack": "25",
     "status": "Native questionnaire lifecycle implemented separately from retained external responder links and manual receipts.",
@@ -437,7 +442,7 @@
   "requested_expansion_2026_11_14": {
     "status": "all_nine_functional_reference_workflows_implemented_target_content_acceptance_pending",
     "release_style": "Larger functional releases; existing pack numbers retained.",
-    "priority": "Reconcile actual identities, approved questionnaire wording and programme/cohort criteria; accept automated factual review content and account sign-off in native/Cloud/browser target. Consistent Yorkshire narration remains separate.",
+    "priority": "Accept existing functions in actual source/native/Cloud/browser environment; reconcile source applicability and approved wording. Publish genuine checked Yorkshire help recordings against the supplied scripts rather than adding more optional portal features.",
     "workstreams": [
       {
         "name": "Apprentice experience",

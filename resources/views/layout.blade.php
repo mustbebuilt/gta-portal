@@ -3,10 +3,11 @@
 <body><a class="skip-link" href="#main-content">Skip to main content</a><div class="shell">
 <aside class="sidebar"><a class="brand" href="{{ url('/') }}"><img src="{{ asset('assets/gta-logo.jpg') }}" width="64" height="64" alt="GTA"><span>GTA<br><small>Apprenticeship portal</small></span></a>
 @auth @include('navigation.menu') @endauth
-<p class="release">Local development checkpoint<br>Development Pack 26 · Fictional data only</p></aside>
+<p class="release">Local development checkpoint<br>Development Pack 27 · Fictional data only</p></aside>
 <div class="workspace"><header class="topbar"><span>{{ auth()->user()?->name ?? 'GTA sign in' }} @auth<small>{{ ucfirst(auth()->user()->role) }}</small>@endauth</span><div class="toolbar"><button type="button" id="theme-toggle">Dark mode</button>@auth<form action="{{ route('logout') }}" method="post">@csrf<button>Sign out</button></form>@endauth</div></header>
 <main id="main-content" tabindex="-1"><div class="test-notice">Fictional local test application · Working modules are linked below. Formal plan approval, completed reviews/signatures, complete reporting and live deployment remain in development.</div>
 @if(session('status'))<div class="notice" role="status">{{ session('status') }}</div>@endif
 @if(auth()->user()?->role==='ceo'&&\App\Support\ExecutiveAccess::enabled(request()))<div class="errors" role="status">CEO emergency override is on for this session. Uses are recorded. <a href="{{ route('executive.index') }}" @if(request()->routeIs('executive.*'))aria-current="page"@endif>Review or end override</a></div>@endif
 @if(app()->environment('staging'))<p class="test-notice">Staging portal — use fictional test records. Live release, real-data migration and target-environment acceptance remain separate.</p>@endif
+@if(auth()->check()) @php($helpContext=\App\Support\HelpCatalogue::context(auth()->user(),request())) @if($helpContext)<p><a href="{{ route('help.index',['guide'=>$helpContext['id']]) }}#help-{{ $helpContext['id'] }}">Help with this page: {{ $helpContext['title'] }}</a></p>@endif @endif
 @yield('content')</main></div></div></body></html>
