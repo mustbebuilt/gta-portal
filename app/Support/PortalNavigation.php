@@ -14,7 +14,7 @@ class PortalNavigation
         $primary=[];$groups=[];
         if($u->role==='employer') {$primary[]=$item('My employer actions','employer-actions.index',[],['employer-actions.index','employer-actions.show','employer-actions.respond']);}
         if(StaffAttention::allowed($u)) {$primary[]=$item('Needs attention','attention.index');}
-        if($u->role==='apprentice') {$primary[]=$item('My next step','experience.home');}
+        if($u->role==='apprentice') {$primary[]=$item('My next step','experience.home');$primary[]=$item('Getting started','getting-started.index',[],['getting-started.*']);}
         $group=function(string $id,string $label,array $links)use(&$groups):void {
             if(!$links) {return;}
             $groups[]=['id'=>$id,'label'=>$label,'links'=>$links,'open'=>collect($links)->contains(fn($l)=>$l['current'])];
@@ -59,6 +59,7 @@ class PortalNavigation
                 $links[]=$item($label,'directories.index',[$kind],[], $request->routeIs('directories.*')&&$request->route('kind')===$kind);
             }
             $links[]=$item('Employer accounts','employer-accounts.index',[],['employer-accounts.*','employer-grants.*']);
+            $links[]=$item('Apprentice onboarding','apprentice-onboarding.index',[],['apprentice-onboarding.*']);
             $links[]=$item('Staff onboarding','onboarding.index',[],['onboarding.*']);
             $links[]=$item('Questionnaire link setup','questionnaires.configuration');
         }

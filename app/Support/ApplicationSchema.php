@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack27.
+    // Presence-only contract from the unchanged reference migrations through Pack28.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -15,8 +15,12 @@ class ApplicationSchema
         'apprentice_alert_controls'=>['created_at','history','id','paused','updated_at','updated_by','version'],
         'apprentice_alert_deliveries'=>['apprentice_id','auth_version','channel','completed_at','config_hash','created_at','cycle_date','history','id','preference_revision','provider_id','reason','recipient_hash','recipient_id','reconciliation','reserved_at','seen_at','source','source_hash','state','updated_at'],
         'apprentice_experience_entries'=>['apprentice_id','created_at','detail','happened_on','history','id','kind','request_token','requester_id','response','reviewer_id','state','title','updated_at','version'],
+        'apprentice_invitation_bindings'=>['apprentice_id','created_at','identity_hash','user_id'],
         'apprentice_markers'=>['apprentice_id','code','created_at','id','recorded_by','updated_at'],
         'apprentice_mobile_challenges'=>['apprentice_id','attempts','auth_version','code_hash','config_hash','created_at','expires_at','id','phone_hash','preference_revision','provider_id','session_hash','state','updated_at','user_id'],
+        'apprentice_onboarding_events'=>['actor_id','apprentice_id','created_at','event','id','identity_reference','user_id'],
+        'apprentice_start_check_events'=>['actor_id','check_id','check_version','confirmed','created_at','id'],
+        'apprentice_start_checks'=>['apprentice_id','confirmed_at','created_at','id','item','updated_at','user_id','version'],
         'apprentices'=>['alert_channel','alert_history','alert_mobile','alert_mobile_verified_at','alert_revision','alerts_enabled','careers_adviser_id','created_at','email','employer','employer_id','english_tutor_id','first_name','group_name','id','last_name','maths_tutor_id','mentor_id','planned_end_date','programme','programme_id','reference','start_date','tutor_group_id','tutor_id','updated_at','user_id','version'],
         'assignment_change_events'=>['actor_id','after_links','apprentice_id','before_links','created_at','id'],
         'attendance_marks'=>['adjustment','apprentice_id','arrival','code','comment','created_at','departure','id','otj_confirmed','otj_minutes','parts','recorded_by','training_session_id','updated_at'],

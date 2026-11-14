@@ -35,6 +35,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('apprentices.index'));
 Route::middleware('guest')->group(function () {
+    Route::get('/apprentice-invitation/{user}/{token}', [\App\Http\Controllers\ApprenticeOnboardingController::class,'acceptForm'])->whereNumber('user')->where('token','[A-Za-z0-9]{64}')->name('apprentice-invitation.accept');
+    Route::post('/apprentice-invitation/{user}/{token}', [\App\Http\Controllers\ApprenticeOnboardingController::class,'accept'])->whereNumber('user')->where('token','[A-Za-z0-9]{64}')->name('apprentice-invitation.activate');
     Route::get('/employer-invitation/{user}/{token}', [\App\Http\Controllers\EmployerPortalController::class,'acceptForm'])->whereNumber('user')->where('token','[A-Za-z0-9]{64}')->name('employer-onboarding.accept');
     Route::post('/employer-invitation/{user}/{token}', [\App\Http\Controllers\EmployerPortalController::class,'accept'])->whereNumber('user')->where('token','[A-Za-z0-9]{64}')->name('employer-onboarding.activate');
     Route::get('/two-step', [\App\Http\Controllers\SecondFactorController::class, 'challenge'])->name('second-factor.challenge');
@@ -60,6 +62,14 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/my-reminders/{delivery}/seen', [\App\Http\Controllers\ApprenticeNotificationController::class,'seen'])->whereUuid('delivery')->name('apprentice-reminders.seen');
     Route::get('/gateway-preparation' , [\App\Http\Controllers\GatewayReadinessController::class,'index'])->name('gateway.index');
     Route::get('/apprentices/{apprentice}/gateway-preparation.pdf', [\App\Http\Controllers\GatewayReadinessController::class,'pdf'])->name('gateway.pdf');
+    Route::get('/apprentice-onboarding', [\App\Http\Controllers\ApprenticeOnboardingController::class,'index'])->name('apprentice-onboarding.index');
+    Route::get('/apprentice-onboarding/{apprentice}', [\App\Http\Controllers\ApprenticeOnboardingController::class,'show'])->name('apprentice-onboarding.show');
+    Route::post('/apprentice-onboarding/{apprentice}/link', [\App\Http\Controllers\ApprenticeOnboardingController::class,'link'])->name('apprentice-onboarding.link');
+    Route::post('/apprentice-onboarding/{apprentice}/detach', [\App\Http\Controllers\ApprenticeOnboardingController::class,'detach'])->name('apprentice-onboarding.detach');
+    Route::post('/apprentice-onboarding/{apprentice}/invite', [\App\Http\Controllers\ApprenticeOnboardingController::class,'invite'])->name('apprentice-onboarding.invite');
+    Route::post('/apprentice-onboarding/{apprentice}/revoke', [\App\Http\Controllers\ApprenticeOnboardingController::class,'revoke'])->name('apprentice-onboarding.revoke');
+    Route::get('/getting-started', [\App\Http\Controllers\ApprenticeOnboardingController::class,'home'])->name('getting-started.index');
+    Route::post('/getting-started/{item}', [\App\Http\Controllers\ApprenticeOnboardingController::class,'check'])->name('getting-started.check');
     Route::get('/employer-accounts', [\App\Http\Controllers\EmployerPortalController::class,'accounts'])->name('employer-accounts.index');
     Route::post('/employer-accounts', [\App\Http\Controllers\EmployerPortalController::class,'createAccount'])->name('employer-accounts.create');
     Route::post('/employer-accounts/{user}/invite', [\App\Http\Controllers\EmployerPortalController::class,'invite'])->name('employer-accounts.invite');

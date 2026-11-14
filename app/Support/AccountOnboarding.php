@@ -23,7 +23,7 @@ class AccountOnboarding
         return self::available() && $user->active && ! $user->email_verified_at
             && in_array(strtolower(trim($user->email)), self::recipients(), true)
             && User::whereRaw('LOWER(email) = ?', [strtolower(trim($user->email))])->count() === 1
-            && ($purpose === 'verify' || ($purpose === 'invite' && in_array($user->role, DirectoryCatalog::STAFF_ROLES, true)) || ($purpose === 'employer_invite' && $user->role === 'employer'));
+            && (($purpose === 'learner_invite' && $user->role === 'apprentice' && ApprenticeOnboarding::inviteProfile($user)) || $purpose === 'verify' || ($purpose === 'invite' && in_array($user->role, DirectoryCatalog::STAFF_ROLES, true)) || ($purpose === 'employer_invite' && $user->role === 'employer'));
     }
     public static function audit(User $user, ?int $actor, string $event): void
     {
@@ -33,13 +33,14 @@ class AccountOnboarding
     public static function issue(User $user, string $purpose, ?User $issuer = null): void
     {
         abort_unless(self::eligible($user, $purpose), 403);
-        if (in_array($purpose, ['invite','employer_invite'], true)) {
+        if (in_array($purpose, ['invite','employer_invite','learner_invite'], true)) {
             abort_unless($issuer && $issuer->active && in_array($issuer->role, ['admin', 'ceo'], true), 403);
         }
         $old = DB::table('account_onboarding_tokens')->where('user_id', $user->id)->where('purpose', $purpose)->first();
         if ($old && now()->diffInSeconds(\Illuminate\Support\Carbon::parse($old->created_at), true) < 60) {
             throw ValidationException::withMessages(['onboarding' => 'A link was prepared recently. Wait a minute before sending another.']);
         }
+        if ($purpose === 'learner_invite') { ApprenticeOnboarding::bindInvitation($user); }
         $token = Str::random(64);
         DB::table('account_onboarding_tokens')->updateOrInsert(['user_id' => $user->id, 'purpose' => $purpose], [
             'token_hash' => hash('sha256', $token), 'auth_version' => $user->auth_version,
@@ -47,7 +48,7 @@ class AccountOnboarding
             'created_at' => now(), 'expires_at' => now()->addMinutes(60),
         ]);
         // Never trust the request Host header to construct an account link.
-        $path = $purpose === 'employer_invite' ? route('employer-onboarding.accept', [$user->id, $token], false) : ($purpose === 'invite' ? route('onboarding.accept', [$user->id, $token], false) : route('account.email.confirm', [$token], false));
+        $path = $purpose === 'learner_invite' ? route('apprentice-invitation.accept', [$user->id, $token], false) : ($purpose === 'employer_invite' ? route('employer-onboarding.accept', [$user->id, $token], false) : ($purpose === 'invite' ? route('onboarding.accept', [$user->id, $token], false) : route('account.email.confirm', [$token], false)));
         $user->notify(new AccountOnboardingLink($purpose, rtrim(config('app.url'), '/').$path));
         self::audit($user, $issuer?->id ?? $user->id, $purpose.'_link_prepared');
     }
@@ -57,10 +58,11 @@ class AccountOnboarding
         $q = DB::table('account_onboarding_tokens')->where('user_id', $user->id)->where('purpose', $purpose);
         $row = ($lock ? $q->lockForUpdate() : $q)->first();
         if (! $row || (int) $row->auth_version !== $user->auth_version || now()->greaterThanOrEqualTo($row->expires_at) || ! hash_equals($row->token_hash, hash('sha256', $token))) { return false; }
-        if (in_array($purpose, ['invite','employer_invite'], true)) {
+        if (in_array($purpose, ['invite','employer_invite','learner_invite'], true)) {
             $issuer = User::whereKey($row->issuer_id)->first();
             if (! $issuer || ! $issuer->active || ! in_array($issuer->role, ['admin', 'ceo'], true) || $issuer->auth_version !== (int) $row->issuer_auth_version) { return false; }
         }
+        if ($purpose === 'learner_invite' && ! ApprenticeOnboarding::validInvitation($user)) { return false; }
         return true;
     }
     public static function inspect(): array
