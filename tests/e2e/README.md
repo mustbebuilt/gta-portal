@@ -75,3 +75,4 @@ BASE_URL="http://gta-portal.test" npx playwright test --headed
 ```bash
 npx playwright show-report
 ```
+

@@ -172,3 +172,4 @@ test.describe.serial('Feature 1: Learning Tasks and Portfolio Workflow', () => {
         console.log(`Captured full verification screenshot: ${screenshotPath}`);
     });
 });
+

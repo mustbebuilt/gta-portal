@@ -15,3 +15,4 @@ export default defineConfig({
   },
   reporter: [['list'], ['html', { open: 'never' }]],
 });
+
