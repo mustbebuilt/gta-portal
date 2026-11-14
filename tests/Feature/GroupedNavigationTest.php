@@ -18,7 +18,7 @@ class GroupedNavigationTest extends TestCase
  }
  private function parity(User $u):void {
   $this->actingAs($u);$this->app->instance('request',$this->requestFor('help.index'));view()->addNamespace('nav_baseline',base_path('tests/fixtures'));
-  $old=view('nav_baseline::navigation-pack17')->render();$new=view('navigation.menu')->render();$this->assertSame($this->links($old),$this->links($new),'Existing href inventory changed for '.$u->role);
+  $old=view('nav_baseline::navigation-pack17')->render();$new=view('navigation.menu')->render();$expected=$this->links($old);if($u->role==='apprentice'){$expected[]=route('alerts.index');sort($expected);}$this->assertSame($expected,$this->links($new),'Unexpected href inventory changed for '.$u->role);
  }
  public function test_every_existing_link_is_preserved_for_all_primary_roles():void {
   foreach(['admin','ceo','tutor','apprentice','employer','staff','manager','mentor','functional_skills_tutor','careers_adviser','inclusion_lead','inclusion_member','unassigned']as$role){$this->parity(User::factory()->create(['role'=>$role,'subject_scope'=>$role==='functional_skills_tutor'?'both':null]));}

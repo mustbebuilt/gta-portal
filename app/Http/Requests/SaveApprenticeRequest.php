@@ -17,6 +17,7 @@ class SaveApprenticeRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        if(is_string($this->input('alert_mobile'))) { $this->merge(['alert_mobile'=>\App\Support\ApprenticeAlerts::normalise($this->input('alert_mobile'))]); }
         $this->merge(['reference' => strtoupper(trim((string) $this->input('reference')))]);
     }
 
@@ -59,6 +60,8 @@ class SaveApprenticeRequest extends FormRequest
                 ->where(fn ($q) => $q->where('role', 'tutor')->where('active', true))
                 ->when($record?->tutor_id, fn ($q) => $q->orWhere('id', $record->tutor_id)))],
             ...$this->linkedRules($record),
+            'change_alert_preferences'=>['sometimes','boolean'],
+            ...array_map(fn($rules)=>['exclude_unless:change_alert_preferences,1',...$rules],\App\Support\ApprenticeAlerts::rules()),
             'version' => $record ? ['required', 'integer', 'min:1'] : ['prohibited'],
         ];
     }

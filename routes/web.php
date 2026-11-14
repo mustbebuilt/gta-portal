@@ -74,6 +74,8 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/reminder-mail', [\App\Http\Controllers\ReminderDeliveryController::class,'prepare'])->name('reminder-mail.prepare');
     Route::get('/reminder-mail/{delivery}', [\App\Http\Controllers\ReminderDeliveryController::class,'show'])->name('reminder-mail.show');
     Route::post('/reminder-mail/{delivery}', [\App\Http\Controllers\ReminderDeliveryController::class,'transition'])->name('reminder-mail.transition');
+    Route::get('/account/alerts', [\App\Http\Controllers\ApprenticeAlertController::class,'index'])->name('alerts.index');
+    Route::post('/account/alerts', [\App\Http\Controllers\ApprenticeAlertController::class,'save'])->name('alerts.save');
     Route::get('/account/email', [\App\Http\Controllers\AccountOnboardingController::class, 'notice'])->name('account.email');
     Route::post('/account/email', [\App\Http\Controllers\AccountOnboardingController::class, 'sendVerification'])->name('account.email.send');
     Route::get('/account/email/confirm/{token}', [\App\Http\Controllers\AccountOnboardingController::class, 'confirmForm'])->where('token', '[A-Za-z0-9]{64}')->name('account.email.confirm');

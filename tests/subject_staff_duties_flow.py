@@ -166,12 +166,13 @@ with tempfile.TemporaryDirectory(prefix='gta-staff-duties-') as temporary:
         passed('Subject revocation invalidates the old database session and removes access while preserving qualification and assignment history')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert 'deadline_history' not in [r[1] for r in c.execute('PRAGMA table_info(learning_tasks)')]
+            assert 'alerts_enabled' not in [r[1] for r in c.execute('PRAGMA table_info(apprentices)')]
+            assert 'deadline_history' in [r[1] for r in c.execute('PRAGMA table_info(learning_tasks)')]
             assert c.execute('SELECT COUNT(*) FROM staff_duties WHERE user_id=?',(staff,)).fetchone()[0]==1
             assert c.execute('SELECT * FROM career_discussions WHERE apprentice_id=?',(target,)).fetchall()==discussion and c.execute('SELECT * FROM progress_review_drafts WHERE apprentice_id=?',(target,)).fetchall()==review
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_second_factors','support_plan_reminders')").fetchone()[0]==2
         assert artisan('migrate','--force').returncode==0
-        passed('New migration rolls back/reapplies only the latest task-history column, preserving the duty table on disposable SQLite; previous business records, MFA and support-reminder schema remain')
+        passed('New migration rolls back/reapplies only the latest apprentice preference columns, preserving the duty table on disposable SQLite; previous business records, MFA and support-reminder schema remain')
         configure('production');start_backend();assert req(admin,staff_path)[0]==503
         passed('Existing production gate remains enforced')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Local client-verified HTTPS, cached configuration and disposable SQLite database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualYorkshireVoiceTested':False,'limits':['No actual Martin repository/native locks/Cloud/browser/mobile acceptance','Additional Careers, mentor, Maths and English duties are explicit; primary role, Inclusion and admin policies remain separate','Pack11 voice choice retained; no regional voice audio/service generated']};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps({'passed':len(checks),'failed':0}))

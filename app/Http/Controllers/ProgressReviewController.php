@@ -65,7 +65,7 @@ class ProgressReviewController extends Controller
         $signedRecords=$review ? \App\Models\SignedReviewRecord::where('progress_review_draft_id',$review->id)->whereNull('withdrawn_at')->get() : collect();
         $signedConfirmed=$signedRecords->contains(fn($r)=>$r->checked_at && \App\Support\SignedReviews::intact($r));
 
-        return view('reviews.form', ['signedConfirmed'=>$signedConfirmed,'hasSignedSource'=>$signedRecords->isNotEmpty(),'apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $review?->source_snapshot ?? $this->snapshot($apprentice, []), 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
+        return view('reviews.form', ['preparation'=>($review?->exists&&$review->state==='Draft')?\App\Support\ReviewPreparation::inspect($review->fields??[],$review->source_snapshot??[],DeliveryPlan::approved($apprentice)):null,'signedConfirmed'=>$signedConfirmed,'hasSignedSource'=>$signedRecords->isNotEmpty(),'apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $review?->source_snapshot ?? $this->snapshot($apprentice, []), 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
     }
 
     public function pdf(Request $r, Apprentice $apprentice, ProgressReviewDraft $review): Response
@@ -141,14 +141,8 @@ class ProgressReviewController extends Controller
             \App\Models\IndividualDeliveryPlan::where('apprentice_id', $a->id)->lockForUpdate()->first();
             $row = ProgressReviewDraft::whereKey($review->id)->lockForUpdate()->firstOrFail();
             if ($row->version !== $r->integer('version') || $row->state !== 'Draft') { throw ValidationException::withMessages(['version' => 'This review changed or is already frozen. Reopen the current revision.']); }
-            $f = $row->fields;
-            $required = ['reviewDate', 'trainingFrom', 'mentor', 'tutor', 'employerRep', 'method', 'attendance', 'judgement', 'previousCheck', 'planChange', 'summary', 'learning', 'progressDiscussion', 'previousNotes', 'planChangeNotes', 'sharedSupport', 'absence', 'newNeeds'];
-            foreach ($required as $key) {
-                if (! filled($f[$key] ?? null)) { throw ValidationException::withMessages(['version' => 'Complete every review section, using N/A where appropriate, before preparing signatures. Missing: '.$key]); }
-            }
-            if (! ($f['trainingChecked'] ?? false) || ! ($f['targetsAgreed'] ?? false) || ! ($f['providerPrepared'] ?? false) || $f['previousCheck'] === 'Unable to check') { throw ValidationException::withMessages(['version' => 'Check the training, previous actions, agreed targets and preparation before preparing signatures.']); }
             $plan = DeliveryPlan::approved($a);
-            if (! $plan || ($row->source_snapshot['delivery_plan']['hash'] ?? null) !== $plan['hash']) { throw ValidationException::withMessages(['version' => 'Save this draft against the current provider-approved delivery plan before preparing signatures.']); }
+            \App\Support\ReviewPreparation::requireReady($row->fields??[],$row->source_snapshot??[],$plan);
             $row->history = [...($row->history ?? []), ['event' => 'ready_for_signatures', 'fields' => $row->fields, 'source_snapshot' => $row->source_snapshot, 'saved_by' => $r->user()->id, 'saved_at' => now()->toIso8601String()]];
             $row->state = 'Ready for signatures'; $row->version++; $row->save();
             DB::table('learning_events')->insert(['user_id' => $r->user()->id, 'apprentice_id' => $a->id, 'kind' => 'review_draft', 'record_id' => $row->id, 'event' => 'ready_for_signatures', 'created_at' => now()]);

@@ -46,7 +46,8 @@ class ApprenticeController extends Controller
     public function store(SaveApprenticeRequest $request): RedirectResponse
     {
         $record = DB::transaction(function () use ($request) {
-            $record = Apprentice::create($request->safe()->except('version'));
+            $record = Apprentice::create($request->safe()->except(['version',...\App\Support\ApprenticeAlerts::INPUTS]));
+            if($request->boolean('change_alert_preferences')) { \App\Support\ApprenticeAlerts::apply($record,$request->user(),$request->session()->get('auth_version'),$request->validated());$record->save(); }
             AssignmentHistory::record($record, $request->user()->id, null);
             $this->audit($request, $record, 'created');
 
@@ -78,10 +79,11 @@ class ApprenticeController extends Controller
                 throw ValidationException::withMessages(['version' => 'This record changed while you were editing. Reopen it before making further changes.']);
             }
             $beforeLinks = $locked->only(AssignmentHistory::KEYS);
-            $locked->fill($request->safe()->except('version'));
+            $locked->fill($request->safe()->except(['version',...\App\Support\ApprenticeAlerts::INPUTS]));
             if ($locked->isDirty('programme_id') && LearningTask::where('apprentice_id', $locked->id)->exists() && ! TaskCatalogue::historyMatches($locked)) {
                 throw ValidationException::withMessages(['programme_id' => 'Assigned programme task history cannot be transferred to another programme automatically. Keep the current mapping until a controlled programme transfer is available.']);
             }
+            if($request->boolean('change_alert_preferences')) { \App\Support\ApprenticeAlerts::apply($locked,$request->user(),$request->session()->get('auth_version'),$request->validated()); }
             $locked->version++;
             $locked->save();
             AssignmentHistory::record($locked, $request->user()->id, $beforeLinks);

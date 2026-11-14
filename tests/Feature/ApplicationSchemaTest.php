@@ -28,7 +28,7 @@ class ApplicationSchemaTest extends TestCase
  }
  public function test_reference_migrations_match_all_required_names_and_recent_columns():void {
   $this->ready();$r=ApplicationSchema::inspectSchema(Schema::getFacadeRoot());
-  $this->assertSame('pass',$r['status']);$this->assertSame(73,$r['required_tables']);$this->assertSame(705,$r['required_columns']);$this->assertSame(73,$r['tables_checked']);$this->assertSame([],$r['missing_tables']);$this->assertSame([],$r['missing_columns']);
+  $this->assertSame('pass',$r['status']);$this->assertSame(73,$r['required_tables']);$this->assertSame(711,$r['required_columns']);$this->assertSame(73,$r['tables_checked']);$this->assertSame([],$r['missing_tables']);$this->assertSame([],$r['missing_columns']);
   $this->assertContains('maths_tutor',ApplicationSchema::TABLES['staff_duties']);$this->assertContains('english_tutor',ApplicationSchema::TABLES['staff_duties']);$this->assertArrayHasKey('account_second_factors',ApplicationSchema::TABLES);
  }
  public function test_missing_subject_columns_block_even_when_all_migration_names_are_recorded():void {

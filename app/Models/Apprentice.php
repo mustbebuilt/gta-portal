@@ -11,13 +11,15 @@ class Apprentice extends Model
 {
     use HasFactory;
 
-    protected $attributes = ['version' => 1];
+    protected $attributes = ['version' => 1,'alert_revision'=>0];
+
+    protected $hidden=['alert_mobile','alert_mobile_verified_at','alert_history'];
 
     protected $fillable = ['reference', 'first_name', 'last_name', 'email', 'programme', 'start_date', 'planned_end_date', 'employer', 'group_name', 'tutor_id', 'programme_id', 'employer_id', 'tutor_group_id', 'mentor_id', 'careers_adviser_id', 'maths_tutor_id', 'english_tutor_id'];
 
     protected function casts(): array
     {
-        return ['start_date' => 'date', 'planned_end_date' => 'date', 'version' => 'integer'];
+        return ['start_date' => 'date', 'planned_end_date' => 'date', 'version' => 'integer','alert_revision'=>'integer','alerts_enabled'=>'boolean','alert_history'=>'array','alert_mobile'=>'encrypted','alert_mobile_verified_at'=>'datetime'];
     }
 
     public function tutor(): BelongsTo

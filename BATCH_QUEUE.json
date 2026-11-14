@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-18",
+  "checkpoint": "development-pack-19",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -381,14 +381,19 @@
       "batch": "Development Pack18 \u2014 grouped sidebar navigation",
       "status": "working_tested_grouped_navigation",
       "remaining": "Actual browser/mobile/assistive-technology and Cloud acceptance remain. Existing destination permissions stay authoritative."
+    },
+    {
+      "batch": "Development Pack19 \u2014 review checklist and apprentice alert preferences",
+      "status": "working_tested_review_checklist_and_alert_preferences",
+      "remaining": "Actual Cloud/native/browser acceptance, Vonage account/credentials, mobile ownership verification and task/review delivery pipeline remain. Preferences are functional but do not send messages."
     }
   ],
-  "queue_review": "Pack18 groups existing sidebar links into native collapsible sections with preserved role visibility, automatic current-section opening and prominent common shortcuts.",
+  "queue_review": "Pack19 adds saved-review preparation checks and apprentice Email/Text/Both plus On/Off preferences, encrypted mobile storage and self-service. Vonage is selected for future delivery integration; setup instructions included. No SMS/email reminder sending enabled.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
   "next_priority": "Martin to merge/test through18 on actual staging, especially grouped-menu usability, role visibility, native disclosure keyboard behaviour and mobile layout.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "18",
+  "development_pack": "19",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",

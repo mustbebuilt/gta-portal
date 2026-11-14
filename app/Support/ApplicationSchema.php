@@ -6,14 +6,14 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack17.
+    // Presence-only contract from the unchanged reference migrations through Pack19.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
         'account_onboarding_tokens'=>['auth_version','created_at','expires_at','issuer_auth_version','issuer_id','purpose','token_hash','user_id'],
         'account_second_factors'=>['confirmed_at','created_at','last_step','recovery_hashes','secret','setup_binding','setup_expires_at','updated_at','user_id'],
         'apprentice_markers'=>['apprentice_id','code','created_at','id','recorded_by','updated_at'],
-        'apprentices'=>['careers_adviser_id','created_at','email','employer','employer_id','english_tutor_id','first_name','group_name','id','last_name','maths_tutor_id','mentor_id','planned_end_date','programme','programme_id','reference','start_date','tutor_group_id','tutor_id','updated_at','user_id','version'],
+        'apprentices'=>['alert_channel','alert_history','alert_mobile','alert_mobile_verified_at','alert_revision','alerts_enabled','careers_adviser_id','created_at','email','employer','employer_id','english_tutor_id','first_name','group_name','id','last_name','maths_tutor_id','mentor_id','planned_end_date','programme','programme_id','reference','start_date','tutor_group_id','tutor_id','updated_at','user_id','version'],
         'assignment_change_events'=>['actor_id','after_links','apprentice_id','before_links','created_at','id'],
         'attendance_marks'=>['adjustment','apprentice_id','arrival','code','comment','created_at','departure','id','otj_confirmed','otj_minutes','parts','recorded_by','training_session_id','updated_at'],
         'audit_events'=>['apprentice_id','created_at','event','id','user_id'],
