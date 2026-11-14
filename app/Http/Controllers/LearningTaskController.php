@@ -238,18 +238,22 @@ class LearningTaskController extends Controller
     public function upload(Request $r, LearningTask $task): RedirectResponse
     {
         abort_unless(Access::learner($r->user(), $task->apprentice), 403);
-        $r->validate(['version' => ['required', 'integer'], 'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,docx', 'extensions:pdf,jpg,jpeg,png,docx', 'max:15360'], 'kind' => ['required', Rule::in(['supporting-evidence', 'inspection-checklist'])]]);
+        $r->validate(['version' => ['required', 'integer'], 'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,docx', 'extensions:pdf,jpg,jpeg,png,docx', 'max:15360'], 'kind' => ['required', Rule::in(['supporting-evidence', 'inspection-checklist','workplace-photo'])], 'description'=>['required_if:kind,workplace-photo','nullable','string','max:5000']]);
+        if($r->input('kind')==='workplace-photo') {$r->validate(['file'=>['mimes:jpg,jpeg,png','extensions:jpg,jpeg,png']]);}
         $entry = null;
         try {
             DB::transaction(function () use ($r, $task, &$entry): void {
                 $t = LearningTask::whereKey($task->id)->lockForUpdate()->firstOrFail();
                 $this->version($r, $t);
                 BlockRelease::check($t);
+                if (($t->template['kind']??'source-pending')==='source-pending') {
+                    throw ValidationException::withMessages(['file'=>'This task needs its programme source before evidence can be uploaded.']);
+                }
                 if (! $t->editable()) {
                     throw ValidationException::withMessages(['file' => 'The submitted version is locked.']);
                 }
                 $entry = PrivateEvidence::store($r->file('file'), 'task-evidence', $r->user()->id);
-                TaskEvidence::create(['learning_task_id' => $t->id, 'uploaded_by' => $r->user()->id, ...array_intersect_key($entry, array_flip(['disk', 'path', 'name', 'mime', 'sha256', 'bytes'])), 'kind' => $r->input('kind')]);
+                TaskEvidence::create(['learning_task_id' => $t->id, 'uploaded_by' => $r->user()->id, ...array_intersect_key($entry, array_flip(['disk', 'path', 'name', 'mime', 'sha256', 'bytes'])), 'kind' => $r->input('kind'),'description'=>$r->input('description')]);
                 $t->version++;
                 $t->save();
                 $this->audit($r, $t->apprentice_id, $t->id, 'evidence_added');

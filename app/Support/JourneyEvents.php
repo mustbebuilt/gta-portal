@@ -31,6 +31,14 @@ class JourneyEvents
         foreach (SmartAction::where('apprentice_id', $a->id)->whereNull('learning_task_id')->where('status', 'Completed')->whereNotNull('completion_date')->get() as $action) {
             $events[] = ['date' => $action->completion_date->toDateString(), 'type' => 'Agreed target completed', 'title' => $action->title, 'detail' => $action->measure, 'url' => route('actions.index', $a).'#action-'.$action->id];
         }
+        foreach(ApprenticeExperience::blocks($a) as $block) {
+            if(!$block['complete']){continue;}
+            $dates=LearningTask::where('apprentice_id',$a->id)->where('block',$block['block'])->get()->map(fn($t)=>collect($t->submissions??[])->last()['decision']['date']??null)->filter()->values();
+            if($dates->count()===5){$events[]=['date'=>$dates->max(),'type'=>'Training block tasks approved','title'=>'Block '.$block['block'].' task milestone','detail'=>'All five allocated source tasks have tutor approval. Other programme requirements remain separate.','url'=>route('learning.index',$a)];}
+        }
+        foreach(\App\Models\ApprenticeExperienceEntry::where('apprentice_id',$a->id)->where('kind','achievement')->where('state','Approved')->whereNotNull('happened_on')->get() as $e) {
+            $events[]=['date'=>$e->happened_on->toDateString(),'type'=>'Checked workplace achievement','title'=>$e->title,'detail'=>$e->detail.' — Tutor response: '.$e->response,'url'=>route('experience.index',['filter'=>'achievement'])];
+        }
         usort($events, fn ($x, $y) => strcmp($x['date'], $y['date']) ?: strcmp($x['title'], $y['title']));
 
         return array_values(array_filter($events, fn ($e) => $e['date'] <= today()->toDateString()));

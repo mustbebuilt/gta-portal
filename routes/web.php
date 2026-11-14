@@ -48,7 +48,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
-    Route::post('/staff/{user}/duties', [\App\Http\Controllers\StaffDutyController::class,'save'])->name('staff-duties.save');
+    Route::get('/my-next-step', [\App\Http\Controllers\ApprenticeExperienceController::class,'home'])->name('experience.home');
+    Route::get('/my-help-and-achievements', [\App\Http\Controllers\ApprenticeExperienceController::class,'index'])->name('experience.index');
+    Route::post('/my-help-and-achievements', [\App\Http\Controllers\ApprenticeExperienceController::class,'create'])->name('experience.create');
+    Route::post('/my-help-and-achievements/{entry}', [\App\Http\Controllers\ApprenticeExperienceController::class,'respond'])->name('experience.respond');
+    Route::post('/staff/{user}/duties' , [\App\Http\Controllers\StaffDutyController::class,'save'])->name('staff-duties.save');
     Route::get('/my-responsibilities', [\App\Http\Controllers\MyResponsibilitiesController::class,'index'])->name('responsibilities.index');
     Route::get('/assignment-checks', [\App\Http\Controllers\AssignmentCheckController::class,'index'])->name('assignment-checks.index');
     Route::get('/portal-setup', [\App\Http\Controllers\PortalSetupController::class,'index'])->name('setup.index');

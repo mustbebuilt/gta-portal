@@ -46,3 +46,6 @@ main:focus{outline:none}
 .navigation-group-links{padding:6px}.sidebar .navigation-group-links a{font-size:14px;min-height:44px;padding:10px 12px;margin:2px 0;overflow-wrap:anywhere}
 .sidebar .navigation-shortcuts a{font-weight:700}.sidebar .navigation-help{margin-top:12px;border-top:1px solid #405263;border-radius:0;padding-top:16px}
 @media(max-width:850px){.sidebar nav.grouped-navigation{grid-column:1/-1}.navigation-group{width:100%}.sidebar .navigation-shortcuts a{margin-bottom:6px}}
+
+/* Pack21 apprentice journey: native progress and responsive cards, no script needed. */
+.experience-blocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;padding:0;list-style:none}.experience-blocks li{border:1px solid var(--border,#637082);border-radius:10px;padding:1rem;overflow-wrap:anywhere}.experience-blocks progress{width:100%;accent-color:#54c6a0}.experience-complete{border-left:5px solid #54c6a0!important}.experience-next{border-left:5px solid #79b8ff}.experience-next h2{overflow-wrap:anywhere}

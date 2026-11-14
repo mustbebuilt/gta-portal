@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-20",
+  "checkpoint": "development-pack-21",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -391,23 +391,28 @@
       "batch": "Development Pack20 \u2014 apprentice mobile verification workstream",
       "status": "working_tested_staging_mobile_verification",
       "remaining": "Actual Vonage account/sender/handset/native/Cloud acceptance and automatic task/review email/SMS reminder generation/delivery still required. No production enablement or live sends here."
+    },
+    {
+      "batch": "Pack21 apprentice experience",
+      "status": "working_tested_reference_code",
+      "remaining": "Apply after Pack20, reconcile actual Martin source/schema, migrate before routes, configure scoped Inclusion cover and perform browser/phone/native/Cloud acceptance."
     }
   ],
-  "queue_review": "Pack20 completes a controlled staging apprentice mobile-verification workflow: Vonage API transport, code lifecycle, opt-in/session/source binding, quotas, UI and private configuration diagnostic. Automatic task/review reminder delivery remains separate.",
+  "queue_review": "Pack21 implements the apprentice experience: next-step home, 12-phase task journey, private photo explanations, checked workplace achievements and scoped help receipts/responses. Actual Martin/Cloud/browser acceptance remains pending.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Larger functional releases following the requested expansion roadmap; complete actual Martin/provider/staging acceptance and plan automatic task/review delivery separately. All nine new additions remain planned.",
+  "next_priority": "Staff attention and factual review preparation workstream, then employer action authority and agreed Gateway criteria. Automatic task/review message delivery remains separate.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "20",
+  "development_pack": "21",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",
     "remaining": "Actual shared responder URLs, form ownership/access/privacy checks and browser/hosted acceptance; receipt reconciliation stays manual. No answer storage, automatic invitation, annual due flag or completion tracking."
   },
   "requested_expansion_2026_11_14": {
-    "status": "planned_not_implemented",
-    "release_style": "Group into larger functional releases; numbers/scope finalised before implementation. Existing Pack01\u201319 numbering preserved.",
-    "priority": "Finish current mobile-verification workstream, then apprentice experience, staff follow-up, employer/completion.",
+    "status": "apprentice_experience_implemented_reference_code",
+    "release_style": "Larger functional releases; existing pack numbers retained.",
+    "priority": "Stage Pack21 apprentice experience; staff follow-up and employer/completion remain planned.",
     "workstreams": [
       {
         "name": "Apprentice experience",
@@ -417,21 +422,24 @@
           "Photo-to-evidence upload",
           "Personal achievement timeline",
           "Quick help request"
-        ]
+        ],
+        "status": "working_tested_reference_code"
       },
       {
         "name": "Staff follow-up",
         "functions": [
           "Who needs attention today staff view",
           "Review preparation assistant"
-        ]
+        ],
+        "status": "planned_not_implemented"
       },
       {
         "name": "Employer and completion",
         "functions": [
           "Employer action centre",
           "Apprentice readiness check"
-        ]
+        ],
+        "status": "planned_not_implemented"
       }
     ],
     "dependencies": [

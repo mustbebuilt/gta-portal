@@ -6,12 +6,13 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack20.
+    // Presence-only contract from the unchanged reference migrations through Pack21.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
         'account_onboarding_tokens'=>['auth_version','created_at','expires_at','issuer_auth_version','issuer_id','purpose','token_hash','user_id'],
         'account_second_factors'=>['confirmed_at','created_at','last_step','recovery_hashes','secret','setup_binding','setup_expires_at','updated_at','user_id'],
+        'apprentice_experience_entries'=>['apprentice_id','created_at','detail','happened_on','history','id','kind','request_token','requester_id','response','reviewer_id','state','title','updated_at','version'],
         'apprentice_markers'=>['apprentice_id','code','created_at','id','recorded_by','updated_at'],
         'apprentice_mobile_challenges'=>['apprentice_id','attempts','auth_version','code_hash','config_hash','created_at','expires_at','id','phone_hash','preference_revision','provider_id','session_hash','state','updated_at','user_id'],
         'apprentices'=>['alert_channel','alert_history','alert_mobile','alert_mobile_verified_at','alert_revision','alerts_enabled','careers_adviser_id','created_at','email','employer','employer_id','english_tutor_id','first_name','group_name','id','last_name','maths_tutor_id','mentor_id','planned_end_date','programme','programme_id','reference','start_date','tutor_group_id','tutor_id','updated_at','user_id','version'],
@@ -76,7 +77,7 @@ class ApplicationSchema
         'support_plan_reminders'=>['created_at','dismissed_at','id','recipient_id','seen_at','source','source_key','support_plan_id','updated_at'],
         'support_plans'=>['active_plan','activities','apprentice_id','closure_outcome','concern_ids','created_at','draft','files','history','id','review_owner_id','review_owner_revision','reviews','status','updated_at','version'],
         'survey_receipts'=>['apprentice_id','checks','created_at','history','id','kind','receipt_revision','recorded_by','submitted_date','updated_at','version'],
-        'task_evidence'=>['bytes','created_at','disk','id','kind','learning_task_id','mime','name','path','sha256','updated_at','uploaded_by'],
+        'task_evidence'=>['bytes','created_at','description','disk','id','kind','learning_task_id','mime','name','path','sha256','updated_at','uploaded_by'],
         'teaching_instructions'=>['acknowledgements','apprentice_id','created_at','draft_revision','draft_text','history','id','private_note','recipient_ids','release','updated_at','version'],
         'training_plan_workspaces'=>['apprentice_id','created_at','history','id','proposal','reviews','rpl','source_hash','updated_at','version'],
         'training_sessions'=>['breaks','cancellation_reason','created_at','created_by','delivered_learning','end_time','history','id','members','name','planned_learning','session_date','start_time','state','tutor_group_id','updated_at','version'],

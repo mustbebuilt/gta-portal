@@ -67,7 +67,7 @@ class DashboardController extends Controller
     {
         abort_unless(Access::training($r->user(), $apprentice), 403);
 
-        return view('dashboard.journey', ['apprentice' => $apprentice, 'events' => JourneyEvents::for($apprentice)]);
+        return view('dashboard.journey', ['apprentice' => $apprentice, 'events'=>JourneyEvents::for($apprentice),'blocks'=>\App\Support\ApprenticeExperience::blocks($apprentice)]);
     }
 
     private function data(Request $r,bool $includeAttendance=true): array

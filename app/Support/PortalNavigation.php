@@ -12,6 +12,7 @@ class PortalNavigation
         $item=fn(string $label,string $route,array $parameters=[],array $patterns=[],?bool $current=null)=>[
             'label'=>$label,'href'=>route($route,$parameters),'current'=>$current??$request->routeIs(...($patterns?:[$route]))];
         $primary=[];$groups=[];
+        if($u->role==='apprentice') {$primary[]=$item('My next step','experience.home');}
         $group=function(string $id,string $label,array $links)use(&$groups):void {
             if(!$links) {return;}
             $groups[]=['id'=>$id,'label'=>$label,'links'=>$links,'open'=>collect($links)->contains(fn($l)=>$l['current'])];
@@ -40,6 +41,7 @@ class PortalNavigation
             $links[]=$item('Support review reminders','support-review-reminders.index',[],['support-review-reminders.*']);
         }
         if(QuestionnaireLinks::canView($u)) {$links[]=$item('Questionnaires','questionnaires.index');}
+        if($u->role==='apprentice'||ApprenticeExperience::queueAllowed($u)) {$links[]=$item($u->role==='apprentice'?'My help & achievements':'Help & achievement responses','experience.index',[],['experience.index','experience.create','experience.respond']);}
         $group('support','Support',$links);
         $manage=Gate::forUser($u)->allows('manage-directories');$links=[];
         if(!in_array($u->role,['apprentice','employer'],true)) {$links[]=$item('Staff development','staff.index',[],['staff.*']);}
