@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Apprentice;
+use App\Models\EmployerPortalAction;
 use App\Models\LearningTask;
 use App\Models\ProgrammeOutcome;
 use App\Models\SmartAction;
@@ -12,7 +13,7 @@ class StaffAttention
 {
     public const VIEWS = ['all', 'overdue', 'today', 'followup', 'checks'];
 
-    public const REASONS = ['all', 'attendance', 'task', 'marking', 'action', 'review', 'progress', 'help', 'achievement', 'programme'];
+    public const REASONS = ['all', 'attendance', 'task', 'marking', 'action', 'review', 'progress', 'help', 'achievement', 'programme', 'employer'];
 
     public const RANK = ['overdue' => 0, 'today' => 1, 'followup' => 2, 'checks' => 3];
 
@@ -50,6 +51,7 @@ class StaffAttention
         // Private requests and their counts never enter this combined view.
         $entries = ApprenticeExperience::queue($u)->where('kind', '!=', 'help_private')->where('state', 'New')->orderBy('id')->get(['id', 'apprentice_id', 'kind', 'created_at'])->groupBy('apprentice_id');
         $rows = [];
+        $employerReplies = EmployerPortalAction::whereIn('apprentice_id', $training)->where('state', 'Responded')->get(['id', 'apprentice_id', 'responded_at'])->groupBy('apprentice_id');
         foreach ($people as $a) {
             $reasons = [];
             $add = function (string $kind, string $bucket, string $text, ?string $date, string $url) use (&$reasons): void {
@@ -154,6 +156,9 @@ class StaffAttention
             foreach ($entries->get($a->id, collect()) as $e) {
                 $achievement = $e->kind === 'achievement';
                 $add($achievement ? 'achievement' : 'help', 'followup', $achievement ? 'Workplace achievement awaiting check' : 'Help request awaiting first staff response', $e->created_at->toDateString(), route('experience.index', ['filter' => 'all']).'#entry-'.$e->id);
+            }
+            foreach ($employerReplies->get($a->id, collect()) as $reply) {
+                $add('employer', 'followup', 'Employer reply awaiting staff check', $reply->responded_at?->toDateString(), route('employer-actions.staff', $a).'#employer-action-'.$reply->id);
             }
             if (! $reasons) {
                 continue;

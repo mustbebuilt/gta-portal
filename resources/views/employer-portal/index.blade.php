@@ -1,0 +1,4 @@
+@extends('layout')
+@section('title','My employer actions')
+@section('content')<h1>My employer actions</h1><p>Requests GTA has checked and shared with your named login. Your authority is checked for each apprentice. Replies do not sign a review or approve training hours.</p>@forelse($actions as $x)<section class="panel"><h2>{{ $x->title }}</h2><p>{{ $x->state }} · Requested by {{ $x->due_date?->format('d M Y')??'No date set' }}</p><a class="button" href="{{ route('employer-actions.show',$x) }}">Open request / reply</a></section>@empty<section class="panel"><h2>No current requests</h2><p>If you expected a request, ask GTA to check your named access and the published request.</p></section>@endforelse
+{{ $actions->links() }}@endsection

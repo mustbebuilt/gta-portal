@@ -48,7 +48,7 @@ class SessionController extends Controller
     public static function destination(Request $request, \App\Models\User $user): RedirectResponse
     {
         return redirect()->intended(route(match ($user->role) {
-            'apprentice' => 'experience.home','manager','staff' => 'staff.index','mentor' => 'reviews.index','functional_skills_tutor' => 'em.caseload','careers_adviser' => 'careers.worklist', 'inclusion_lead','inclusion_member' => SupportAccess::team($user) ? 'support.worklist' : 'help.index',default => 'apprentices.index'
+            'employer' => 'employer-actions.index','apprentice' => 'experience.home','manager','staff' => 'staff.index','mentor' => 'reviews.index','functional_skills_tutor' => 'em.caseload','careers_adviser' => 'careers.worklist', 'inclusion_lead','inclusion_member' => SupportAccess::team($user) ? 'support.worklist' : 'help.index',default => 'apprentices.index'
         }));
     }
 

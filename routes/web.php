@@ -35,6 +35,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('apprentices.index'));
 Route::middleware('guest')->group(function () {
+    Route::get('/employer-invitation/{user}/{token}', [\App\Http\Controllers\EmployerPortalController::class,'acceptForm'])->whereNumber('user')->where('token','[A-Za-z0-9]{64}')->name('employer-onboarding.accept');
+    Route::post('/employer-invitation/{user}/{token}', [\App\Http\Controllers\EmployerPortalController::class,'accept'])->whereNumber('user')->where('token','[A-Za-z0-9]{64}')->name('employer-onboarding.activate');
     Route::get('/two-step', [\App\Http\Controllers\SecondFactorController::class, 'challenge'])->name('second-factor.challenge');
     Route::post('/two-step', [\App\Http\Controllers\SecondFactorController::class, 'verify'])->name('second-factor.verify');
     Route::post('/two-step/cancel', [\App\Http\Controllers\SecondFactorController::class, 'cancel'])->name('second-factor.cancel');
@@ -48,7 +50,25 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
-    Route::get('/needs-attention', [\App\Http\Controllers\StaffWorkflowController::class,'attention'])->name('attention.index');
+    Route::get('/gateway-preparation', [\App\Http\Controllers\GatewayReadinessController::class,'index'])->name('gateway.index');
+    Route::get('/apprentices/{apprentice}/gateway-preparation.pdf', [\App\Http\Controllers\GatewayReadinessController::class,'pdf'])->name('gateway.pdf');
+    Route::get('/employer-accounts', [\App\Http\Controllers\EmployerPortalController::class,'accounts'])->name('employer-accounts.index');
+    Route::post('/employer-accounts', [\App\Http\Controllers\EmployerPortalController::class,'createAccount'])->name('employer-accounts.create');
+    Route::post('/employer-accounts/{user}/invite', [\App\Http\Controllers\EmployerPortalController::class,'invite'])->name('employer-accounts.invite');
+    Route::get('/apprentices/{apprentice}/employer-access', [\App\Http\Controllers\EmployerPortalController::class,'grants'])->name('employer-grants.index');
+    Route::post('/apprentices/{apprentice}/employer-access', [\App\Http\Controllers\EmployerPortalController::class,'grant'])->name('employer-grants.save');
+    Route::post('/employer-access/{grant}/revoke', [\App\Http\Controllers\EmployerPortalController::class,'revoke'])->name('employer-grants.revoke');
+    Route::get('/apprentices/{apprentice}/employer-actions', [\App\Http\Controllers\EmployerPortalController::class,'staff'])->name('employer-actions.staff');
+    Route::post('/apprentices/{apprentice}/employer-actions', [\App\Http\Controllers\EmployerPortalController::class,'publish'])->name('employer-actions.publish');
+    Route::get('/employer-actions', [\App\Http\Controllers\EmployerPortalController::class,'index'])->name('employer-actions.index');
+    Route::get('/employer-actions/{action}', [\App\Http\Controllers\EmployerPortalController::class,'show'])->whereUuid('action')->name('employer-actions.show');
+    Route::post('/employer-actions/{action}', [\App\Http\Controllers\EmployerPortalController::class,'respond'])->whereUuid('action')->name('employer-actions.respond');
+    Route::post('/employer-actions/{action}/check', [\App\Http\Controllers\EmployerPortalController::class,'staffChange'])->whereUuid('action')->name('employer-actions.check');
+    Route::get('/apprentices/{apprentice}/gateway-preparation', [\App\Http\Controllers\GatewayReadinessController::class,'show'])->name('gateway.show');
+    Route::post('/apprentices/{apprentice}/gateway-preparation', [\App\Http\Controllers\GatewayReadinessController::class,'prepare'])->name('gateway.prepare');
+    Route::post('/gateway-criteria/{plan}/state', [\App\Http\Controllers\GatewayReadinessController::class,'change'])->name('gateway.change');
+    Route::post('/gateway-criteria/{plan}/checks', [\App\Http\Controllers\GatewayReadinessController::class,'check'])->name('gateway.check');
+    Route::get('/needs-attention' , [\App\Http\Controllers\StaffWorkflowController::class,'attention'])->name('attention.index');
     Route::get('/apprentices/{apprentice}/reviews/{review}/preparation', [\App\Http\Controllers\StaffWorkflowController::class,'briefing'])->name('review-briefs.index');
     Route::post('/apprentices/{apprentice}/reviews/{review}/preparation', [\App\Http\Controllers\StaffWorkflowController::class,'prepare'])->name('review-briefs.prepare');
     Route::get('/apprentices/{apprentice}/reviews/{review}/preparation/{brief}', [\App\Http\Controllers\StaffWorkflowController::class,'briefing'])->whereUuid('brief')->name('review-briefs.show');

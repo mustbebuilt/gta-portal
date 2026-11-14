@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack22.
+    // Presence-only contract from the unchanged reference migrations through Pack23.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -28,6 +28,8 @@ class ApplicationSchema
         'data_import_batches'=>['applied_at','applied_by','created_at','id','kind','prepared_by','preview_hash','rows','source_hash','source_name','source_reference','state','updated_at','version'],
         'data_import_events'=>['actor_id','created_at','data_import_batch_id','event','id'],
         'directory_events'=>['created_at','event','id','kind','record_id','user_id'],
+        'employer_apprentice_grants'=>['active','apprentice_id','created_at','employer_id','employer_version','history','id','identity_hash','identity_reference','updated_at','user_id','verified_by','version'],
+        'employer_portal_actions'=>['apprentice_id','created_at','created_by','detail','due_date','employer_apprentice_grant_id','history','id','kind','responded_at','responded_by','response','response_note','source','source_hash','source_id','state','title','updated_at','version'],
         'employers'=>['active','contact_email','contact_name','contact_phone','created_at','id','name','record_version','reference','size_band','updated_at'],
         'evidence_copy_events'=>['created_at','event','id','origin','plan_id','summary'],
         'evidence_copy_plans'=>['created_at','finished_at','id','manifest','manifest_hash','reference','result','source_disk','started_at','state','target_disk','updated_at','version'],
@@ -37,6 +39,8 @@ class ApplicationSchema
         'executive_access_sessions'=>['created_at','ended_at','id','reason','reference','started_at','updated_at','user_id'],
         'extra_trainings'=>['agreement','apprentice_id','approval','compensation','created_at','end_time','evidence','excluded_minutes','file','history','id','learning','minutes','parts','provider','recorded_by','start_time','topic','training_date','tutor_group_id','updated_at','version','withdrawal_reason','withdrawn_at','working'],
         'failed_jobs'=>['connection','exception','failed_at','id','payload','queue','uuid'],
+        'gateway_readiness_checks'=>['binding_hash','checked_by','checked_on','created_at','criterion_key','evidence_reference','gateway_readiness_plan_id','history','id','note','state','updated_at','version'],
+        'gateway_readiness_plans'=>['apprentice_id','approved_at','approved_by','basis','cohort','created_at','created_by','criteria','history','id','source_hash','source_reference','state','updated_at','version'],
         'historical_otj_records'=>['apprentice_id','created_at','data_import_batch_id','end_time','evidence_reference','excluded_minutes','fingerprint','history','id','minutes','programme_identity','start_time','topic','training_date','updated_at','version','withdrawn_at'],
         'individual_delivery_plans'=>['active','apprentice_id','approved','created_at','draft','history','id','updated_at','version'],
         'job_batches'=>['cancelled_at','created_at','failed_job_ids','failed_jobs','finished_at','id','name','options','pending_jobs','total_jobs'],

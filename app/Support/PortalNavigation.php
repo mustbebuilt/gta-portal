@@ -12,6 +12,7 @@ class PortalNavigation
         $item=fn(string $label,string $route,array $parameters=[],array $patterns=[],?bool $current=null)=>[
             'label'=>$label,'href'=>route($route,$parameters),'current'=>$current??$request->routeIs(...($patterns?:[$route]))];
         $primary=[];$groups=[];
+        if($u->role==='employer') {$primary[]=$item('My employer actions','employer-actions.index',[],['employer-actions.index','employer-actions.show','employer-actions.respond']);}
         if(StaffAttention::allowed($u)) {$primary[]=$item('Needs attention','attention.index');}
         if($u->role==='apprentice') {$primary[]=$item('My next step','experience.home');}
         $group=function(string $id,string $label,array $links)use(&$groups):void {
@@ -31,6 +32,7 @@ class PortalNavigation
         if(in_array($u->role,['admin','ceo','tutor'],true)) {
             $links[]=$item('Groups and sessions','attendance.index',[],['attendance.*']);$links[]=$item('Marking worklist','marking.index',[],['marking.*']);
         }
+        if(in_array($u->role,['admin','ceo','tutor'],true)){$links[]=$item('Gateway preparation','gateway.index',[],['gateway.*']);}
         $group('training','Apprentices & training',$links);
         $links=[];
         if(ReviewReminders::allowed($u)) {$links[]=$item('Reviews','reviews.index',[],['reviews.*']);}
@@ -55,6 +57,7 @@ class PortalNavigation
             foreach(['staff'=>'Staff','employers'=>'Employers','groups'=>'Tutor groups','programmes'=>'Programmes']as$kind=>$label) {
                 $links[]=$item($label,'directories.index',[$kind],[], $request->routeIs('directories.*')&&$request->route('kind')===$kind);
             }
+            $links[]=$item('Employer accounts','employer-accounts.index',[],['employer-accounts.*','employer-grants.*']);
             $links[]=$item('Staff onboarding','onboarding.index',[],['onboarding.*']);
             $links[]=$item('Questionnaire link setup','questionnaires.configuration');
         }

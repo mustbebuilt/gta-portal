@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-22",
+  "checkpoint": "development-pack-23",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -401,23 +401,28 @@
       "batch": "Pack22 staff attention and factual review assistant",
       "status": "working_tested_reference_code",
       "remaining": "Merge after21, migrate brief table, test native engine/concurrency/Cloud/browser/accessibility and real staff source mappings. No automatic messaging or signed-review completion."
+    },
+    {
+      "batch": "Pack23 employer action centre and configurable Gateway preparation",
+      "status": "working_tested_reference_workflow",
+      "remaining": "Actual identity/authority and account setup, correct approved standard/EPA/cohort criteria, evidence verification, native concurrency/Cloud/browser/PDF acceptance and final provider decisions. No automatic messages/signatures/OTJ or completion updates."
     }
   ],
-  "queue_review": "Pack22 implements combined scoped staff attention and source-bound factual review preparation with checked selective insertion. Reference code/tests completed; actual target acceptance remains pending.",
+  "queue_review": "Pack23 implements a larger employer/Gateway workstream: controlled employer account invitations, explicit per-apprentice authority, source-bound public requests/replies/staff checking, reply attention, approved configurable Gateway criteria/checks/worklist and private preparation PDF. No real criteria, signatures, messages or Cloud deployment implied.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Employer action authority and agreed standard/cohort Gateway criteria. Target rollout and automatic task/review notification delivery remain separate.",
+  "next_priority": "Finish full automatic apprentice reminder delivery, electronic review signing and questionnaire completion tracking as separately scoped work; reconcile actual curriculum/Gateway criteria and complete target rollout before more features.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "22",
+  "development_pack": "23",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",
     "remaining": "Actual shared responder URLs, form ownership/access/privacy checks and browser/hosted acceptance; receipt reconciliation stays manual. No answer storage, automatic invitation, annual due flag or completion tracking."
   },
   "requested_expansion_2026_11_14": {
-    "status": "apprentice_experience_and_staff_followup_implemented_reference_code",
+    "status": "all_nine_functional_reference_workflows_implemented_target_content_acceptance_pending",
     "release_style": "Larger functional releases; existing pack numbers retained.",
-    "priority": "Stage Pack22 staff attention/review preparation after21; employer action centre and Gateway readiness remain planned.",
+    "priority": "Reconcile actual employer identities, authoritative standard/cohort criteria and target acceptance. Automatic notifications, digital signatures and questionnaire integration remain separate.",
     "workstreams": [
       {
         "name": "Apprentice experience",
@@ -444,7 +449,7 @@
           "Employer action centre",
           "Apprentice readiness check"
         ],
-        "status": "planned_not_implemented"
+        "status": "working_tested_configurable_reference_workflow_real_criteria_pending"
       }
     ],
     "dependencies": [

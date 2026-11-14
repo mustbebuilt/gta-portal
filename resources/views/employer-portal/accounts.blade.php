@@ -1,0 +1,7 @@
+@extends('layout')
+@section('title','Employer accounts')
+@section('content')
+<h1>Employer accounts</h1>@include('learning.errors')<p>Creating a login or confirming a mailbox grants no apprentice access. GTA verifies named workplace authority separately on each apprentice profile.</p><section class="panel"><h2>Create an employer login</h2><form method="post" action="{{ route('employer-accounts.create') }}">@csrf<label for="contact-name">Contact name</label><input id="contact-name" name="name" maxlength="150" required><label for="contact-email">Individual work email</label><input id="contact-email" name="email" type="email" maxlength="254" required><button>Create login without access</button></form><p>No password is displayed or emailed. Use the separate controlled staging invitation.</p></section>
+@foreach($users as $user)<section class="panel"><h2>{{ $user->name }}</h2><p>{{ $user->email }} · {{ $user->active?'Active':'Inactive' }} · {{ $user->email_verified_at?'Mailbox confirmed':'Mailbox unconfirmed' }}</p>@if(\App\Support\AccountOnboarding::eligible($user,'employer_invite'))<form method="post" action="{{ route('employer-accounts.invite',$user) }}">@csrf<input type="hidden" name="record_version" value="{{ $user->record_version }}"><button>Send controlled employer invitation</button></form>@else<p>Invitation unavailable: already verified, inactive or outside the configured staging mail pilot. Existing mail configuration/allowlist gates remain.</p>@endif</section>@endforeach
+{{ $users->links() }}
+@endsection

@@ -23,7 +23,7 @@ class AccountOnboarding
         return self::available() && $user->active && ! $user->email_verified_at
             && in_array(strtolower(trim($user->email)), self::recipients(), true)
             && User::whereRaw('LOWER(email) = ?', [strtolower(trim($user->email))])->count() === 1
-            && ($purpose === 'verify' || ($purpose === 'invite' && in_array($user->role, DirectoryCatalog::STAFF_ROLES, true)));
+            && ($purpose === 'verify' || ($purpose === 'invite' && in_array($user->role, DirectoryCatalog::STAFF_ROLES, true)) || ($purpose === 'employer_invite' && $user->role === 'employer'));
     }
     public static function audit(User $user, ?int $actor, string $event): void
     {
@@ -33,7 +33,7 @@ class AccountOnboarding
     public static function issue(User $user, string $purpose, ?User $issuer = null): void
     {
         abort_unless(self::eligible($user, $purpose), 403);
-        if ($purpose === 'invite') {
+        if (in_array($purpose, ['invite','employer_invite'], true)) {
             abort_unless($issuer && $issuer->active && in_array($issuer->role, ['admin', 'ceo'], true), 403);
         }
         $old = DB::table('account_onboarding_tokens')->where('user_id', $user->id)->where('purpose', $purpose)->first();
@@ -47,7 +47,7 @@ class AccountOnboarding
             'created_at' => now(), 'expires_at' => now()->addMinutes(60),
         ]);
         // Never trust the request Host header to construct an account link.
-        $path = $purpose === 'invite' ? route('onboarding.accept', [$user->id, $token], false) : route('account.email.confirm', [$token], false);
+        $path = $purpose === 'employer_invite' ? route('employer-onboarding.accept', [$user->id, $token], false) : ($purpose === 'invite' ? route('onboarding.accept', [$user->id, $token], false) : route('account.email.confirm', [$token], false));
         $user->notify(new AccountOnboardingLink($purpose, rtrim(config('app.url'), '/').$path));
         self::audit($user, $issuer?->id ?? $user->id, $purpose.'_link_prepared');
     }
@@ -57,7 +57,7 @@ class AccountOnboarding
         $q = DB::table('account_onboarding_tokens')->where('user_id', $user->id)->where('purpose', $purpose);
         $row = ($lock ? $q->lockForUpdate() : $q)->first();
         if (! $row || (int) $row->auth_version !== $user->auth_version || now()->greaterThanOrEqualTo($row->expires_at) || ! hash_equals($row->token_hash, hash('sha256', $token))) { return false; }
-        if ($purpose === 'invite') {
+        if (in_array($purpose, ['invite','employer_invite'], true)) {
             $issuer = User::whereKey($row->issuer_id)->first();
             if (! $issuer || ! $issuer->active || ! in_array($issuer->role, ['admin', 'ceo'], true) || $issuer->auth_version !== (int) $row->issuer_auth_version) { return false; }
         }
