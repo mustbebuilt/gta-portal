@@ -13,7 +13,7 @@ class SupportPlan extends Model
 
     protected function casts(): array
     {
-        return ['concern_ids' => 'array', 'draft' => 'array', 'active_plan' => 'array', 'history' => 'array', 'reviews' => 'array', 'activities' => 'array', 'files' => 'array', 'version' => 'integer'];
+        return ['concern_ids' => 'array', 'draft' => 'array', 'active_plan' => 'array', 'history' => 'array', 'reviews' => 'array', 'activities' => 'array', 'files' => 'array', 'version' => 'integer', 'review_owner_id' => 'integer', 'review_owner_revision' => 'integer'];
     }
 
     public function apprentice(): BelongsTo

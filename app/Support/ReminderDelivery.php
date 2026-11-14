@@ -1,6 +1,6 @@
 <?php
 namespace App\Support;
-use App\Models\{Apprentice, LearningTask, MarkingReminder, ReviewReminder, ReminderMail, User};
+use App\Models\{Apprentice, LearningTask, MarkingReminder, ReviewReminder, ReminderMail, SupportPlanReminder, User};
 use App\Notifications\PortalWorkPrompt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -24,7 +24,8 @@ class ReminderDelivery
     }
     public static function eligible(User $user): bool
     {
-        return self::available() && $user->active && $user->email_verified_at && in_array($user->role,['tutor','mentor'],true)
+        $inclusion = SupportAccess::team($user) && in_array(SupportAccess::settings($user)['duty'], ['member','lead'], true);
+        return self::available() && $user->active && $user->email_verified_at && (in_array($user->role,['tutor','mentor'],true) || $inclusion)
             && in_array(strtolower(trim($user->email)),self::recipients(),true)
             && User::whereRaw('LOWER(email) = ?',[strtolower(trim($user->email))])->count()===1;
     }
@@ -32,10 +33,12 @@ class ReminderDelivery
     // Reconcile existing in-portal records against current sources; never creates prompts or marks them seen.
     public static function candidate(User $user): array
     {
-        if(!self::eligible($user)){return ['snapshot'=>null,'checks'=>1,'check_message'=>'Account must be active, email-confirmed, unique and an allowed tutor or mentor.'];}
+        if(!self::eligible($user)){return ['snapshot'=>null,'checks'=>1,'check_message'=>'Account must be active, email-confirmed, unique and an allowed tutor, mentor or Inclusion Team recipient.'];}
         $marking=MarkingReminder::where('recipient_id',$user->id)->whereNull('seen_at')->orderBy('id')->limit(101)->get();
         $reviews=ReviewReminder::where('recipient_id',$user->id)->whereNull('seen_at')->orderBy('id')->limit(101)->get();
-        if($marking->count()+$reviews->count()>100){return ['snapshot'=>null,'checks'=>1,'check_message'=>'More than 100 unseen source records. Reconcile these in the portal first.'];}
+        $supportPlans=\App\Models\SupportPlan::whereIn('apprentice_id',SupportAccess::ids($user))->select('id');
+        $support=SupportPlanReminder::where('recipient_id',$user->id)->whereIn('support_plan_id',$supportPlans)->whereNull('seen_at')->whereNull('dismissed_at')->orderBy('id')->limit(101)->get();
+        if($marking->count()+$reviews->count()+$support->count()>100){return ['snapshot'=>null,'checks'=>1,'check_message'=>'More than 100 unseen source records. Reconcile these in the portal first.'];}
         $items=[];$checks=0;
         foreach($marking as $reminder){
             $task=LearningTask::find($reminder->learning_task_id);
@@ -49,6 +52,10 @@ class ReminderDelivery
             $item=collect($position['items'])->first(fn($item)=>$item['owner']->id===$user->id && $item['key']===$reminder->source_key);
             if(!$item || !$item['intact'] || !is_array($reminder->source) || self::hash($reminder->source)!==$item['key'] || $reminder->signed_review_record_id!==$item['source']['record_id']){$checks++;continue;}
             $items[]=['kind'=>'review','id'=>$reminder->id,'key'=>$reminder->source_key];
+        }
+        foreach($support as $reminder){
+            if(!SupportPlanReminders::current($reminder,$user)){$checks++;continue;}
+            $items[]=['kind'=>'support_plan','id'=>$reminder->id,'key'=>$reminder->source_key];
         }
         $snapshot=$items ? ['recipient_id'=>$user->id,'auth_version'=>$user->auth_version,'role'=>$user->role,'email_hash'=>hash('sha256',$user->email),'origin'=>config('app.url'),'items'=>$items] : null;
         return ['snapshot'=>$snapshot,'checks'=>$checks,'check_message'=>$checks ? $checks.' recorded source item(s) no longer match the current position and were excluded.' : ($snapshot ? 'Current source checks passed.' : 'No eligible current source items.')];

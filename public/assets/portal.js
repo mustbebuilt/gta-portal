@@ -8,7 +8,69 @@ for(const form of document.querySelectorAll('form[method=post]')){let dirty=fals
 
 for(const form of document.querySelectorAll('[data-staff-entry]')){const kind=form.querySelector('[name=kind]');const update=()=>{for(const group of form.querySelectorAll('[data-staff-kinds]')){group.hidden=!group.dataset.staffKinds.split(' ').includes(kind.value);for(const input of group.querySelectorAll('input,textarea,select'))input.disabled=group.hidden;}};kind.addEventListener('change',update);update();}
 
-if('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window){const stop=document.querySelector('[data-stop-help]');const buttons=document.querySelectorAll('[data-read-help]');const finish=()=>{for(const button of buttons)button.setAttribute('aria-pressed','false');if(stop)stop.hidden=true;};for(const button of buttons){button.hidden=false;button.setAttribute('aria-pressed','false');button.addEventListener('click',()=>{window.speechSynthesis.cancel();finish();const text=document.getElementById(button.dataset.readHelp);if(!text)return;const speech=new SpeechSynthesisUtterance(text.textContent);speech.lang='en-GB';speech.onend=finish;speech.onerror=finish;button.setAttribute('aria-pressed','true');if(stop)stop.hidden=false;window.speechSynthesis.speak(speech);});}if(stop)stop.addEventListener('click',()=>{window.speechSynthesis.cancel();finish();});if(buttons.length)window.addEventListener('pagehide',()=>window.speechSynthesis.cancel());}
+// Optional general help read-aloud. Only an explicit button click can start speech.
+(() => {
+  const buttons = [...document.querySelectorAll('[data-read-help]')];
+  if (!buttons.length) return;
+  const controls = document.querySelector('[data-help-voice-controls]');
+  const select = document.querySelector('[data-help-voice]');
+  const accent = document.querySelector('[data-help-accent-note]');
+  const stop = document.querySelector('[data-stop-help]');
+  if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;
+  const engine = window.speechSynthesis;
+  let voices = [];
+  let preferred = '';
+  try { preferred = localStorage.getItem('gta-help-voice') || ''; } catch {}
+  const voiceId = voice => voice.voiceURI || `${voice.name}|${voice.lang}`;
+  const finish = () => {
+    buttons.forEach(button => button.setAttribute('aria-pressed', 'false'));
+    if (stop) stop.hidden = true;
+  };
+  const cancel = () => { engine.cancel(); finish(); };
+  const populate = () => {
+    voices = [...engine.getVoices()].sort((a,b) => {
+      const rank = voice => /yorkshire/i.test(voice.name) ? 0 : /^en[-_]GB$/i.test(voice.lang) ? 1 : /^en[-_]/i.test(voice.lang) ? 2 : 3;
+      return rank(a) - rank(b) || a.name.localeCompare(b.name);
+    });
+    if (!select) return;
+    select.replaceChildren();
+    if (!voices.length) {
+      const option = document.createElement('option'); option.value = ''; option.textContent = 'Device default UK English request'; select.append(option);
+    } else {
+      voices.forEach(voice => { const option = document.createElement('option'); option.value = voiceId(voice); option.textContent = `${voice.name} — ${voice.lang}`; select.append(option); });
+      select.value = voices.some(voice => voiceId(voice) === preferred) ? preferred : voiceId(voices[0]);
+    }
+    if (accent) accent.textContent = voices.some(voice => /yorkshire/i.test(voice.name))
+      ? 'A Yorkshire-labelled voice is available on this device. Select it to try it.'
+      : 'No Yorkshire-labelled voice is listed on this device. The exact accent depends on the voice you choose.';
+  };
+  populate();
+  if (controls) controls.hidden = false;
+  engine.addEventListener('voiceschanged', populate);
+  select?.addEventListener('change', () => {
+    cancel(); preferred = select.value;
+    try { localStorage.setItem('gta-help-voice', preferred); } catch {}
+  });
+  buttons.forEach(button => {
+    button.hidden = false; button.setAttribute('aria-pressed', 'false');
+    button.addEventListener('click', () => {
+      cancel();
+      const text = document.getElementById(button.dataset.readHelp);
+      if (!text) return;
+      const speech = new SpeechSynthesisUtterance(text.textContent);
+      const voice = voices.find(voice => voiceId(voice) === select?.value);
+      if (voice) speech.voice = voice;
+      speech.lang = voice?.lang || 'en-GB';
+      speech.onend = finish; speech.onerror = finish;
+      button.setAttribute('aria-pressed', 'true');
+      if (stop) stop.hidden = false;
+      engine.speak(speech);
+    });
+  });
+  stop?.addEventListener('click', cancel);
+  window.addEventListener('pagehide', cancel);
+})();
+
 
 // Print the full text of task answers, including content outside a textarea's visible box.
 window.addEventListener('beforeprint',()=>{

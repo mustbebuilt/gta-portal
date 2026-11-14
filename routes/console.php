@@ -244,3 +244,19 @@ Artisan::command('gta:curriculum-source-check {--programme= : Limit to one loade
         $ok=collect($results)->every(fn($row)=>$row['technical_ok']);$this->line(json_encode(['result'=>$ok?'technical_checks_passed':'needs_checks','releases'=>$results,'writes_performed'=>false,'curriculum_approval'=>false],JSON_THROW_ON_ERROR));return $ok?0:1;
     }catch(\Throwable){$this->line('{"result":"source_check_failed","writes_performed":false,"curriculum_approval":false}');return 1;}
 })->purpose('Read bundled blank-task catalogues, source receipts and PDF hashes without changing apprentice records');
+
+Artisan::command('gta:questionnaire-check', function () {
+    $result = \App\Support\QuestionnaireLinks::inspect();
+    $this->line(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    return $result['all_ready'] ? 0 : 1;
+})->purpose('Read questionnaire link configuration and candidate hashes without fetching forms, sending messages or recording completion');
+
+Artisan::command('gta:support-plan-reminders {--record : Persist deduplicated private in-portal support-plan prompts}', function () {
+    $record = (bool) $this->option('record');
+    $counts = \App\Support\SupportPlanReminders::generate($record);
+    $this->line(json_encode(['mode'=>$record?'record':'preview','counts'=>$counts,'external_messages_sent'=>false], JSON_THROW_ON_ERROR));
+    return 0;
+})->purpose('Preview or record due approved-plan coordinator prompts; no email or plan review is performed');
+\Illuminate\Support\Facades\Schedule::command('gta:support-plan-reminders --record')
+    ->dailyAt('09:05')->timezone(config('app.timezone'))->withoutOverlapping(30)
+    ->when(fn()=>config('portal_reminders.support_plan_scheduled')===true);

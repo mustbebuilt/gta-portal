@@ -3,6 +3,7 @@
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Apprentice Support Plan</h1><p>{{ $plan->exists?'Plan '.$plan->id.' · '.$plan->status:'New private draft' }}</p></div><a class="button" href="{{ route('support.index',$apprentice) }}">Back to support and concerns</a></header>
 @include('learning.errors')
+@include('support.review-coordinator')
 @if($plan->active_plan)<section class="panel"><h2>Approved active version</h2><a class="button" href="{{ route('support.plan.pdf',$plan) }}">Download private approved plan PDF</a><p>Approved {{ $plan->active_plan['approved_at'] }} · Next review {{ $plan->nextReview() }}</p><p>Agreed support: {{ $plan->active_plan['fields']['support'] }}</p><p>Reason: {{ $plan->active_plan['reason'] }}</p><p>Draft changes below do not replace this approved version until a new approval is recorded.</p></section>@endif
 @if($plan->status!=='Closed')<section class="panel"><h2>Private plan draft</h2><form method="post" action="{{ $plan->exists?route('support.plan.save',[$apprentice,$plan]):route('support.plan.create',$apprentice) }}">@csrf @if($plan->exists)<input type="hidden" name="version" value="{{ $plan->version }}">@endif
 <p>Link the relevant coded concerns.</p>@foreach($concerns as $c)<label class="check"><input name="concern_ids[]" type="checkbox" value="{{ $c->id }}" @checked(in_array($c->id,$plan->concern_ids??[],true))>Concern {{ $c->id }} · {{ $c->code }} · {{ $codes[$c->code] }}</label>@endforeach

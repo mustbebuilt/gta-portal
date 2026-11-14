@@ -48,11 +48,18 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
+    Route::get('/portal-setup', [\App\Http\Controllers\PortalSetupController::class,'index'])->name('setup.index');
+    Route::get('/support-review-reminders', [\App\Http\Controllers\SupportPlanReminderController::class,'index'])->name('support-review-reminders.index');
+    Route::post('/support-review-reminders/{reminder}/dismiss', [\App\Http\Controllers\SupportPlanReminderController::class,'dismiss'])->name('support-review-reminders.dismiss');
+    Route::post('/support-review-reminders/{reminder}/seen', [\App\Http\Controllers\SupportPlanReminderController::class,'seen'])->name('support-review-reminders.seen');
+    Route::post('/support-plans/{plan}/review-coordinator', [\App\Http\Controllers\SupportPlanReminderController::class,'assign'])->name('support-review-reminders.assign');
     Route::get('/task-library', [\App\Http\Controllers\TaskLibraryController::class, 'index'])->name('task-library.index');
     Route::get('/task-library/{programme}/{reference}', [\App\Http\Controllers\TaskLibraryController::class, 'show'])->name('task-library.show');
     Route::get('/task-library/{programme}/{reference}/source.pdf', [\App\Http\Controllers\TaskLibraryController::class, 'pdf'])->name('task-library.pdf');
     Route::get('/account/two-step', [\App\Http\Controllers\SecondFactorController::class, 'settings'])->name('second-factor.settings');
     Route::post('/account/two-step', [\App\Http\Controllers\SecondFactorController::class, 'change'])->name('second-factor.change');
+    Route::get('/questionnaires', [\App\Http\Controllers\QuestionnaireController::class, 'index'])->name('questionnaires.index');
+    Route::get('/questionnaires/configuration', [\App\Http\Controllers\QuestionnaireController::class, 'configuration'])->name('questionnaires.configuration');
     Route::get('/curriculum-source-checks', [\App\Http\Controllers\CurriculumSourceController::class,'index'])->name('curriculum-sources.index');
     Route::get('/apprentices/{apprentice}/source-comparison', [\App\Http\Controllers\CurriculumSourceController::class,'show'])->name('curriculum-sources.show');
     Route::post('/apprentices/{apprentice}/source-comparison', [\App\Http\Controllers\CurriculumSourceController::class,'submit'])->name('curriculum-sources.submit');

@@ -16,7 +16,7 @@ class LocalTestOnly
         $response->headers->set('Cache-Control', 'no-store, private');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-Frame-Options', 'DENY');
-        $response->headers->set('Referrer-Policy', $request->routeIs('onboarding.accept', 'onboarding.activate', 'account.email.confirm', 'account.email.verify', 'second-factor.*') ? 'no-referrer' : 'same-origin');
+        $response->headers->set('Referrer-Policy', $request->routeIs('onboarding.accept', 'onboarding.activate', 'account.email.confirm', 'account.email.verify', 'questionnaires.*', 'second-factor.*') ? 'no-referrer' : 'same-origin');
 
         return $response;
     }
