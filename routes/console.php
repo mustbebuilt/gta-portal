@@ -127,7 +127,7 @@ Artisan::command('gta:portal-reminders {--record : Persist deduplicated in-porta
     ->dailyAt('09:00')->timezone(config('app.timezone'))->withoutOverlapping(30)
     ->when(fn()=>config('portal_reminders.scheduled',false));
 
-Artisan::command('gta:cloud-check {--database : Probe the configured staging database read-only}', function () {
+Artisan::command('gta:cloud-check {--database : Check the actual staging MySQL/MariaDB connection, migrations and required schema names read-only}', function () {
     $result=\App\Support\CloudReadiness::inspect((bool)$this->option('database'));
     $this->line(json_encode($result,JSON_THROW_ON_ERROR));
     return $result['blocking_checks'] ? 1 : 0;

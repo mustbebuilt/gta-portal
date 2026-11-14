@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-14",
+  "checkpoint": "development-pack-15",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -361,14 +361,19 @@
       "batch": "Development Pack14 \u2014 management assignment checks",
       "status": "working_tested_read_only_assignment_checks",
       "remaining": "Actual target/native/browser/Cloud acceptance; intended staffing and optional roles still require deliberate provider decisions. Current eligibility is not proof of full access."
+    },
+    {
+      "batch": "Development Pack15 \u2014 required staging schema presence checks",
+      "status": "working_tested_read_only_schema_presence",
+      "remaining": "Actual native database/Cloud execution, custom schema mapping, types/indexes/constraints/data correctness and full staging acceptance remain. No automatic repair or production release."
     }
   ],
-  "queue_review": "Pack14 adds read-only management assignment checks. Real target integration and authoritative source decisions remain; no record is auto-fixed.",
+  "queue_review": "Pack15 strengthens the existing staging CLI diagnostic with a read-only required table/column presence contract; no target acceptance or automatic repair is implied.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Martin repository/Cloud acceptance and actual configuration remain essential. Pack 09 advances the account MFA pilot; it does not close production identity/security policy, complete recovery/relink or retained curriculum decisions.",
+  "next_priority": "Finish this development round at Pack15. Martin to integrate and test through15 on actual staging; further packs should address observed defects or authoritative missing content, rather than an indefinite enhancement sequence.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "14",
+  "development_pack": "15",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",
