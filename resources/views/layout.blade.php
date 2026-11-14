@@ -21,8 +21,9 @@
 @foreach(['employers'=>'Employers','staff'=>'Staff','groups'=>'Tutor groups','programmes'=>'Programmes'] as $kind=>$title)<a href="{{ route('directories.index',$kind) }}" @if(request()->routeIs('directories.*') && request()->route('kind')===$kind)aria-current="page"@endif>{{ $title }}</a>@endforeach
 @endcan
 @if(auth()->user()->role==='ceo')<a href="{{ route('executive.index') }}" @if(request()->routeIs('executive.*'))aria-current="page"@endif>CEO emergency access</a>@endif
+@if(\App\Support\SecondFactor::required(auth()->user()) || \App\Support\SecondFactor::mayEnrol(auth()->user()))<a href="{{ route('second-factor.settings') }}" @if(request()->routeIs('second-factor.settings','second-factor.change'))aria-current="page"@endif>Two-step sign-in</a>@endif
 <a href="{{ route('account.email') }}" @if(request()->routeIs('account.email*'))aria-current="page"@endif>Confirm email</a><a href="{{ route('account.password') }}" @if(request()->routeIs('account.password*'))aria-current="page"@endif>Change password</a><a href="{{ route('help.index') }}" @if(request()->routeIs('help.*'))aria-current="page"@endif>Help and how to</a></nav>@endauth
-<p class="release">Local development checkpoint<br>Completion 13 · based on v0.35.0 · Fictional data only</p></aside>
+<p class="release">Local development checkpoint<br>Development Pack 09 · Fictional data only</p></aside>
 <div class="workspace"><header class="topbar"><span>{{ auth()->user()?->name ?? 'GTA sign in' }} @auth<small>{{ ucfirst(auth()->user()->role) }}</small>@endauth</span><div class="toolbar"><button type="button" id="theme-toggle">Dark mode</button>@auth<form action="{{ route('logout') }}" method="post">@csrf<button>Sign out</button></form>@endauth</div></header>
 <main id="main-content" tabindex="-1"><div class="test-notice">Fictional local test application · Working modules are linked below. Formal plan approval, completed reviews/signatures, complete reporting and live deployment remain in development.</div>
 @if(session('status'))<div class="notice" role="status">{{ session('status') }}</div>@endif

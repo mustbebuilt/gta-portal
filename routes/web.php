@@ -35,6 +35,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('apprentices.index'));
 Route::middleware('guest')->group(function () {
+    Route::get('/two-step', [\App\Http\Controllers\SecondFactorController::class, 'challenge'])->name('second-factor.challenge');
+    Route::post('/two-step', [\App\Http\Controllers\SecondFactorController::class, 'verify'])->name('second-factor.verify');
+    Route::post('/two-step/cancel', [\App\Http\Controllers\SecondFactorController::class, 'cancel'])->name('second-factor.cancel');
     Route::get('/staff-invitation/{user}/{token}', [\App\Http\Controllers\AccountOnboardingController::class, 'acceptForm'])->whereNumber('user')->where('token', '[A-Za-z0-9]{64}')->name('onboarding.accept');
     Route::post('/staff-invitation/{user}/{token}', [\App\Http\Controllers\AccountOnboardingController::class, 'accept'])->whereNumber('user')->where('token', '[A-Za-z0-9]{64}')->name('onboarding.activate');
     Route::get('/forgot-password', [AccountAccessController::class, 'forgot'])->name('password.request');
@@ -44,7 +47,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [SessionController::class, 'create'])->name('login');
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
-Route::middleware(['auth', ActiveAccount::class])->group(function () {
+Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
+    Route::get('/account/two-step', [\App\Http\Controllers\SecondFactorController::class, 'settings'])->name('second-factor.settings');
+    Route::post('/account/two-step', [\App\Http\Controllers\SecondFactorController::class, 'change'])->name('second-factor.change');
     Route::get('/curriculum-source-checks', [\App\Http\Controllers\CurriculumSourceController::class,'index'])->name('curriculum-sources.index');
     Route::get('/apprentices/{apprentice}/source-comparison', [\App\Http\Controllers\CurriculumSourceController::class,'show'])->name('curriculum-sources.show');
     Route::post('/apprentices/{apprentice}/source-comparison', [\App\Http\Controllers\CurriculumSourceController::class,'submit'])->name('curriculum-sources.submit');

@@ -1,5 +1,5 @@
 {
-  "checkpoint": "v0.33.0",
+  "checkpoint": "development-pack-09",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -45,7 +45,7 @@
     {
       "batch": "Configurable private evidence service",
       "status": "working_tested_copy_planning_and_staging_execution",
-      "remaining": "Known-reference inventory, protected exact-preview plans, opt-in exclusive staged copies and final hash/binding verification supplied. Actual private source/target rehearsal, legacy/unregistered reconciliation, reference cutover, restore and Cloud acceptance remain. No source deletion/link change."
+      "remaining": "Protected copy planning/execution plus retained-copy readback, exclusive separate recovery rehearsal and read-only administrator history now work locally. Actual remote/private source/target rehearsal, unregistered legacy reconciliation, database/application backup recovery, live reference relink, native concurrency/crash and hosted acceptance remain. No source deletion or cutover."
     },
     {
       "batch": "Marking worklist and in-portal reminders",
@@ -55,7 +55,7 @@
     {
       "batch": "Account access and password recovery preparation",
       "status": "working_tested_local_recovery",
-      "remaining": "Own-account password change, session version binding, sensitive-account invalidation and audit work. Broker recovery is disabled by default and local/testing array-sink only. Production verification/invitations/MFA/delivery, session-cutover acceptance and actual identity-provider integration remain pending."
+      "remaining": "Own-account changes and invalidation remain; C01\u201307 additionally provide restricted staging SMTP recovery, mailbox confirmation, ordinary-staff invitation and reviewed marking/review email pilots. Actual provider/identity/MFA, production account policy, native/hosted acceptance and real identity-provider mapping remain pending."
     },
     {
       "batch": "Maths/English training and qualifications",
@@ -95,7 +95,7 @@
     {
       "batch": "Training plans, RPL and curriculum/KSB coverage",
       "status": "working_tested_operational_provider_plan",
-      "remaining": "Individual twelve-block calendars, controlled references, occupational target, independent provider snapshot approval/withdrawal and guarded deadline preview/application work for four routes. Current approved Autocare RPL can be bound, without automatic price/hours reduction. Formal document contents/primary KSB/Foundation/S9 source reconciliation, participant signatures and financial/funding approval remain."
+      "remaining": "Existing operational provider plans preserved. Technical catalogue/receipt/PDF checks, scoped saved-source comparisons and independent assessment records now work for four loaded routes. Actual Paint controlled-SOW and Autocare KSB/Foundation/S9/cohort source decisions remain; no warnings cleared, participant/funding/price/hour decisions or source replacement implied."
     },
     {
       "batch": "Ten-week progress reviews",
@@ -129,8 +129,8 @@
     },
     {
       "batch": "Induction/wellbeing surveys",
-      "status": "working_tested_receipt_tracking",
-      "remaining": "Previously supplied questionnaire PDFs were located; their documents are not being requested again. Current code records private receipts/checks, not questionnaire answers. External responder URLs/configuration are still required; document design/edit URLs must not be treated as respondent links. Any internal sensitive-answer storage needs a separate approved privacy/access decision."
+      "status": "working_tested_receipts_and_shared_link_configuration",
+      "remaining": "Pack 08 adds the disabled-by-default shared responder-link workflow. Actual responder URLs, form ownership/access/privacy review, hosted browser acceptance and manual receipt reconciliation remain. The original questionnaire PDFs were previously located; do not request them again or treat edit/design URLs as responder URLs. Sensitive answers remain external."
     },
     {
       "batch": "Help and optional voice explanations",
@@ -140,12 +140,12 @@
     {
       "batch": "Reminder delivery and account administration",
       "status": "partial",
-      "remaining": "First empty-staging administrator bootstrap now works with once-only audit/marker and private credentials; shared sessions/cache tested via local HTTPS. Existing-user onboarding/invitations, verification/MFA/recovery email, actual scheduler/resources and employer mapping remain pending. Reminder schedule off by default."
+      "remaining": "Controlled staging recovery/onboarding plus reviewed explicit generic marking/review SMTP pilot now implemented. Actual provider/inbox, native concurrency/crash recovery, production policy/MFA, apprentice/employer onboarding, actual scheduler/resources and hosted acceptance remain. Automated external reminder dispatch is not enabled."
     },
     {
       "batch": "Polishing and acceptance",
-      "status": "partial",
-      "remaining": "Shared responsive controls, spacing, source labels, report meters and source-safe guidance polished. Native PDF task sample inspected using non-browser PDF rendering. No browser/phone/keyboard/print user acceptance or full-device QA performed."
+      "status": "working_script_checked_browser_acceptance_pending",
+      "remaining": "v0.34 navigation plus v0.35 apprentice/directory form error recovery implemented. Server/HTTP and Node checks supplied. Actual browser startup remains blocked here; browser/phone/screen-reader/touch/print acceptance and real hosted integration remain for Martin."
     },
     {
       "batch": "Laravel Cloud release",
@@ -161,9 +161,192 @@
       "batch": "v0.33.0 exclusive verified staging copies",
       "status": "working_tested",
       "remaining": "Actual remote rehearsal/reconciliation and separately reviewed cutover/restore."
+    },
+    {
+      "batch": "v0.34.0 keyboard and compact navigation",
+      "status": "working_script_checked_browser_acceptance_pending",
+      "remaining": "Actual Chromium/phone/screen-reader acceptance and merge into Martin's integrated interface; browser runner included."
+    },
+    {
+      "batch": "v0.35.0 form error recovery / handover baseline",
+      "status": "working_server_and_script_tested_browser_acceptance_pending",
+      "remaining": "Actual browser/native error-link focus/screen-reader acceptance and integration into Martin's repository. Separate improved version follows Jon's confirmation that the update has been sent."
+    },
+    {
+      "batch": "Improved preview 01 \u2014 scoped dashboard training work",
+      "status": "implemented_validation_in_TEST_RESULTS",
+      "remaining": "Actual browser/phone/screen-reader/layout acceptance, real repository/Cloud integration and user review; no automatic merge into v0.35."
+    },
+    {
+      "batch": "Improved preview 02 \u2014 scoped marking worklist",
+      "status": "implemented_validation_in_TEST_RESULTS",
+      "remaining": "Actual browser/device/hosted acceptance and user review; global reminder processing remains separate from list filters."
+    },
+    {
+      "batch": "Improved preview 03 \u2014 Searchable review follow-up worklist",
+      "status": "implemented_validation_in_TEST_RESULTS",
+      "remaining": "Actual browser/device/hosted acceptance and user review; no automatic merge into the v0.35 handover."
+    },
+    {
+      "batch": "Improved preview 03 \u2014 Scoped dashboard review follow-up links",
+      "status": "implemented_validation_in_TEST_RESULTS",
+      "remaining": "Actual browser/device/hosted acceptance and user review; no automatic merge into the v0.35 handover."
+    },
+    {
+      "batch": "Improved preview 03 \u2014 Latest saved review draft metadata and source shortcuts",
+      "status": "implemented_validation_in_TEST_RESULTS",
+      "remaining": "Actual browser/device/hosted acceptance and user review; no automatic merge into the v0.35 handover."
+    },
+    {
+      "batch": "Improved preview 04 \u2014 Register source worklist/search/pagination",
+      "status": "implemented_validation_in_TEST_RESULTS",
+      "remaining": "Actual browser/device/hosted acceptance and source reconciliation/user review; no automatic merge into v0.35."
+    },
+    {
+      "batch": "Improved preview 04 \u2014 Scoped dashboard register follow-up links",
+      "status": "implemented_validation_in_TEST_RESULTS",
+      "remaining": "Actual browser/device/hosted acceptance and source reconciliation/user review; no automatic merge into v0.35."
+    },
+    {
+      "batch": "Improved preview 04 \u2014 Saved register code position and safe source failure",
+      "status": "implemented_validation_in_TEST_RESULTS",
+      "remaining": "Actual browser/device/hosted acceptance and source reconciliation/user review; no automatic merge into v0.35."
+    },
+    {
+      "batch": "Maths and English caseload follow-up",
+      "status": "working_tested_local",
+      "remaining": "Search/subject/target/evidence follow-up in separate preview; browser and hosted acceptance remain. Topic completion and qualification achievement stay separate."
+    },
+    {
+      "batch": "Improved preview 06 \u2014 Searchable private Careers worklist",
+      "status": "working_tested_local",
+      "remaining": "Browser/device/hosted acceptance, real source reconciliation and deliberate merge into Martin's project remain pending."
+    },
+    {
+      "batch": "Improved preview 06 \u2014 Careers date, adviser and action-source checks",
+      "status": "working_tested_local",
+      "remaining": "Browser/device/hosted acceptance, real source reconciliation and deliberate merge into Martin's project remain pending."
+    },
+    {
+      "batch": "Improved preview 06 \u2014 Careers discussion history and exact source navigation",
+      "status": "working_tested_local",
+      "remaining": "Browser/device/hosted acceptance, real source reconciliation and deliberate merge into Martin's project remain pending."
+    },
+    {
+      "batch": "Improved preview 07 \u2014 extra-training follow-up",
+      "status": "working_tested_sqlite_http",
+      "remaining": "Native database, actual browser/device/hosted acceptance and deliberate merge into Martin's project remain pending."
+    },
+    {
+      "batch": "Improved preview 08 \u2014 Private concern search and pagination",
+      "status": "working_tested_sqlite_http",
+      "remaining": "Native database, browser/device/hosted acceptance and deliberate integration remain pending; no automatic support approval/funding or record repair."
+    },
+    {
+      "batch": "Improved preview 08 \u2014 Concern action-date and current-owner checks",
+      "status": "working_tested_sqlite_http",
+      "remaining": "Native database, browser/device/hosted acceptance and deliberate integration remain pending; no automatic support approval/funding or record repair."
+    },
+    {
+      "batch": "Improved preview 08 \u2014 Support-plan review queue",
+      "status": "working_tested_sqlite_http",
+      "remaining": "Native database, browser/device/hosted acceptance and deliberate integration remain pending; no automatic support approval/funding or record repair."
+    },
+    {
+      "batch": "Improved preview 09 \u2014 Searchable staff overview",
+      "status": "working_tested_sqlite_http",
+      "remaining": "Native database, browser/device/hosted acceptance and deliberate integration remain pending; no HR authority or completion status is inferred."
+    },
+    {
+      "batch": "Improved preview 09 \u2014 Outstanding staff-development action queue",
+      "status": "working_tested_sqlite_http",
+      "remaining": "Native database, browser/device/hosted acceptance and deliberate integration remain pending; no HR authority or completion status is inferred."
+    },
+    {
+      "batch": "Improved preview 09 \u2014 Planned staff-review queue and exact source anchors",
+      "status": "working_tested_sqlite_http",
+      "remaining": "Native database, browser/device/hosted acceptance and deliberate integration remain pending; no HR authority or completion status is inferred."
+    },
+    {
+      "batch": "Completion 01 \u2014 controlled staging password-recovery SMTP pilot",
+      "status": "working_tested_controlled_staging_pilot",
+      "remaining": "Actual provider/remote TLS/inbox delivery, identity verification/onboarding/MFA, native database and hosted/production acceptance remain. The wider account-delivery completion batch is still partial."
+    },
+    {
+      "batch": "Completion 02 \u2014 Existing-account mailbox confirmation",
+      "status": "working_tested_controlled_staging_pilot",
+      "remaining": "Native database/locking, actual provider and inbox delivery, browser/device/hosted and real repository acceptance remain; production blocked."
+    },
+    {
+      "batch": "Completion 03 \u2014 Controlled existing-staff password invitation",
+      "status": "working_tested_controlled_staging_pilot",
+      "remaining": "Native database/locking, actual provider and inbox delivery, browser/device/hosted and real repository acceptance remain; production blocked."
+    },
+    {
+      "batch": "Completion 04 \u2014 Administrator staff-onboarding queue, resend and revoke",
+      "status": "working_tested_controlled_staging_pilot",
+      "remaining": "Native database/locking, actual provider and inbox delivery, browser/device/hosted and real repository acceptance remain; production blocked."
+    },
+    {
+      "batch": "Completion 05 \u2014 Reconciled recipient/source preview and deduplicated reminder-mail preparation",
+      "status": "working_tested_controlled_staging_pilot",
+      "remaining": "Native locking/concurrency/crash recovery, actual mail provider/inbox and browser/hosted/real-project acceptance remain; production blocked and no automatic external dispatch."
+    },
+    {
+      "batch": "Completion 06 \u2014 Explicit reviewed staging SMTP dispatch with committed reservation",
+      "status": "working_tested_controlled_staging_pilot",
+      "remaining": "Native locking/concurrency/crash recovery, actual mail provider/inbox and browser/hosted/real-project acceptance remain; production blocked and no automatic external dispatch."
+    },
+    {
+      "batch": "Completion 07 \u2014 Private delivery history, versioned review/cancel and uncertain-outcome handling",
+      "status": "working_tested_controlled_staging_pilot",
+      "remaining": "Native locking/concurrency/crash recovery, actual mail provider/inbox and browser/hosted/real-project acceptance remain; production blocked and no automatic external dispatch."
+    },
+    {
+      "batch": "Completion 08 \u2014 Retained staging-copy hash/size recheck independent of original-file contents",
+      "status": "working_tested_isolated_recovery_rehearsal",
+      "remaining": "Native migration/locking/concurrency/fault and actual remote storage/privacy/browser/hosted acceptance, complete DB/application backup recovery and live relink remain separate; no cutover approval."
+    },
+    {
+      "batch": "Completion 09 \u2014 Exclusive isolated evidence-file recovery rehearsal",
+      "status": "working_tested_isolated_recovery_rehearsal",
+      "remaining": "Native migration/locking/concurrency/fault and actual remote storage/privacy/browser/hosted acceptance, complete DB/application backup recovery and live relink remain separate; no cutover approval."
+    },
+    {
+      "batch": "Completion 10 \u2014 Read-only administrator recovery history and current-byte rechecks",
+      "status": "working_tested_isolated_recovery_rehearsal",
+      "remaining": "Native migration/locking/concurrency/fault and actual remote storage/privacy/browser/hosted acceptance, complete DB/application backup recovery and live relink remain separate; no cutover approval."
+    },
+    {
+      "batch": "Completion 11 \u2014 Four-route catalogue/receipt/blank-PDF technical checks",
+      "status": "working_tested_source_control_workflow",
+      "remaining": "Actual provider source/cohort/KSB decisions and controlled amendments, real repository/native/browser/hosted acceptance remain; no curriculum/funding approval or automatic source migration."
+    },
+    {
+      "batch": "Completion 12 \u2014 Scoped saved-task source and cohort-context comparison",
+      "status": "working_tested_source_control_workflow",
+      "remaining": "Actual provider source/cohort/KSB decisions and controlled amendments, real repository/native/browser/hosted acceptance remain; no curriculum/funding approval or automatic source migration."
+    },
+    {
+      "batch": "Completion 13 \u2014 Independent source-assessment review, return and withdrawal history",
+      "status": "working_tested_source_control_workflow",
+      "remaining": "Actual provider source/cohort/KSB decisions and controlled amendments, real repository/native/browser/hosted acceptance remain; no curriculum/funding approval or automatic source migration."
+    },
+    {
+      "batch": "Development Pack 09 \u2014 optional staff authenticator sign-in and recovery",
+      "status": "working_tested_controlled_staging_pilot",
+      "remaining": "Actual authenticator apps, browser/device/Cloud and native database concurrency acceptance, independent security review, out-of-band security notifications and approved lost-both-factors recovery policy remain. Confirmed factors stay enforced when enrolment is OFF. No administrator bypass or production enablement."
     }
   ],
-  "queue_review": "v0.32.0 adds exact-preview, protected evidence copy plans; v0.33.0 adds explicit once-only staging execution with exclusive destination creation, source SHA-256/size validation, destination readback, final verification and technical audit. Original files, application references and retained snapshots are not changed. No storage cutover or production execution is enabled.",
+  "queue_review": "Pack 08 adds shared questionnaire links; Pack 09 adds optional authenticator enrolment and password-plus-code/recovery sign-in. Both require target acceptance. No automatic production deployment or survey answer storage.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Actual repository/environment integration and source/target rehearsal; reconcile real legacy/unregistered files, then separately review reference cutover and restore proof. No automatic link switch or production access."
+  "next_priority": "Martin repository/Cloud acceptance and actual configuration remain essential. Pack 09 advances the account MFA pilot; it does not close production identity/security policy, complete recovery/relink or retained curriculum decisions.",
+  "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
+  "source_baseline": "v0.35.0",
+  "development_pack": "09",
+  "questionnaire_update": {
+    "pack": "08",
+    "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",
+    "remaining": "Actual shared responder URLs, form ownership/access/privacy checks and browser/hosted acceptance; receipt reconciliation stays manual. No answer storage, automatic invitation, annual due flag or completion tracking."
+  }
 }
