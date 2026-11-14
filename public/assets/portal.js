@@ -105,6 +105,12 @@ window.addEventListener('beforeprint',()=>{
     show(!compact.matches || focusInside);
     if (!compact.matches && toggleFocused) {
       const target = navigation.querySelector('[aria-current="page"]') || navigation.querySelector('a');
+      // A user may have closed the current group manually. Reveal it before focus.
+      let group = target?.closest?.('details');
+      while (group) {
+        group.open = true;
+        group = group.parentElement?.closest?.('details');
+      }
       target?.focus();
     }
     button.hidden = !compact.matches;

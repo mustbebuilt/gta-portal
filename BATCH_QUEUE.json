@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-17",
+  "checkpoint": "development-pack-18",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -376,14 +376,19 @@
       "batch": "Development Pack17 \u2014 task deadline change history",
       "status": "working_tested_deadline_history",
       "remaining": "Actual native/Cloud/browser acceptance; no historic date changes reconstructed, no automatic plan amendment/source approval."
+    },
+    {
+      "batch": "Development Pack18 \u2014 grouped sidebar navigation",
+      "status": "working_tested_grouped_navigation",
+      "remaining": "Actual browser/mobile/assistive-technology and Cloud acceptance remain. Existing destination permissions stay authoritative."
     }
   ],
-  "queue_review": "Pack17 records future manual/approved-plan task deadline changes. Existing date rules, saved work and earlier unknown history are preserved.",
+  "queue_review": "Pack18 groups existing sidebar links into native collapsible sections with preserved role visibility, automatic current-section opening and prominent common shortcuts.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Martin to integrate/test through17 on actual staging and return concrete findings. No fixed remaining-pack count is implied.",
+  "next_priority": "Martin to merge/test through18 on actual staging, especially grouped-menu usability, role visibility, native disclosure keyboard behaviour and mobile layout.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "17",
+  "development_pack": "18",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",

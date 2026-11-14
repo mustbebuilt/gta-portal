@@ -35,3 +35,14 @@ main:focus{outline:none}
 .error-summary a{color:inherit;text-decoration:underline;text-underline-offset:3px}
 
 .priority-summary{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}.priority-summary span{padding:8px 12px;border:1px solid var(--line);border-radius:8px}.priority-list{list-style:none;margin:0;padding:0}.priority-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:18px 0;border-bottom:1px solid var(--line)}.priority-row h3{font-size:17px;margin:8px 0;overflow-wrap:anywhere}.priority-row p{margin:4px 0}.priority-row .button{align-self:center}.priority-heading{scroll-margin-top:20px}@media(max-width:650px){.priority-row{grid-template-columns:minmax(0,1fr)}.priority-row .button{justify-self:start;max-width:100%}}
+
+/* Grouped navigation: native disclosures remain usable without JavaScript. */
+.sidebar nav.grouped-navigation{display:block;width:100%}.navigation-shortcuts:empty{display:none}
+.navigation-group{margin:6px 0;border:1px solid #405263;border-radius:8px;overflow:hidden}
+.sidebar .navigation-group>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px;padding:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;list-style:none;overflow-wrap:anywhere}
+.navigation-group>summary::-webkit-details-marker{display:none}.navigation-group>summary::after{content:"";width:8px;height:8px;flex:0 0 8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);margin-right:4px}
+.navigation-group[open]>summary::after{transform:rotate(45deg)}.navigation-group[open]>summary{background:#253d50}
+.navigation-group>summary:hover{background:#253d50}.navigation-group>summary:focus-visible{outline:3px solid #edaa3a;outline-offset:-3px}
+.navigation-group-links{padding:6px}.sidebar .navigation-group-links a{font-size:14px;min-height:44px;padding:10px 12px;margin:2px 0;overflow-wrap:anywhere}
+.sidebar .navigation-shortcuts a{font-weight:700}.sidebar .navigation-help{margin-top:12px;border-top:1px solid #405263;border-radius:0;padding-top:16px}
+@media(max-width:850px){.sidebar nav.grouped-navigation{grid-column:1/-1}.navigation-group{width:100%}.sidebar .navigation-shortcuts a{margin-bottom:6px}}
