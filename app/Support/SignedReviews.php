@@ -28,6 +28,10 @@ class SignedReviews
     }
     public static function intact(SignedReviewRecord $r): bool
     {
+        if(($r->snapshot['origin']??null)==='electronic'){
+            $packet=\App\Models\ElectronicReviewPacket::find($r->snapshot['electronic_packet_id']??null);
+            if(!$packet||$packet->signed_review_record_id!==$r->id||($r->snapshot['packet_hash']??null)!==$packet->snapshot_hash||($packet->completion['file_sha256']??null)!==($r->file['sha256']??null)||!ElectronicReviews::recordIntact($packet,$r)){return false;}
+        }
         return ($r->snapshot['apprentice_id']??null)===$r->apprentice_id && ($r->snapshot['review_id']??null)===$r->progress_review_draft_id && !$r->meeting_date->gt(today()) && ReviewedImports::hash($r->snapshot)===$r->snapshot_hash && ($r->file['sha256']??null)===($r->snapshot['file_sha256']??null) && ($r->snapshot['review_version']??null)===$r->review_version && ($r->snapshot['fields']['reviewDate']??null)===$r->meeting_date->toDateString();
     }
     private static function current(Apprentice $a,ProgressReviewDraft $r): void
@@ -49,6 +53,7 @@ class SignedReviews
                 if($a->programme_id){$a->programmeRecord()->lockForUpdate()->first();}IndividualDeliveryPlan::where('apprentice_id',$a->id)->lockForUpdate()->first();
                 $r=ProgressReviewDraft::whereKey($review->id)->lockForUpdate()->firstOrFail();
                 if($r->version!==(int)$data['version']){self::fail('This frozen review changed. Reopen its current evidence page.');}self::current($a,$r);
+                if(\App\Models\ElectronicReviewPacket::where('active_review_id',$r->id)->exists()){self::fail('Withdraw the active electronic participant record before adding an external signed copy.');}
                 if(SignedReviewRecord::where('progress_review_draft_id',$r->id)->whereNull('withdrawn_at')->exists()){self::fail('A current signed-copy record already exists. Resolve it before adding another.');}
                 $expected=['apprentice'=>$a->first_name.' '.$a->last_name,'employer'=>$r->fields['employerRep']??'','mentor'=>$r->fields['mentor']??''];
                 foreach($expected as $role=>$name){
@@ -92,6 +97,7 @@ class SignedReviews
             Apprentice::whereKey($record->apprentice_id)->lockForUpdate()->firstOrFail();ProgressReviewDraft::whereKey($record->progress_review_draft_id)->lockForUpdate()->firstOrFail();
             $row=SignedReviewRecord::whereKey($record->id)->lockForUpdate()->firstOrFail();
             if($row->version!==$version || $row->withdrawn_at){self::fail('This evidence record changed or is already withdrawn.');}
+            if(($row->snapshot['origin']??null)==='electronic'){ElectronicReviews::withdrawFromRecord($row,$u,$reason);}
             $row->withdrawn_at=now();$row->version++;$row->history=[...$row->history,['event'=>'copy_withdrawn','by'=>$u->id,'reason'=>$reason,'at'=>now()->toIso8601String()]];$row->save();self::event($row,$u,'copy_withdrawn');
         });
     }

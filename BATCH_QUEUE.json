@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-25",
+  "checkpoint": "development-pack-26",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -416,14 +416,19 @@
       "batch": "Pack25 consolidated native questionnaire workflow",
       "status": "working_reference_code_target_acceptance_pending",
       "remaining": "Provider-approved question and privacy wording, actual Inclusion scope/identity, old external receipt reconciliation, native encryption/backup/locks, browser/mobile and hosted acceptance. External forms are not automatically ingested."
+    },
+    {
+      "batch": "Pack26 automated review preparation and participant sign-off",
+      "status": "working_reference_code_target_acceptance_pending",
+      "remaining": "Actual named participant authority/identity, provider acceptance of account/password sign-off, native transaction/concurrency/encrypted-file restore, browser/mobile/accessibility and Cloud acceptance. No certificate-based PDF signature or independent timestamp service."
     }
   ],
-  "queue_review": "Pack25 consolidates native questionnaire authoring/independent publication, scope-bound batch assignments, encrypted private drafts, immutable submissions, Inclusion checks, resubmission, concern-linked follow-up resolution/reopening, status exports, homepage and generic reminder integration. Actual GTA wording and target acceptance remain required.",
+  "queue_review": "Pack26 consolidates expanded factual review preparation with named signing authority, source-bound shared participant records, three account/password sign-offs, decline/withdraw/reissue, independent checked PDF, legacy signed-record/cycle/reminder integration and audit. Actual source/native/Cloud/browser/provider acceptance remains.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Integrate and accept current code in the actual target. Remaining distinct development: direct electronic review signing and consistent Yorkshire narration; authoritative curriculum/Gateway decisions, existing external-form reconciliation and actual provider/native/Cloud rollout still require acceptance. The whole portal is not declared complete.",
+  "next_priority": "Accept the expanded review workflow and earlier packs in the actual target; consistent Yorkshire narration remains distinct development. Actual provider policy on account sign-off, authoritative curriculum/cohort/Gateway decisions, source completeness and deployment acceptance remain separate.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "25",
+  "development_pack": "26",
   "questionnaire_update": {
     "pack": "25",
     "status": "Native questionnaire lifecycle implemented separately from retained external responder links and manual receipts.",
@@ -432,7 +437,7 @@
   "requested_expansion_2026_11_14": {
     "status": "all_nine_functional_reference_workflows_implemented_target_content_acceptance_pending",
     "release_style": "Larger functional releases; existing pack numbers retained.",
-    "priority": "Reconcile actual identities, questionnaire wording and authoritative programme/cohort criteria; test native/Cloud/provider rollout. Direct electronic review signatures remain separate.",
+    "priority": "Reconcile actual identities, approved questionnaire wording and programme/cohort criteria; accept automated factual review content and account sign-off in native/Cloud/browser target. Consistent Yorkshire narration remains separate.",
     "workstreams": [
       {
         "name": "Apprentice experience",

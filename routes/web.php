@@ -99,6 +99,20 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/account/two-step', [\App\Http\Controllers\SecondFactorController::class, 'settings'])->name('second-factor.settings');
     Route::post('/account/two-step', [\App\Http\Controllers\SecondFactorController::class, 'change'])->name('second-factor.change');
 
+
+    Route::get('/review-signing',[\App\Http\Controllers\ElectronicReviewController::class,'index'])->name('electronic-reviews.index');
+    Route::get('/apprentices/{apprentice}/review-signing-authority',[\App\Http\Controllers\ElectronicReviewController::class,'authorities'])->name('review-authority.index');
+    Route::post('/apprentices/{apprentice}/review-signing-authority',[\App\Http\Controllers\ElectronicReviewController::class,'saveAuthority'])->name('review-authority.save');
+    Route::post('/review-signing-authorities/{authority}/revoke',[\App\Http\Controllers\ElectronicReviewController::class,'revokeAuthority'])->whereUuid('authority')->name('review-authority.revoke');
+    Route::get('/reviews/{review}/participant-record',[\App\Http\Controllers\ElectronicReviewController::class,'prepareForm'])->name('electronic-reviews.prepare-form');
+    Route::post('/reviews/{review}/participant-record',[\App\Http\Controllers\ElectronicReviewController::class,'prepare'])->name('electronic-reviews.prepare');
+    Route::get('/review-signing/{packet}',[\App\Http\Controllers\ElectronicReviewController::class,'show'])->whereUuid('packet')->name('electronic-reviews.show');
+    Route::post('/review-signing/{packet}/release',[\App\Http\Controllers\ElectronicReviewController::class,'release'])->whereUuid('packet')->name('electronic-reviews.release');
+    Route::post('/review-signing/{packet}/respond',[\App\Http\Controllers\ElectronicReviewController::class,'respond'])->middleware('throttle:6,1')->whereUuid('packet')->name('electronic-reviews.respond');
+    Route::post('/review-signing/{packet}/confirm',[\App\Http\Controllers\ElectronicReviewController::class,'confirm'])->whereUuid('packet')->name('electronic-reviews.confirm');
+    Route::post('/review-signing/{packet}/withdraw',[\App\Http\Controllers\ElectronicReviewController::class,'withdraw'])->whereUuid('packet')->name('electronic-reviews.withdraw');
+    Route::get('/review-signing/{packet}/record.pdf',[\App\Http\Controllers\ElectronicReviewController::class,'download'])->whereUuid('packet')->name('electronic-reviews.pdf');
+
     Route::get('/portal-questionnaires', [\App\Http\Controllers\PortalQuestionnaireController::class,'index'])->name('portal-questionnaires.index');
     Route::get('/portal-questionnaires/forms', [\App\Http\Controllers\PortalQuestionnaireController::class,'forms'])->name('portal-questionnaires.forms');
     Route::post('/portal-questionnaires/forms', [\App\Http\Controllers\PortalQuestionnaireController::class,'saveForm'])->name('portal-questionnaires.create-form');

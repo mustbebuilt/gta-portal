@@ -1,0 +1,11 @@
+@extends('layout')
+@section('title','Prepare participant review record')
+@section('content')
+<header class="page-heading"><div><h1>Prepare participant review record</h1><p>{{ $apprentice->reference }} · Review {{ $review->id }} · Frozen version {{ $review->version }}</p></div></header>
+@include('electronic-reviews.errors')
+<p>The participant record uses the shared review fields shown in the next preview. Restricted support fields, questionnaire answers, careers notes and internal source snapshots are excluded. Check all remaining free text and selected actions before release.</p>
+<a class="button" href="{{ route('reviews.edit',[$apprentice,$review]) }}">Back to private review</a>@if(\App\Support\LearningAccess::manager(auth()->user()))<a class="button" href="{{ route('review-authority.index',$apprentice) }}">Manage employer signing authority</a>@endif
+@if($review->state==='Ready for signatures'&&$authorities->isNotEmpty())<section class="panel"><form method="post" action="{{ route('electronic-reviews.prepare',$review) }}">@csrf<input type="hidden" name="version" value="{{ $review->version }}"><label>Named employer signing authority<select name="authority_id" required>@foreach($authorities  as $x) @php($g=\App\Models\EmployerApprenticeGrant::find($x->employer_apprentice_grant_id))<option value="{{ $x->id }}">{{ \App\Models\User::find($g->user_id)->name }} · Authority valid until {{ $x->expires_on->format('d M Y') }}</option>@endforeach</select></label>
+<label>Signing window ends<input type="date" name="expires_on" required min="{{ today()->toDateString() }}" max="{{ today()->addDays(30)->toDateString() }}"></label>
+<fieldset><legend>Actions to include in the participant record (optional)</legend>@forelse($review->source_snapshot['action_plan']??[]  as $action)<label><input type="checkbox" name="action_ids[]" value="{{ $action['id'] }}">{{ $action['title'] }} · {{ $action['owner'] }} · {{ $action['due_date']??'No date' }}</label>@empty<p>No actions captured in this frozen review.</p>@endforelse</fieldset><button class="primary">Prepare private preview</button></form></section>@else<p>Use a frozen ready review and current verified named employer signing authority. The frozen apprentice, employer representative and mentor names must match their individual accounts.</p>@endif
+@endsection

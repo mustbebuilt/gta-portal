@@ -37,6 +37,7 @@ class PortalNavigation
         $links=[];
         if(ReviewReminders::allowed($u)) {$links[]=$item('Reviews','reviews.index',[],['reviews.*']);}
         if(in_array($u->role,['admin','ceo','apprentice'],true)||StaffDuties::has($u,'careers_adviser')) {$links[]=$item('Careers','careers.worklist',[],['careers.*']);}
+        if(in_array($u->role,['admin','ceo','tutor','apprentice','employer'],true)||StaffDuties::has($u,'mentor')){$links[]=$item('Review signing','electronic-reviews.index',[],['electronic-reviews.*','review-authority.*']);}
         $group('reviews-careers','Reviews & Careers',$links);
         $links=[];
         if(SupportAccess::team($u)) {

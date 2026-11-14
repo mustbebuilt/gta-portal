@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title','Review preparation assistant')
 @section('content')
+<p class="test-notice">Preparation now also draws on recorded OTJ, Maths/English topics, qualifications, attended-session subjects, planned sessions and approved blocks. Missing data stays flagged. Check and edit each suggested section before applying it; the actual discussion and agreements still need recording.</p>
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }} · {{ $apprentice->reference }}</p><h1>Review preparation assistant</h1><p>Factual notes for saved draft {{ $review->id }} · version {{ $review->version }}.</p></div><a class="button" href="{{ route('reviews.edit',[$apprentice,$review]) }}">Return to review draft</a></header>
 @include('learning.errors')
 <p class="notice">These are preparation notes from saved records. They do not describe a meeting that has not happened, choose a progress judgement, confirm evidence sufficiency or sign a review. Check sources and edit the wording before inserting selected sections.</p>
@@ -19,6 +20,11 @@
 </section>
 <details class="panel"><summary>Captured training sources</summary><p>Current task/action positions at capture; dated feedback and completed sessions limited to the chosen period. Private Support, Careers, HR, help requests, file contents and deadline-change reasons are excluded. No external AI service is used.</p><h2>Task decisions and current status</h2>@forelse($brief->source['tasks'] as $task)<article><p>{{ $task['reference'] }} · {{ $task['title'] }} · {{ $task['status'] }} · Decision {{ $task['decision_date']??'Not reliably dated' }} · Due {{ $task['due']??'Not set' }}</p>@if($task['feedback'])<p class="recorded-answer">{{ $task['feedback'] }}</p>@endif @if(\App\Support\LearningAccess::training(auth()->user(),$apprentice))<a href="{{ route('tasks.show',$task['id']) }}">Open current task source</a>@endif</article>@empty<p>No allocated tasks.</p>@endforelse
 <h2>Saved session records</h2>@forelse($brief->source['attendance'] as $session)<p>{{ $session['date'] }} · {{ $session['name'] }} · {{ $session['state'] }} · {{ $session['code']?\App\Support\AttendanceMath::CODES[$session['code']]:'Unmarked / source check' }}@unless($session['ended']) · Not counted as a completed session @endunless</p>@empty<p>No saved roster sessions in this period.</p>@endforelse
+@if($brief->source['automation']??null) @php($facts=$brief->source['automation'])
+<h2>Recorded OTJ and training facts</h2><p>Chosen-period loaded OTJ subtotal: {{ number_format($facts['period_recorded_minutes']/60,2) }} hours. Current loaded subtotal: {{ number_format($facts['otj']['recorded_minutes']/60,2) }} hours. Source checks: {{ $facts['otj']['invalid_sources'] }}; pending: {{ $facts['otj']['pending_sources'] }}. Historical completeness is not verified.</p>
+<h3>Assigned Maths and English topics</h3>@forelse($facts['topics'] as $topic)<p>{{ $topic['subject'] }} · {{ $topic['topic'] }} · {{ $topic['planned_hours'] }} planned hours · {{ $topic['status'] }} · Source version {{ $topic['version'] }}</p>@empty<p>No assigned topics loaded.</p>@endforelse
+<h3>Qualification source records</h3>@forelse($facts['qualifications'] as $q)<p>{{ $q['title'] }} · {{ $q['status'] }} · Result {{ $q['result']??'Not recorded' }} · Target {{ $q['target']??'Not set' }} · Source version {{ $q['version'] }}</p>@empty<p>No qualification source records loaded.</p>@endforelse
+@endif
 <h2>Current agreed actions</h2>@forelse($brief->source['actions'] as $action)<p>{{ $action['title'] }} · {{ $action['owner'] }} · {{ $action['status'] }} · Due {{ $action['due']??'Not set' }}</p>@empty<p>No action records loaded.</p>@endforelse</details>
 @endif
 @endif

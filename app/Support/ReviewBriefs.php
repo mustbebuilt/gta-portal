@@ -37,7 +37,7 @@ class ReviewBriefs
         })->all();
         $actions = SmartAction::with(['task' => fn ($q) => $q->where('apprentice_id', $a->id)])->where('apprentice_id', $a->id)->orderBy('id')->when($lock, fn ($q) => $q->lockForUpdate())->get()->map(fn ($x) => ['id' => $x->id, 'title' => $x->title, 'version' => $x->version, 'owner' => $x->owner, 'status' => $x->learning_task_id && ! $x->task ? 'Source needs checking' : $x->currentStatus(), 'due' => $x->learning_task_id && ! $x->task ? null : $x->deadline()?->toDateString(), 'completion' => $x->completion_date?->toDateString(), 'linked_task' => $x->learning_task_id])->all();
 
-        return ['as_of' => today()->toDateString(), 'period_from' => $from, 'period_to' => $to, 'profile' => $a->only('id', 'version', 'reference', 'tutor_id', 'mentor_id', 'programme_id'), 'review' => ['id' => $review->id, 'version' => $review->version, 'state' => $review->state, 'fields_hash' => ReviewedImports::hash($review->fields ?? []), 'snapshot_hash' => ReviewedImports::hash($review->source_snapshot ?? [])], 'tasks' => $tasks, 'attendance' => StaffTrainingRecords::attendance($a, $from, $to, $lock), 'actions' => $actions];
+        return ['as_of' => today()->toDateString(), 'period_from' => $from, 'period_to' => $to, 'profile' => $a->only('id', 'version', 'reference', 'tutor_id', 'mentor_id', 'programme_id'), 'review' => ['id' => $review->id, 'version' => $review->version, 'state' => $review->state, 'fields_hash' => ReviewedImports::hash($review->fields ?? []), 'snapshot_hash' => ReviewedImports::hash($review->source_snapshot ?? [])], 'automation'=>ReviewAutomation::capture($a,$from,$to,$lock), 'tasks' => $tasks, 'attendance' => StaffTrainingRecords::attendance($a, $from, $to, $lock), 'actions' => $actions];
     }
 
     public static function suggest(array $s): array
@@ -79,6 +79,11 @@ class ReviewBriefs
         $summary[] = $report['percent'] === null ? 'Attendance percentage unavailable from this loaded period.' : 'Loaded-session attendance: '.round($report['percent'], 1).'%. Not whole-programme attendance.';
         $summary[] = 'Current task approvals: '.$approved->count().'/'.$tasks->count().'. OTJ hours, qualifications, support needs, employer participation and progress judgement require their own checked sources. Discuss learning, feedback and previous actions, then record the actual three-way discussion.';
 
+        if(isset($s['automation'])){
+            $notes=ReviewAutomation::notes($s['automation']);
+            $learning=[...$learning,...$notes['learning']];$progress=[...$progress,...$notes['progressDiscussion']];$summary=[...$summary,...$notes['summary']];
+            foreach($tasks->groupBy('block') as $block=>$rows){$progress[]='Current block '.$block.': '.$rows->where('status','Approved')->count().'/'.$rows->count().' allocated tasks approved. Check actual progress against the approved plan; this is not KSB achievement.';}
+        }
         return ['learning' => implode("\n", $learning), 'progressDiscussion' => implode("\n\n", $progress), 'previousNotes' => implode("\n", $previous), 'summary' => implode("\n\n", $summary)];
     }
 

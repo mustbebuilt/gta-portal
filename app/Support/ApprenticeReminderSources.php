@@ -87,6 +87,13 @@ class ApprenticeReminderSources
             if ($f->kind==='ongoing' || !in_array($f->state,['Published','Retired'],true) || !PortalQuestionnaires::intact($f)) {continue;}
             $items[]=['kind'=>'questionnaire_due','id'=>$x->id,'version'=>$x->version,'date'=>$x->due_date->toDateString(),'form_hash'=>$f->content_hash];
         }
+
+        foreach (\App\Models\ElectronicReviewPacket::where('apprentice_id',$a->id)->where('state','Released')->orderBy('id')->when($lock,fn($q)=>$q->lockForUpdate())->get() as $packet) {
+            $slot=\App\Models\ElectronicReviewSigner::where('packet_id',$packet->id)->where('user_id',$u->id)->where('role','apprentice')->where('state','Pending')->when($lock,fn($q)=>$q->lockForUpdate())->first();
+            if ($slot && ElectronicReviews::current($packet) && ElectronicReviews::signerIntact($slot,$packet)) {
+                $items[]=['kind'=>'review_signing','id'=>$packet->id,'version'=>$packet->version,'date'=>$packet->expires_on->toDateString(),'document_hash'=>$packet->snapshot_hash];
+            }
+        }
         if (count($items) > 100) {
             return ['source' => null, 'check' => 'over_100_items_reconcile_first'];
         }
@@ -98,9 +105,9 @@ class ApprenticeReminderSources
     public static function link(Apprentice $a, array $item): string
     {
         return match ($item['kind']) {
-            'questionnaire_due' => route('portal-questionnaires.show',$item['id']),'task_referred','task_overdue','task_due' => route('tasks.show', $item['id']),'action_overdue','action_due' => route('actions.index', $a).'#action-'.$item['id'],default => route('experience.home')
+            'review_signing' => route('electronic-reviews.show',$item['id']),'questionnaire_due' => route('portal-questionnaires.show',$item['id']),'task_referred','task_overdue','task_due' => route('tasks.show', $item['id']),'action_overdue','action_due' => route('actions.index', $a).'#action-'.$item['id'],default => route('experience.home')
         };
     }
 
-    public const LABELS = ['questionnaire_due' => 'Portal questionnaire due — sign in to check', 'task_referred' => 'Task returned for changes', 'task_overdue' => 'Task past its recorded deadline', 'task_due' => 'Task due within seven days', 'action_overdue' => 'Agreed action past its date', 'action_due' => 'Agreed action due within seven days', 'review_due' => 'Review due reference — confirm appointment with tutor', 'training_tomorrow' => 'Saved training session tomorrow — check timetable with GTA'];
+    public const LABELS = ['review_signing' => 'Review record waiting for your sign-off', 'questionnaire_due' => 'Portal questionnaire due — sign in to check', 'task_referred' => 'Task returned for changes', 'task_overdue' => 'Task past its recorded deadline', 'task_due' => 'Task due within seven days', 'action_overdue' => 'Agreed action past its date', 'action_due' => 'Agreed action due within seven days', 'review_due' => 'Review due reference — confirm appointment with tutor', 'training_tomorrow' => 'Saved training session tomorrow — check timetable with GTA'];
 }

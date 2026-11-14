@@ -65,7 +65,7 @@ class ProgressReviewController extends Controller
         $signedRecords=$review ? \App\Models\SignedReviewRecord::where('progress_review_draft_id',$review->id)->whereNull('withdrawn_at')->get() : collect();
         $signedConfirmed=$signedRecords->contains(fn($r)=>$r->checked_at && \App\Support\SignedReviews::intact($r));
 
-        return view('reviews.form', ['preparation'=>($review?->exists&&$review->state==='Draft')?\App\Support\ReviewPreparation::inspect($review->fields??[],$review->source_snapshot??[],DeliveryPlan::approved($apprentice)):null,'signedConfirmed'=>$signedConfirmed,'hasSignedSource'=>$signedRecords->isNotEmpty(),'apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $review?->source_snapshot ?? \App\Support\ReviewSnapshot::capture($apprentice, []), 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
+        return view('reviews.form', ['automatedDefaults'=>\App\Support\ReviewAutomation::defaults($apprentice),'preparation'=>($review?->exists&&$review->state==='Draft')?\App\Support\ReviewPreparation::inspect($review->fields??[],$review->source_snapshot??[],DeliveryPlan::approved($apprentice)):null,'signedConfirmed'=>$signedConfirmed,'hasSignedSource'=>$signedRecords->isNotEmpty(),'apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $review?->source_snapshot ?? \App\Support\ReviewSnapshot::capture($apprentice, []), 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
     }
 
     public function pdf(Request $r, Apprentice $apprentice, ProgressReviewDraft $review): Response
@@ -160,6 +160,7 @@ class ProgressReviewController extends Controller
             $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
             abort_unless($this->allowed($r, $fresh), 403);
             $row = ProgressReviewDraft::whereKey($review->id)->lockForUpdate()->firstOrFail();
+            if(\App\Models\ElectronicReviewPacket::where('active_review_id',$row->id)->exists()){throw ValidationException::withMessages(['version'=>'Withdraw the active participant signing record before reopening this review.']);}
             if (\App\Models\SignedReviewRecord::where('progress_review_draft_id',$row->id)->whereNull('withdrawn_at')->exists()) { throw ValidationException::withMessages(['version'=>'Withdraw the current signed-copy evidence/confirmation before reopening this frozen review.']); }
             if ($row->version !== $r->integer('version') || $row->state !== 'Ready for signatures') { throw ValidationException::withMessages(['version' => 'Only the current frozen revision can be reopened.']); }
             $row->history = [...($row->history ?? []), ['event' => 'reopened', 'reason' => $r->input('reason'), 'fields' => $row->fields, 'source_snapshot' => $row->source_snapshot, 'saved_by' => $r->user()->id, 'saved_at' => now()->toIso8601String()]];

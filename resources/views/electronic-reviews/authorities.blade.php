@@ -1,0 +1,12 @@
+@extends('layout')
+@section('title','Employer review-signing authority')
+@section('content')
+<header class="page-heading"><div><h1>Employer review-signing authority</h1><p>{{ $apprentice->reference }} · {{ $apprentice->first_name }} {{ $apprentice->last_name }}</p></div></header>
+@include('electronic-reviews.errors')
+<p>Verify that this named person can sign apprenticeship progress reviews for this apprentice and employer. Existing reply access alone does not establish signing authority. Keep actual identity/authority evidence in the controlled source record; record its reference here.</p><p><a class="button" href="{{ route('employer-grants.index',$apprentice) }}">Check employer access first</a><a class="button" href="{{ route('electronic-reviews.index') }}">Review signing worklist</a></p>
+@forelse($grants  as $g) @php($authority=$authorities->get($g->id))
+<section class="panel"><h2>{{ \App\Models\User::find($g->user_id)->name }}</h2>@if($authority)<p>{{ $authority->active?'Recorded active':'Revoked' }} · Expires {{ $authority->expires_on->format('d M Y') }} · Version {{ $authority->version }}</p><p style="white-space:pre-wrap">{{ $authority->authority_reference }}</p>@endif
+<form method="post" action="{{ route('review-authority.save',$apprentice) }}">@csrf<input type="hidden" name="grant_id" value="{{ $g->id }}"><input type="hidden" name="version" value="{{ $authority?->version??0 }}"><label>Identity and authority evidence reference<textarea name="authority_reference" rows="3" required maxlength="4000"></textarea></label><label>Authority expires on<input type="date" name="expires_on" required min="{{ today()->toDateString() }}" max="{{ today()->addYear()->toDateString() }}"></label><label><input type="checkbox" name="authority_checked" value="1" required>I checked this named person's authority to sign this apprentice's progress reviews.</label><button>Verify signing authority</button></form>
+@if($authority?->active)<details><summary>Revoke signing authority</summary><form method="post" action="{{ route('review-authority.revoke',$authority) }}">@csrf<input type="hidden" name="version" value="{{ $authority->version }}"><label>Private reason<textarea name="reason" required maxlength="2000"></textarea></label><button>Revoke authority</button></form></details>@endif</section>
+@empty<section class="panel"><p>No valid named employer account grants. Verify employer access before creating signing authority.</p></section>@endforelse
+@endsection

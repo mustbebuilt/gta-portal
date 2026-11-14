@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack25.
+    // Presence-only contract from the unchanged reference migrations through Pack26.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -30,6 +30,9 @@ class ApplicationSchema
         'data_import_batches'=>['applied_at','applied_by','created_at','id','kind','prepared_by','preview_hash','rows','source_hash','source_name','source_reference','state','updated_at','version'],
         'data_import_events'=>['actor_id','created_at','data_import_batch_id','event','id'],
         'directory_events'=>['created_at','event','id','kind','record_id','user_id'],
+        'electronic_review_events'=>['actor_id','authority_id','created_at','event','id','packet_id','private_note','record_version'],
+        'electronic_review_packets'=>['active_review_id','apprentice_id','checked_at','checked_by','completion','completion_hash','created_at','expires_on','id','prepared_by','progress_review_draft_id','released_at','released_by','signed_review_record_id','snapshot','snapshot_hash','state','updated_at','version','withdrawn_at','withdrawn_by'],
+        'electronic_review_signers'=>['attestation','attestation_hash','attested_at','auth_version','created_at','expected_name','id','identity_hash','packet_id','role','state','updated_at','user_id','version'],
         'employer_apprentice_grants'=>['active','apprentice_id','created_at','employer_id','employer_version','history','id','identity_hash','identity_reference','updated_at','user_id','verified_by','version'],
         'employer_portal_actions'=>['apprentice_id','created_at','created_by','detail','due_date','employer_apprentice_grant_id','history','id','kind','responded_at','responded_by','response','response_note','source','source_hash','source_id','state','title','updated_at','version'],
         'employers'=>['active','contact_email','contact_name','contact_phone','created_at','id','name','record_version','reference','size_band','updated_at'],
@@ -72,6 +75,7 @@ class ApplicationSchema
         'review_preparation_briefs'=>['applied','applied_at','applied_by','applied_review_version','apprentice_id','created_at','id','period_from','period_to','prepared_by','progress_review_draft_id','source','source_hash','suggested','updated_at'],
         'review_reminder_events'=>['actor_id','created_at','event','id','origin','review_reminder_id'],
         'review_reminders'=>['apprentice_id','created_at','id','recipient_id','seen_at','signed_review_record_id','source','source_key','updated_at'],
+        'review_signing_authorities'=>['active','apprentice_id','authority_reference','created_at','employer_apprentice_grant_id','expires_on','grant_binding','history','id','updated_at','verified_by','version'],
         'sessions'=>['id','ip_address','last_activity','payload','user_agent','user_id'],
         'signed_review_events'=>['actor_id','created_at','event','id','signed_review_record_id'],
         'signed_review_records'=>['apprentice_id','checked_at','checked_by','created_at','file','history','id','meeting_date','prepared_by','progress_review_draft_id','review_version','snapshot','snapshot_hash','updated_at','version','withdrawn_at'],
