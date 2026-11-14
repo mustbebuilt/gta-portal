@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-09",
+  "checkpoint": "development-pack-10",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -336,14 +336,19 @@
       "batch": "Development Pack 09 \u2014 optional staff authenticator sign-in and recovery",
       "status": "working_tested_controlled_staging_pilot",
       "remaining": "Actual authenticator apps, browser/device/Cloud and native database concurrency acceptance, independent security review, out-of-band security notifications and approved lost-both-factors recovery policy remain. Confirmed factors stay enforced when enrolment is OFF. No administrator bypass or production enablement."
+    },
+    {
+      "batch": "Development Pack 10 \u2014 blank task library and explicit new-allocation checks",
+      "status": "working_tested_four_loaded_routes",
+      "remaining": "Actual Martin integration and browser/Cloud acceptance; Light Vehicle and other unloaded task catalogues, online knowledge-question banks, Blocks11/12 task content and retained curriculum/cohort/KSB decisions remain separate. New allocations require active explicit programme/version and current source checks. Existing saved schemas/answers are preserved."
     }
   ],
-  "queue_review": "Pack 08 adds shared questionnaire links; Pack 09 adds optional authenticator enrolment and password-plus-code/recovery sign-in. Both require target acceptance. No automatic production deployment or survey answer storage.",
+  "queue_review": "Pack 10 exposes all 200 current blank sources for staff inspection and checks new allocations. It does not replace earlier task workflows or create online knowledge papers. The reference archive includes existing code and 200 current PDFs; older saved sources remain retained from earlier packs.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
   "next_priority": "Martin repository/Cloud acceptance and actual configuration remain essential. Pack 09 advances the account MFA pilot; it does not close production identity/security policy, complete recovery/relink or retained curriculum decisions.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "09",
+  "development_pack": "10",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",

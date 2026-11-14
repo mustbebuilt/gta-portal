@@ -172,7 +172,8 @@ class RemainingOperationalBatchTest extends TestCase
     {
         $l = $this->actor('apprentice');
         $t = $this->actor('tutor');
-        $a = Apprentice::factory()->create(['user_id' => $l->id, 'tutor_id' => $t->id]);
+        $programme = Programme::factory()->create(['standard_code'=>'ST0499','version'=>'1.3']);
+        $a = Apprentice::factory()->create(['user_id' => $l->id, 'tutor_id' => $t->id, 'programme_id'=>$programme->id]);
         $admin = $this->actor();
         $this->actingAs($admin)->post('/apprentices/'.$a->id.'/learning', ['confirmed' => 1])->assertRedirect()->assertSessionHasNoErrors();
 
@@ -222,7 +223,8 @@ class RemainingOperationalBatchTest extends TestCase
         $a = Apprentice::factory()->create();
         $task = LearningTask::factory()->create(['apprentice_id' => $a->id, 'block' => 2]);
         $this->assertTrue(BlockRelease::state($task)['open']);
-        $b = Apprentice::factory()->create();
+        $programme = Programme::factory()->create(['standard_code'=>'ST0499','version'=>'1.3']);
+        $b = Apprentice::factory()->create(['programme_id'=>$programme->id]);
         $this->actingAs($this->actor())->post('/apprentices/'.$b->id.'/block-controls', ['version' => 0, 'enabled' => 1, 'operation' => 'settings', 'reason' => 'Fictional enable sequence'])->assertRedirect()->assertSessionHasNoErrors();
         $this->post('/apprentices/'.$b->id.'/learning',['confirmed' => 1])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertDatabaseCount('learning_tasks',51);

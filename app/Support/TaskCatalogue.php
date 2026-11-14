@@ -38,6 +38,12 @@ class TaskCatalogue
         return self::keyFor($apprentice) !== null;
     }
 
+    // New allocations require an explicit programme/version. Legacy saved Autocare work remains readable.
+    public static function allocationKey(Apprentice $apprentice): ?string
+    {
+        return $apprentice->programme_id ? self::keyFor($apprentice) : null;
+    }
+
     public static function savedKey(LearningTask $task): string
     {
         return $task->template['catalogueId'] ?? 'autocare';

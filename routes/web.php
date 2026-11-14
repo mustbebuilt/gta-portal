@@ -48,6 +48,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
+    Route::get('/task-library', [\App\Http\Controllers\TaskLibraryController::class, 'index'])->name('task-library.index');
+    Route::get('/task-library/{programme}/{reference}', [\App\Http\Controllers\TaskLibraryController::class, 'show'])->name('task-library.show');
+    Route::get('/task-library/{programme}/{reference}/source.pdf', [\App\Http\Controllers\TaskLibraryController::class, 'pdf'])->name('task-library.pdf');
     Route::get('/account/two-step', [\App\Http\Controllers\SecondFactorController::class, 'settings'])->name('second-factor.settings');
     Route::post('/account/two-step', [\App\Http\Controllers\SecondFactorController::class, 'change'])->name('second-factor.change');
     Route::get('/curriculum-source-checks', [\App\Http\Controllers\CurriculumSourceController::class,'index'])->name('curriculum-sources.index');

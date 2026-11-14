@@ -1,7 +1,7 @@
 @foreach(collect($fields)->groupBy('section') as $section=>$items)
 <fieldset><legend>{{ $section }}</legend><div class="form-grid">@foreach($items as $field)
 @php($name=$field['name'])
-@php($value=$readonly?($values[$name]??''):old('answers.'.$name,$values[$name]??''))
+@php($value=($preview??false)?'':($readonly?($values[$name]??''):old('answers.'.$name,$values[$name]??'')))
 @if($field['type']==='notice')<p class="muted full">{{ $field['label'] }}</p>
 @elseif($field['type']!=='decision')
 <div class="{{ ($field['long']??false)?'full':'' }}"><label for="field-{{ $name }}">{{ $field['label'] }}</label>

@@ -45,7 +45,8 @@ class LearningWorkflowTest extends TestCase
 
     public function test_explicit_allocation_creates_fifty_source_tasks_once_without_dates(): void
     {
-        $a = Apprentice::factory()->create();
+        $programme = \App\Models\Programme::factory()->create(['standard_code'=>'ST0499','version'=>'1.3']);
+        $a = Apprentice::factory()->create(['programme_id'=>$programme->id]);
         $this->actingAs($this->actor('admin'));
         $this->get('/apprentices/'.$a->id.'/learning')->assertOk();
         $this->post('/apprentices/'.$a->id.'/learning', ['confirmed' => 1])->assertRedirect()->assertSessionHasNoErrors();

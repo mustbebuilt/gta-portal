@@ -43,13 +43,16 @@ class LearningTaskController extends Controller
             if ($fresh->programme_id) {
                 $fresh->programmeRecord()->lockForUpdate()->first();
             }
-            if (! TaskCatalogue::appliesTo($fresh)) {
-                throw ValidationException::withMessages(['confirmed' => 'The linked programme/version has no loaded task catalogue. No tasks were assigned.']);
+            $key = TaskCatalogue::allocationKey($fresh);
+            if ($key === null) {
+                throw ValidationException::withMessages(['confirmed' => 'Link an active supported programme with the correct standard and version before assigning tasks. No tasks were assigned.']);
             }
             if (LearningTask::where('apprentice_id', $apprentice->id)->exists()) {
                 throw ValidationException::withMessages(['confirmed' => 'Tasks are already assigned. No duplicate allocation was made.']);
             }
-            $key = TaskCatalogue::keyFor($fresh);
+            if (! \App\Support\CurriculumSources::release($key)['technical_ok']) {
+                throw ValidationException::withMessages(['confirmed' => 'The task catalogue or its PDF sources need checking. No tasks were assigned.']);
+            }
             foreach (TaskCatalogue::tasks($key) as $t) {
                 $task = new LearningTask(['apprentice_id' => $apprentice->id, 'reference' => $t['id'], 'block' => $t['block'], 'title' => $t['title'], 'theme' => $t['theme'], 'template' => [...TaskCatalogue::template($t['id'], $key), 'catalogueId' => $key]]);
                 $task->status = $task->template['kind'] === 'source-pending' ? 'Source required' : 'Draft';

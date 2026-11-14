@@ -9,8 +9,8 @@
 @if($manage)@include('learning.block-controls')@endif
 @if($tasks->isEmpty())
 <section class="panel"><h2>No tasks assigned</h2><p>No progress percentage is available until tasks are assigned.</p>
-@php($catalogueKey=\App\Support\TaskCatalogue::keyFor($apprentice))
-@if($manage && $catalogueKey)<form method="post" action="{{ route('learning.allocate',$apprentice) }}">@csrf<label class="check"><input type="checkbox" name="confirmed" value="1" required>I confirm the supplied {{ \App\Support\TaskCatalogue::PROGRAMMES[$catalogueKey]['name'] }} catalogue applies to this apprentice. This assigns source tasks only; it does not approve an individual training plan.</label><button class="primary">Assign {{ \App\Support\TaskCatalogue::PROGRAMMES[$catalogueKey]['name'] }} tasks</button></form>@elseif($manage)<p>No task catalogue is loaded for the linked programme/version. Check the programme link before assigning tasks.</p>@endif</section>
+@php($catalogueKey=\App\Support\TaskCatalogue::allocationKey($apprentice))
+@if($manage && $catalogueKey)<p><a class="button" href="{{ route('task-library.index',['programme'=>$catalogueKey]) }}">Preview this task catalogue</a></p><form method="post" action="{{ route('learning.allocate',$apprentice) }}">@csrf<label class="check"><input type="checkbox" name="confirmed" value="1" required>I confirm the supplied {{ \App\Support\TaskCatalogue::PROGRAMMES[$catalogueKey]['name'] }} catalogue applies to this apprentice. This assigns source tasks only; it does not approve an individual training plan.</label><button class="primary">Assign {{ \App\Support\TaskCatalogue::PROGRAMMES[$catalogueKey]['name'] }} tasks</button></form>@elseif($manage)<p>Link an active supported programme with its correct standard and version before assigning tasks. An unlinked record does not default to Autocare.</p>@endif</section>
 @else
 @php($all=(int)$counts->sum())
 @php($approved=(int)($counts['Approved']??0))
