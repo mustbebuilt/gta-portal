@@ -12,6 +12,7 @@ class PortalNavigation
         $item=fn(string $label,string $route,array $parameters=[],array $patterns=[],?bool $current=null)=>[
             'label'=>$label,'href'=>route($route,$parameters),'current'=>$current??$request->routeIs(...($patterns?:[$route]))];
         $primary=[];$groups=[];
+        if(StaffAttention::allowed($u)) {$primary[]=$item('Needs attention','attention.index');}
         if($u->role==='apprentice') {$primary[]=$item('My next step','experience.home');}
         $group=function(string $id,string $label,array $links)use(&$groups):void {
             if(!$links) {return;}

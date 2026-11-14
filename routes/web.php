@@ -48,7 +48,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
-    Route::get('/my-next-step', [\App\Http\Controllers\ApprenticeExperienceController::class,'home'])->name('experience.home');
+    Route::get('/needs-attention', [\App\Http\Controllers\StaffWorkflowController::class,'attention'])->name('attention.index');
+    Route::get('/apprentices/{apprentice}/reviews/{review}/preparation', [\App\Http\Controllers\StaffWorkflowController::class,'briefing'])->name('review-briefs.index');
+    Route::post('/apprentices/{apprentice}/reviews/{review}/preparation', [\App\Http\Controllers\StaffWorkflowController::class,'prepare'])->name('review-briefs.prepare');
+    Route::get('/apprentices/{apprentice}/reviews/{review}/preparation/{brief}', [\App\Http\Controllers\StaffWorkflowController::class,'briefing'])->whereUuid('brief')->name('review-briefs.show');
+    Route::post('/apprentices/{apprentice}/reviews/{review}/preparation/{brief}', [\App\Http\Controllers\StaffWorkflowController::class,'apply'])->whereUuid('brief')->name('review-briefs.apply');
+    Route::get('/my-next-step' , [\App\Http\Controllers\ApprenticeExperienceController::class,'home'])->name('experience.home');
     Route::get('/my-help-and-achievements', [\App\Http\Controllers\ApprenticeExperienceController::class,'index'])->name('experience.index');
     Route::post('/my-help-and-achievements', [\App\Http\Controllers\ApprenticeExperienceController::class,'create'])->name('experience.create');
     Route::post('/my-help-and-achievements/{entry}', [\App\Http\Controllers\ApprenticeExperienceController::class,'respond'])->name('experience.respond');

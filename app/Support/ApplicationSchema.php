@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack21.
+    // Presence-only contract from the unchanged reference migrations through Pack22.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -59,6 +59,7 @@ class ApplicationSchema
         'qualifications'=>['achievement_date','apprentice_id','created_at','files','history','id','level','notes','result','start_date','status','subject','title','type','updated_at','version'],
         'reminder_mail_events'=>['actor_id','created_at','event','id','outbox_id'],
         'reminder_mail_outbox'=>['approved_at','approved_by','approver_auth_version','attempted_at','created_at','fingerprint','finished_at','id','prepared_by','recipient_id','snapshot','state','updated_at','version'],
+        'review_preparation_briefs'=>['applied','applied_at','applied_by','applied_review_version','apprentice_id','created_at','id','period_from','period_to','prepared_by','progress_review_draft_id','source','source_hash','suggested','updated_at'],
         'review_reminder_events'=>['actor_id','created_at','event','id','origin','review_reminder_id'],
         'review_reminders'=>['apprentice_id','created_at','id','recipient_id','seen_at','signed_review_record_id','source','source_key','updated_at'],
         'sessions'=>['id','ip_address','last_activity','payload','user_agent','user_id'],

@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-21",
+  "checkpoint": "development-pack-22",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -396,23 +396,28 @@
       "batch": "Pack21 apprentice experience",
       "status": "working_tested_reference_code",
       "remaining": "Apply after Pack20, reconcile actual Martin source/schema, migrate before routes, configure scoped Inclusion cover and perform browser/phone/native/Cloud acceptance."
+    },
+    {
+      "batch": "Pack22 staff attention and factual review assistant",
+      "status": "working_tested_reference_code",
+      "remaining": "Merge after21, migrate brief table, test native engine/concurrency/Cloud/browser/accessibility and real staff source mappings. No automatic messaging or signed-review completion."
     }
   ],
-  "queue_review": "Pack21 implements the apprentice experience: next-step home, 12-phase task journey, private photo explanations, checked workplace achievements and scoped help receipts/responses. Actual Martin/Cloud/browser acceptance remains pending.",
+  "queue_review": "Pack22 implements combined scoped staff attention and source-bound factual review preparation with checked selective insertion. Reference code/tests completed; actual target acceptance remains pending.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Staff attention and factual review preparation workstream, then employer action authority and agreed Gateway criteria. Automatic task/review message delivery remains separate.",
+  "next_priority": "Employer action authority and agreed standard/cohort Gateway criteria. Target rollout and automatic task/review notification delivery remain separate.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "21",
+  "development_pack": "22",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",
     "remaining": "Actual shared responder URLs, form ownership/access/privacy checks and browser/hosted acceptance; receipt reconciliation stays manual. No answer storage, automatic invitation, annual due flag or completion tracking."
   },
   "requested_expansion_2026_11_14": {
-    "status": "apprentice_experience_implemented_reference_code",
+    "status": "apprentice_experience_and_staff_followup_implemented_reference_code",
     "release_style": "Larger functional releases; existing pack numbers retained.",
-    "priority": "Stage Pack21 apprentice experience; staff follow-up and employer/completion remain planned.",
+    "priority": "Stage Pack22 staff attention/review preparation after21; employer action centre and Gateway readiness remain planned.",
     "workstreams": [
       {
         "name": "Apprentice experience",
@@ -431,7 +436,7 @@
           "Who needs attention today staff view",
           "Review preparation assistant"
         ],
-        "status": "planned_not_implemented"
+        "status": "working_tested_reference_code"
       },
       {
         "name": "Employer and completion",
