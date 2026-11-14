@@ -106,7 +106,9 @@ class ApprenticeController extends Controller
         }
         foreach (['mentor_id' => 'mentor', 'careers_adviser_id' => 'careers_adviser', 'maths_tutor_id' => 'functional_skills_tutor', 'english_tutor_id' => 'functional_skills_tutor'] as $field => $role) {
             $subject = $field === 'maths_tutor_id' ? 'maths' : ($field === 'english_tutor_id' ? 'english' : null);
-            $query = User::where('role', $role)->when($subject, fn ($q) => $q->whereIn('subject_scope', [$subject, 'both']));
+            $query = isset(\App\Support\StaffDuties::LABELS[$role])
+                ? \App\Support\StaffDuties::query(User::query(), $role)
+                : User::where('role', $role)->when($subject, fn ($q) => $q->whereIn('subject_scope', [$subject, 'both']));
             $options[$field] = DirectoryCatalog::options($query, $apprentice?->$field);
         }
 

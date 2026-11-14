@@ -15,7 +15,7 @@ class SignedReviews
 {
     public static function allowed(User $u,Apprentice $a): bool
     {
-        return $u->active && (LearningAccess::manager($u) || LearningAccess::tutor($u,$a) || ($u->role==='mentor' && $a->mentor_id===$u->id));
+        return $u->active && (LearningAccess::manager($u) || LearningAccess::tutor($u,$a) || StaffDuties::assigned($u,$a,'mentor'));
     }
     private static function fail(string $text): never {throw ValidationException::withMessages(['version'=>$text]);}
     private static function profile(Apprentice $a): string

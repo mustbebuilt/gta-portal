@@ -45,7 +45,7 @@ class CareersFollowup
                 continue;
             }
             $adviser = $a->careersAdviser;
-            $ownerOk = $adviser && $adviser->active && $adviser->role === 'careers_adviser';
+            $ownerOk = $adviser && StaffDuties::has($adviser,'careers_adviser');
             foreach ($d->actions ?? [] as $action) {
                 if ($action['status'] === 'Completed') { continue; }
                 $due = self::date($action['due_date'] ?? null);

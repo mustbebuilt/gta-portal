@@ -26,7 +26,7 @@ class ProgressReviewController extends Controller
 {
     private function allowed(Request $r, Apprentice $a): bool
     {
-        return Access::manager($r->user()) || Access::tutor($r->user(), $a) || ($r->user()->role === 'mentor' && $a->mentor_id === $r->user()->id);
+        return Access::manager($r->user()) || Access::tutor($r->user(), $a) || \App\Support\StaffDuties::assigned($r->user(), $a, 'mentor');
     }
 
     public function index(Request $r): View
@@ -34,7 +34,12 @@ class ProgressReviewController extends Controller
         abort_unless(\App\Support\ReviewReminders::allowed($r->user()), 403);
         $q = Apprentice::with(['mentor', 'tutor']);
         if (! Access::manager($r->user())) {
-            $q->where($r->user()->role === 'mentor' ? 'mentor_id' : 'tutor_id', $r->user()->id);
+            $q->where(function($q) use($r) {
+                if($r->user()->role==='tutor'){$q->where('tutor_id',$r->user()->id);}
+                if(\App\Support\StaffDuties::has($r->user(),'mentor')){
+                    $r->user()->role==='tutor' ? $q->orWhere('mentor_id',$r->user()->id) : $q->where('mentor_id',$r->user()->id);
+                }
+            });
         }
 
         $input=$r->validate(['search'=>['nullable','string','max:250'],'view'=>['nullable','string',Rule::in(\App\Support\ReviewFollowup::VIEWS)],'group'=>['nullable','integer','min:1'],'apprentice'=>['nullable','integer','min:1']]);

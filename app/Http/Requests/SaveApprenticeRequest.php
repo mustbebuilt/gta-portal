@@ -71,7 +71,15 @@ class SaveApprenticeRequest extends FormRequest
         }
         foreach (['mentor_id' => 'mentor', 'careers_adviser_id' => 'careers_adviser', 'maths_tutor_id' => 'functional_skills_tutor', 'english_tutor_id' => 'functional_skills_tutor'] as $field => $role) {
             $subject = $field === 'maths_tutor_id' ? 'maths' : ($field === 'english_tutor_id' ? 'english' : null);
-            $rules[$field] = ['nullable', 'integer', Rule::exists('users', 'id')->where(fn ($q) => $q->where(fn ($q) => $q->where('active', true)->where('role', $role)->when($subject, fn ($q) => $q->whereIn('subject_scope', [$subject, 'both'])))->when($record?->$field, fn ($q) => $q->orWhere('id', $record->$field)))];
+            $rules[$field] = ['nullable', 'integer', Rule::exists('users', 'id')->where(function ($q) use ($role, $subject, $record, $field) {
+                $q->where(function ($q) use ($role, $subject) {
+                    if (isset(\App\Support\StaffDuties::LABELS[$role])) {
+                        \App\Support\StaffDuties::query($q, $role);
+                    } else {
+                        $q->where('active', true)->where('role', $role)->when($subject, fn ($q) => $q->whereIn('subject_scope', [$subject, 'both']));
+                    }
+                })->when($record?->$field, fn ($q) => $q->orWhere('id', $record->$field));
+            })];
         }
 
         return $rules;

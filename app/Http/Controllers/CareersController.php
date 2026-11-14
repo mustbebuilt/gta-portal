@@ -22,7 +22,7 @@ class CareersController extends Controller
 {
     private function write(Request $r, Apprentice $a): bool
     {
-        return Access::manager($r->user()) || ($r->user()->role === 'careers_adviser' && $a->careers_adviser_id === $r->user()->id);
+        return Access::manager($r->user()) || \App\Support\StaffDuties::assigned($r->user(), $a, 'careers_adviser');
     }
 
     private function viewable(Request $r, Apprentice $a): bool
@@ -32,7 +32,7 @@ class CareersController extends Controller
 
     public function worklist(Request $r): View
     {
-        abort_unless(in_array($r->user()->role, ['admin', 'ceo', 'careers_adviser', 'apprentice'], true), 403);
+        abort_unless(Access::manager($r->user()) || ($r->user()->active && $r->user()->role==='apprentice') || \App\Support\StaffDuties::has($r->user(),'careers_adviser'), 403);
         $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'show' => ['nullable', Rule::in(CareersFollowup::VIEWS)], 'type' => ['nullable', Rule::in(['all', 'employment', 'progression'])], 'action_page' => ['nullable', 'integer', 'min:1'], 'apprentice_page' => ['nullable', 'integer', 'min:1']]);
         $q = Apprentice::with('careersAdviser');
         if (! Access::manager($r->user())) {
@@ -112,14 +112,18 @@ class CareersController extends Controller
     {
         abort_unless($this->write($r, $apprentice), 403);
         abort_unless(! $discussion || $discussion->apprentice_id === $apprentice->id, 404);
-        $adviser = User::whereKey($apprentice->careers_adviser_id)->where('active', true)->where('role', 'careers_adviser')->first();
-        if (! $adviser) {
+        $adviser = User::find($apprentice->careers_adviser_id);
+        if (! $adviser || ! \App\Support\StaffDuties::has($adviser, 'careers_adviser')) {
             throw ValidationException::withMessages(['adviser' => 'Assign an active careers adviser in the apprentice profile first.']);
         }
         $data = $r->validate(['version' => $discussion ? ['required', 'integer'] : ['prohibited'], 'type' => ['required', Rule::in(['progression', 'employment'])], 'discussion_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'goals' => ['required', 'string', 'max:10000'], 'options' => ['required', 'string', 'max:10000'], 'advice' => ['required', 'string', 'max:20000'], 'outcome' => ['required', Rule::in(['Next step agreed', 'Exploring options', 'Specialist referral'])], 'next_step' => ['required', 'string', 'max:10000'], 'referral' => ['nullable', 'required_if:outcome,Specialist referral', 'string', 'max:250']]);
         DB::transaction(function () use ($r, $apprentice, $adviser, $data, $discussion): void {
             $a = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
             abort_unless($this->write($r, $a), 403);
+            $adviser = User::whereKey($a->careers_adviser_id)->lockForUpdate()->first();
+            if (! $adviser || ! \App\Support\StaffDuties::has($adviser, 'careers_adviser')) {
+                throw ValidationException::withMessages(['adviser'=>'The assigned Careers duty changed. Reopen the apprentice record.']);
+            }
             $fields = collect($data)->except('version')->all();
             $fields['referral'] = $data['outcome'] === 'Specialist referral' ? ($data['referral'] ?? null) : null;
             if ($discussion) {

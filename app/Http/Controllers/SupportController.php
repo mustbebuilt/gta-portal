@@ -39,7 +39,7 @@ class SupportController extends Controller
 
     private function raiseAllowed(Request $r, Apprentice $a): bool
     {
-        return $this->team($r, $a) || Access::tutor($r->user(), $a) || Access::subject($r->user(), $a, 'maths') || Access::subject($r->user(), $a, 'english') || ($r->user()->role === 'mentor' && $a->mentor_id === $r->user()->id) || ($r->user()->role === 'careers_adviser' && $a->careers_adviser_id === $r->user()->id);
+        return $this->team($r, $a) || Access::tutor($r->user(), $a) || Access::subject($r->user(), $a, 'maths') || Access::subject($r->user(), $a, 'english') || \App\Support\StaffDuties::assigned($r->user(),$a,'mentor') || \App\Support\StaffDuties::assigned($r->user(),$a,'careers_adviser');
     }
 
     private function codes(): array

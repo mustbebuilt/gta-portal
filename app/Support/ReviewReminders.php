@@ -14,7 +14,7 @@ class ReviewReminders
 {
     public static function allowed(User $u): bool
     {
-        return $u->active && in_array($u->role,['admin','ceo','tutor','mentor'],true);
+        return $u->active && (in_array($u->role,['admin','ceo','tutor'],true) || StaffDuties::has($u,'mentor'));
     }
 
     // Only checked actual meeting records create due prompts. First-review references stay provisional.
@@ -32,8 +32,9 @@ class ReviewReminders
             $record=SignedReviewRecord::findOrFail($cycle['latest_record_id']);
             foreach(['tutor','mentor'] as $role){
                 $owner=$a->{$role.'_id'} ? User::whereKey($a->{$role.'_id'})->when($lock,fn($q)=>$q->lockForUpdate())->first() : null;
-                if(!$owner || !$owner->active || $owner->role!==$role){$ownerChecks++;continue;}
+                if(!$owner || !$owner->active || ($role==='mentor' ? !StaffDuties::has($owner,'mentor') : $owner->role!=='tutor')){$ownerChecks++;continue;}
                 $source=['outcome_id'=>$outcome->id,'status_binding'=>ReviewedImports::hash(collect($outcome->context)->only('status','sourceRef','endDate')->all()),'apprentice_id'=>$a->id,'record_id'=>$record->id,'record_version'=>$record->version,'snapshot_hash'=>$record->snapshot_hash,'checked_at'=>$record->checked_at->toIso8601String(),'meeting_date'=>$cycle['last_meeting'],'due_date'=>$cycle['next_due'],'recipient_id'=>$owner->id,'recipient_role'=>$role];
+                if($role==='mentor' && ($binding=StaffDuties::binding($owner,'mentor'))!==null){$source['duty_binding']=$binding;}
                 $key=ReviewedImports::hash($source);
                 $reminder=ReviewReminder::where('source_key',$key)->first();
                 $intact=!$reminder || (ReviewedImports::hash($reminder->source)===$key && $reminder->apprentice_id===$a->id && $reminder->signed_review_record_id===$record->id && $reminder->recipient_id===$owner->id);
@@ -80,7 +81,7 @@ class ReviewReminders
         DB::transaction(function() use($reminder,$user): void {
             $a=Apprentice::whereKey($reminder->apprentice_id)->lockForUpdate()->firstOrFail();
             $fresh=User::whereKey($user->id)->lockForUpdate()->firstOrFail();
-            abort_unless($fresh->active && in_array($fresh->role,['tutor','mentor'],true) && $a->{$fresh->role.'_id'}===$fresh->id,403);
+            abort_unless(LearningAccess::tutor($fresh,$a) || StaffDuties::assigned($fresh,$a,'mentor'),403);
             $position=self::position($a,true);
             $item=collect($position['items'])->first(fn($item)=>$item['owner']->id===$fresh->id && $item['key']===$reminder->source_key);
             $row=ReviewReminder::whereKey($reminder->id)->lockForUpdate()->firstOrFail();

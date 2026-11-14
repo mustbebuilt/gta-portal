@@ -33,10 +33,10 @@ class HelpController extends Controller
         if (in_array($role, ['admin', 'ceo', 'functional_skills_tutor'], true)) {
             $guides[] = ['Maths and English', 'Topics and qualifications', 'Assign only the apprentice’s required topics and planned hours. Zero planned hours means secure in that topic. Evidence, evidence acceptance and tutor-confirmed topic completion are separate steps. Record each qualification separately with its actual result, individually chosen start date and twelve-month target. Do not turn topic percentages into a qualification result.'];
         }
-        if (in_array($role, ['admin', 'ceo', 'mentor', 'tutor'], true)) {
+        if (in_array($role, ['admin', 'ceo', 'tutor'], true) || \App\Support\StaffDuties::has($request->user(),'mentor')) {
             $guides[] = ['Reviews', 'Prepare a review draft', 'Open Reviews and choose an assigned apprentice. Record the actual meeting information and discussion. Source snapshots help preparation but do not replace the whole individual training plan. Current review records are drafts only: signatures, completion, shared copies and completed-review scheduling are not yet enabled.'];
         }
-        if (in_array($role, ['admin', 'ceo', 'careers_adviser'], true)) {
+        if (in_array($role, ['admin', 'ceo'], true) || \App\Support\StaffDuties::has($request->user(),'careers_adviser')) {
             $guides[] = ['Careers adviser', 'Record advice', 'Open Careers to see apprentices currently assigned to you. Choose the actual discussion type: career progression or employment support. Record goals, advice and outcome, then measurable actions with an owner and deadline. Employers do not receive access to these records.'];
         }
         if (SupportAccess::team($request->user())) {

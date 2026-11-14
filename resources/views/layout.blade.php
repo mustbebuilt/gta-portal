@@ -8,11 +8,11 @@
 @can('viewAny',\App\Models\Apprentice::class)<a href="{{ route('apprentices.index') }}" @if(request()->routeIs('apprentices.*'))aria-current="page"@endif>Apprentices</a>@endcan
 @if(in_array(auth()->user()->role,['admin','ceo','tutor','apprentice','functional_skills_tutor'],true))<a href="{{ route('em.caseload') }}" @if(request()->routeIs('em.*'))aria-current="page"@endif>Maths and English</a>@endif
 @if(in_array(auth()->user()->role,['admin','ceo','tutor'],true))<a href="{{ route('attendance.index') }}" @if(request()->routeIs('attendance.*'))aria-current="page"@endif>Groups and sessions</a><a href="{{ route('marking.index') }}" @if(request()->routeIs('marking.*'))aria-current="page"@endif>Marking worklist</a>@endif
-@if(in_array(auth()->user()->role,['admin','ceo','apprentice','careers_adviser'],true))<a href="{{ route('careers.worklist') }}" @if(request()->routeIs('careers.*'))aria-current="page"@endif>Careers</a>@endif
+@if((in_array(auth()->user()->role,['admin','ceo','apprentice'],true) || \App\Support\StaffDuties::has(auth()->user(),'careers_adviser')))<a href="{{ route('careers.worklist') }}" @if(request()->routeIs('careers.*'))aria-current="page"@endif>Careers</a>@endif
 @if(\App\Support\SupportAccess::team(auth()->user()))<a href="{{ route('support-review-reminders.index') }}" @if(request()->routeIs('support-review-reminders.*'))aria-current="page"@endif>Support review reminders</a>@endif
 @if(\App\Support\SupportAccess::team(auth()->user()))<a href="{{ route('support.worklist') }}" @if(request()->routeIs('support.*') && !request()->routeIs('support.permissions'))aria-current="page"@endif>Support and retention</a>@endif
 @if(\App\Support\QuestionnaireLinks::canView(auth()->user()))<a href="{{ route('questionnaires.index') }}" @if(request()->routeIs('questionnaires.index'))aria-current="page"@endif>Questionnaires</a>@endif
-@if(in_array(auth()->user()->role,['admin','ceo','tutor','mentor'],true))<a href="{{ route('reviews.index') }}" @if(request()->routeIs('reviews.*'))aria-current="page"@endif>Reviews</a>@endif
+@if(\App\Support\ReviewReminders::allowed(auth()->user()))<a href="{{ route('reviews.index') }}" @if(request()->routeIs('reviews.*'))aria-current="page"@endif>Reviews</a>@endif
 @if(!in_array(auth()->user()->role,['apprentice','employer'],true))<a href="{{ route('staff.index') }}" @if(request()->routeIs('staff.*'))aria-current="page"@endif>Staff development</a>@endif
 @if(auth()->user()->role!=='apprentice')<a href="{{ route('cases.index') }}" @if(request()->routeIs('cases.*'))aria-current="page"@endif>Case studies</a>@endif
 @if(in_array(auth()->user()->role,['admin','ceo'],true))<a href="{{ route('support.permissions') }}" @if(request()->routeIs('support.permissions'))aria-current="page"@endif>Support permissions</a>@endif
@@ -28,7 +28,7 @@
 @if(auth()->user()->role==='ceo')<a href="{{ route('executive.index') }}" @if(request()->routeIs('executive.*'))aria-current="page"@endif>CEO emergency access</a>@endif
 @if(\App\Support\SecondFactor::required(auth()->user()) || \App\Support\SecondFactor::mayEnrol(auth()->user()))<a href="{{ route('second-factor.settings') }}" @if(request()->routeIs('second-factor.settings','second-factor.change'))aria-current="page"@endif>Two-step sign-in</a>@endif
 <a href="{{ route('account.email') }}" @if(request()->routeIs('account.email*'))aria-current="page"@endif>Confirm email</a><a href="{{ route('account.password') }}" @if(request()->routeIs('account.password*'))aria-current="page"@endif>Change password</a><a href="{{ route('help.index') }}" @if(request()->routeIs('help.*'))aria-current="page"@endif>Help and how to</a></nav>@endauth
-<p class="release">Local development checkpoint<br>Development Pack 11 · Fictional data only</p></aside>
+<p class="release">Local development checkpoint<br>Development Pack 12 · Fictional data only</p></aside>
 <div class="workspace"><header class="topbar"><span>{{ auth()->user()?->name ?? 'GTA sign in' }} @auth<small>{{ ucfirst(auth()->user()->role) }}</small>@endauth</span><div class="toolbar"><button type="button" id="theme-toggle">Dark mode</button>@auth<form action="{{ route('logout') }}" method="post">@csrf<button>Sign out</button></form>@endauth</div></header>
 <main id="main-content" tabindex="-1"><div class="test-notice">Fictional local test application · Working modules are linked below. Formal plan approval, completed reviews/signatures, complete reporting and live deployment remain in development.</div>
 @if(session('status'))<div class="notice" role="status">{{ session('status') }}</div>@endif

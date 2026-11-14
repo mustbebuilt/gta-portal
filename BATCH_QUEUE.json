@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-11",
+  "checkpoint": "development-pack-12",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -346,14 +346,19 @@
       "batch": "Development Pack11 \u2014 support review coordination, setup guide and device voice choice",
       "status": "working_tested_controlled_staging",
       "remaining": "Actual named owner provisioning by Martin, actual staff/assignment migration, browser/device voices/accent and hosted/native mail/scheduler/concurrency acceptance remain. Voice selection uses available device voices; no Yorkshire audio service supplied. One primary staff role remains; no generic multi-role redesign. Coordinator prompts never complete reviews/funding claims; external mail stays explicit reviewed staging-only."
+    },
+    {
+      "batch": "Development Pack12 \u2014 additional Careers and mentor duties on one staff account",
+      "status": "working_tested_scoped_additional_duties",
+      "remaining": "Actual Martin integration/native locking/browser/Cloud acceptance remain. Only Careers and Learning & Progress Mentor additions are included; no generic role hierarchy or extra Tutor/Maths/Admin/Inclusion permissions. Primary role, explicit apprentice assignments, MFA and saved histories are retained. Pack11 device voice choice is unchanged; actual Yorkshire voice availability is unverified."
     }
   ],
-  "queue_review": "Pack11 adds explicit support-plan review coordination/private prompts, generic reviewed staging mail support, owner/staff/assignment setup guidance and optional device voice selection after user feedback. No actual named privileged account, external voice service or deployment is provisioned.",
+  "queue_review": "Pack12 addresses the duplicate-account workaround: staff can receive explicit additional Careers/mentor duties and be assigned in those capacities, with versioned access changes and preserved history. Pack11 voice/setup/support functionality remains; no actual users or hosted settings are provisioned.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
   "next_priority": "Martin repository/Cloud acceptance and actual configuration remain essential. Pack 09 advances the account MFA pilot; it does not close production identity/security policy, complete recovery/relink or retained curriculum decisions.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "11",
+  "development_pack": "12",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",

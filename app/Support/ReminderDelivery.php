@@ -25,7 +25,7 @@ class ReminderDelivery
     public static function eligible(User $user): bool
     {
         $inclusion = SupportAccess::team($user) && in_array(SupportAccess::settings($user)['duty'], ['member','lead'], true);
-        return self::available() && $user->active && $user->email_verified_at && (in_array($user->role,['tutor','mentor'],true) || $inclusion)
+        return self::available() && $user->active && $user->email_verified_at && ($user->role==='tutor' || StaffDuties::has($user,'mentor') || $inclusion)
             && in_array(strtolower(trim($user->email)),self::recipients(),true)
             && User::whereRaw('LOWER(email) = ?',[strtolower(trim($user->email))])->count()===1;
     }
