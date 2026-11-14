@@ -220,17 +220,19 @@ class LearningTaskController extends Controller
     public function deadline(Request $r, LearningTask $task): RedirectResponse
     {
         abort_unless(Access::manager($r->user()) || Access::tutor($r->user(), $task->apprentice), 403);
-        $data = $r->validate(['version' => ['required', 'integer'], 'due_date' => ['nullable', 'date_format:Y-m-d']]);
+        $data = $r->validate(['version' => ['required', 'integer'], 'due_date' => ['nullable', 'date_format:Y-m-d'], 'reason'=>['nullable','string','max:2000']]);
         DB::transaction(function () use ($r, $task, $data): void {
             $t = LearningTask::whereKey($task->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $t);
-            $t->due_date = $data['due_date'] ?? null;
+            $a=\App\Models\Apprentice::whereKey($t->apprentice_id)->lockForUpdate()->firstOrFail();
+            $actor=\App\Support\TaskDeadlineHistory::actor($r->user(),$r->session()->get('auth_version'),$a);
+            if(!\App\Support\TaskDeadlineHistory::record($t,$data['due_date']??null,$actor,'manual',$data['reason']??null)) {return;}
             $t->version++;
             $t->save();
             $this->audit($r, $t->apprentice_id, $t->id, 'deadline_saved');
         });
 
-        return back()->with('status', 'Task deadline saved. No other deadlines changed.');
+        return back()->with('status', 'Task deadline checked. Any date change was saved with its history; no other deadlines changed.');
     }
 
     public function upload(Request $r, LearningTask $task): RedirectResponse

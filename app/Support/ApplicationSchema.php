@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack13.
+    // Presence-only contract from the unchanged reference migrations through Pack17.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -41,7 +41,7 @@ class ApplicationSchema
         'jobs'=>['attempts','available_at','created_at','id','payload','queue','reserved_at'],
         'learning_block_controls'=>['apprentice_id','created_at','enabled','exceptions','history','id','updated_at','version'],
         'learning_events'=>['apprentice_id','created_at','event','id','kind','record_id','user_id'],
-        'learning_tasks'=>['answers','apprentice_id','block','created_at','due_date','id','reference','status','submissions','submitted_at','template','theme','title','updated_at','version'],
+        'learning_tasks'=>['answers','apprentice_id','block','created_at','deadline_history','due_date','id','reference','status','submissions','submitted_at','template','theme','title','updated_at','version'],
         'management_packs'=>['captured_by','created_at','id','snapshot','snapshot_hash','title'],
         'marker_change_events'=>['actor_id','after_codes','apprentice_id','before_codes','created_at','id','reason','source'],
         'marking_reminder_events'=>['created_at','event','id','marking_reminder_id','origin','user_id'],

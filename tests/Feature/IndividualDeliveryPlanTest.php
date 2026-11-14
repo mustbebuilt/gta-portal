@@ -158,6 +158,12 @@ class IndividualDeliveryPlanTest extends TestCase
         $this->post($url.'/apply',$payload)->assertSessionHasNoErrors();
         $this->assertSame($before,$tasks->take(3)->map(fn($t)=>$t->fresh()->getAttributes())->all());
         $this->assertSame($row->approved['blocks'][0]['end'],$tasks[4]->fresh()->due_date->toDateString());
+        $deadlineHistory=$tasks[4]->fresh()->deadline_history;
+        $this->assertCount(1,$deadlineHistory);$this->assertSame('approved_plan',$deadlineHistory[0]['origin']);
+        $this->assertSame($admin->id,$deadlineHistory[0]['by']);$this->assertNull($deadlineHistory[0]['before']);
+        $this->assertSame(['plan_id'=>$row->id,'approved_hash'=>$row->approved['hash']],$deadlineHistory[0]['source']);
+        $this->assertNull($tasks[0]->fresh()->deadline_history);$this->assertNull($tasks[1]->fresh()->deadline_history);
+
         $this->assertSame(4,$row->fresh()->version);$this->assertCount(0,DeliveryPlan::preview($a,$row->fresh()->approved));
         $this->assertDatabaseCount('learning_tasks',50);
         $this->post($url.'/apply',[...$payload,'version'=>4,'task_binding'=>DeliveryPlan::taskBinding($a)])->assertSessionHasNoErrors();

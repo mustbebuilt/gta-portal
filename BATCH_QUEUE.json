@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-16",
+  "checkpoint": "development-pack-17",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -371,14 +371,19 @@
       "batch": "Development Pack16 \u2014 My responsibilities staff hub",
       "status": "working_tested_staff_responsibility_hub",
       "remaining": "Actual target/browser/Cloud acceptance and authoritative missing content remain. Staff see only existing eligible explicit assignments; no private Inclusion counts are added."
+    },
+    {
+      "batch": "Development Pack17 \u2014 task deadline change history",
+      "status": "working_tested_deadline_history",
+      "remaining": "Actual native/Cloud/browser acceptance; no historic date changes reconstructed, no automatic plan amendment/source approval."
     }
   ],
-  "queue_review": "Pack16 adds a staff self-view of existing eligible apprentice assignments. No new grants, role hierarchy or completion claims.",
+  "queue_review": "Pack17 records future manual/approved-plan task deadline changes. Existing date rules, saved work and earlier unknown history are preserved.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Martin to integrate/test through16 on actual staging. Pack16 is a requested usability extension after the proposed15 stopping point; future development should follow concrete requirements or defects, not an assumed fixed remaining-pack count.",
+  "next_priority": "Martin to integrate/test through17 on actual staging and return concrete findings. No fixed remaining-pack count is implied.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "16",
+  "development_pack": "17",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",

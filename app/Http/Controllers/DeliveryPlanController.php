@@ -157,6 +157,7 @@ class DeliveryPlanController extends Controller
         $r->validate(['version' => ['required', 'integer'], 'approval_hash' => ['required', 'string', 'size:64'], 'task_binding' => ['required', 'string', 'size:64'], 'confirmed' => ['accepted']]);
         DB::transaction(function () use ($r, $apprentice): void {
             [$a, $row] = $this->lock($r, $apprentice);
+            $actor=\App\Support\TaskDeadlineHistory::actor($r->user(),$r->session()->get('auth_version'),$a,true);
             $tasks = LearningTask::where('apprentice_id', $a->id)->orderBy('id')->lockForUpdate()->get(); $plan = DeliveryPlan::approved($a);
             if (! $plan || $plan['hash'] !== $r->input('approval_hash') || DeliveryPlan::taskBinding($a) !== $r->input('task_binding')) { throw ValidationException::withMessages(['version' => 'The approved plan or task records changed. Reopen the preview.']); }
             $changes = [];
@@ -164,7 +165,8 @@ class DeliveryPlanController extends Controller
                 $due = DeliveryPlan::deadline($t, $plan);
                 if (! $due) { continue; }
                 $changes[] = ['task_id' => $t->id, 'before_version' => $t->version, 'due_date' => $due];
-                $t->due_date = $due; $t->version++; $t->save();
+                \App\Support\TaskDeadlineHistory::record($t,$due,$actor,'approved_plan',null,['plan_id'=>$row->id,'approved_hash'=>$plan['hash']]);
+                $t->version++; $t->save();
                 DB::table('learning_events')->insert(['user_id' => $r->user()->id, 'apprentice_id' => $a->id, 'kind' => 'task', 'record_id' => $t->id, 'event' => 'plan_deadline_applied', 'created_at' => now()]);
             }
             if ($changes) { $this->commit($r, $row, 'plan_deadlines_applied', ['approved_hash' => $plan['hash'], 'changes' => $changes]); }

@@ -33,8 +33,8 @@ with tempfile.TemporaryDirectory(prefix='gta-schema-diagnostic-')as temporary:
   passed('Explicit probe in production refuses before database metadata access; no values or credentials emitted')
   r=cli(mysql,'--database');assert r['schema_presence']['status']=='blocked' and r['schema_presence']['reason']=='database_probe_failed' and digest()==before
   passed('Actual unavailable native connection fails closed with sanitised structured output, not a native success claim')
-  r=metadata();assert r['status']=='pass' and r['required_tables']==73 and r['required_columns']==704
-  passed('All 73 reference tables and 704 required column names are present on actual freshly migrated disposable SQLite')
+  r=metadata();assert r['status']=='pass' and r['required_tables']==73 and r['required_columns']==705
+  passed('All 73 reference tables and 705 required column names are present on actual freshly migrated disposable SQLite')
   script(r"Illuminate\Support\Facades\Schema::table('staff_duties',fn($t)=>$t->dropColumn(['maths_tutor','english_tutor']));echo '{}';")
   r=metadata();assert r['status']=='blocked' and r['missing_columns']['staff_duties']==['english_tutor','maths_tutor']
   names=script(r"echo json_encode(['pending'=>array_values(array_diff(array_keys(app('migrator')->getMigrationFiles([database_path('migrations')])),app('migration.repository')->getRan()))]);")

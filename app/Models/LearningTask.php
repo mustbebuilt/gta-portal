@@ -17,7 +17,7 @@ class LearningTask extends Model
 
     protected function casts(): array
     {
-        return ['template' => 'array', 'answers' => 'array', 'submissions' => 'array', 'due_date' => 'date', 'submitted_at' => 'datetime', 'block' => 'integer', 'version' => 'integer'];
+        return ['template' => 'array', 'answers' => 'array', 'submissions' => 'array', 'deadline_history' => 'array', 'due_date' => 'date', 'submitted_at' => 'datetime', 'block' => 'integer', 'version' => 'integer'];
     }
 
     public function apprentice(): BelongsTo
