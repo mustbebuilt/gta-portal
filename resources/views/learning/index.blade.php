@@ -3,6 +3,7 @@
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->full_name ?? ($apprentice->first_name.' '.$apprentice->last_name) }}</p><h1>Training blocks and tasks</h1><p class="muted">Open the task, complete the work, then send it to your tutor.</p></div><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a><a class="button" href="{{ route('curriculum.show',$apprentice) }}">Blocks and KSB reference</a></header>
 <p><a class="button" href="{{ route('delivery.show',$apprentice) }}">Individual delivery plan and block calendar</a></p>
+@if(\App\Support\CurriculumSources::allowed(auth()->user(),$apprentice))<p><a class="button" href="{{ route('curriculum-sources.show',$apprentice) }}">Task source comparison</a></p>@endif
 @include('learning.errors')
 @include('learning.source-warnings')
 @if($manage)@include('learning.block-controls')@endif

@@ -1,0 +1,19 @@
+<section class="panel priority-heading" id="training-priorities" aria-labelledby="training-priorities-title">
+<h2 id="training-priorities-title">{{ auth()->user()->role==='apprentice'?'Your next training steps':'Training work to follow up' }}</h2>
+<p>Overdue items first, then work due today and dates to check. This list follows your selected group and apprentice scope.</p>
+<div class="priority-summary" aria-label="Training work counts"><span><strong>{{ $priorities['counts']['overdue'] }}</strong> overdue</span><span><strong>{{ $priorities['counts']['today'] }}</strong> due today</span><span><strong>{{ $priorities['counts']['checks'] }}</strong> date checks</span></div>
+<form method="get" class="search">
+@foreach(['group','apprentice'] as $scopeField)@if(request()->filled($scopeField))<input type="hidden" name="{{ $scopeField }}" value="{{ request($scopeField) }}">@endif @endforeach
+<div><label for="priority-filter">Show training work</label><select id="priority-filter" name="priority">@foreach(['all'=>'All listed work','overdue'=>'Overdue','today'=>'Due today','checks'=>'Dates to check'] as $value=>$label)<option value="{{ $value }}" @selected($priorityFilter===$value)>{{ $label }}</option>@endforeach</select></div><button type="submit">Show work</button>
+</form>
+<p class="muted">{{ $priorityList->total() }} matching items · page {{ $priorityList->currentPage() }} of {{ $priorityList->lastPage() }}. Counts above include all listed work in your current scope.</p>
+<ol class="priority-list">
+@forelse($priorityList as $item)
+<li class="priority-row" data-priority-row="{{ $item['key'] }}"><div><span class="status {{ $item['bucket']==='overdue'?'red':'neutral' }}">{{ ['overdue'=>'Overdue','today'=>'Due today','checks'=>'Date needs checking'][$item['bucket']] }} · {{ ['marking'=>'Marking','task'=>'Training task','action'=>'SMART action'][$item['kind']] }}</span><h3>{{ \Illuminate\Support\Str::limit($item['title'],140) }}</h3><p>{{ $item['apprentice'] }} · {{ $item['reference'] }}</p><p>Responsible: {{ $item['owner'] }} · {{ $item['kind']==='marking'?'Marking deadline':'Source deadline' }}: {{ $item['date']??'Needs checking' }}</p></div><a class="button" href="{{ $item['url'] }}">Open {{ $item['kind']==='action'?'action':'task' }}<span class="sr-only">: {{ $item['reference'] }} · {{ $item['title'] }}</span></a></li>
+@empty
+<li><p>No matching training work is listed. Other modules and incomplete source information still need their own checks.</p></li>
+@endforelse
+</ol>
+@if($priorityList->hasPages())<nav class="pagination" aria-label="Training work pages">@if($priorityList->previousPageUrl())<a class="button" href="{{ $priorityList->previousPageUrl() }}#training-priorities">Previous work</a>@endif @if($priorityList->nextPageUrl())<a class="button" href="{{ $priorityList->nextPageUrl() }}#training-priorities">Next work</a>@endif</nav>@endif
+<details><summary>What this work list includes</summary><p>Training tasks and standalone SMART actions only. Linked actions follow their original task and do not add a duplicate row. Completed items and future work are not listed. Review, attendance, qualification, private Careers and support records keep their separate worklists.</p><p>Marking uses the existing rule of more than seven calendar days after submission. Dates follow the portal timezone ({{ config('app.timezone') }}). Training tasks use their recorded dates; SMART actions use their existing deadlines. Missing or future submission dates are date checks, not successful completion. Open the source to check release conditions and the next permitted action.</p>@if(auth()->user()->role==='apprentice')<p>Your list excludes marking decisions, actions already with the tutor and actions owned by someone else. A missing deadline needs your tutor’s help.</p>@endif</details>
+</section>

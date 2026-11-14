@@ -15,7 +15,10 @@ class AttendanceLedger
         foreach ($sessions as $s) {
             if (! $s->ended()) {
                 continue;
-            }$marks = $s->marks->keyBy('apprentice_id');
+            }
+            $roster=RegisterFollowup::roster($s);
+            abort_unless($roster['shape'] && !$roster['duplicates'],422,'Attendance totals are unavailable until saved source rosters have been checked by an administrator.');
+            $marks = $s->marks->keyBy('apprentice_id');
             foreach ($s->members as $id) {
                 if (! isset($allowed[$id])) {
                     continue;

@@ -32,11 +32,14 @@ class AttendanceController extends Controller
 
     public function index(Request $r): View
     {
-        abort_unless(Access::manager($r->user()) || $r->user()->role === 'tutor', 403);
-        $groups = TutorGroup::where('active', true)->when(! Access::manager($r->user()), fn ($q) => $q->where('tutor_id', $r->user()->id))->orderBy('name')->get();
-        $sessions = TrainingSession::with('group')->whereIn('tutor_group_id', $groups->pluck('id'))->orderByDesc('session_date')->get()->filter(fn ($s) => $this->sessionAllowed($r, $s));
-
-        return view('attendance.index', compact('groups', 'sessions'));
+        $visible=\App\Support\RegisterFollowup::visible($r->user());$groups=$visible['groups'];$sessions=$visible['sessions'];
+        $input=$r->validate(['view'=>['nullable','string',Rule::in(\App\Support\RegisterFollowup::VIEWS)],'group'=>['nullable','integer','min:1'],'apprentice'=>['nullable','integer','min:1'],'search'=>['nullable','string','max:250']]);
+        if($r->filled('group')){abort_unless($groups->contains('id',(int)$input['group']),404);$sessions=$sessions->where('tutor_group_id',(int)$input['group']);}
+        if($r->filled('apprentice')){abort_unless(Apprentice::visibleTo($r->user())->whereKey((int)$input['apprentice'])->exists(),404);$sessions=$sessions->filter(fn($s)=>in_array((int)$input['apprentice'],\App\Support\RegisterFollowup::roster($s)['ids'],true));}
+        $search=trim($input['search']??'');if($search!==''){$sessions=$sessions->filter(fn($s)=>mb_stripos($s->name,$search)!==false || mb_stripos($s->group->name,$search)!==false);}
+        $followup=\App\Support\RegisterFollowup::for($sessions);$view=$input['view']??'all';$filtered=($view==='all'?$followup['rows']:$followup['rows']->where('bucket',$view))->values();$page=min(\Illuminate\Pagination\Paginator::resolveCurrentPage(),max(1,(int)ceil($filtered->count()/25)));
+        $registerRows=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,25)->values(),$filtered->count(),25,$page,['path'=>$r->url(),'query'=>$r->except('page')]);
+        return view('attendance.index',['groups'=>$groups,'sessions'=>$registerRows->getCollection()->pluck('session'),'registerRows'=>$registerRows,'registerCounts'=>$followup['counts'],'registerView'=>$view,'registerSearch'=>$search]);
     }
 
     public function create(Request $r): RedirectResponse
@@ -84,9 +87,12 @@ class AttendanceController extends Controller
 
     public function show(Request $r, TrainingSession $session): View
     {
+        if(!\App\Support\RegisterFollowup::roster($session)['shape']){abort_unless(Access::manager($r->user()),403);abort(422,'The saved roster needs an administrator source check before this register can open.');}
         abort_unless($this->sessionAllowed($r, $session), 403);
 
-        return view('attendance.session', ['session' => $session->load('marks'), 'members' => Apprentice::whereIn('id', $session->members)->orderBy('last_name')->get()]);
+        $session->load('marks');$readiness=\App\Support\RegisterFollowup::readiness($session);
+        abort_unless($readiness['can_open'],422,'The saved session timing needs an administrator source check before this register can open.');
+        return view('attendance.session', ['session'=>$session,'members'=>Apprentice::whereIn('id',$session->members)->orderBy('last_name')->get(),'registerReadiness'=>$readiness]);
     }
 
     public function save(Request $r, TrainingSession $session): RedirectResponse

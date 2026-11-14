@@ -1,0 +1,7 @@
+@extends('layout')
+@section('title','Evidence recovery rehearsals')
+@section('content')
+<header class="page-heading"><div><p class="eyebrow">Private evidence operations</p><h1>Evidence recovery rehearsals</h1><p>Recorded technical rehearsals only. No evidence links are changed and no live restore or cutover is approved.</p></div></header>
+@include('learning.errors')
+<section class="panel"><h2>Rehearsal history</h2><form method="get" action="{{ route('evidence-restore.index') }}"><label for="restore-state">Recorded position</label><select id="restore-state" name="state">@foreach(['all','Prepared','Running','Verified restore rehearsal','Needs checks'] as $option)<option value="{{ $option }}" @selected($state===$option)>{{ $option }}</option>@endforeach</select><button>Apply filter</button><a href="{{ route('evidence-restore.index') }}">Reset</a></form><p>{{ $runs->total() }} matching records. Opening these pages reads no evidence file contents. File transfers are explicit operator commands.</p><div class="table-wrap"><table><thead><tr><th>Record</th><th>Recorded position</th><th>Prepared</th><th>Finished</th></tr></thead><tbody>@forelse($runs as $run)<tr><td><a href="{{ route('evidence-restore.show',$run) }}">{{ $run->id }}</a></td><td>{{ $run->state }}</td><td>{{ $run->created_at }}</td><td>{{ $run->finished_at??'Not recorded' }}</td></tr>@empty<tr><td colspan="4">No rehearsals match. Use the controlled operator instructions to prepare a rehearsal.</td></tr>@endforelse</tbody></table></div>{{ $runs->links() }}</section>
+@endsection

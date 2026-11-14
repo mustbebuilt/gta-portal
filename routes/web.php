@@ -35,6 +35,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('apprentices.index'));
 Route::middleware('guest')->group(function () {
+    Route::get('/staff-invitation/{user}/{token}', [\App\Http\Controllers\AccountOnboardingController::class, 'acceptForm'])->whereNumber('user')->where('token', '[A-Za-z0-9]{64}')->name('onboarding.accept');
+    Route::post('/staff-invitation/{user}/{token}', [\App\Http\Controllers\AccountOnboardingController::class, 'accept'])->whereNumber('user')->where('token', '[A-Za-z0-9]{64}')->name('onboarding.activate');
     Route::get('/forgot-password', [AccountAccessController::class, 'forgot'])->name('password.request');
     Route::post('/forgot-password', [AccountAccessController::class, 'requestReset'])->name('password.email');
     Route::get('/reset-password/{token}', [AccountAccessController::class, 'resetForm'])->name('password.reset');
@@ -43,6 +45,24 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
 Route::middleware(['auth', ActiveAccount::class])->group(function () {
+    Route::get('/curriculum-source-checks', [\App\Http\Controllers\CurriculumSourceController::class,'index'])->name('curriculum-sources.index');
+    Route::get('/apprentices/{apprentice}/source-comparison', [\App\Http\Controllers\CurriculumSourceController::class,'show'])->name('curriculum-sources.show');
+    Route::post('/apprentices/{apprentice}/source-comparison', [\App\Http\Controllers\CurriculumSourceController::class,'submit'])->name('curriculum-sources.submit');
+    Route::get('/apprentices/{apprentice}/source-comparison/{record}', [\App\Http\Controllers\CurriculumSourceController::class,'record'])->name('curriculum-sources.record');
+    Route::post('/apprentices/{apprentice}/source-comparison/{record}', [\App\Http\Controllers\CurriculumSourceController::class,'review'])->name('curriculum-sources.review');
+    Route::get('/evidence-recovery', [\App\Http\Controllers\EvidenceRestoreController::class,'index'])->name('evidence-restore.index');
+    Route::get('/evidence-recovery/{run}', [\App\Http\Controllers\EvidenceRestoreController::class,'show'])->whereUuid('run')->name('evidence-restore.show');
+    Route::get('/reminder-mail', [\App\Http\Controllers\ReminderDeliveryController::class,'index'])->name('reminder-mail.index');
+    Route::post('/reminder-mail', [\App\Http\Controllers\ReminderDeliveryController::class,'prepare'])->name('reminder-mail.prepare');
+    Route::get('/reminder-mail/{delivery}', [\App\Http\Controllers\ReminderDeliveryController::class,'show'])->name('reminder-mail.show');
+    Route::post('/reminder-mail/{delivery}', [\App\Http\Controllers\ReminderDeliveryController::class,'transition'])->name('reminder-mail.transition');
+    Route::get('/account/email', [\App\Http\Controllers\AccountOnboardingController::class, 'notice'])->name('account.email');
+    Route::post('/account/email', [\App\Http\Controllers\AccountOnboardingController::class, 'sendVerification'])->name('account.email.send');
+    Route::get('/account/email/confirm/{token}', [\App\Http\Controllers\AccountOnboardingController::class, 'confirmForm'])->where('token', '[A-Za-z0-9]{64}')->name('account.email.confirm');
+    Route::post('/account/email/confirm/{token}', [\App\Http\Controllers\AccountOnboardingController::class, 'confirm'])->where('token', '[A-Za-z0-9]{64}')->name('account.email.verify');
+    Route::get('/staff-onboarding', [\App\Http\Controllers\AccountOnboardingController::class, 'index'])->name('onboarding.index');
+    Route::post('/staff-onboarding/{user}/invite', [\App\Http\Controllers\AccountOnboardingController::class, 'invite'])->name('onboarding.invite');
+    Route::post('/staff-onboarding/{user}/revoke', [\App\Http\Controllers\AccountOnboardingController::class, 'revoke'])->name('onboarding.revoke');
     Route::get('/account/password', [AccountAccessController::class, 'changeForm'])->name('account.password');
     Route::post('/account/password', [AccountAccessController::class, 'change'])->name('account.password.update');
     Route::get('/reports/management-packs',[ManagementPackController::class,'index'])->name('management.index');

@@ -23,6 +23,28 @@ class SaveDirectoryRequest extends FormRequest
         }
     }
 
+    public function attributes(): array
+    {
+        return [
+            'name' => 'name',
+            'active' => 'active status',
+            'record_version' => 'record version',
+            'reference' => 'reference',
+            'contact_name' => 'contact name',
+            'contact_email' => 'contact email address',
+            'contact_phone' => 'contact phone number',
+            'size_band' => 'employer size band',
+            'standard_code' => 'standard code',
+            'version' => 'standard version',
+            'level' => 'level',
+            'programme_id' => 'programme',
+            'tutor_id' => 'main tutor',
+            'email' => 'email address',
+            'role' => 'staff role',
+            'subject_scope' => 'maths/English subject scope',
+        ];
+    }
+
     public function rules(): array
     {
         $kind = $this->route('kind');

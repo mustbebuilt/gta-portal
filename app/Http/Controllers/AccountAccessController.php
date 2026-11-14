@@ -62,15 +62,20 @@ class AccountAccessController extends Controller
         $data = $request->validate(['email' => ['required', 'email:rfc', 'max:254']]);
         if (AccountAccess::recoveryAvailable()) {
             (new Timebox)->call(function () use ($data): void {
-                DB::transaction(function () use ($data): void {
-                $user = AccountAccess::eligible($data['email']);
-                if ($user) {
-                    $user = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
-                    if ($user->active && $user->email_verified_at) {
-                        Password::broker()->sendResetLink(['email' => $user->email, 'active' => true]);
-                    }
+                try {
+                    DB::transaction(function () use ($data): void {
+                        $user = AccountAccess::eligible($data['email']);
+                        if ($user) {
+                            $user = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+                            if ($user->active && $user->email_verified_at && \App\Support\RecoveryDelivery::recipientAllowed($user->email)) {
+                                Password::broker()->sendResetLink(['email' => $user->email, 'active' => true]);
+                            }
+                        }
+                    });
+                } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface) {
+                    // Keep the generic public response; the token transaction rolls back.
+                    // Do not log SMTP transcripts, recipient details or reset links here.
                 }
-                });
             }, 250000);
         }
 
@@ -96,7 +101,7 @@ class AccountAccessController extends Controller
                     return null;
                 }
                 $u = User::whereKey($u->id)->lockForUpdate()->firstOrFail();
-                if (! $u->active || ! $u->email_verified_at) {
+                if (! $u->active || ! $u->email_verified_at || ! \App\Support\RecoveryDelivery::recipientAllowed($u->email)) {
                     return null;
                 }
 

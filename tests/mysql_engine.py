@@ -6,18 +6,18 @@ import argparse,json,os,re,secrets,signal,socket as sockets,subprocess,sys,tempf
 p=argparse.ArgumentParser();p.add_argument('--php',required=True);p.add_argument('--server-root',required=True);p.add_argument('--output',required=True);p.add_argument('--filter');p.add_argument('--http-only',action='store_true');p.add_argument('--python-deps');a=p.parse_args()
 project=Path(__file__).resolve().parent.parent;server_root=Path(a.server_root).resolve();server=None
 with tempfile.TemporaryDirectory(prefix='gta-mariadb-') as temporary:
-    temp=Path(temporary);data=temp/'data';data.mkdir();listener=sockets.socket();listener.bind(('127.0.0.1',0));listener.listen(64);port=listener.getsockname()[1];nonce=secrets.token_hex(8);database='gta_test_'+nonce;username=database;password=secrets.token_hex(24);token=secrets.token_hex(24)
-    env=os.environ.copy();env['LD_LIBRARY_PATH']=str(server_root/'lib/x86_64-linux-gnu')+':'+str(server_root.parent/'lib/x86_64-linux-gnu')+':'+env.get('LD_LIBRARY_PATH','')
+    temp=Path(temporary);data=temp/'data';data.mkdir();private_tmp=temp/'tmp';private_tmp.mkdir(mode=0o700);listener=sockets.socket();listener.bind(('127.0.0.1',0));listener.listen(64);port=listener.getsockname()[1];nonce=secrets.token_hex(8);database='gta_test_'+nonce;username=database;password=secrets.token_hex(24);token=secrets.token_hex(24)
+    env=os.environ.copy();env['TMPDIR']=str(private_tmp);env['LD_LIBRARY_PATH']=str(server_root/'lib/x86_64-linux-gnu')+':'+str(server_root.parent/'lib/x86_64-linux-gnu')+':'+env.get('LD_LIBRARY_PATH','')
     server_binary=server_root/'sbin/mariadbd';client=server_root/'bin/mariadb';install=server_root/'bin/mariadb-install-db'
     def sql(text):
         r=subprocess.run([str(client),'--no-defaults','--protocol=tcp','--host=127.0.0.1','--port='+str(port),'--user=root','--batch','--skip-column-names'],env=env,input=text,capture_output=True,text=True,timeout=30)
         if r.returncode:raise RuntimeError('Private local database setup/query failed')
         return r.stdout.strip()
     try:
-        init=subprocess.run([str(install),'--no-defaults','--basedir='+str(server_root),'--datadir='+str(data),'--auth-root-authentication-method=normal','--skip-test-db','--skip-name-resolve'],env=env,capture_output=True,text=True,timeout=60)
+        init=subprocess.run([str(install),'--no-defaults','--basedir='+str(server_root),'--datadir='+str(data),'--tmpdir='+str(private_tmp),'--auth-root-authentication-method=normal','--skip-test-db','--skip-name-resolve'],env=env,capture_output=True,text=True,timeout=60)
         if init.returncode:raise RuntimeError('Private MariaDB initialisation failed: '+init.stderr[-1500:]+init.stdout[-1500:])
         logfile=open(temp/'server.log','w')
-        command=[str(server_binary),'--no-defaults','--basedir='+str(server_root),'--datadir='+str(data),'--pid-file='+str(temp/'server.pid'),'--bind-address=127.0.0.1','--port='+str(port),'--skip-name-resolve','--innodb-buffer-pool-size=64M','--innodb-flush-log-at-trx-commit=2','--performance-schema=OFF','--log-error='+str(temp/'mariadb.log')]
+        command=[str(server_binary),'--no-defaults','--basedir='+str(server_root),'--datadir='+str(data),'--tmpdir='+str(private_tmp),'--pid-file='+str(temp/'server.pid'),'--bind-address=127.0.0.1','--port='+str(port),'--skip-name-resolve','--innodb-buffer-pool-size=64M','--innodb-flush-log-at-trx-commit=2','--performance-schema=OFF','--log-error='+str(temp/'mariadb.log')]
         # Official socket activation accepts only the already-bound loopback TCP descriptor.
         launch="import os,sys;fd=int(sys.argv[1]);os.dup2(fd,3);os.set_inheritable(3,True);e=os.environ.copy();e['LISTEN_FDS']='1';e['LISTEN_PID']=str(os.getpid());os.execve(sys.argv[2],sys.argv[2:],e)"
         server=subprocess.Popen([sys.executable,'-c',launch,str(listener.fileno()),*command],env=env,pass_fds=(listener.fileno(),),stdout=logfile,stderr=logfile,start_new_session=True)
@@ -92,7 +92,7 @@ with tempfile.TemporaryDirectory(prefix='gta-mariadb-') as temporary:
         finally:
             for worker in workers:
                 if worker.poll() is None:worker.terminate();worker.wait(timeout=10)
-        report={'engine':version,'driver':'pdo_mysql / Laravel mysql connection','suite':suite,'http':http_result,'seconds':round(time.monotonic()-started,2),'isolated':True,'network':'Private disposable 127.0.0.1 TCP listener only, passed through socket activation; no external listener','schemaReset':'Fresh private schema per database-backed test; no false enclosing transaction around DDL','nativeAuditErrors':True,'initialAdminConcurrency':concurrency,'actualCloudAccess':False,'actualOracleMySqlAccess':False,'limits':['MariaDB is not the exact Cloud MySQL version; actual Cloud engine/schema acceptance remains','No existing/live database or real data accessed','This suite does not establish all target concurrency, performance, backup or migration mappings']}
+        report={'engine':version,'driver':'pdo_mysql / Laravel mysql connection','suite':suite,'http':http_result,'seconds':round(time.monotonic()-started,2),'isolated':True,'privateTemporaryDirectory':True,'network':'Private disposable 127.0.0.1 TCP listener only, passed through socket activation; no external listener','schemaReset':'Fresh private schema per database-backed test; no false enclosing transaction around DDL','nativeAuditErrors':True,'initialAdminConcurrency':concurrency,'actualCloudAccess':False,'actualOracleMySqlAccess':False,'limits':['MariaDB is not the exact Cloud MySQL version; actual Cloud engine/schema acceptance remains','No existing/live database or real data accessed','This suite does not establish all target concurrency, performance, backup or migration mappings']}
         Path(a.output).write_text(json.dumps(report,indent=2)+'\n');print(json.dumps({'engine':version,'mode':'http' if a.http_only else 'suite','result':'passed' if a.http_only and http_result['failed']==0 else suite.get('result'),'tests':suite.get('tests'),'passed':http_result['passed'] if a.http_only else suite.get('passed'),'assertions':suite.get('assertions'),'concurrency':concurrency['result'],'seconds':report['seconds']}))
         if result.returncode:raise SystemExit(result.returncode)
     finally:

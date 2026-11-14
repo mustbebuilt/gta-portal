@@ -8,6 +8,7 @@ use App\Models\LearningBlockControl;
 use App\Models\LearningTask;
 use App\Models\User;
 use App\Support\BlockRelease;
+use App\Support\CareersFollowup;
 use App\Support\LearningAccess as Access;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,32 +33,22 @@ class CareersController extends Controller
     public function worklist(Request $r): View
     {
         abort_unless(in_array($r->user()->role, ['admin', 'ceo', 'careers_adviser', 'apprentice'], true), 403);
+        $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'show' => ['nullable', Rule::in(CareersFollowup::VIEWS)], 'type' => ['nullable', Rule::in(['all', 'employment', 'progression'])], 'action_page' => ['nullable', 'integer', 'min:1'], 'apprentice_page' => ['nullable', 'integer', 'min:1']]);
         $q = Apprentice::with('careersAdviser');
         if (! Access::manager($r->user())) {
             $q->where($r->user()->role === 'apprentice' ? 'user_id' : 'careers_adviser_id', $r->user()->id);
         }
 
-        $apprentices = $q->orderBy('last_name')->get();
-        $items = [];
-        if ($r->user()->role !== 'apprentice') {
-            $people = $apprentices->keyBy('id');
-            foreach (CareerDiscussion::whereIn('apprentice_id', $people->keys())->get() as $d) {
-                $a = $people[$d->apprentice_id];
-                foreach ($d->actions ?? [] as $action) {
-                    if ($action['status'] === 'Completed') {
-                        continue;
-                    }
-                    $checking = $action['status'] === 'Ready for adviser check';
-                    $items[] = ['apprentice' => $a, 'discussion' => $d, 'action' => $action, 'overdue' => filled($action['due_date'] ?? null) && $action['due_date'] < today()->toDateString(), 'owner' => $checking || $action['owner'] === 'Careers adviser' ? ($a->careersAdviser?->name ?? 'Careers adviser not assigned') : $a->first_name.' '.$a->last_name, 'next' => $checking ? 'Check submitted work' : ($action['owner'] === 'Careers adviser' ? 'Complete agreed adviser action' : 'Check progress with apprentice')];
-                }
-            }
+        $apprentices = $q->orderBy('last_name')->orderBy('first_name')->orderBy('id')->get();
+        $search = trim($data['search'] ?? '');
+        if ($search !== '') {
+            $apprentices = $apprentices->filter(fn ($a) => Str::contains(Str::lower($a->first_name.' '.$a->last_name.' '.$a->reference), Str::lower($search)));
         }
-        $all = collect($items);
-        $show = in_array($r->query('show'), ['overdue', 'today', 'checking'], true) ? $r->query('show') : 'all';
-        $type = in_array($r->query('type'), ['employment', 'progression'], true) ? $r->query('type') : 'all';
-        $items = $all->filter(fn ($i) => ($type === 'all' || $i['discussion']->type === $type) && match ($show) {
-            'overdue' => $i['overdue'], 'today' => ($i['action']['due_date'] ?? null) === today()->toDateString(), 'checking' => $i['action']['status'] === 'Ready for adviser check', default => true
-        })->sortBy(fn ($i) => ($i['overdue'] ? '0' : '1').($i['action']['due_date'] ?? '9999'));
+        $show = $data['show'] ?? 'all'; $type = $data['type'] ?? 'all';
+        $discussions = $r->user()->role === 'apprentice' ? collect() : CareerDiscussion::whereIn('apprentice_id', $apprentices->pluck('id'))->when($type !== 'all', fn ($query) => $query->where('type', $type))->get(['id', 'apprentice_id', 'type', 'actions']);
+        $followup = CareersFollowup::for($apprentices, $discussions);
+        $all = $followup['rows'];
+        $items = CareersFollowup::paginate($all->filter(fn ($item) => $show === 'all' || $item['flags'][$show])->values(), $r, 'action_page');
 
         $blockPrompts = [];
         if ($r->user()->role !== 'apprentice') {
@@ -71,7 +62,7 @@ class CareersController extends Controller
             }
         }
 
-        return view('careers.worklist', ['plannedPrompts'=>$r->user()->role==='apprentice' ? [] : \App\Support\CareersPrompts::worklist($apprentices),'apprentices'=>$apprentices,'items'=>$items,'all'=>$all,'show'=>$show,'type'=>$type,'blockPrompts'=>$blockPrompts]);
+        return view('careers.worklist', ['plannedPrompts'=>$r->user()->role==='apprentice' ? [] : \App\Support\CareersPrompts::worklist($apprentices),'apprentices'=>CareersFollowup::paginate($apprentices->values(), $r, 'apprentice_page'),'search'=>$search,'workCounts'=>$followup['counts'],'sourceChecks'=>$followup['sourceChecks'],'items'=>$items,'all'=>$all,'show'=>$show,'type'=>$type,'blockPrompts'=>$blockPrompts]);
     }
 
     public function recordPrompts(Request $r): RedirectResponse
@@ -91,10 +82,30 @@ class CareersController extends Controller
     {
         abort_unless($this->viewable($r, $apprentice), 403);
 
-        $editing = $r->filled('edit') ? CareerDiscussion::where('apprentice_id', $apprentice->id)->findOrFail($r->integer('edit')) : null;
+        $data = $r->validate(['edit' => ['nullable', 'integer', 'min:1'], 'discussion' => ['nullable', 'integer', 'min:1'], 'history_type' => ['nullable', Rule::in(['all', 'employment', 'progression'])], 'history_page' => ['nullable', 'integer', 'min:1']]);
+        if (isset($data['edit'], $data['discussion']) && (int) $data['edit'] !== (int) $data['discussion']) {
+            throw ValidationException::withMessages(['discussion' => 'Open one source discussion before amending it.']);
+        }
+        $editing = isset($data['edit']) ? CareerDiscussion::where('apprentice_id', $apprentice->id)->findOrFail($data['edit']) : null;
         abort_unless(! $editing || $this->write($r, $apprentice), 403);
-
-        return view('careers.index', ['apprentice' => $apprentice, 'editing' => $editing, 'write' => $this->write($r, $apprentice), 'discussions' => CareerDiscussion::with('adviser')->where('apprentice_id', $apprentice->id)->orderByDesc('discussion_date')->get()]);
+        $pinned = $data['discussion'] ?? $editing?->id;
+        $query = CareerDiscussion::with('adviser')->where('apprentice_id', $apprentice->id);
+        if ($pinned) {
+            $query->whereKey($pinned);
+            abort_unless((clone $query)->exists(), 404);
+        } elseif (($data['history_type'] ?? 'all') !== 'all') {
+            $query->where('type', $data['history_type']);
+        }
+        $discussions = CareersFollowup::paginate($query->orderByDesc('discussion_date')->orderByDesc('id')->get(), $r, 'history_page', 10);
+        foreach ($discussions as $d) {
+            if (! CareersFollowup::actionsReadable($d->actions)) {
+                if ($r->expectsJson()) {
+                    abort(422, 'Careers action source needs administrator reconciliation before this discussion can be opened. No record has been changed.');
+                }
+                throw new \Illuminate\Http\Exceptions\HttpResponseException(response()->view('careers.source-check', ['apprentice' => $apprentice, 'discussionId' => $d->id], 422));
+            }
+        }
+        return view('careers.index', ['apprentice' => $apprentice, 'editing' => $editing, 'write' => $this->write($r, $apprentice), 'discussions' => $discussions, 'pinnedDiscussion' => $pinned]);
     }
 
     public function save(Request $r, Apprentice $apprentice, ?CareerDiscussion $discussion = null): RedirectResponse

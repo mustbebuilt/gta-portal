@@ -24,7 +24,26 @@ class DashboardController extends Controller
 {
     public function index(Request $r): View
     {
-        return view('dashboard.index', $this->data($r));
+        $data=$this->data($r,false);
+        $filter=$r->query('priority','all');$page=$r->query('priority_page','1');
+        abort_unless(is_string($filter) && in_array($filter,['all','overdue','today','checks'],true),422,'Choose a recognised work filter.');
+        abort_unless((is_string($page) || is_int($page)) && ctype_digit((string)$page) && (int)$page>=1 && (int)$page<=1000000,422,'Choose a valid work-list page.');
+        $priorities=\App\Support\DashboardPriorities::for($r->user(),$data['apprentices'],$data['tasks'],$data['actions']);
+        $filtered=$filter==='all'?$priorities['rows']:$priorities['rows']->where('bucket',$filter)->values();
+        $page=min((int)$page,max(1,(int)ceil($filtered->count()/15)));
+        $list=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,15)->values(),$filtered->count(),15,$page,['path'=>$r->url(),'query'=>$r->except('priority_page'),'pageName'=>'priority_page']);
+        $reviewSummary=$r->user()->role==='apprentice'?null:\App\Support\ReviewFollowup::for($r->user(),$data['apprentices']);
+        $registerSummary=null;
+        if($r->user()->role!=='apprentice'){
+            $registerAccess=\App\Support\RegisterFollowup::visible($r->user());
+            if(!$r->filled('group') || $registerAccess['groups']->contains('id',(int)$r->query('group'))){
+                $visibleRegisters=$registerAccess['sessions'];
+                if($r->filled('group')){$visibleRegisters=$visibleRegisters->where('tutor_group_id',(int)$r->query('group'));}
+                if($r->filled('apprentice')){$visibleRegisters=$visibleRegisters->filter(fn($s)=>in_array((int)$r->query('apprentice'),\App\Support\RegisterFollowup::roster($s)['ids'],true));}
+                $registerSummary=\App\Support\RegisterFollowup::for($visibleRegisters);
+            }
+        }
+        return view('dashboard.index',$data+['priorities'=>$priorities,'priorityFilter'=>$filter,'priorityList'=>$list,'reviewSummary'=>$reviewSummary,'registerSummary'=>$registerSummary]);
     }
 
     public function report(Request $r): View
@@ -51,7 +70,7 @@ class DashboardController extends Controller
         return view('dashboard.journey', ['apprentice' => $apprentice, 'events' => JourneyEvents::for($apprentice)]);
     }
 
-    private function data(Request $r): array
+    private function data(Request $r,bool $includeAttendance=true): array
     {
         abort_unless(in_array($r->user()->role, ['admin', 'ceo', 'tutor', 'apprentice'], true), 403);
         $visible = Apprentice::visibleTo($r->user())->with(['groupRecord', 'tutor'])->orderBy('last_name')->get();
@@ -82,6 +101,6 @@ class DashboardController extends Controller
             }
         }
 
-        return ['tutorMarking' => $tutorMarking, 'attendanceLedger' => AttendanceLedger::forIds($ids->all()), 'outcomeContexts' => Access::manager($r->user()) ? ProgrammeOutcome::whereIn('apprentice_id', $ids)->get()->keyBy('apprentice_id') : collect(), 'apprentices' => $scope, 'visible' => $visible, 'groups' => $groups, 'metrics' => $metrics, 'tasks' => $tasks, 'topics' => $topics, 'qualifications' => $qualifications, 'actions' => $actions, 'manager' => Access::manager($r->user())];
+        return ['tutorMarking' => $tutorMarking, 'attendanceLedger' => $includeAttendance?AttendanceLedger::forIds($ids->all()):null, 'outcomeContexts' => Access::manager($r->user()) ? ProgrammeOutcome::whereIn('apprentice_id', $ids)->get()->keyBy('apprentice_id') : collect(), 'apprentices' => $scope, 'visible' => $visible, 'groups' => $groups, 'metrics' => $metrics, 'tasks' => $tasks, 'topics' => $topics, 'qualifications' => $qualifications, 'actions' => $actions, 'manager' => Access::manager($r->user())];
     }
 }

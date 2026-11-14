@@ -110,13 +110,14 @@ class PrivateEvidence
         return ['disk'=>self::diskName($entry),'path'=>self::path($entry)];
     }
 
-    public static function fingerprint(array $entry): array
+    public static function fingerprint(array $entry, ?int $maxBytes = null): array
     {
+        if($maxBytes!==null && ($maxBytes<1 || $maxBytes>=PHP_INT_MAX)){throw new \RuntimeException('Invalid fingerprint limit.');}
         $location=self::location($entry);$disk=self::filesystem($location['disk']);
         if(!$disk->fileExists($location['path'])){return ['exists'=>false];}
         $stream=$disk->readStream($location['path']);
         if(!is_resource($stream)){throw new \RuntimeException('Private evidence could not be read.');}
-        try{$hash=hash_init('sha256');$bytes=hash_update_stream($hash,$stream);return ['exists'=>true,'bytes'=>$bytes,'sha256'=>hash_final($hash)];}
+        try{$hash=hash_init('sha256');$bytes=hash_update_stream($hash,$stream,$maxBytes===null?-1:$maxBytes+1);if($maxBytes!==null && $bytes>$maxBytes){throw new \RuntimeException('Evidence exceeds bounded verification limit.');}return ['exists'=>true,'bytes'=>$bytes,'sha256'=>hash_final($hash)];}
         finally{fclose($stream);}
     }
 

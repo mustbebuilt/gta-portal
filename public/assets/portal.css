@@ -20,3 +20,18 @@
 
 /* Individual delivery calendar: retain column labels and allow horizontal scrolling on narrow screens. */
 .table-wrap{max-width:100%;overflow-x:auto}.table-wrap table{border-collapse:collapse;width:100%;min-width:680px}.table-wrap th,.table-wrap td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}.table-wrap input{min-width:140px}.table-wrap td:last-child input{min-width:90px;width:110px}
+
+/* Keyboard entry point and compact navigation; no-JS navigation stays available. */
+.skip-link{position:fixed;top:12px;left:12px;z-index:1000;padding:12px 18px;background:var(--panel);color:var(--text);border:2px solid var(--accent);border-radius:8px;transform:translateY(-200%)}
+.skip-link:focus{transform:translateY(0)}
+.navigation-toggle[hidden],#portal-navigation[hidden]{display:none!important}
+main:focus{outline:none}
+.sidebar nav{min-width:0}
+.sidebar nav a[aria-current=page]{font-weight:750;box-shadow:inset 4px 0 0 #8ad5ff}
+@media(max-width:850px){.navigation-toggle{min-width:105px;justify-self:end}.sidebar nav a{overflow-wrap:anywhere}}
+@media print{.skip-link,.navigation-toggle{display:none!important}}
+
+.error-summary:focus{outline:3px solid var(--accent);outline-offset:3px}
+.error-summary a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+
+.priority-summary{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}.priority-summary span{padding:8px 12px;border:1px solid var(--line);border-radius:8px}.priority-list{list-style:none;margin:0;padding:0}.priority-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:18px 0;border-bottom:1px solid var(--line)}.priority-row h3{font-size:17px;margin:8px 0;overflow-wrap:anywhere}.priority-row p{margin:4px 0}.priority-row .button{align-self:center}.priority-heading{scroll-margin-top:20px}@media(max-width:650px){.priority-row{grid-template-columns:minmax(0,1fr)}.priority-row .button{justify-self:start;max-width:100%}}

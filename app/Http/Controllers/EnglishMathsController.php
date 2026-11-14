@@ -7,6 +7,8 @@ use App\Models\Qualification;
 use App\Models\TrainingTopic;
 use App\Support\LearningAccess as Access;
 use App\Support\PrivateEvidence;
+use App\Support\EnglishMathsFollowup;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,6 +25,7 @@ class EnglishMathsController extends Controller
     {
         $u = $r->user();
         abort_unless($u->active && in_array($u->role, ['admin', 'ceo', 'tutor', 'apprentice', 'functional_skills_tutor'], true), 403);
+        $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'subject' => ['nullable', Rule::in(['all', 'maths', 'english'])], 'view' => ['nullable', Rule::in(EnglishMathsFollowup::VIEWS)], 'page' => ['nullable', 'integer', 'min:1']]);
         $query = Apprentice::query();
         if ($u->role === 'functional_skills_tutor') {
             $query->where(function ($q) use ($u): void {
@@ -40,26 +43,42 @@ class EnglishMathsController extends Controller
             $query->visibleTo($u);
         }
 
-        return view('em.caseload', ['apprentices' => $query->orderBy('last_name')->paginate(20)]);
+        $search = trim($data['search'] ?? '');
+        $people = $query->orderBy('last_name')->orderBy('first_name')->orderBy('id')->get();
+        if ($search !== '') {
+            $people = $people->filter(fn ($a) => Str::contains(Str::lower($a->first_name.' '.$a->last_name.' '.$a->reference), Str::lower($search)));
+        }
+        $subject = $data['subject'] ?? 'all';
+        $view = $data['view'] ?? 'all';
+        $summary = EnglishMathsFollowup::for($u, $people, $subject);
+        $rows = $summary['rows']->filter(fn ($row) => $view === 'all' || $row['flags'][$view])->values();
+        $page = min((int) ($data['page'] ?? 1), max(1, (int) ceil($rows->count() / 20)));
+        $paginator = new LengthAwarePaginator($rows->slice(($page - 1) * 20, 20)->values(), $rows->count(), 20, $page, ['path' => $r->url(), 'query' => $r->except('page')]);
+        return view('em.caseload', ['followupRows' => $paginator, 'followupCounts' => $summary['counts'], 'selectedSubject' => $subject, 'selectedView' => $view, 'search' => $search]);
     }
 
     private function subjects(Request $r, Apprentice $a): array
     {
-        return array_values(array_filter(['maths', 'english'], fn ($s) => Access::training($r->user(), $a) || Access::subject($r->user(), $a, $s)));
+        return EnglishMathsFollowup::subjects($r->user(), $a);
     }
 
     public function index(Request $r, Apprentice $apprentice): View
     {
         $subjects = $this->subjects($r, $apprentice);
         abort_unless($subjects, 403);
+        $data = $r->validate(['show' => ['nullable', Rule::in(['working', 'achieved', 'overdue', 'today', 'checks'])], 'topics' => ['nullable', Rule::in(['awaiting', 'referred'])], 'subject' => ['nullable', Rule::in(['maths', 'english'])]]);
+        if (isset($data['subject'])) {
+            abort_unless(in_array($data['subject'], $subjects, true), 403);
+            $subjects = [$data['subject']];
+        }
         $topics = TrainingTopic::where('apprentice_id', $apprentice->id)->whereIn('subject', $subjects)->orderBy('subject')->orderBy('topic')->get();
         $quals = Qualification::where('apprentice_id', $apprentice->id)->whereIn('subject', $subjects)->orderBy('subject')->get();
         $filter = $r->query('show');
         $quals = $quals->filter(fn ($q) => match ($filter) {
-            'working' => $q->status === 'Working towards','achieved' => $q->achieved(),'overdue' => $q->position() === 'Overdue','checks' => $q->position() === 'Date check',default => true
+            'working' => $q->status === 'Working towards','achieved' => $q->achieved(),'overdue' => $q->position() === 'Overdue','today' => $q->position() === 'Due today','checks' => $q->position() === 'Date check',default => true
         });
 
-        return view('em.index', ['apprentice' => $apprentice, 'subjects' => $subjects, 'topics' => $topics, 'qualifications' => $quals, 'catalogue' => $this->catalogue(), 'canManage' => Access::manager($r->user())]);
+        return view('em.index', ['apprentice' => $apprentice, 'subjects' => $subjects, 'topics' => $topics, 'topicRows' => $topics->filter(fn ($t) => match ($data['topics'] ?? '') { 'awaiting' => $t->evidence_stage === 'Awaiting review', 'referred' => $t->evidence_stage === 'Referred', default => true }), 'qualifications' => $quals, 'catalogue' => $this->catalogue(), 'canManage' => Access::manager($r->user())]);
     }
 
     public function assign(Request $r, Apprentice $apprentice): RedirectResponse

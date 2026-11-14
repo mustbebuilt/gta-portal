@@ -9,6 +9,7 @@ use App\Models\LearningTask;
 use App\Models\StaffDevelopmentProfile as Profile;
 use App\Models\User;
 use App\Support\AppraisalTemplate;
+use App\Support\StaffFollowup;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -62,26 +63,22 @@ class StaffDevelopmentController extends Controller
     public function index(Request $r): View
     {
         abort_unless($this->staff($r->user()), 403);
+        $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'staff_state' => ['nullable', Rule::in(StaffFollowup::STAFF_VIEWS)], 'action_state' => ['nullable', Rule::in(StaffFollowup::ACTION_VIEWS)], 'review_state' => ['nullable', Rule::in(StaffFollowup::REVIEW_VIEWS)], 'staff_page' => ['nullable', 'integer', 'min:1'], 'action_page' => ['nullable', 'integer', 'min:1'], 'review_page' => ['nullable', 'integer', 'min:1']]);
         $q = User::whereNotIn('role', ['apprentice', 'employer']);
         if ($r->user()->role !== 'ceo') {
             $ids = Profile::where('manager_id', $r->user()->id)->pluck('user_id');
             $q->where(fn ($q) => $q->where('id', $r->user()->id)->orWhereIn('id', $ids));
         }
 
-        $people = $q->orderBy('name')->get();
-        $profiles = Profile::whereIn('user_id', $people->pluck('id'))->get()->keyBy('user_id');
-        $summary = [];
-        foreach ($people as $person) {
-            $profile = $profiles->get($person->id);
-            $v = $profile?->payload ?? [];
-            $manager = $person->id !== $r->user()->id && $this->manage($r, $person);
-            $entries = collect($v['entries'] ?? [])->filter(fn ($e) => $manager || ($e['kind'] ?? null) === 'cpd' || ($e['shared'] ?? false));
-            $actions = collect($v['actions'] ?? [])->where('status', '!=', 'Completed');
-            $planned = collect($v['schedules'] ?? [])->where('status', 'Planned');
-            $summary[$person->id] = ['recorded' => (bool) $profile, 'entries' => $entries->count(), 'open_actions' => $actions->count(), 'overdue_actions' => $actions->filter(fn ($a) => filled($a['due'] ?? null) && $a['due'] < today()->toDateString())->count(), 'due_reviews' => $planned->filter(fn ($a) => filled($a['due'] ?? null) && $a['due'] <= today()->toDateString())->count(), 'date_checks' => $actions->filter(fn ($a) => ! filled($a['due'] ?? null))->count()];
-        }
-
-        return view('staff.index', compact('people', 'summary'));
+        $people = $q->orderBy('name')->orderBy('id')->get();
+        $search = trim($data['search'] ?? ''); $staffState = $data['staff_state'] ?? 'all';
+        $actionState = $data['action_state'] ?? 'all'; $reviewState = $data['review_state'] ?? 'all';
+        if ($search !== '') { $people = $people->filter(fn ($person) => Str::contains(Str::lower($person->name), Str::lower($search))); }
+        $profiles = Profile::whereIn('user_id', $people->pluck('id'))->get(['id', 'user_id', 'manager_id', 'payload'])->keyBy('user_id');
+        $staffCounts = ['all' => $people->count(), 'active' => $people->where('active', true)->count(), 'inactive' => $people->where('active', false)->count(), 'unrecorded' => $people->filter(fn ($person) => ! $profiles->has($person->id))->count()];
+        $people = $people->filter(fn ($person) => match ($staffState) { 'active' => $person->active, 'inactive' => ! $person->active, 'unrecorded' => ! $profiles->has($person->id), default => true })->values();
+        $followup = StaffFollowup::for($people, $profiles, $r->user()->id, $r->user()->role === 'ceo');
+        return view('staff.index', ['people' => StaffFollowup::paginate($people, $r, 'staff_page'), 'summary' => $followup['summary'], 'actionRows' => StaffFollowup::paginate($followup['actions']->filter(fn ($row) => $row['flags'][$actionState])->values(), $r, 'action_page'), 'reviewRows' => StaffFollowup::paginate($followup['reviews']->filter(fn ($row) => $row['flags'][$reviewState])->values(), $r, 'review_page'), 'actionCounts' => $followup['actionCounts'], 'reviewCounts' => $followup['reviewCounts'], 'staffCounts' => $staffCounts, 'search' => $search, 'staffState' => $staffState, 'actionState' => $actionState, 'reviewState' => $reviewState]);
     }
 
     public function show(Request $r, User $target): View

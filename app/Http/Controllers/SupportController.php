@@ -13,6 +13,7 @@ use App\Support\MarkerHistory;
 use App\Support\PortalPdf;
 use App\Support\PrivateEvidence;
 use App\Support\SupportAccess;
+use App\Support\SupportFollowup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,18 +55,15 @@ class SupportController extends Controller
     public function worklist(Request $r): View
     {
         abort_unless($this->team($r), 403);
-        $q = SupportConcern::with(['apprentice', 'owner'])->whereIn('apprentice_id', SupportAccess::ids($r->user()));
-        if ($r->query('state') === 'new') {
-            $q->whereNull('acknowledged_at');
-        } elseif ($r->query('state') === 'overdue') {
-            $q->where('status', '!=', 'Closed')->whereDate('action_due', '<', today());
-        } elseif ($r->query('state') === 'weekly') {
-            $q->where('status', '!=', 'Closed')->where(fn ($q) => $q->whereNull('next_review')->orWhereDate('next_review', '<=', today()));
-        } else {
-            $q->where('status', '!=', 'Closed');
-        }
-
-        return view('support.worklist', ['concerns' => $q->orderBy('created_at')->get(), 'codes' => $this->codes()]);
+        $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'state' => ['nullable', Rule::in(SupportFollowup::CONCERN_VIEWS)], 'plan_state' => ['nullable', Rule::in(SupportFollowup::PLAN_VIEWS)], 'page' => ['nullable', 'integer', 'min:1'], 'plan_page' => ['nullable', 'integer', 'min:1']]);
+        $search = trim($data['search'] ?? ''); $state = $data['state'] ?? 'open'; $planState = $data['plan_state'] ?? 'all';
+        $people = Apprentice::whereIn('id', SupportAccess::ids($r->user()))->get();
+        if ($search !== '') { $people = $people->filter(fn ($a) => Str::contains(Str::lower($a->first_name.' '.$a->last_name.' '.$a->reference), Str::lower($search))); }
+        $concerns = SupportConcern::with(['apprentice', 'owner:id,name,role,active'])->whereIn('apprentice_id', $people->pluck('id'))->orderBy('created_at')->orderBy('id')->get(['id', 'apprentice_id', 'owner_id', 'code', 'status', 'action_due', 'next_review', 'acknowledged_at', 'created_at']);
+        $concernSummary = SupportFollowup::concerns($concerns);
+        $plans = SupportPlan::whereIn('apprentice_id', $people->pluck('id'))->get(['id', 'apprentice_id', 'status', 'active_plan', 'reviews']);
+        $planSummary = SupportFollowup::plans($plans, $people);
+        return view('support.worklist', ['concernRows' => SupportFollowup::paginate($concernSummary['rows']->filter(fn ($row) => $row['flags'][$state])->values(), $r, 'page'), 'concernCounts' => $concernSummary['counts'], 'planRows' => SupportFollowup::paginate($planSummary['rows']->filter(fn ($row) => $row['flags'][$planState])->values(), $r, 'plan_page'), 'planCounts' => $planSummary['counts'], 'search' => $search, 'state' => $state, 'planState' => $planState, 'codes' => $this->codes()]);
     }
 
     public function index(Request $r, Apprentice $apprentice): View

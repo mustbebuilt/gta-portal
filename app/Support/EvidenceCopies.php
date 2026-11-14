@@ -55,6 +55,17 @@ class EvidenceCopies
         if(!self::intact($plan)){return false;}
         return self::proposal($plan->source_disk,$plan->target_disk)['proposal_hash']===$plan->manifest['proposal_hash'];
     }
+    // Internal recovery API: pinned copies may be rechecked even if live originals/references change.
+    // Never expose returned locators in a response, CLI output or notification.
+    public static function verifiedManifest(EvidenceCopyPlan $plan): array
+    {
+        if(!self::intact($plan) || $plan->state!=='Verified staging copies' || !is_array($plan->result) || ($plan->result['source_stable_at_finish']??false)!==true){throw new \RuntimeException('A verified intact retained copy plan is required.');}
+        $items=$plan->manifest['items'];$results=$plan->result['items']??[];
+        if(!is_array($results) || !array_is_list($results) || count($results)!==count($items) || ($plan->result['verified_copies']??null)!==count($items)){throw new \RuntimeException('Copy result is incomplete.');}
+        foreach($items as $index=>$item){if(($results[$index]['token']??null)!==$item['token'] || ($results[$index]['status']??null)!=='verified_copy'){throw new \RuntimeException('Copy result binding disagrees.');}}
+        foreach(['source','target'] as $side){if(ReviewedImports::hash(self::profile($plan->{$side.'_disk'}))!==ReviewedImports::hash($plan->manifest[$side.'_profile']??[])){throw new \RuntimeException('Copy storage profile changed.');}}
+        return $plan->manifest;
+    }
     public static function summary(EvidenceCopyPlan $plan): array
     {
         $intact=self::intact($plan);

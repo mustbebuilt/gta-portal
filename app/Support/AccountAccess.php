@@ -14,7 +14,8 @@ class AccountAccess
 {
     public static function recoveryAvailable(): bool
     {
-        return config('account_access.recovery_enabled') === true && app()->environment(['local', 'testing']) && config('mail.default') === 'array';
+        return (config('account_access.recovery_enabled') === true && app()->environment(['local', 'testing']) && config('mail.default') === 'array')
+            || (app()->environment('staging') && RecoveryDelivery::errors() === []);
     }
 
     public static function passwordRules(): array
@@ -31,11 +32,12 @@ class AccountAccess
         $users = User::whereRaw('LOWER(email) = ?', [strtolower(trim($email))])->limit(2)->get();
         $u = $users->count() === 1 ? $users->first() : null;
 
-        return $u && $u->active && $u->email_verified_at ? $u : null;
+        return $u && $u->active && $u->email_verified_at && RecoveryDelivery::recipientAllowed($u->email) ? $u : null;
     }
 
     public static function invalidate(User $user, ?int $actor, string $event, string $origin): void
     {
+        DB::table('account_onboarding_tokens')->where('user_id', $user->id)->delete();
         Password::broker()->deleteToken($user);
         if ($user->isDirty('email')) {
             $old = new User(['email' => $user->getOriginal('email')]);

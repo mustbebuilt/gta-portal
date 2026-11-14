@@ -20,6 +20,27 @@ class SaveApprenticeRequest extends FormRequest
         $this->merge(['reference' => strtoupper(trim((string) $this->input('reference')))]);
     }
 
+    public function attributes(): array
+    {
+        return [
+            'reference' => 'learner reference',
+            'first_name' => 'first name',
+            'last_name' => 'last name',
+            'email' => 'email address',
+            'programme_id' => 'apprenticeship programme',
+            'start_date' => 'first day in learning',
+            'planned_end_date' => 'planned training end date',
+            'employer_id' => 'employer',
+            'tutor_group_id' => 'tutor group',
+            'tutor_id' => 'main tutor',
+            'mentor_id' => 'Learning & Progress Mentor',
+            'careers_adviser_id' => 'careers adviser',
+            'maths_tutor_id' => 'maths tutor',
+            'english_tutor_id' => 'English tutor',
+            'version' => 'record version',
+        ];
+    }
+
     public function rules(): array
     {
         $record = $this->route('apprentice');

@@ -3,6 +3,7 @@
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">{{ $session->group->name }}</p><h1>{{ $session->name }}</h1><p>{{ $session->session_date->format('d M Y') }} · {{ $session->start_time }}–{{ $session->end_time }}</p><span class="status">{{ $session->state }}</span></div><a class="button" href="{{ route('attendance.index') }}">Back to sessions</a></header>
 @include('learning.errors')
+@include('attendance.register-readiness')
 <section class="panel"><h2>Planned learning</h2><p class="recorded-answer">{{ $session->planned_learning }}</p><p>Excluded periods: @forelse($session->breaks as $break){{ $break['start'] }}–{{ $break['end'] }} @empty None recorded @endforelse</p><p class="muted">The roster is a saved snapshot. Changing current group membership does not rewrite past attendance.</p></section>
 @if($session->state==='Cancelled')<section class="panel"><h2>Cancelled session</h2><p>{{ $session->cancellation_reason }}</p><p>This session is excluded from attendance and OTJ totals.</p></section>
 @else

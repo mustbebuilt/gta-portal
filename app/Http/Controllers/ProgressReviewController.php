@@ -37,9 +37,17 @@ class ProgressReviewController extends Controller
             $q->where($r->user()->role === 'mentor' ? 'mentor_id' : 'tutor_id', $r->user()->id);
         }
 
-        $apprentices=$q->orderBy('last_name')->get();$positions=[];
-        foreach($apprentices as $a){$positions[$a->id]=\App\Support\ReviewReminders::position($a);}
-        return view('reviews.index', ['apprentices'=>$apprentices,'positions'=>$positions,'manager'=>Access::manager($r->user()),'reminderPreview'=>Access::manager($r->user()) ? \App\Support\ReviewReminders::generate() : null,'reminderScheduleEnabled'=>(bool)config('portal_reminders.scheduled',false),'lastReminderRun'=>Access::manager($r->user()) ? DB::table('portal_reminder_runs')->latest('id')->first() : null]);
+        $input=$r->validate(['search'=>['nullable','string','max:250'],'view'=>['nullable','string',Rule::in(\App\Support\ReviewFollowup::VIEWS)],'group'=>['nullable','integer','min:1'],'apprentice'=>['nullable','integer','min:1']]);
+        if($r->filled('group')){$q->where('tutor_group_id',(int)$input['group']);}
+        if($r->filled('apprentice')){abort_unless((clone $q)->whereKey((int)$input['apprentice'])->exists(),404);$q->whereKey((int)$input['apprentice']);}
+        $search=trim($input['search']??'');
+        if($search!==''){$q->where(fn($n)=>$n->where('reference','like','%'.$search.'%')->orWhere('first_name','like','%'.$search.'%')->orWhere('last_name','like','%'.$search.'%'));}
+        $people=$q->orderBy('last_name')->orderBy('id')->get();
+        $followup=\App\Support\ReviewFollowup::for($r->user(),$people,true);$view=$input['view']??'all';$filtered=\App\Support\ReviewFollowup::filter($followup['rows'],$view)->values();
+        $page=\Illuminate\Pagination\Paginator::resolveCurrentPage();$page=min($page,max(1,(int)ceil($filtered->count()/25)));
+        $reviewRows=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,25)->values(),$filtered->count(),25,$page,['path'=>$r->url(),'query'=>$r->except('page')]);
+        $apprentices=$reviewRows->getCollection()->pluck('apprentice');$positions=$followup['positions'];
+        return view('reviews.index', ['apprentices'=>$apprentices,'positions'=>$positions,'reviewRows'=>$reviewRows,'reviewCounts'=>$followup['counts'],'reviewView'=>$view,'reviewSearch'=>$search,'manager'=>Access::manager($r->user()),'reminderPreview'=>Access::manager($r->user()) ? \App\Support\ReviewReminders::generate() : null,'reminderScheduleEnabled'=>(bool)config('portal_reminders.scheduled',false),'lastReminderRun'=>Access::manager($r->user()) ? DB::table('portal_reminder_runs')->latest('id')->first() : null]);
     }
 
     public function form(Request $r, Apprentice $apprentice, ?ProgressReviewDraft $review = null): View

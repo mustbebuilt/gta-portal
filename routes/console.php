@@ -185,3 +185,62 @@ Artisan::command('gta:evidence-copy {plan} {--copy : Explicitly execute a once-o
         return $result['integrity']==='intact' && (!$this->option('copy') || $plan->state==='Verified staging copies')?0:1;
     }catch(\Throwable){$this->line(json_encode(['result'=>'copy_needs_checks','action'=>'Inspect the retained plan/state/audit privately. Staging keys may remain after a failed/interrupted copy. Originals and application links are not changed.']));return 1;}
 })->purpose('Inspect a protected plan by default; explicit opt-in staging execution copies without overwriting or cutting over');
+
+Artisan::command('gta:recovery-check', function () {
+    $result=\App\Support\RecoveryDelivery::inspect();
+    $this->line(json_encode($result,JSON_THROW_ON_ERROR));
+    return $result['blockers'] ? 1 : 0;
+})->purpose('Check controlled staging recovery configuration without sending email or exposing recipients/secrets');
+
+Artisan::command('gta:onboarding-check', function () {
+    $result = \App\Support\AccountOnboarding::inspect();
+    $this->line(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    return $result['blockers'] ? 1 : 0;
+})->purpose('Check restricted staging onboarding configuration without sending or writing');
+
+Artisan::command('gta:reminder-mail-check', function () {
+    $result=\App\Support\ReminderDelivery::inspect();$this->line(json_encode($result,JSON_THROW_ON_ERROR));return $result['blockers']?1:0;
+})->purpose('Check staging reminder-mail configuration without sending or writing');
+Artisan::command('gta:reminder-mail {--send= : Explicit reviewed delivery ID to attempt once}', function () {
+    $id=$this->option('send');
+    if($id!==null){
+        if(!is_string($id) || !preg_match('/^[1-9][0-9]{0,17}$/',$id)){$this->line('{"result":"invalid_id","mail_attempted":false}');return 1;}
+        $result=\App\Support\ReminderDelivery::dispatch((int)$id);$this->line(json_encode($result,JSON_THROW_ON_ERROR));return $result['result']==='accepted'?0:1;
+    }
+    $preview=\App\Support\ReminderDelivery::preview();
+    $this->line(json_encode(['mode'=>'preview','configuration'=>\App\Support\ReminderDelivery::available()?'checked':'blocked','pilot_accounts'=>count($preview),'current_candidates'=>count(array_filter($preview,fn($row)=>$row['snapshot']!==null)),'existing_delivery_records'=>count(array_filter($preview,fn($row)=>$row['existing']!==null)),'sends_performed'=>false,'writes_performed'=>false],JSON_THROW_ON_ERROR));return 0;
+})->purpose('Preview or explicitly attempt one reviewed staging reminder; never automatically retries');
+
+Artisan::command('gta:evidence-backup {plan} {--verify : Explicitly hash-read retained staging copies only}', function () {
+    try{
+        $plan=\App\Models\EvidenceCopyPlan::findOrFail($this->argument('plan'));
+        $result=$this->option('verify') ? \App\Support\EvidenceRestore::verifyBackup($plan) : \App\Support\EvidenceRestore::backupSummary($plan);
+        $this->line(json_encode($result,JSON_THROW_ON_ERROR));return !$this->option('verify') || ($result['result']??null)==='verified_retained_copies'?0:1;
+    }catch(\Throwable){$this->line('{"result":"backup_needs_checks","writes_performed":false,"cutover_approved":false}');return 1;}
+})->purpose('Inspect a verified retained copy plan; explicit verification reads backup bytes without original-file access');
+Artisan::command('gta:evidence-restore-plan {plan} {--target=} {--record : Record the exact recovery rehearsal preview} {--expected-hash=} {--reference=}', function () {
+    try{
+        $plan=\App\Models\EvidenceCopyPlan::findOrFail($this->argument('plan'));$target=(string)$this->option('target');
+        if($this->option('record')){$run=\App\Support\EvidenceRestore::prepare($plan,$target,(string)$this->option('expected-hash'),(string)$this->option('reference'));$result=\App\Support\EvidenceRestore::summary($run);}
+        else{$proposal=\App\Support\EvidenceRestore::proposal($plan,$target);$result=collect($proposal)->except('private_manifest')->all()+['mode'=>'preview','file_reads'=>false,'writes_performed'=>false,'originals_read'=>false,'cutover_approved'=>false];}
+        $this->line(json_encode($result,JSON_THROW_ON_ERROR));return 0;
+    }catch(\Throwable){$this->line('{"result":"restore_plan_needs_checks","cutover_approved":false}');return 1;}
+})->purpose('Preview a dedicated private restore rehearsal; explicit recording saves a protected manifest only');
+Artisan::command('gta:evidence-restore {run} {--restore : Explicitly execute one prepared recovery rehearsal} {--verify : Explicitly recheck completed rehearsal bytes without writes} {--expected-version=} {--expected-hash=}', function () {
+    try{
+        if($this->option('restore') && $this->option('verify')){throw new \RuntimeException('Choose one explicit operation.');}
+        $run=\App\Models\EvidenceRestoreRun::findOrFail($this->argument('run'));
+        if($this->option('restore')){$run=\App\Support\EvidenceRestore::execute($run,(int)$this->option('expected-version'),(string)$this->option('expected-hash'));}
+        $result=$this->option('verify') ? \App\Support\EvidenceRestore::verify($run) : \App\Support\EvidenceRestore::summary($run);
+        $this->line(json_encode($result,JSON_THROW_ON_ERROR));
+        return $this->option('verify') ? (($result['result']??null)==='verified_rehearsal_objects'?0:1) : (($result['integrity']??null)==='intact' && (!$this->option('restore') || $run->state==='Verified restore rehearsal')?0:1);
+    }catch(\Throwable){$this->line('{"result":"restore_needs_checks","action":"Retain protected manifests and any partial rehearsal files. Originals and application links are unchanged. No automatic retry or cleanup.","cutover_approved":false}');return 1;}
+})->purpose('Inspect by default; explicitly restore exclusively to a separate staging namespace or recheck its bytes');
+
+Artisan::command('gta:curriculum-source-check {--programme= : Limit to one loaded catalogue key}', function () {
+    try{
+        $key=$this->option('programme');$keys=$key===null?array_keys(\App\Support\TaskCatalogue::PROGRAMMES):[$key];$results=[];
+        foreach($keys as$key){$results[]=\App\Support\CurriculumSources::safeRelease(\App\Support\CurriculumSources::release($key));}
+        $ok=collect($results)->every(fn($row)=>$row['technical_ok']);$this->line(json_encode(['result'=>$ok?'technical_checks_passed':'needs_checks','releases'=>$results,'writes_performed'=>false,'curriculum_approval'=>false],JSON_THROW_ON_ERROR));return $ok?0:1;
+    }catch(\Throwable){$this->line('{"result":"source_check_failed","writes_performed":false,"curriculum_approval":false}');return 1;}
+})->purpose('Read bundled blank-task catalogues, source receipts and PDF hashes without changing apprentice records');

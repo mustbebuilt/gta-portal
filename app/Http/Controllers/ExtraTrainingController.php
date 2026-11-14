@@ -11,6 +11,8 @@ use App\Support\PrivateEvidence;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -63,9 +65,26 @@ class ExtraTrainingController extends Controller
     public function index(Request $r, Apprentice $apprentice): View
     {
         abort_unless(Access::training($r->user(), $apprentice), 403);
-        $rows = ExtraTraining::where('apprentice_id', $apprentice->id)->orderByDesc('training_date')->get();
-
-        return view('attendance.extra', ['apprentice' => $apprentice, 'records' => $rows, 'write' => $this->write($r, $apprentice), 'learner' => Access::learner($r->user(), $apprentice), 'approvedMinutes' => $rows->filter(fn ($x) => $x->approval && ! $x->withdrawn_at && $x->occurred())->sum('minutes')]);
+        $views = ['all' => 'All records', 'pending' => 'All pending checks', 'agreement' => 'Awaiting apprentice agreement', 'compensation' => 'Awaiting employer confirmation', 'ready' => 'Ready for tutor check', 'approved' => 'Approved OTJ', 'withdrawn' => 'Withdrawn'];
+        $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'show' => ['nullable', Rule::in(array_keys($views))], 'page' => ['nullable', 'integer', 'min:1'], 'record' => ['nullable', 'integer', 'min:1']]);
+        $rows = ExtraTraining::where('apprentice_id', $apprentice->id)->orderByDesc('training_date')->orderByDesc('id')->get();
+        $approvedMinutes = $rows->filter(fn ($x) => $x->approval && ! $x->withdrawn_at && $x->occurred())->sum('minutes');
+        $search = trim($data['search'] ?? '');
+        $show = $data['show'] ?? 'all';
+        $pinned = isset($data['record']) ? $rows->firstWhere('id', (int) $data['record']) : null;
+        abort_if(isset($data['record']) && ! $pinned, 404);
+        $searched = $search === '' ? $rows : $rows->filter(fn ($x) => Str::contains(Str::lower($x->topic.' '.$x->provider), Str::lower($search)));
+        $matches = fn ($x, $view) => match ($view) {
+            'all' => true,
+            'pending' => ! $x->withdrawn_at && ! $x->approval,
+            default => $x->position() === $views[$view],
+        };
+        $counts = [];
+        foreach (array_keys($views) as $view) { $counts[$view] = $searched->filter(fn ($x) => $matches($x, $view))->count(); }
+        $selected = $pinned ? collect([$pinned]) : $searched->filter(fn ($x) => $matches($x, $show))->values();
+        $page = min((int) ($data['page'] ?? 1), max(1, (int) ceil($selected->count() / 20)));
+        $records = new LengthAwarePaginator($selected->slice(($page - 1) * 20, 20)->values(), $selected->count(), 20, $page, ['path' => $r->url(), 'query' => $r->except('page')]);
+        return view('attendance.extra', ['apprentice' => $apprentice, 'records' => $records, 'write' => $this->write($r, $apprentice), 'learner' => Access::learner($r->user(), $apprentice), 'approvedMinutes' => $approvedMinutes, 'views' => $views, 'counts' => $counts, 'search' => $search, 'show' => $show, 'pinnedRecord' => $pinned?->id]);
     }
 
     public function create(Request $r, Apprentice $apprentice): RedirectResponse
