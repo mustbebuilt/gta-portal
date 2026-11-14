@@ -262,3 +262,18 @@ Artisan::command('gta:support-plan-reminders {--record : Persist deduplicated pr
     ->when(fn()=>config('portal_reminders.support_plan_scheduled')===true);
 
 Artisan::command('gta:mobile-verification-check {--history : Read aggregate stored states without contacts or codes}', function () { $result=\App\Support\MobileVerification::inspect();if($this->option('history')){$result['history']=\App\Support\MobileVerification::history();}$this->line(json_encode($result,JSON_THROW_ON_ERROR));return ($result['blockers']||($result['history']['result']??null)==='blocked')?1:0; })->purpose('Inspect apprentice mobile-verification pilot configuration without sending or connecting');
+
+Artisan::command('gta:apprentice-alerts {--preview : Read source counts only} {--prepare : Store current eligible digests without sending} {--send : Attempt prepared current-cycle reminders} {--run : Prepare then attempt current reminders} {--limit=20 : Up to250 profiles prepared or50 messages attempted}', function () {
+ $mode=array_filter(['preview'=>$this->option('preview'),'prepare'=>$this->option('prepare'),'send'=>$this->option('send'),'run'=>$this->option('run')]);
+ if(count($mode)>1||!ctype_digit((string)$this->option('limit'))||(int)$this->option('limit')<1||(int)$this->option('limit')>250){$this->line('{"result":"invalid_mode_or_limit","sends_performed":false}');return 1;}
+ try {
+  $service=\App\Support\ApprenticeNotificationDelivery::class;$limit=(int)$this->option('limit');$result=['configuration'=>$service::inspect(),'sends_performed'=>false,'writes_performed'=>false];
+  if($this->option('preview')){$p=$service::preview();$result['counts']=$p['counts'];$result['operations']=$service::control();unset($result['operations']['history']);}
+  elseif($this->option('prepare')){$result['prepared']=$service::prepare($limit);$result['writes_performed']=true;}
+  elseif($this->option('send')){$result['attempt_outcomes']=$service::sendPrepared($limit);$result['sends_performed']='see_attempt_outcomes';$result['writes_performed']=true;}
+  elseif($this->option('run')){$result['prepared']=$service::prepare($limit);$result['attempt_outcomes']=$service::sendPrepared($limit);$result['sends_performed']='see_attempt_outcomes';$result['writes_performed']=true;}
+  $this->line(json_encode($result,JSON_THROW_ON_ERROR));return ($service::errors('email')&&$service::errors('sms'))?1:0;
+ }catch(\Throwable){$this->line('{"result":"needs_reconciliation","action":"Inspect saved attempt states. No automatic retry. No contact or provider error is printed."}');return 1;}
+})->purpose('Configuration-only by default; explicitly preview, prepare or dispatch bounded apprentice reminders');
+\Illuminate\Support\Facades\Schedule::command('gta:apprentice-alerts --prepare --limit=250')->dailyAt('09:10')->timezone(config('app.timezone'))->withoutOverlapping(30)->when(fn()=>config('apprentice_notifications.enabled')===true&&config('apprentice_notifications.scheduled')===true);
+\Illuminate\Support\Facades\Schedule::command('gta:apprentice-alerts --send --limit=20')->everyMinute()->between('09:15','10:00')->timezone(config('app.timezone'))->withoutOverlapping(30)->when(fn()=>config('apprentice_notifications.enabled')===true&&config('apprentice_notifications.scheduled')===true);

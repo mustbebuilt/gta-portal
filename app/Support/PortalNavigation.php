@@ -66,12 +66,14 @@ class PortalNavigation
         $links=[];
         if($manage) {
             $links[]=$item('Evidence recovery rehearsals','evidence-restore.index',[],['evidence-restore.*']);
+            $links[]=$item('Apprentice reminder delivery','apprentice-notifications.index',[],['apprentice-notifications.*']);
             $links[]=$item('Reminder mail pilot','reminder-mail.index',[],['reminder-mail.*']);
         }
         if($u->role==='ceo') {$links[]=$item('CEO emergency access','executive.index',[],['executive.*']);}
         $group('system','System tools',$links);
         $links=[];
         if(SecondFactor::required($u)||SecondFactor::mayEnrol($u)) {$links[]=$item('Two-step sign-in','second-factor.settings',[],['second-factor.settings','second-factor.change']);}
+        if($u->role==='apprentice') {$links[]=$item('My reminders','apprentice-reminders.index',[],['apprentice-reminders.*']);}
         if($u->role==='apprentice') {$links[]=$item('Alert preferences','alerts.index',[],['alerts.*']);}
         $links[]=$item('Confirm email','account.email',[],['account.email*']);$links[]=$item('Change password','account.password',[],['account.password*']);
         $group('account','My account',$links);

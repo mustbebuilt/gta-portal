@@ -6,12 +6,14 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack23.
+    // Presence-only contract from the unchanged reference migrations through Pack24.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
         'account_onboarding_tokens'=>['auth_version','created_at','expires_at','issuer_auth_version','issuer_id','purpose','token_hash','user_id'],
         'account_second_factors'=>['confirmed_at','created_at','last_step','recovery_hashes','secret','setup_binding','setup_expires_at','updated_at','user_id'],
+        'apprentice_alert_controls'=>['created_at','history','id','paused','updated_at','updated_by','version'],
+        'apprentice_alert_deliveries'=>['apprentice_id','auth_version','channel','completed_at','config_hash','created_at','cycle_date','history','id','preference_revision','provider_id','reason','recipient_hash','recipient_id','reconciliation','reserved_at','seen_at','source','source_hash','state','updated_at'],
         'apprentice_experience_entries'=>['apprentice_id','created_at','detail','happened_on','history','id','kind','request_token','requester_id','response','reviewer_id','state','title','updated_at','version'],
         'apprentice_markers'=>['apprentice_id','code','created_at','id','recorded_by','updated_at'],
         'apprentice_mobile_challenges'=>['apprentice_id','attempts','auth_version','code_hash','config_hash','created_at','expires_at','id','phone_hash','preference_revision','provider_id','session_hash','state','updated_at','user_id'],

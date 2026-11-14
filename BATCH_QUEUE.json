@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-23",
+  "checkpoint": "development-pack-24",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -406,14 +406,19 @@
       "batch": "Pack23 employer action centre and configurable Gateway preparation",
       "status": "working_tested_reference_workflow",
       "remaining": "Actual identity/authority and account setup, correct approved standard/EPA/cohort criteria, evidence verification, native concurrency/Cloud/browser/PDF acceptance and final provider decisions. No automatic messages/signatures/OTJ or completion updates."
+    },
+    {
+      "batch": "Pack24 consolidated apprentice reminder automation and operations",
+      "status": "working_tested_staging_reference_workflow",
+      "remaining": "Actual approved recipients/verified mobiles, sender/SMTP/Vonage accounts, account spending controls, native races/locks/cache/Cloud scheduler, browser/mobile and real delivery acceptance. Existing production gate remains. No delivery receipt/bounce processing or external Support data."
     }
   ],
-  "queue_review": "Pack23 implements a larger employer/Gateway workstream: controlled employer account invitations, explicit per-apprentice authority, source-bound public requests/replies/staff checking, reply attention, approved configurable Gateway criteria/checks/worklist and private preparation PDF. No real criteria, signatures, messages or Cloud deployment implied.",
+  "queue_review": "Pack24 implements the larger apprentice reminder source/digest/outbox/SMTP/Vonage transport/scheduler/inbox/operations workflow, with durable pause and attempt ledger, source/consent fences, budgets and uncertainty reconciliation. Real provider/native/Cloud acceptance remains separate.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Finish full automatic apprentice reminder delivery, electronic review signing and questionnaire completion tracking as separately scoped work; reconcile actual curriculum/Gateway criteria and complete target rollout before more features.",
+  "next_priority": "Reconcile/deploy/test current code and providers; direct electronic review signing, questionnaire integration and consistent Yorkshire narration remain separate workstreams. No claim the whole original portal is complete.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "23",
+  "development_pack": "24",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",

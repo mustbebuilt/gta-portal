@@ -50,7 +50,15 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
-    Route::get('/gateway-preparation', [\App\Http\Controllers\GatewayReadinessController::class,'index'])->name('gateway.index');
+    Route::post('/apprentice-reminder-control', [\App\Http\Controllers\ApprenticeNotificationController::class,'pause'])->name('apprentice-notifications.pause');
+    Route::get('/apprentice-reminder-delivery', [\App\Http\Controllers\ApprenticeNotificationController::class,'index'])->name('apprentice-notifications.index');
+    Route::post('/apprentice-reminder-delivery', [\App\Http\Controllers\ApprenticeNotificationController::class,'prepare'])->name('apprentice-notifications.prepare');
+    Route::post('/apprentice-reminder-delivery/{delivery}/send', [\App\Http\Controllers\ApprenticeNotificationController::class,'dispatch'])->whereUuid('delivery')->name('apprentice-notifications.dispatch');
+    Route::post('/apprentice-reminder-delivery/{delivery}/cancel', [\App\Http\Controllers\ApprenticeNotificationController::class,'cancel'])->whereUuid('delivery')->name('apprentice-notifications.cancel');
+    Route::post('/apprentice-reminder-delivery/{delivery}/reconcile', [\App\Http\Controllers\ApprenticeNotificationController::class,'reconcile'])->whereUuid('delivery')->name('apprentice-notifications.reconcile');
+    Route::get('/my-reminders', [\App\Http\Controllers\ApprenticeNotificationController::class,'inbox'])->name('apprentice-reminders.index');
+    Route::post('/my-reminders/{delivery}/seen', [\App\Http\Controllers\ApprenticeNotificationController::class,'seen'])->whereUuid('delivery')->name('apprentice-reminders.seen');
+    Route::get('/gateway-preparation' , [\App\Http\Controllers\GatewayReadinessController::class,'index'])->name('gateway.index');
     Route::get('/apprentices/{apprentice}/gateway-preparation.pdf', [\App\Http\Controllers\GatewayReadinessController::class,'pdf'])->name('gateway.pdf');
     Route::get('/employer-accounts', [\App\Http\Controllers\EmployerPortalController::class,'accounts'])->name('employer-accounts.index');
     Route::post('/employer-accounts', [\App\Http\Controllers\EmployerPortalController::class,'createAccount'])->name('employer-accounts.create');

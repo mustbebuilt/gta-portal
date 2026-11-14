@@ -129,7 +129,7 @@ with tempfile.TemporaryDirectory(prefix='gta-staff-workflow-') as temporary:
         passed('Current tutor reassignment removes brief access and apprentice attention identity on the next request')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='employer_portal_actions'").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='apprentice_alert_deliveries'").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('apprentice_experience_entries','apprentice_mobile_challenges')").fetchone()[0]==2
             assert 'description'in [r[1]for r in c.execute('PRAGMA table_info(task_evidence)')]
             assert c.execute('SELECT version FROM progress_review_drafts WHERE id=?',(ids['review'],)).fetchone()[0]==2

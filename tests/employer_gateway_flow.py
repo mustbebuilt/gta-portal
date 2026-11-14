@@ -142,11 +142,11 @@ with tempfile.TemporaryDirectory(prefix='gta-employer-gateway-') as temporary:
         passed('Changed recorded programme status invalidates published readiness basis instead of preserving a ready claim')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('employer_apprentice_grants','employer_portal_actions','gateway_readiness_plans','gateway_readiness_checks')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('apprentice_alert_deliveries','apprentice_alert_controls')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('review_preparation_briefs','apprentice_experience_entries','apprentice_mobile_challenges')").fetchone()[0]==3
             assert c.execute('SELECT status FROM smart_actions WHERE id=?',(ids['target'],)).fetchone()[0]=='To do'
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable four-table migration round-trip preserves all earlier review/apprentice/mobile schema and original target state; real used data requires backup')
+        passed('Disposable latest reminder migration round-trip preserves employer/Gateway and earlier review/apprentice/mobile schema and original target state; real used data requires backup')
         configure('production');start_backend();assert req(admin,'/employer-accounts')[0]==503 and req(employer,'/employer-actions')[0]==503 and req(learner,gateway)[0]==503
         passed('Existing production gate remains enforced on account, employer and Gateway routes')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS, cached staging config, disposable SQLite/encrypted database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'actualGatewayCriteriaSupplied':False,'actualParticipantSignatures':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))
