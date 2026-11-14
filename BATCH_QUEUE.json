@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-19",
+  "checkpoint": "development-pack-20",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -386,17 +386,59 @@
       "batch": "Development Pack19 \u2014 review checklist and apprentice alert preferences",
       "status": "working_tested_review_checklist_and_alert_preferences",
       "remaining": "Actual Cloud/native/browser acceptance, Vonage account/credentials, mobile ownership verification and task/review delivery pipeline remain. Preferences are functional but do not send messages."
+    },
+    {
+      "batch": "Development Pack20 \u2014 apprentice mobile verification workstream",
+      "status": "working_tested_staging_mobile_verification",
+      "remaining": "Actual Vonage account/sender/handset/native/Cloud acceptance and automatic task/review email/SMS reminder generation/delivery still required. No production enablement or live sends here."
     }
   ],
-  "queue_review": "Pack19 adds saved-review preparation checks and apprentice Email/Text/Both plus On/Off preferences, encrypted mobile storage and self-service. Vonage is selected for future delivery integration; setup instructions included. No SMS/email reminder sending enabled.",
+  "queue_review": "Pack20 completes a controlled staging apprentice mobile-verification workflow: Vonage API transport, code lifecycle, opt-in/session/source binding, quotas, UI and private configuration diagnostic. Automatic task/review reminder delivery remains separate.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Martin to merge/test through18 on actual staging, especially grouped-menu usability, role visibility, native disclosure keyboard behaviour and mobile layout.",
+  "next_priority": "Larger functional releases following the requested expansion roadmap; complete actual Martin/provider/staging acceptance and plan automatic task/review delivery separately. All nine new additions remain planned.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "19",
+  "development_pack": "20",
   "questionnaire_update": {
     "pack": "08",
     "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",
     "remaining": "Actual shared responder URLs, form ownership/access/privacy checks and browser/hosted acceptance; receipt reconciliation stays manual. No answer storage, automatic invitation, annual due flag or completion tracking."
+  },
+  "requested_expansion_2026_11_14": {
+    "status": "planned_not_implemented",
+    "release_style": "Group into larger functional releases; numbers/scope finalised before implementation. Existing Pack01\u201319 numbering preserved.",
+    "priority": "Finish current mobile-verification workstream, then apprentice experience, staff follow-up, employer/completion.",
+    "workstreams": [
+      {
+        "name": "Apprentice experience",
+        "functions": [
+          "My next step apprentice homepage",
+          "Apprentice progress journey",
+          "Photo-to-evidence upload",
+          "Personal achievement timeline",
+          "Quick help request"
+        ]
+      },
+      {
+        "name": "Staff follow-up",
+        "functions": [
+          "Who needs attention today staff view",
+          "Review preparation assistant"
+        ]
+      },
+      {
+        "name": "Employer and completion",
+        "functions": [
+          "Employer action centre",
+          "Apprentice readiness check"
+        ]
+      }
+    ],
+    "dependencies": [
+      "Extend existing dashboards/journey/evidence/review snapshots with scoped source links",
+      "Employer account mapping and action authority must be designed and tested",
+      "Gateway requirements require agreed authoritative programme/cohort criteria; unknown stays unknown",
+      "Private support/HR/feedback is not automatically shared or added to generated summaries"
+    ]
   }
 }

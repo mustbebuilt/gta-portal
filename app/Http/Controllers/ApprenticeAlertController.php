@@ -11,7 +11,7 @@ class ApprenticeAlertController extends Controller {
   return $rows->count()===1?$rows->first():null;
  }
  public function index(Request $r) {
-  $a=$this->profile($r);return response()->view('account.alerts',['apprentice'=>$a],$a?200:409)->header('Cache-Control','no-store, private');
+  $a=$this->profile($r);return response()->view('account.alerts',['apprentice'=>$a,'mobileVerification'=>\App\Support\MobileVerification::position($r,$a)],$a?200:409)->header('Cache-Control','no-store, private');
  }
  public function save(Request $r) {
   abort_unless($r->user()->role==='apprentice',403);if(is_string($r->input('alert_mobile'))){$r->merge(['alert_mobile'=>ApprenticeAlerts::normalise($r->input('alert_mobile'))]);}

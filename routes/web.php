@@ -74,6 +74,8 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/reminder-mail', [\App\Http\Controllers\ReminderDeliveryController::class,'prepare'])->name('reminder-mail.prepare');
     Route::get('/reminder-mail/{delivery}', [\App\Http\Controllers\ReminderDeliveryController::class,'show'])->name('reminder-mail.show');
     Route::post('/reminder-mail/{delivery}', [\App\Http\Controllers\ReminderDeliveryController::class,'transition'])->name('reminder-mail.transition');
+    Route::post('/account/alerts/mobile/request', [\App\Http\Controllers\MobileVerificationController::class,'issue'])->name('alerts.mobile.request');
+    Route::post('/account/alerts/mobile/confirm', [\App\Http\Controllers\MobileVerificationController::class,'confirm'])->name('alerts.mobile.confirm');
     Route::get('/account/alerts', [\App\Http\Controllers\ApprenticeAlertController::class,'index'])->name('alerts.index');
     Route::post('/account/alerts', [\App\Http\Controllers\ApprenticeAlertController::class,'save'])->name('alerts.save');
     Route::get('/account/email', [\App\Http\Controllers\AccountOnboardingController::class, 'notice'])->name('account.email');

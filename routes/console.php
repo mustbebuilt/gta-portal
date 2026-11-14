@@ -199,7 +199,7 @@ Artisan::command('gta:onboarding-check', function () {
 })->purpose('Check restricted staging onboarding configuration without sending or writing');
 
 Artisan::command('gta:reminder-mail-check', function () {
-    $result=\App\Support\ReminderDelivery::inspect();$this->line(json_encode($result,JSON_THROW_ON_ERROR));return $result['blockers']?1:0;
+    $result=\App\Support\ReminderDelivery::inspect();$this->line(json_encode($result,JSON_THROW_ON_ERROR));return ($result['blockers']||($result['history']['result']??null)==='blocked')?1:0;
 })->purpose('Check staging reminder-mail configuration without sending or writing');
 Artisan::command('gta:reminder-mail {--send= : Explicit reviewed delivery ID to attempt once}', function () {
     $id=$this->option('send');
@@ -260,3 +260,5 @@ Artisan::command('gta:support-plan-reminders {--record : Persist deduplicated pr
 \Illuminate\Support\Facades\Schedule::command('gta:support-plan-reminders --record')
     ->dailyAt('09:05')->timezone(config('app.timezone'))->withoutOverlapping(30)
     ->when(fn()=>config('portal_reminders.support_plan_scheduled')===true);
+
+Artisan::command('gta:mobile-verification-check {--history : Read aggregate stored states without contacts or codes}', function () { $result=\App\Support\MobileVerification::inspect();if($this->option('history')){$result['history']=\App\Support\MobileVerification::history();}$this->line(json_encode($result,JSON_THROW_ON_ERROR));return ($result['blockers']||($result['history']['result']??null)==='blocked')?1:0; })->purpose('Inspect apprentice mobile-verification pilot configuration without sending or connecting');
