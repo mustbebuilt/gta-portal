@@ -49,6 +49,7 @@ Route::middleware('guest')->group(function () {
 });
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
     Route::post('/staff/{user}/duties', [\App\Http\Controllers\StaffDutyController::class,'save'])->name('staff-duties.save');
+    Route::get('/my-responsibilities', [\App\Http\Controllers\MyResponsibilitiesController::class,'index'])->name('responsibilities.index');
     Route::get('/assignment-checks', [\App\Http\Controllers\AssignmentCheckController::class,'index'])->name('assignment-checks.index');
     Route::get('/portal-setup', [\App\Http\Controllers\PortalSetupController::class,'index'])->name('setup.index');
     Route::get('/support-review-reminders', [\App\Http\Controllers\SupportPlanReminderController::class,'index'])->name('support-review-reminders.index');
