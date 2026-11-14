@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack24.
+    // Presence-only contract from the unchanged reference migrations through Pack25.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -58,6 +58,10 @@ class ApplicationSchema
         'monthly_scorecards'=>['apprentice_id','comment','created_at','history','id','month','scores','training_session_id','tutor_id','updated_at','version'],
         'password_reset_tokens'=>['created_at','email','token'],
         'portal_bootstrap_states'=>['completed_at','completed_by','id'],
+        'portal_questionnaire_assignments'=>['apprentice_id','assigned_by','created_at','cycle_code','draft_answers','due_date','form_id','id','recipient_id','state','submission_count','submitted_at','updated_at','version'],
+        'portal_questionnaire_events'=>['actor_id','assignment_id','created_at','event','form_id','id','private_reason','record_version'],
+        'portal_questionnaire_forms'=>['approved_by','authored_by','content_hash','created_at','id','introduction','kind','privacy_notice','published_at','questions','revision','series_id','state','title','updated_at','version'],
+        'portal_questionnaire_submissions'=>['answer_payload','assignment_id','checked_at','checked_by','concern_id','created_at','followup','followup_history','followup_resolved_at','followup_resolved_by','id','payload_hash','private_note','revision','shared_note','state','submitted_at','updated_at','version'],
         'portal_reminder_runs'=>['counts','created_at','id'],
         'programme_outcomes'=>['apprentice_id','context','created_at','history','id','updated_at','version'],
         'programmes'=>['active','created_at','id','level','name','record_version','standard_code','updated_at','version'],

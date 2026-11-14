@@ -43,7 +43,7 @@ class PortalNavigation
             $links[]=$item('Support and retention','support.worklist',[],[], $request->routeIs('support.*')&&!$request->routeIs('support.permissions'));
             $links[]=$item('Support review reminders','support-review-reminders.index',[],['support-review-reminders.*']);
         }
-        if(QuestionnaireLinks::canView($u)) {$links[]=$item('Questionnaires','questionnaires.index');}
+        if(QuestionnaireLinks::canView($u)) {$links[]=$item('Questionnaires','questionnaires.index',[],['questionnaires.index','portal-questionnaires.*']);}
         if($u->role==='apprentice'||ApprenticeExperience::queueAllowed($u)) {$links[]=$item($u->role==='apprentice'?'My help & achievements':'Help & achievement responses','experience.index',[],['experience.index','experience.create','experience.respond']);}
         $group('support','Support',$links);
         $manage=Gate::forUser($u)->allows('manage-directories');$links=[];

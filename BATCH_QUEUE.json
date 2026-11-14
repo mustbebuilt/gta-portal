@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-24",
+  "checkpoint": "development-pack-25",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -130,7 +130,7 @@
     {
       "batch": "Induction/wellbeing surveys",
       "status": "working_tested_receipts_and_shared_link_configuration",
-      "remaining": "Pack 08 adds the disabled-by-default shared responder-link workflow. Actual responder URLs, form ownership/access/privacy review, hosted browser acceptance and manual receipt reconciliation remain. The original questionnaire PDFs were previously located; do not request them again or treat edit/design URLs as responder URLs. Sensitive answers remain external."
+      "remaining": "Pack25 adds the separate native questionnaire lifecycle. Existing shared external links and manual receipts remain unchanged. Actual approved GTA form/privacy wording, external response/receipt reconciliation and target acceptance remain necessary. Do not infer submission from a link opening or import sensitive answers automatically."
     },
     {
       "batch": "Help and optional voice explanations",
@@ -411,23 +411,28 @@
       "batch": "Pack24 consolidated apprentice reminder automation and operations",
       "status": "working_tested_staging_reference_workflow",
       "remaining": "Actual approved recipients/verified mobiles, sender/SMTP/Vonage accounts, account spending controls, native races/locks/cache/Cloud scheduler, browser/mobile and real delivery acceptance. Existing production gate remains. No delivery receipt/bounce processing or external Support data."
+    },
+    {
+      "batch": "Pack25 consolidated native questionnaire workflow",
+      "status": "working_reference_code_target_acceptance_pending",
+      "remaining": "Provider-approved question and privacy wording, actual Inclusion scope/identity, old external receipt reconciliation, native encryption/backup/locks, browser/mobile and hosted acceptance. External forms are not automatically ingested."
     }
   ],
-  "queue_review": "Pack24 implements the larger apprentice reminder source/digest/outbox/SMTP/Vonage transport/scheduler/inbox/operations workflow, with durable pause and attempt ledger, source/consent fences, budgets and uncertainty reconciliation. Real provider/native/Cloud acceptance remains separate.",
+  "queue_review": "Pack25 consolidates native questionnaire authoring/independent publication, scope-bound batch assignments, encrypted private drafts, immutable submissions, Inclusion checks, resubmission, concern-linked follow-up resolution/reopening, status exports, homepage and generic reminder integration. Actual GTA wording and target acceptance remain required.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Reconcile/deploy/test current code and providers; direct electronic review signing, questionnaire integration and consistent Yorkshire narration remain separate workstreams. No claim the whole original portal is complete.",
+  "next_priority": "Integrate and accept current code in the actual target. Remaining distinct development: direct electronic review signing and consistent Yorkshire narration; authoritative curriculum/Gateway decisions, existing external-form reconciliation and actual provider/native/Cloud rollout still require acceptance. The whole portal is not declared complete.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "24",
+  "development_pack": "25",
   "questionnaire_update": {
-    "pack": "08",
-    "status": "Shared external responder-link workflow developed; disabled by default until actual URLs and exact-link reviews are configured.",
-    "remaining": "Actual shared responder URLs, form ownership/access/privacy checks and browser/hosted acceptance; receipt reconciliation stays manual. No answer storage, automatic invitation, annual due flag or completion tracking."
+    "pack": "25",
+    "status": "Native questionnaire lifecycle implemented separately from retained external responder links and manual receipts.",
+    "remaining": "Publish actual GTA wording after provider review. Do not invent/recreate questionnaires or infer external submissions. No real forms/answers imported. Original questionnaire source PDFs were previously located; reconcile them through existing project records rather than asking Jon for the same files again."
   },
   "requested_expansion_2026_11_14": {
     "status": "all_nine_functional_reference_workflows_implemented_target_content_acceptance_pending",
     "release_style": "Larger functional releases; existing pack numbers retained.",
-    "priority": "Reconcile actual employer identities, authoritative standard/cohort criteria and target acceptance. Automatic notifications, digital signatures and questionnaire integration remain separate.",
+    "priority": "Reconcile actual identities, questionnaire wording and authoritative programme/cohort criteria; test native/Cloud/provider rollout. Direct electronic review signatures remain separate.",
     "workstreams": [
       {
         "name": "Apprentice experience",

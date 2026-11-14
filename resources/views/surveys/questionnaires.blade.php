@@ -2,6 +2,7 @@
 @section('title','Questionnaires')
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">Apprentice support</p><h1>Questionnaires</h1><p>Choose the questionnaire you have been asked to complete.</p></div></header>
+<p><a class="button primary" href="{{ route('portal-questionnaires.index') }}">{{ auth()->user()->role==='apprentice'?'My portal questionnaires':'Portal questionnaire worklist' }}</a></p>
 <p class="test-notice">These questionnaires open on an external service in a new tab. Read the privacy information on that form before answering. Opening a link does not record submission or completion in this portal.</p>
 @foreach($cards as $kind=>$card)
 <section class="panel"><h2>{{ $card['title'] }}</h2>

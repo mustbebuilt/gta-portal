@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title','Wellbeing survey follow-up')
 @section('content')
+<p><a class="button" href="{{ route('portal-questionnaires.index') }}">Portal questionnaire worklist</a> · The receipts below record external submissions separately.</p>
 <div class="survey-private"><header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Wellbeing survey follow-up</h1><p>Receipt and Inclusion Team check are recorded separately.</p></div><a class="button" href="{{ route('support.index',$apprentice) }}">Back to support record</a></header>
 <p><a class="button" href="{{ route('questionnaires.index') }}">Open questionnaires</a></p>
 @include('learning.errors')

@@ -98,6 +98,22 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/task-library/{programme}/{reference}/source.pdf', [\App\Http\Controllers\TaskLibraryController::class, 'pdf'])->name('task-library.pdf');
     Route::get('/account/two-step', [\App\Http\Controllers\SecondFactorController::class, 'settings'])->name('second-factor.settings');
     Route::post('/account/two-step', [\App\Http\Controllers\SecondFactorController::class, 'change'])->name('second-factor.change');
+
+    Route::get('/portal-questionnaires', [\App\Http\Controllers\PortalQuestionnaireController::class,'index'])->name('portal-questionnaires.index');
+    Route::get('/portal-questionnaires/forms', [\App\Http\Controllers\PortalQuestionnaireController::class,'forms'])->name('portal-questionnaires.forms');
+    Route::post('/portal-questionnaires/forms', [\App\Http\Controllers\PortalQuestionnaireController::class,'saveForm'])->name('portal-questionnaires.create-form');
+    Route::get('/portal-questionnaires/forms/{form}', [\App\Http\Controllers\PortalQuestionnaireController::class,'forms'])->whereUuid('form')->name('portal-questionnaires.form');
+    Route::post('/portal-questionnaires/forms/{form}', [\App\Http\Controllers\PortalQuestionnaireController::class,'saveForm'])->whereUuid('form')->name('portal-questionnaires.save-form');
+    Route::post('/portal-questionnaires/forms/{form}/state', [\App\Http\Controllers\PortalQuestionnaireController::class,'formAction'])->whereUuid('form')->name('portal-questionnaires.form-action');
+    Route::get('/portal-questionnaires/assign', [\App\Http\Controllers\PortalQuestionnaireController::class,'assignmentForm'])->name('portal-questionnaires.assign-form');
+    Route::post('/portal-questionnaires/assign', [\App\Http\Controllers\PortalQuestionnaireController::class,'assign'])->name('portal-questionnaires.assign');
+    Route::get('/portal-questionnaires/status.csv', [\App\Http\Controllers\PortalQuestionnaireController::class,'export'])->name('portal-questionnaires.export');
+    Route::get('/portal-questionnaires/{assignment}', [\App\Http\Controllers\PortalQuestionnaireController::class,'show'])->whereUuid('assignment')->name('portal-questionnaires.show');
+    Route::post('/portal-questionnaires/{assignment}', [\App\Http\Controllers\PortalQuestionnaireController::class,'respond'])->whereUuid('assignment')->name('portal-questionnaires.respond');
+    Route::post('/portal-questionnaires/{assignment}/check', [\App\Http\Controllers\PortalQuestionnaireController::class,'review'])->whereUuid('assignment')->name('portal-questionnaires.review');
+    Route::post('/portal-questionnaires/{assignment}/followup', [\App\Http\Controllers\PortalQuestionnaireController::class,'followup'])->whereUuid('assignment')->name('portal-questionnaires.followup');
+    Route::post('/portal-questionnaires/{assignment}/cancel', [\App\Http\Controllers\PortalQuestionnaireController::class,'cancel'])->whereUuid('assignment')->name('portal-questionnaires.cancel');
+
     Route::get('/questionnaires', [\App\Http\Controllers\QuestionnaireController::class, 'index'])->name('questionnaires.index');
     Route::get('/questionnaires/configuration', [\App\Http\Controllers\QuestionnaireController::class, 'configuration'])->name('questionnaires.configuration');
     Route::get('/curriculum-source-checks', [\App\Http\Controllers\CurriculumSourceController::class,'index'])->name('curriculum-sources.index');

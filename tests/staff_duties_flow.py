@@ -141,7 +141,7 @@ with tempfile.TemporaryDirectory(prefix='gta-staff-duties-') as temporary:
         passed('Pack11 optional voice interface is retained and correct database-session access survives PHP restart')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='apprentice_alert_deliveries'").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='portal_questionnaire_forms'").fetchone()[0]==0
             assert 'alerts_enabled' in [r[1] for r in c.execute('PRAGMA table_info(apprentices)')]
             assert 'deadline_history' in [r[1] for r in c.execute('PRAGMA table_info(learning_tasks)')]
             assert c.execute('SELECT * FROM career_discussions WHERE apprentice_id=?',(target,)).fetchall()==discussion and c.execute('SELECT * FROM progress_review_drafts WHERE apprentice_id=?',(target,)).fetchall()==review

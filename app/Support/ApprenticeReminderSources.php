@@ -78,6 +78,15 @@ class ApprenticeReminderSources
                 continue;
             }$items[] = ['kind' => 'training_tomorrow', 'id' => $s->id, 'version' => $s->version, 'date' => $tomorrow, 'start' => $s->start_time, 'end' => $s->end_time];
         }
+
+        // Only dated, outstanding non-voluntary assignments; no form title, answers or check notes.
+        foreach (\App\Models\PortalQuestionnaireAssignment::where('apprentice_id',$a->id)->where('recipient_id',$u->id)
+            ->whereIn('state',['Assigned','In progress'])->whereDate('due_date','<=',$end)->orderBy('id')
+            ->when($lock,fn($q)=>$q->lockForUpdate())->get() as $x) {
+            $f=$x->form;
+            if ($f->kind==='ongoing' || !in_array($f->state,['Published','Retired'],true) || !PortalQuestionnaires::intact($f)) {continue;}
+            $items[]=['kind'=>'questionnaire_due','id'=>$x->id,'version'=>$x->version,'date'=>$x->due_date->toDateString(),'form_hash'=>$f->content_hash];
+        }
         if (count($items) > 100) {
             return ['source' => null, 'check' => 'over_100_items_reconcile_first'];
         }
@@ -89,9 +98,9 @@ class ApprenticeReminderSources
     public static function link(Apprentice $a, array $item): string
     {
         return match ($item['kind']) {
-            'task_referred','task_overdue','task_due' => route('tasks.show', $item['id']),'action_overdue','action_due' => route('actions.index', $a).'#action-'.$item['id'],default => route('experience.home')
+            'questionnaire_due' => route('portal-questionnaires.show',$item['id']),'task_referred','task_overdue','task_due' => route('tasks.show', $item['id']),'action_overdue','action_due' => route('actions.index', $a).'#action-'.$item['id'],default => route('experience.home')
         };
     }
 
-    public const LABELS = ['task_referred' => 'Task returned for changes', 'task_overdue' => 'Task past its recorded deadline', 'task_due' => 'Task due within seven days', 'action_overdue' => 'Agreed action past its date', 'action_due' => 'Agreed action due within seven days', 'review_due' => 'Review due reference — confirm appointment with tutor', 'training_tomorrow' => 'Saved training session tomorrow — check timetable with GTA'];
+    public const LABELS = ['questionnaire_due' => 'Portal questionnaire due — sign in to check', 'task_referred' => 'Task returned for changes', 'task_overdue' => 'Task past its recorded deadline', 'task_due' => 'Task due within seven days', 'action_overdue' => 'Agreed action past its date', 'action_due' => 'Agreed action due within seven days', 'review_due' => 'Review due reference — confirm appointment with tutor', 'training_tomorrow' => 'Saved training session tomorrow — check timetable with GTA'];
 }
