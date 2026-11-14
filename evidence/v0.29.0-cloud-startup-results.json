@@ -1,0 +1,72 @@
+{
+  "passed": 14,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "Fresh staging fixture migrates without demonstration accounts",
+      "passed": true
+    },
+    {
+      "name": "Actual CLI administrator preview creates no account",
+      "passed": true
+    },
+    {
+      "name": "Non-interactive creation refuses a missing private credential input",
+      "passed": true
+    },
+    {
+      "name": "Actual private-stdin bootstrap creates one active administrator and atomic audit without exposing password or inferring email verification",
+      "passed": true
+    },
+    {
+      "name": "Repeated actual bootstrap refuses to replace or duplicate the existing account",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTPS staging login loads through the explicit gate with secure encrypted database-session cookies and private headers",
+      "passed": true
+    },
+    {
+      "name": "Actual plain HTTP backend request cannot bypass staging HTTPS",
+      "passed": true
+    },
+    {
+      "name": "Actual staging sign-in rejects missing CSRF token",
+      "passed": true
+    },
+    {
+      "name": "Actual failed HTTPS login uses the shared database rate-limit cache",
+      "passed": true
+    },
+    {
+      "name": "New bootstrap password signs in through actual HTTPS and database-backed session",
+      "passed": true
+    },
+    {
+      "name": "Bootstrapped administrator saves a fictional apprentice through actual staging form and validation",
+      "passed": true
+    },
+    {
+      "name": "Authenticated staging session and saved record survive PHP restart using database sessions",
+      "passed": true
+    },
+    {
+      "name": "Disabling staging configuration blocks both public login and an already authenticated session",
+      "passed": true
+    },
+    {
+      "name": "Production remains inaccessible and bootstrap refuses it even when staging flags remain enabled",
+      "passed": true
+    }
+  ],
+  "transport": "Local HTTPS TLS-terminating loopback proxy with a fixture certificate verified by the client",
+  "database": "Disposable SQLite with database sessions and cache",
+  "actualCloudAccess": false,
+  "actualMySqlAccess": false,
+  "realDataOrMail": false,
+  "limits": [
+    "No real Laravel Cloud deployment, database engine, S3 bucket, browser or production acceptance",
+    "Loopback proxy trust exists only in the temporary test config; source proxy settings are unchanged",
+    "No genuine account identities, personal learner records, external messages or real credentials used"
+  ]
+}

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\ExecutiveAccess;
+use App\Support\SupportAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,9 +31,10 @@ class SessionController extends Controller
         }
         RateLimiter::clear($key);
         $request->session()->regenerate();
+        $request->session()->put('auth_version', $request->user()->auth_version);
 
         return redirect()->intended(route(match ($request->user()->role) {
-            'manager','staff' => 'staff.index','mentor' => 'reviews.index','functional_skills_tutor' => 'em.caseload','careers_adviser' => 'careers.worklist', 'inclusion_lead','inclusion_member' => 'support.worklist',default => 'apprentices.index'
+            'manager','staff' => 'staff.index','mentor' => 'reviews.index','functional_skills_tutor' => 'em.caseload','careers_adviser' => 'careers.worklist', 'inclusion_lead','inclusion_member' => SupportAccess::team($request->user()) ? 'support.worklist' : 'help.index',default => 'apprentices.index'
         }));
     }
 

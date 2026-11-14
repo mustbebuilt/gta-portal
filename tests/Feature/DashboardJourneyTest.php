@@ -29,7 +29,7 @@ class DashboardJourneyTest extends TestCase
     public function test_dashboard_with_missing_records_does_not_invent_overall_progress(): void
     {
         $this->actingAs($this->actor())->get('/dashboard')->assertOk()->assertSee('No assigned tasks in this scope.')->assertDontSee('100%');
-        $this->get('/reports/operational')->assertOk()->assertSee('not the complete management pack');
+        $this->get('/reports/operational')->assertOk()->assertSee('Saved operational management packs are available separately.')->assertSee('not an inspection/compliance score');
         $this->get('/reports/inspection')->assertOk()->assertSee('not a complete Ofsted report');
     }
 

@@ -1,0 +1,17 @@
+{
+  "pages": 3,
+  "textChecks": {
+    "UNSIGNED FROZEN SOURCE": true,
+    "External participant signature record": true,
+    "Apprentice": true,
+    "Employer": true,
+    "Mentor": true,
+    "Frozen data identifier": true
+  },
+  "renderedPages": [
+    1,
+    3
+  ],
+  "verificationScope": "Fictional unsigned source; manual layout inspection. No actual signatures, identity authentication or cryptographic verification.",
+  "visualInspection": "First and signature pages inspected: all three signature/date lines, frozen source identifier, unsigned notice and footer visible without clipping in this three-page sample."
+}

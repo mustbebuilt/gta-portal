@@ -26,7 +26,9 @@ class DemoSetupTest extends TestCase
         $this->assertDatabaseCount('users', 10);
         $first = Apprentice::where('reference', 'DEMO-001')->firstOrFail();
         $this->assertSame('Demo Workshop', $first->employerRecord->name);
-        $this->assertSame('DEMO-ONLY', $first->programmeRecord->standard_code);
+        $this->assertSame('ST0499', $first->programmeRecord->standard_code);
+        $this->assertSame('1.3', $first->programmeRecord->version);
+        $this->assertStringContainsString('fictional', $first->programmeRecord->name);
         $this->assertSame('maths', $first->mathsTutor->subject_scope);
         $this->assertSame('english', $first->englishTutor->subject_scope);
         $this->assertSame('mentor', $first->mentor->role);

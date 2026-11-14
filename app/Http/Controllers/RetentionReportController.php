@@ -6,6 +6,9 @@ use App\Models\Apprentice;
 use App\Models\Employer;
 use App\Models\ProgrammeOutcome;
 use App\Models\SupportConcern;
+use App\Support\AssignmentHistory;
+use App\Support\AttendanceLedger;
+use App\Support\ConcernDuration;
 use App\Support\LearningAccess as Access;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -117,8 +120,10 @@ class RetentionReportController extends Controller
         $r->validate(['from' => ['nullable', 'date_format:Y-m-d'], 'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'], 'factor' => ['nullable', Rule::in(['programme', 'age', 'size', 'maths', 'english', 'additional', 'ehcp', 'reason'])]]);
         $apprentices = Apprentice::with(['programmeRecord', 'employerRecord'])->orderBy('last_name')->get();
         $contexts = ProgrammeOutcome::all()->keyBy('apprentice_id');
+        $attendance = AttendanceLedger::forIds($apprentices->pluck('id')->all());
         $factor = $r->query('factor', 'programme');
-        $caseCounts = SupportConcern::selectRaw('apprentice_id,COUNT(*) AS total')->groupBy('apprentice_id')->pluck('total', 'apprentice_id');
+        $cases = SupportConcern::all()->groupBy('apprentice_id');
+        $assignmentEvents = DB::table('assignment_change_events')->get()->groupBy('apprentice_id');
         $rows = [];
         $excluded = 0;
         foreach ($apprentices as $a) {
@@ -128,11 +133,12 @@ class RetentionReportController extends Controller
                 continue;
             }$c = $contexts->get($a->id)?->context ?? [];
             $status = $c['status'] ?? 'Unknown';
-            $row = ['apprentice' => $a, 'status' => $status, 'achievement' => $c['achievement'] ?? 'Unknown', 'factor' => $factor === 'programme' ? ($a->programmeLabel() ?? 'Unknown') : ($c[$factor] ?? 'Unknown'), 'reason' => $status === 'Withdrawn' ? ($c['reason'] ?? 'Not established') : 'Not applicable', 'reason_basis' => $c['reasonBasis'] ?? 'Not confirmed', 'employers' => 'Unknown — full history not connected', 'tutors' => 'Unknown — full history not connected', 'concern_cases' => (int) ($caseCounts[$a->id] ?? 0), 'concern_days' => null];
+            $history = AssignmentHistory::summary($a, $assignmentEvents->get($a->id, collect()));
+            $row = ['apprentice' => $a, 'status' => $status, 'achievement' => $c['achievement'] ?? 'Unknown', 'factor' => $factor === 'programme' ? ($a->programmeLabel() ?? 'Unknown') : ($c[$factor] ?? 'Unknown'), 'reason' => $status === 'Withdrawn' ? ($c['reason'] ?? 'Not established') : 'Not applicable', 'reason_basis' => $c['reasonBasis'] ?? 'Not confirmed', 'employers' => $history['employers'] === null ? 'Unknown' : $history['employers'].' distinct recorded linked employers; earlier history unknown', 'tutors' => $history['tutors'] === null ? 'Unknown' : $history['tutors'].' distinct recorded main tutors; earlier history unknown', 'recorded_attendance' => $attendance[$a->id]['report'], 'concern_cases' => $cases->get($a->id, collect())->count(), 'concern_duration' => ConcernDuration::summarise($cases->get($a->id, collect()))];
             $rows[] = $row;
         }
         $groups = collect($rows)->groupBy('factor')->map(fn ($g) => ['total' => $g->count(), 'completed' => $g->where('status', 'Completed')->count(), 'withdrawn' => $g->where('status', 'Withdrawn')->count(), 'achieved' => $g->where('achievement', 'Achieved')->count(), 'unknown' => $g->where('status', 'Unknown')->count()]);
 
-        return view('retention.report',['rows' => $rows, 'groups' => $groups, 'factor' => $factor, 'excluded' => $excluded]);
+        return view('retention.report', ['rows' => $rows, 'groups' => $groups, 'factor' => $factor, 'excluded' => $excluded]);
     }
 }

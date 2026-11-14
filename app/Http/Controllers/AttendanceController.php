@@ -7,8 +7,10 @@ use App\Models\AttendanceMark;
 use App\Models\ExtraTraining;
 use App\Models\TrainingSession;
 use App\Models\TutorGroup;
+use App\Support\AttendanceLedger;
 use App\Support\AttendanceMath as Math;
 use App\Support\LearningAccess as Access;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +42,7 @@ class AttendanceController extends Controller
     public function create(Request $r): RedirectResponse
     {
         abort_unless(Access::manager($r->user()) || $r->user()->role === 'tutor', 403);
-        $data = $r->validate(['tutor_group_id' => ['required', 'integer', Rule::exists('tutor_groups', 'id')->where('active', true)], 'name' => ['required', 'string', 'max:250'], 'session_date' => ['required', 'date_format:Y-m-d'], 'start_time' => ['required', 'date_format:H:i'], 'end_time' => ['required', 'date_format:H:i', 'after:start_time'], 'planned_learning' => ['required', 'string', 'max:10000'], 'breaks_checked' => ['accepted'], 'breaks' => ['nullable', 'array', 'max:10'], 'breaks.*.start' => ['nullable', 'required_with:breaks.*.end', 'date_format:H:i'], 'breaks.*.end' => ['nullable', 'required_with:breaks.*.start', 'date_format:H:i']]);
+        $data = $r->validate(['repeat_weeks' => ['nullable', 'integer', 'min:1', 'max:52'], 'tutor_group_id' => ['required', 'integer', Rule::exists('tutor_groups', 'id')->where('active', true)], 'name' => ['required', 'string', 'max:250'], 'session_date' => ['required', 'date_format:Y-m-d'], 'start_time' => ['required', 'date_format:H:i'], 'end_time' => ['required', 'date_format:H:i', 'after:start_time'], 'planned_learning' => ['required', 'string', 'max:10000'], 'breaks_checked' => ['accepted'], 'breaks' => ['nullable', 'array', 'max:10'], 'breaks.*.start' => ['nullable', 'required_with:breaks.*.end', 'date_format:H:i'], 'breaks.*.end' => ['nullable', 'required_with:breaks.*.start', 'date_format:H:i']]);
         $group = TutorGroup::findOrFail($data['tutor_group_id']);
         abort_unless($this->groupAllowed($r, $group), 403);
         $members = Apprentice::where('tutor_group_id', $group->id)->orderBy('id')->get();
@@ -56,14 +58,28 @@ class AttendanceController extends Controller
                 throw ValidationException::withMessages(['breaks' => 'Excluded periods must be within the session and end after they start.']);
             }
         }
-        $s = DB::transaction(function () use ($r, $data, $members, $breaks) {
-            $s = TrainingSession::create(collect($data)->only('tutor_group_id', 'name', 'session_date', 'start_time', 'end_time', 'planned_learning')->all() + ['created_by' => $r->user()->id, 'members' => $members->pluck('id')->all(), 'breaks' => $breaks]);
-            $this->audit($r, $s, 'planned');
+        $s = DB::transaction(function () use ($r, $data, $breaks, $group) {
+            $locked = TutorGroup::whereKey($group->id)->lockForUpdate()->firstOrFail();
+            abort_unless($locked->active && $this->groupAllowed($r, $locked), 403);
+            $current = Apprentice::where('tutor_group_id', $group->id)->orderBy('id')->lockForUpdate()->get();
+            if ($current->isEmpty() || (! Access::manager($r->user()) && $current->contains(fn ($a) => $a->tutor_id !== $r->user()->id))) {
+                throw ValidationException::withMessages(['tutor_group_id' => 'The roster changed. Check the group before planning.']);
+            }
+            $first = null;
+            for ($week = 0; $week < ($data['repeat_weeks'] ?? 1); $week++) {
+                $date = Carbon::parse($data['session_date'])->addWeeks($week)->toDateString();
+                if (TrainingSession::where('tutor_group_id', $group->id)->whereDate('session_date', $date)->where('state', '!=', 'Cancelled')->where('start_time', '<', $data['end_time'])->where('end_time', '>', $data['start_time'])->exists()) {
+                    throw ValidationException::withMessages(['session_date' => 'A planned session already overlaps this group on '.$date.'. No sessions in this request were saved.']);
+                }
+                $s = TrainingSession::create(collect($data)->only('tutor_group_id', 'name', 'start_time', 'end_time', 'planned_learning')->all() + ['session_date' => $date, 'created_by' => $r->user()->id, 'members' => $current->pluck('id')->all(), 'breaks' => $breaks]);
+                $this->audit($r, $s, 'session_planned');
+                $first ??= $s;
+            }
 
-            return $s;
+            return $first;
         });
 
-        return to_route('attendance.show', $s)->with('status', 'Session planned. Roster saved; no attendance or OTJ hours inferred.');
+        return to_route('attendance.show', $s)->with('status', 'Session plan saved. Repeated weeks keep separate registers; no attendance, delivery or OTJ hours inferred.');
     }
 
     public function show(Request $r, TrainingSession $session): View
@@ -76,7 +92,7 @@ class AttendanceController extends Controller
     public function save(Request $r, TrainingSession $session): RedirectResponse
     {
         abort_unless($this->sessionAllowed($r, $session), 403);
-        $data = $r->validate(['version' => ['required', 'integer'], 'delivered_learning' => ['nullable', 'string', 'max:10000'], 'marks' => ['required', 'array'], 'marks.*.code' => ['nullable', Rule::in(array_keys(Math::CODES))], 'marks.*.arrival' => ['nullable', 'date_format:H:i'], 'marks.*.departure' => ['nullable', 'date_format:H:i'], 'marks.*.otj_confirmed' => ['nullable', 'boolean'], 'marks.*.minutes' => ['nullable', 'integer', 'min:0'], 'marks.*.comment' => ['nullable', 'string', 'max:2000'], 'marks.*.adjustment' => ['nullable', 'string', 'max:2000']]);
+        $data = $r->validate(['version' => ['required', 'integer'], 'correction_reason' => ['nullable', 'string', 'max:2000'], 'delivered_learning' => ['nullable', 'string', 'max:10000'], 'marks' => ['required', 'array'], 'marks.*.code' => ['nullable', Rule::in(array_keys(Math::CODES))], 'marks.*.arrival' => ['nullable', 'date_format:H:i'], 'marks.*.departure' => ['nullable', 'date_format:H:i'], 'marks.*.otj_confirmed' => ['nullable', 'boolean'], 'marks.*.minutes' => ['nullable', 'integer', 'min:0'], 'marks.*.comment' => ['nullable', 'string', 'max:2000'], 'marks.*.adjustment' => ['nullable', 'string', 'max:2000']]);
         DB::transaction(function () use ($r, $session, $data): void {
             $s = TrainingSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $s);
@@ -89,7 +105,11 @@ class AttendanceController extends Controller
             if (array_diff(array_map('intval', array_keys($data['marks'])), $ids)) {
                 throw ValidationException::withMessages(['marks' => 'A mark was supplied for someone outside this roster.']);
             }
+            abort_unless($this->sessionAllowed($r, $s), 403);
             $before = $s->marks()->get()->toArray();
+            if ($before && ! filled($data['correction_reason'] ?? null)) {
+                throw ValidationException::withMessages(['correction_reason' => 'Explain the correction to this saved register.']);
+            }
             foreach ($ids as $id) {
                 $v = $data['marks'][$id] ?? [];
                 $code = $v['code'] ?? null;
@@ -136,7 +156,7 @@ class AttendanceController extends Controller
                 AttendanceMark::updateOrCreate(['training_session_id' => $s->id, 'apprentice_id' => $id], ['code' => $code, 'arrival' => in_array($code, ['O', 'T'], true) ? $v['arrival'] : null, 'departure' => in_array($code, ['O', 'T'], true) ? $v['departure'] : null, 'parts' => $parts, 'otj_minutes' => $minutes, 'otj_confirmed' => $confirmed, 'recorded_by' => $r->user()->id, 'comment' => $v['comment'] ?? null, 'adjustment' => $v['adjustment'] ?? null]);
             }
             $h = $s->history ?? [];
-            $h[] = ['event' => 'register_saved', 'by' => $r->user()->id, 'at' => now()->toIso8601String(), 'before_marks' => $before, 'before_delivered' => $s->delivered_learning];
+            $h[] = ['event' => 'register_saved', 'by' => $r->user()->id, 'at' => now()->toIso8601String(), 'correction_reason' => $data['correction_reason'] ?? null, 'before_marks' => $before, 'before_delivered' => $s->delivered_learning];
             $s->history = $h;
             $s->delivered_learning = $data['delivered_learning'] ?? null;
             $s->version++;
@@ -154,6 +174,10 @@ class AttendanceController extends Controller
         DB::transaction(function () use ($r, $session): void {
             $s = TrainingSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $s);
+            abort_unless($this->sessionAllowed($r, $s), 403);
+            $h = $s->history ?? [];
+            $h[] = ['event' => 'session_cancelled', 'by' => $r->user()->id, 'at' => now()->toIso8601String(), 'reason' => $r->input('reason'), 'before_state' => $s->state];
+            $s->history = $h;
             $s->state = 'Cancelled';
             $s->cancellation_reason = $r->input('reason');
             $s->version++;
@@ -167,18 +191,9 @@ class AttendanceController extends Controller
     public function apprentice(Request $r, Apprentice $apprentice): View
     {
         abort_unless(Access::training($r->user(), $apprentice), 403);
-        $rows = [];
-        $sessions = TrainingSession::with(['marks' => fn ($q) => $q->where('apprentice_id', $apprentice->id)])->whereJsonContains('members', $apprentice->id)->orderBy('session_date')->get();
-        foreach ($sessions as $s) {
-            if (! $s->ended()) {
-                continue;
-            }$m = $s->marks->first();
-            $rows[] = ['id' => $s->id, 'name' => $s->name, 'date' => $s->session_date->toDateString(), 'code' => $m?->code, 'minutes' => $s->state === 'Cancelled' ? 0 : ($m?->otj_confirmed ? $m->otj_minutes : null), 'cancelled' => $s->state === 'Cancelled', 'delivered' => $s->delivered_learning];
-        }
+        $ledger = AttendanceLedger::forIds([$apprentice->id])[$apprentice->id];
 
-        $extraMinutes = ExtraTraining::where('apprentice_id', $apprentice->id)->whereNull('withdrawn_at')->whereNotNull('approval')->get()->filter(fn ($e) => $e->occurred())->sum('minutes');
-
-        return view('attendance.apprentice', ['apprentice' => $apprentice, 'extraMinutes' => $extraMinutes, 'rows' => $rows, 'report' => Math::report($rows)]);
+        return view('attendance.apprentice', ['apprentice' => $apprentice, ...$ledger]);
     }
 
     private function version(Request $r, TrainingSession $s): void

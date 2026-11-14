@@ -1,0 +1,281 @@
+{
+  "checkpoint": "v0.11.0",
+  "createdAt": "2026-11-12T22:29:05.443535+00:00",
+  "previousCheckpoint": "v0.10.0",
+  "sourceLibraryVersion": 10,
+  "changes": [
+    {
+      "path": ".env.example",
+      "change": "updated"
+    },
+    {
+      "path": "BATCH_QUEUE.json",
+      "change": "updated"
+    },
+    {
+      "path": "CHANGES_v0.11.0.md",
+      "change": "added"
+    },
+    {
+      "path": "DATA_REQUIREMENTS_AND_GAPS.md",
+      "change": "updated"
+    },
+    {
+      "path": "DEVELOPMENT_STATUS.txt",
+      "change": "updated"
+    },
+    {
+      "path": "GTA_Laravel_Portal_Test_Report.html",
+      "change": "updated"
+    },
+    {
+      "path": "MARTIN_AI_INTEGRATION_INSTRUCTIONS.md",
+      "change": "updated"
+    },
+    {
+      "path": "MARTIN_BATCH_v0.11.0.md",
+      "change": "added"
+    },
+    {
+      "path": "QUEUE_COMPLETION_REVIEW.md",
+      "change": "updated"
+    },
+    {
+      "path": "README.md",
+      "change": "updated"
+    },
+    {
+      "path": "START_HERE_MARTIN.txt",
+      "change": "updated"
+    },
+    {
+      "path": "TEST_RESULTS.json",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/EnglishMathsController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/ExtraTrainingController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/LearningTaskController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/StaffDevelopmentController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/SupportController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Models/TaskEvidence.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Support/BlockRelease.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Support/PrivateEvidence.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Support/TaskCatalogue.php",
+      "change": "updated"
+    },
+    {
+      "path": "config/evidence.php",
+      "change": "added"
+    },
+    {
+      "path": "config/filesystems.php",
+      "change": "updated"
+    },
+    {
+      "path": "database/migrations/2026_11_12_223000_add_disk_to_task_evidence.php",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.10.0-CHECKPOINT_CHANGE_RECORD.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.10.0-TEST_RESULTS.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.11.0-http-results.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.11.0-pdf-results.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.11.0-static-results.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/data/panel-catalogue.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/data/panel-source-receipt.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/data/panel-tasks.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_10_Task_3_EPA_Mock_Practical_Integrated_Panel_Repair_Scenario_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_10_Task_4_EPA_Readiness_Portfolio_Professional_Discussion_and_Final_Action_Plan_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_1_Task_3_Panel_Workshop_Safety_and_Body_Construction_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_1_Task_4_Tool_Control_Damage_Documentation_and_Evidence_Capture_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_2_Task_3_Damage_Assessment_and_Repair_Planning_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_2_Task_4_Bolt_on_Panel_Preparation_and_Supplementary_Damage_Check_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_3_Task_3_Door_or_Wing_Remove_Refit_and_Alignment_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_3_Task_4_Bumper_Cover_Seals_and_Quality_Gate_Inspection_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_4_Task_3_Technical_Data_Material_Identification_and_Repair_Method_Selection_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_4_Task_4_Joining_Process_Selection_and_Method_Deviation_Record_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_5_Task_3_Spot_Weld_Removal_and_Weld_Test_Piece_Quality_Check_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_5_Task_4_Bonding_Riveting_and_Hybrid_Joining_Test_Piece_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_6_Task_3_Panel_Pulling_and_Metal_Finishing_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_6_Task_4_Filler_Application_Shaping_and_Paint_Handover_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_7_Task_3_Underbody_Measurement_and_Misalignment_Report_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_7_Task_4_Jig_Setup_Controlled_Pull_Plan_and_Post_Check_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_8_Task_3_Advanced_Material_Controls_and_Aluminium_Contamination_Prevention_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_8_Task_4_ADAS_SRS_and_Alternative_Fuel_Safety_Referral_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_9_Task_3_Supplementary_Damage_Report_and_Repair_Plan_Update_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/panel--Block_9_Task_4_Integrated_Quality_Audit_and_Portfolio_Evidence_Review_v1.0.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/layout.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/learning/index.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/learning/task.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/pdf/layout.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "routes/console.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/Feature/EnglishMathsWorkflowTest.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/Feature/ExtraTrainingWorkflowTest.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/Feature/LearningWorkflowTest.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/Feature/PrivateEvidenceActivityTest.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/Feature/PrivateEvidenceDiskTest.php",
+      "change": "added"
+    },
+    {
+      "path": "tests/Feature/ProgrammeTaskIntegrationTest.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/Feature/RemainingOperationalBatchTest.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/Feature/StaffDevelopmentWorkflowTest.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/TestCase.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/static_checks.py",
+      "change": "updated"
+    },
+    {
+      "path": "tools/import_programme_tasks.py",
+      "change": "updated"
+    }
+  ],
+  "scope": "Panel available task workflow and shared configured private evidence. Ten reflection sources and actual Cloud storage remain unfinished."
+}

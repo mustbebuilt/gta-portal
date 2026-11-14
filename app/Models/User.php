@@ -10,7 +10,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $attributes = ['active' => true, 'role' => 'unassigned', 'record_version' => 1];
+    protected $attributes = ['active' => true, 'role' => 'unassigned', 'record_version' => 1, 'auth_version' => 1];
 
     protected $fillable = ['name', 'email', 'password'];
 
@@ -18,6 +18,6 @@ class User extends Authenticatable
 
     protected function casts(): array
     {
-        return ['email_verified_at' => 'datetime', 'password' => 'hashed', 'active' => 'boolean', 'record_version' => 'integer'];
+        return ['email_verified_at' => 'datetime', 'password' => 'hashed', 'active' => 'boolean', 'record_version' => 'integer', 'auth_version' => 'integer'];
     }
 }

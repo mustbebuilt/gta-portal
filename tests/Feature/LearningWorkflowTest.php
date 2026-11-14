@@ -118,13 +118,13 @@ class LearningWorkflowTest extends TestCase
 
     public function test_checklist_upload_is_private_and_snapshot_pinned(): void
     {
-        Storage::fake('local');
+        Storage::fake(config('evidence.disk'));
         [$t,$l,$u] = $this->task('b1-t3');
         $url = '/tasks/'.$t->id;
         $this->actingAs($l)->post($url, ['version' => 1, 'intent' => 'submit', 'own_work' => 1, 'answers' => $this->answers($t)])->assertSessionHasErrors('answers');
         $this->post($url.'/evidence', ['version' => 1, 'kind' => 'inspection-checklist', 'file' => UploadedFile::fake()->create('check.pdf', 2, 'application/pdf')])->assertRedirect()->assertSessionHasNoErrors();
         $f = $t->evidence()->firstOrFail();
-        Storage::disk('local')->assertExists($f->path);
+        Storage::disk(config('evidence.disk'))->assertExists($f->path);
         $this->post($url, ['version' => 2, 'intent' => 'submit', 'own_work' => 1, 'answers' => $this->answers($t)])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame($f->id, $t->fresh()->submissions[0]['evidence'][0]['id']);
         $this->actingAs($this->actor('employer'))->get($url.'/evidence/'.$f->id)->assertForbidden();
@@ -133,7 +133,7 @@ class LearningWorkflowTest extends TestCase
 
     public function test_bad_upload_and_upload_to_locked_submission_are_rejected(): void
     {
-        Storage::fake('local');
+        Storage::fake(config('evidence.disk'));
         [$t,$l] = $this->task();
         $this->actingAs($l)->post('/tasks/'.$t->id.'/evidence', ['version' => 1, 'kind' => 'supporting-evidence', 'file' => UploadedFile::fake()->create('bad.php', 1, 'text/plain')])->assertSessionHasErrors('file');
         $t->status = 'Awaiting marking';
@@ -221,7 +221,7 @@ class LearningWorkflowTest extends TestCase
     {
         [$t,$l] = $this->task();
         $schema = $t->template;
-        $schema['sha256'] = str_repeat('0', 64);
+        $schema[isset($schema['sourceTemplateHash']) ? 'sourceTemplateHash' : 'sha256'] = str_repeat('0', 64);
         $t->template = $schema;
         $t->save();
         $this->actingAs($l)->get('/tasks/'.$t->id.'/original-pdf')->assertStatus(409);

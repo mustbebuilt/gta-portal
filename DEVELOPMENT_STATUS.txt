@@ -1,4 +1,127 @@
-GTA Laravel v0.7.0 — 11 November 2026
+Current checkpoint v0.33.0 — two linked batches
+
+v0.32.0 adds exact-preview, protected evidence copy plans; v0.33.0 adds explicit once-only staging execution with exclusive destination creation, source SHA-256/size validation, destination readback, final verification and technical audit. Original files, application references and retained snapshots are not changed. No storage cutover or production execution is enabled. Read MARTIN_BATCH_v0.33.0.md and TEST_RESULTS.json for current instructions/evidence. One additive migration; no new dependency. Earlier entries describe historical scope.
+
+v0.31.0 | 13 November 2026 | Read-only evidence inventory
+A read-only migration inventory now covers registered private uploads and retained file metadata/links across eight portal source families. Default mode reads database references/configuration only. Explicit verification checks each logical disk/path once against SHA-256 and declared size, flags problems and re-scans for drift. It does not move, relink, delete or approve migration of evidence. Earlier entries/counts retain historical scope.
+
+v0.30.0 | 13 November 2026 | Native database compatibility
+Native database compatibility is now checked against MariaDB 11.8.6 through PDO MySQL as well as SQLite. A real fresh-install index-length blocker is corrected, with a data-preserving forward normalisation for older SQLite checkpoints. Native audit-failure, persistence and initial-administrator concurrency tests are included. Actual Cloud/Oracle MySQL/schema acceptance remains separate. Earlier notes/counts below retain historical scope.
+
+v0.29.0 | 13 November 2026 | Private S3 storage
+Cloud-compatible private S3 evidence storage now has a locked runtime adapter, bucket-level permission handling, file-only existence checks and an explicit synthetic storage probe. Original disk references and records are preserved. Actual Cloud bucket visibility, resource configuration and deployment still need Martin’s environment. Earlier instructions/counts below are historical.
+
+v0.28.0 | 13 November 2026 | Hosted staging startup
+Controlled hosted staging access and once-only first-administrator setup are implemented and tested locally. Explicit staging flags, valid application key, HTTPS origin/requests, secure encrypted shared sessions and shared cache are required. Production remains blocked. Existing records/accounts are never overwritten; actual Cloud resources and repository integration remain unverified. Earlier notes/counts below are historical.
+
+Laravel Cloud installation is the next priority. Read CLOUD_START_HERE_MARTIN.md. Actual repository/environment access is missing; local-only web gate, storage adapter/configuration and first real administrator remain integration work.
+
+v0.27.0 | 13 November 2026 | In-portal review reminders
+Review reminders now use checked actual meeting dates and sourced Active programme status. Current assigned tutor and mentor receive one in-portal prompt per source when due today or overdue. Seen does not complete a review or reset its date. Superseded sources and old assignments cannot be acknowledged. Existing evidence and history are retained. Automatic generation stays disabled by default. Earlier notes/counts below are historical.
+
+v0.26.0 | 13 November 2026 | Checked external review sources
+Externally signed progress-review records, independent manager checks and actual-meeting-based ten-week tracking are implemented/tested locally. Pending copies do not reset dates. The latest active checked meeting sets the next reference at meeting + 70 days. Electronic signing, employer portal access, complete historical compliance and live deployment remain separate. Current evidence: TEST_RESULTS.json. Earlier entries/counts below are historical.
+
+v0.25.0 | 13 November 2026 | Three consolidated batches
+Reviewed qualification result imports, independently checked historical OTJ with reconciliation/withdrawal, and fixed operational management packs work locally. No inferred topic completion, attendance or historic completeness. Current instructions/evidence: MARTIN_BATCH_v0.25.0.md and TEST_RESULTS.json. Formal/source/history/live acceptance boundaries remain. Earlier entries below are historical.
+
+v0.22.0 | 13 November 2026 | Four consolidated batches
+QA2 sources integrated; plan-linked provisional OTJ ledger, guarded source action proposals and approved-calendar Careers prompts work locally. Combined in-portal scheduler is opt-in/off by default. See TEST_RESULTS.json and MARTIN_BATCH_v0.22.0.md. Formal signing, historic completeness, source decisions, gateway criteria and live acceptance remain unfinished. Earlier entries below are historical.
+
+v0.18.0 | 13 November 2026 | Four consolidated implementation batches
+Final 200-task release, individual operational block calendars, independent provider plan approval, protected unset-date application and plan-linked review readiness/reopening work locally. Participant signing, financial/formal KSB approval, completed-review scheduling, gateway criteria and production acceptance remain unfinished. Current evidence: TEST_RESULTS.json; current integration notes: MARTIN_BATCH_v0.18.0.md. Earlier entries below are historical.
+
+v0.14.0 | 13 November 2026
+Panel reflections: ten supplied sources integrated; 50 available Panel task records. Explicit administrator action upgrades only untouched known placeholders with versioned transactional audit; other work/history preserved. No new migration/dependency. See TEST_RESULTS.json and MARTIN_BATCH_v0.14.0.md for current evidence and limits. Earlier status below is historical.
+
+CURRENT CHECKPOINT: v0.13.0
+Account-session controls and password recovery preparation are implemented and tested locally. Existing sessions require fresh sign-in. Live recovery/onboarding/MFA remain incomplete. Current evidence: 389 tests / 4,023 assertions; 63 HTTP checks.
+
+# GTA Laravel v0.13.0 - account access and password recovery preparation
+
+## Implemented
+
+- Added Change password for a signed-in user’s own account. Current password, confirmation and new-password validation are required; posted user IDs/roles cannot target or grant another account. Successful changes require fresh sign-in.
+- Added an additive users.auth_version column and per-request version binding. Existing sessions without a binding must sign in again. Old sessions cannot silently resume after a password change, reset, deactivation/reactivation or sensitive staff-account change.
+- Added a Laravel database password-broker recovery flow, disabled by default. It can run only in local/testing with the array mail sink; SMTP/log mailers and production do not enable it. Only active accounts with an existing verified email qualify. Generic request responses, throttles, hashed expiring single-use tokens and trusted APP_URL link construction are tested.
+- Added account_access_events without password, token or hash contents. Account changes rotate remember credentials, remove reset tokens and end outstanding CEO emergency sessions for the affected account. Audit failure rolls back password, version and token changes.
+- Staff email changes clear verification and old/new reset tokens. The local fictional-password command uses the same invalidation service. No new verification, public registration, invitations or MFA flow was invented.
+- Updated test actingAs to model the same security-version binding as a fresh real sign-in. Explicit stale/missing-session tests and actual two-browser HTTP checks verify the production middleware path; there is no test-only middleware bypass.
+- HTTP proof now has a per-run temporary storage directory, so sessions, file cache/rate limits and evidence are isolated between runs. Actual HTTP verifies disabled recovery, CSRF protection, password change, second-session invalidation, new-password sign-in and persistence after restart.
+
+## Evidence
+
+389 tests / 4,023 assertions on SQLite; 63 actual HTTP checks; 29 connected module tables persist after restart; 269 PHP/compiled Blade syntax checks; 1 JavaScript check; 121 unchanged source PDFs and 2 original GTA assets. No new dependency.
+
+## Boundaries
+
+Recovery is preparation tested against an internal sink, not live email delivery. Production identity verification, invitations, MFA, sender/transport configuration and target hosting/engine/security acceptance remain separate. New local default passwords use at least 12 characters; review the final policy with the actual identity system. Formal plans, signatures and Panel reflection sources remain unfinished.
+
+
+HISTORICAL STATUS BELOW
+
+CURRENT CHECKPOINT: v0.12.0
+Marking worklist and in-portal reminders are implemented and tested. Email/scheduling and the remaining source/live work stay separate. Current evidence: 366 tests / 3,891 assertions and 57 HTTP checks.
+
+# GTA Laravel v0.12.0 - marking worklist and in-portal reminders
+
+## Implemented
+
+- Added Marking worklist navigation for active tutors, administrators and CEO accounts. Tutors see only current main-tutor assignments; management sees the whole awaiting-marking queue.
+- Added filters for overdue work, all awaiting work, submission date checks and tutor assignment checks, plus scoped name/reference search and 25-row pagination. The queue opens the existing whole-task marking page; it does not expose answer bodies or evidence contents.
+- Preserved the existing threshold of more than seven calendar days. Missing/future dates remain checks. Reminder creation also checks the current active main tutor and matching dated submission/template source.
+- Added an administrator action to record in-portal reminders, and gta:marking-reminders (preview by default; --record to persist). Each current submission/recipient is recorded once. No scheduler or email sending was introduced.
+- Added recipient-only Mark reminder seen. This does not change the task, its deadlines, assessment state or progress. Reassignment/deactivation, approval and a new submitted version invalidate access to stale reminders. Task deadline changes do not create duplicate reminders.
+- Added two tables and a queue index in one additive migration. Administrator and recipient events record their real actor; command events use a null system actor rather than pretending to be a tutor. Audit failures roll back reminder creation/acknowledgement.
+- Added role-scoped Help guidance and 20 new feature cases. Expanded the actual HTTP helper to test worklist access, CSRF protection, deduplication and acknowledgement, and persist both reminder tables across a PHP restart.
+
+## Executed checks
+
+366 tests / 3,891 assertions on SQLite; 57 actual local HTTP checks with 28-table restart persistence; 261 PHP/compiled Blade syntax checks; 1 JavaScript syntax check. All 121 source PDFs and both GTA artwork files remain unchanged. No new dependencies.
+
+The dated HTTP reminder fixture is explicitly fictional and disposable. It is not a production backdating feature. No real users, messages or deployment were involved. Current browser/phone/keyboard/physical-print, MySQL/MariaDB and Cloud acceptance remain unverified. Previous v0.11.0 evidence is preserved separately.
+
+## Still separate
+
+Email delivery/retries/cadence, automatic scheduling, production account lifecycle and live recipient rollout. Formal plans/KSB sources, completed signatures, Panel's ten reflection sources and actual Cloud/private-file migration also remain outstanding.
+
+
+HISTORICAL STATUS BELOW
+
+CURRENT CHECKPOINT: v0.11.0
+Panel task workflow and configurable private evidence added. Panel reflections remain Source required; actual Cloud storage and formal plan/signature work remain unfinished. Current evidence: 346 tests / 3,783 assertions, 105 named-disk repeat cases, 52 HTTP checks. Read TEST_RESULTS.json and MARTIN_BATCH_v0.11.0.md.
+
+# GTA Laravel v0.11.0 - Panel tasks and private evidence configuration
+
+## Panel task workflow
+
+Imported 20 unchanged Panel practical PDFs into the existing task workflow, with their own field names, printed technical labels, seven knowledge questions, assessor records and source hashes. The configured catalogue binding is ST0403 v1.3. The 20 practical tasks, ten paper-result records and ten shared workplace job cards provide 40 usable records across Blocks 1-10.
+
+The source pack contains no Panel learning reflections. Ten Task 5 slots are explicitly Source required, not invented questionnaires or completed tasks. They cannot receive work, evidence, approval or a recorded-work PDF. Four task approvals do not complete a block. An administrator can record a reasoned exception to release a later block while the missing source is resolved. Formal KSB/plan sign-off stays separate.
+
+## Configurable private evidence
+
+Every evidence upload/download/existence/failed-audit cleanup caller now uses the shared PrivateEvidence service. New metadata pins the file's disk; old metadata without a disk continues to use the legacy disk. Changing the current upload disk never moves older files or searches another disk for missing bytes.
+
+Added config/evidence.php, three GTA_PRIVATE/GTA_LEGACY environment settings and a nullable task_evidence.disk column. Qualification, support, staff, topic and extra-training JSON file metadata gets a disk key for new files only. Existing source snapshots/history are retained.
+
+Public disk names, public visibility/base URLs and public local roots are rejected. Local evidence uses private visibility; S3/Cloud bucket visibility must be reviewed in staging. S3 writes add no per-object visibility override. The read-only gta:evidence-check command checks disk settings and optional S3-adapter availability without printing secrets or contacting the bucket. The S3 adapter and a live Cloud connection are not included or tested.
+
+## Validation
+
+346 tests / 3,783 assertions on SQLite; 105 related cases / 1,669 assertions repeated with a non-default private local disk; 52 actual HTTP/restart checks. The repeated cases are a subset, not 105 additional application scenarios. Separate final configuration tests also pass. Native long-answer exports retain all 1,200 repeated lines and their final marker. All 121 source PDFs and two GTA artwork files retain their hashes. See TEST_RESULTS.json for scope and exact evidence.
+
+Added tests for Panel missing-source gates, all Panel task pages/PDFs, draft/referral/resubmission/approval, permissions, disk switching, legacy file/JSON reads, wrong-disk refusal, public/missing configuration, failed-audit cleanup, configuration diagnostics and additive migration preservation. Existing file-workflow tests now fake/assert the configured disk.
+
+No live migration, Cloud deployment, real records or external messages. Formal plans/KSB mapping, missing Panel reflections, completed/signed reviews and production identity/delivery remain separate.
+
+
+HISTORICAL STATUS BELOW
+
+CURRENT CHECKPOINT: v0.10.0
+Heavy Vehicle and Paint task batches completed locally. See CHANGES_v0.10.0.md and TEST_RESULTS.json for current results and limits. Prior sections below record development history. No live deployment.
+
+GTA Laravel v0.10.0 — 12 November 2026
 
 WORKING IN THE ACTUAL LOCAL LARAVEL APPLICATION
 The v0.2 profile/directory functions remain. This checkpoint adds:
@@ -157,3 +280,64 @@ MySQL or Laravel Cloud deployment verified. Local/testing-only guard remains.
 Laravel 13 / PHP 8.4.1+ / Laravel Cloud confirmed. This schema is not a drop-in
 migration of Martin's application. No populated DBs, credentials, logs or sessions
 belong in the handover. Functionality and polishing must not sacrifice quality.
+
+V0.8.0 SUPPORT ACCESS BATCH — 12 NOVEMBER 2026
+Added administrator/CEO support duty/scope editor, version guards and atomic reasoned
+permission history. Member/lead duties can be held alongside an existing staff role.
+Assigned scope follows current main/subject tutor, mentor, adviser and group-tutor
+links plus explicit apprentice/group selections; All is a separate setting.
+Legacy inclusion roles retain current access until explicitly overridden. Inactive
+accounts cannot use saved duties. One active lead is enforced across both editors.
+Private concerns, ASPs, evidence and survey receipts use the same scope. Ownership
+choices require current team access to that apprentice. Tutor instruction drafting
+and lead approval stay separate from administrator operational oversight and from
+the approved recipient copy. Careers/HR/subject access has not been broadened.
+Support case worklist includes apprentice references for clearer identification.
+Changed duties also invalidate open staff-directory forms; stale saves and failed
+audit writes cannot leave a partial grant. The demo still contains two profiles.
+
+CURRENT TEST EVIDENCE: see TEST_RESULTS.json for the new runs, not the historical
+v0.7.0 baseline in the retained integration-guide addendum. No visual/browser QA.
+Jon's preference: continue functionality and polishing in useful batches without
+sacrificing quality. Further coding remains in BATCH_QUEUE.json. Heavy Vehicle,
+Paint and Panel source tasks and their programme/version catalogue bindings remain
+pending; no source curriculum has been guessed. Existing business gaps, full-plan
+applicability, Block 11–12 content, historical OTJ/approved target, full review
+completion/signatures, final reporting/KPI policy, remaining HR/survey templates
+and live integration remain pending. No schema is being requested again.
+
+V0.9.0 CONNECTED BATCH
+1. Autocare sequence releases with administrator exceptions, stale guards and reasoned history; legacy task sets retain access until explicitly enabled.
+2. Programme/version allocation guard and protection against silently transferring existing Autocare tasks to a different linked programme.
+3. Atomic weekly repeat planning, separate saved rosters, overlap prevention, reasoned register corrections and retained prior marks.
+4. Marker before/after history and source/actor/time, including concern classification; no reset of unchanged marker timestamps.
+5. Inclusive recorded concern days with overlap union, missing/invalid date checks and explicit incomplete historical coverage.
+6. Minimal assignment-ID event history and distinct recorded employer/main-tutor counts; no inferred lifetime totals.
+7. Staff scope summary, HR3.8 appraisal headings/capability self/manager assessments, existing HR3.9 source headings preserved.
+8. Review source action outcome snapshot and known next-ten-week dates; drafts still do not complete a review or reset its clock.
+9. Block 10 on-screen careers check from source sequence release, scoped to current advisers; no email or automatic advice completion.
+10. Expanded operational report, current-tutor waiting-work ratio/date checks, source attendance and separate qualification records.
+11. Native access-controlled PDFs for recorded task work, operational report, private review draft and approved ASP snapshot.
+12. Responsive spacing/control polish, updated help and reproducible non-rendering static verification script.
+
+All 21 queue areas reviewed. QUEUE_COMPLETION_REVIEW.md and DATA_REQUIREMENTS_AND_GAPS.md are the current completion/blocker records. Remaining business/source/identity/live/visual dependencies are not marked complete. TEST_RESULTS.json contains actual final runs.
+
+FINAL V0.9.0 EVIDENCE: 308 tests / 2652 assertions per SQLite and MariaDB; 52 HTTP checks, 26 module tables persist after restart; 249 PHP/compiled Blade syntax checks, one JavaScript check, 41 original PDFs and two artwork hashes match. Composer validation/platform/advisory checks passed. Native task-PDF sample inspected; no browser/phone/physical-print acceptance.
+
+
+# GTA Laravel v0.10.0 - Heavy Vehicle and Paint tasks
+
+Two local development batches completed: Heavy Vehicle Level 3 and Vehicle Damage Paint Level 3.
+
+- Added 50 programme-specific portal tasks for each programme across Blocks 1-10: 20 practical tasks, 10 source reflection records, 10 paper-result records and 10 instances of the existing shared workplace job card.
+- Imported 60 source PDFs unchanged under separate storage filenames. The original 41 Autocare PDFs and GTA artwork remain unchanged. Task versions and original filenames are preserved in the schemas and source receipts.
+- Connected current assignment access, draft/save/reopen, own-work submission, locked versions, evidence, referral/resubmission, whole-task marking, deadlines, sequence releases and native PDF exports.
+- Added the Heavy Vehicle integrated vehicle/trailer inspection checklist, including printed item labels and validation against contradictory Done/N/A or inspection-status selections. Inspection status never authorises vehicle release.
+- Removed the 50,000-character task answer cap. Task answers use multiline fields; generated recorded-work PDFs flow across pages. Browser print now mirrors the full textarea text (browser acceptance pending).
+- Made allocation, block sequencing and saved-history transfer checks programme-specific. In-use programme codes/versions cannot be relabelled through the directory editor.
+- Kept Autocare's ADAS amendments and Block 9 planning guidance scoped to Autocare tasks. Other programmes show their task sources and a plan/KSB-source-pending page rather than Autocare's planning/RPL calculations.
+- Added source receipts, the reproducible development importer and 19 new feature cases. Updated the previous unsupported-programme test to use Panel because Heavy Vehicle is now supported; equivalent rejection remains tested.
+
+Validation: 327 tests / 3,414 assertions on SQLite; 52 actual loopback HTTP/persistence checks; 252 PHP/compiled Blade syntax checks; 1 JavaScript syntax check; 101 source PDF hashes; 2 unchanged artwork hashes. Each 57,618-character answer saved intact and exported with all 1,200 repeated lines plus the end marker across a 25-page PDF. See TEST_RESULTS.json for exact scope and limits.
+
+No migrations or dependency changes. Existing allocated task snapshots are not rewritten. Formal programme plans/KSB mapping, individual dates/hours, signatures, Blocks 11-12, Panel, live account/mail/storage/Cloud work remain separate.

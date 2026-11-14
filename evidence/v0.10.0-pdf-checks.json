@@ -1,0 +1,16 @@
+{
+  "heavy-vehicle-long-answer.pdf": {
+    "pages": 25,
+    "savedAnswerCharacters": 57618,
+    "expectedLines": 1200,
+    "exportedLines": 1200,
+    "endMarkerPresent": true
+  },
+  "paint-long-answer.pdf": {
+    "pages": 25,
+    "savedAnswerCharacters": 57618,
+    "expectedLines": 1200,
+    "exportedLines": 1200,
+    "endMarkerPresent": true
+  }
+}

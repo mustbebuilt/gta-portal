@@ -1,0 +1,453 @@
+{
+  "checkpoint": "v0.10.0",
+  "createdAt": "2026-11-12T22:03:49.359513+00:00",
+  "previousCheckpoint": "v0.9.0",
+  "sourceLibraryVersion": 9,
+  "attachmentComparison": {
+    "attachedSourceCheckpoint": "v0.7.0",
+    "attachedGuideMatchesRecoveredGuide": true
+  },
+  "changes": [
+    {
+      "path": "BATCH_QUEUE.json",
+      "change": "updated"
+    },
+    {
+      "path": "CHANGES_v0.10.0.md",
+      "change": "added"
+    },
+    {
+      "path": "DATA_REQUIREMENTS_AND_GAPS.md",
+      "change": "updated"
+    },
+    {
+      "path": "DEVELOPMENT_STATUS.txt",
+      "change": "updated"
+    },
+    {
+      "path": "GTA_Laravel_Portal_Test_Report.html",
+      "change": "added"
+    },
+    {
+      "path": "MARTIN_BATCH_v0.10.0.md",
+      "change": "added"
+    },
+    {
+      "path": "QUEUE_COMPLETION_REVIEW.md",
+      "change": "updated"
+    },
+    {
+      "path": "README.md",
+      "change": "updated"
+    },
+    {
+      "path": "START_HERE_MARTIN.txt",
+      "change": "updated"
+    },
+    {
+      "path": "TEST_RESULTS.json",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/ApprenticeController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/CurriculumReferenceController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/DirectoryController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/HelpController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/LearningTaskController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/TrainingPlanController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Support/BlockRelease.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Support/TaskCatalogue.php",
+      "change": "updated"
+    },
+    {
+      "path": "bootstrap/cache/.gitignore",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.10.0-http-results.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.10.0-pdf-checks.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.10.0-static-results.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.9.0-CHECKPOINT_CHANGE_RECORD.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.9.0-TEST_RESULTS.json",
+      "change": "added"
+    },
+    {
+      "path": "public/assets/portal.css",
+      "change": "updated"
+    },
+    {
+      "path": "public/assets/portal.js",
+      "change": "updated"
+    },
+    {
+      "path": "resources/data/heavy-vehicle-catalogue.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/data/heavy-vehicle-source-receipt.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/data/heavy-vehicle-tasks.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/data/paint-catalogue.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/data/paint-source-receipt.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/data/paint-tasks.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_10_Learning_Impact_Record_v1.2.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_10_Task_3_Integrated_Full_Vehicle_and_Trailer_Inspection_v1.3.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_10_Task_4_Integrated_Diagnostic_Capstone_and_Professional_Discussion_v1.3.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_1_Learning_Impact_Record_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_1_Task_3_Workshop_Safety_Vehicle_Support_and_Technical_Measurement_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_1_Task_4_24V_Electrical_Measurement_and_Technical_Documentation_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_2_Learning_Impact_Record_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_2_Task_3_Full_Heavy_Vehicle_and_Trailer_Safety_Inspection_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_2_Task_4_Planned_Maintenance_Service_and_Operator_s_Licence_Record_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_3_Learning_Impact_Record_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_3_Task_3_Steering_Suspension_and_Axle_Inspection_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_3_Task_4_Fifth_Wheel_Trailer_and_Wheel_Security_Inspection_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_4_Learning_Impact_Record_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_4_Task_3_Air_Pressure_Build_Up_Leak_and_Warning_Device_Tests_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_4_Task_4_Foundation_Brake_Inspection_and_EBS_Diagnostic_Check_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_5_Learning_Impact_Record_v1.2.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_5_Task_3_24V_Starting_and_Charging_System_Diagnosis_v1.1_Scenarios.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_5_Task_4_CAN_Network_and_Trailer_Electrical_Fault_Diagnosis_v1.1_Scenarios.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_6_Learning_Impact_Record_v1.2.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_6_Task_3_Engine_Fuel_and_Cooling_System_Diagnosis_v1.1_Scenarios.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_6_Task_4_DPF_SCR_Aftertreatment_Diagnosis_and_Verification_v1.1_Scenarios.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_7_Learning_Impact_Record_v1.2.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_7_Task_3_Driveline_Noise_and_Vibration_Diagnosis_v1.1_Scenarios.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_7_Task_4_PTO_and_Hydraulic_Ancillary_Fault_Diagnosis_v1.1_Scenarios.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_8_Learning_Impact_Record_v1.2.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_8_Task_3_Advanced_Intermittent_Fault_Diagnostic_Investigation_v1.1_Scenarios.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_8_Task_4_Roadside_Triage_Risk_Control_and_Recovery_Decision_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_9_Learning_Impact_Record_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_9_Task_3_Customer_Defect_Explanation_Estimate_and_Authorisation_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/heavy-vehicle--HV_L3_Block_9_Task_4_Job_Card_Quality_Warranty_and_Workshop_Improvement_Review_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_10_Task_3_EPA_Mock_Practical_Integrated_Paint_Repair_Scenario_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_10_Task_4_EPA_Readiness_Portfolio_and_Professional_Discussion_Action_Plan_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_10_Task_5_Learning_Impact_Record_v2.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_1_Task_3_Workshop_Safety_Tools_and_Safe_Vehicle_Support_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_1_Task_4_Measurement_Technical_Information_and_Professional_Handover_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_1_Task_5_Learning_Impact_Record_v2.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_2_Task_3_Substrate_Identification_and_Repair_Method_Selection_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_2_Task_4_Feather_Edging_Filler_Preparation_and_Primer_Readiness_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_2_Task_5_Learning_Impact_Record_v2.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_3_Task_3_Filler_Shaping_Primer_Application_and_Quality_Check_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_3_Task_4_Complex_Masking_Corrosion_Protection_and_Seam_Sealer_Control_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_3_Task_5_Learning_Impact_Record_v2.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_4_Task_3_Colour_Code_Variant_Selection_and_Spray_out_Card_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_4_Task_4_Mixing_Ratios_Viscosity_VOC_and_Material_Planning_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_4_Task_5_Learning_Impact_Record_v2.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_5_Task_3_Spray_Gun_Set_up_Air_Pressure_and_Booth_Controls_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_5_Task_4_Basecoat_Clearcoat_Flash_off_and_Curing_Control_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_5_Task_5_Learning_Impact_Record_v2.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_6_Task_3_Full_Paint_Repair_Plan_Handover_and_QA_Gates_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_6_Task_4_Paint_Defect_Diagnosis_Rework_Plan_and_Evidence_Review_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_6_Task_5_Learning_Impact_Record_v2.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_7_Task_3_Plastic_Bumper_Preparation_and_Adhesion_System_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_7_Task_4_Advanced_Blending_Three_stage_Colour_and_Defect_Rectification_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_7_Task_5_Learning_Impact_Record_v2.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_8_Task_3_EV_Hybrid_ADAS_and_Alternative_Fuel_Paint_Safety_Referral_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_8_Task_4_Specialist_Surfaces_Matte_Finish_and_Sustainable_Curing_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_8_Task_5_Learning_Impact_Record_v2.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_9_Task_3_Customer_Insurer_and_Workshop_Update_with_Quality_Handover_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_9_Task_4_Portfolio_Evidence_Gap_Analysis_Stock_Audit_and_Capstone_Plan_v1.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/task-pdfs/paint--Block_9_Task_5_Learning_Impact_Record_v2.1.pdf",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/layout.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/learning/block-controls.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/learning/fields.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/learning/index.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/learning/programme-reference.blade.php",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/learning/task.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/pdf/layout.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/pdf/task.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/plans/source-pending.blade.php",
+      "change": "added"
+    },
+    {
+      "path": "storage/app/private/.gitignore",
+      "change": "added"
+    },
+    {
+      "path": "storage/framework/cache/data/.gitignore",
+      "change": "added"
+    },
+    {
+      "path": "storage/framework/sessions/.gitignore",
+      "change": "added"
+    },
+    {
+      "path": "storage/framework/views/.gitignore",
+      "change": "added"
+    },
+    {
+      "path": "storage/logs/.gitignore",
+      "change": "added"
+    },
+    {
+      "path": "tests/Feature/ProgrammeTaskIntegrationTest.php",
+      "change": "added"
+    },
+    {
+      "path": "tests/Feature/RemainingOperationalBatchTest.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/static_checks.py",
+      "change": "updated"
+    },
+    {
+      "path": "tools/import_programme_tasks.py",
+      "change": "added"
+    }
+  ],
+  "scope": "Heavy Vehicle and Paint task integrations; no live migration/deployment"
+}

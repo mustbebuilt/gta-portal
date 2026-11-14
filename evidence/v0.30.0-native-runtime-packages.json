@@ -1,0 +1,37 @@
+[
+  {
+    "package": "mariadb-server-core",
+    "version": "1:11.8.6-0+deb13u1",
+    "sha256": "07a333e34773e1e1bc7c5613878c70a1224180f452481dcf786be05711148178"
+  },
+  {
+    "package": "mariadb-client-core",
+    "version": "1:11.8.6-0+deb13u1",
+    "sha256": "d9dc20e0769be8ec54b9bdd64667c047cf5e0933a0c873626a4ac1cb2be7c300"
+  },
+  {
+    "package": "mariadb-common",
+    "version": "1:11.8.6-0+deb13u1",
+    "sha256": "b5116ff56a60d471332d45bfd4ec50391fdcf5a40747bf7fe23ec8551cb71f9c"
+  },
+  {
+    "package": "libaio1t64",
+    "version": "0.3.113-8+b1",
+    "sha256": "490c8a2d116001a5f3b0a6d7a7aabf6a7b629366590dc5c3f75b078e931dd129"
+  },
+  {
+    "package": "liburing2",
+    "version": "2.9-1",
+    "sha256": "4b589c00c7a51172aace2cb2fb3d3ff32daf86c644023126dcfcaa840cc941ea"
+  },
+  {
+    "package": "libnuma1",
+    "version": "2.0.19-1",
+    "sha256": "e578583f73f8208564e5035b18aa729c441fc7ecb389c666923552e123f4d655"
+  },
+  {
+    "package": "php8.4-mysql",
+    "version": "8.4.27-1~deb13u1",
+    "sha256": "e10483a87c0aee7528b0f6d110bac52b48918e387fa67493887fffed84f4e314"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "previous": "v0.28.0",
+  "current": "v0.29.0",
+  "added": {
+    "aws/aws-crt-php": "v1.2.7",
+    "aws/aws-sdk-php": "3.403.5",
+    "league/flysystem-aws-s3-v3": "3.35.3",
+    "mtdowling/jmespath.php": "2.9.2",
+    "symfony/filesystem": "v8.1.11"
+  },
+  "existingVersionChanges": {}
+}

@@ -150,13 +150,13 @@ class EnglishMathsWorkflowTest extends TestCase
 
     public function test_private_topic_upload_download_and_draft_survive_reopen(): void
     {
-        Storage::fake('local');
+        Storage::fake(config('evidence.disk'));
         $l = $this->actor('apprentice');
         $a = Apprentice::factory()->create(['user_id' => $l->id]);
         $t = TrainingTopic::factory()->create(['apprentice_id' => $a->id]);
         $this->actingAs($l)->post('/topics/'.$t->id.'/files', ['version' => 1, 'file' => UploadedFile::fake()->create('maths.pdf', 1, 'application/pdf')])->assertRedirect()->assertSessionHasNoErrors();
         $file = $t->fresh()->files[0];
-        Storage::disk('local')->assertExists($file['path']);
+        Storage::disk(config('evidence.disk'))->assertExists($file['path']);
         $this->get('/topics/'.$t->id.'/files/'.$file['id'])->assertOk();
         $this->actingAs($this->actor('employer'))->get('/topics/'.$t->id.'/files/'.$file['id'])->assertForbidden();
     }

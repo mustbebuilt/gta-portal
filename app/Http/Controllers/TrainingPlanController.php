@@ -7,6 +7,7 @@ use App\Models\Qualification;
 use App\Models\TrainingPlanWorkspace as Workspace;
 use App\Models\TrainingTopic;
 use App\Support\LearningAccess as Access;
+use App\Support\TaskCatalogue;
 use App\Support\TrainingPlanSource as Source;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,10 @@ class TrainingPlanController extends Controller
 {
     private function locked(Request $r, Apprentice $a): Workspace
     {
-        Apprentice::whereKey($a->id)->lockForUpdate()->firstOrFail();
+        $fresh = Apprentice::whereKey($a->id)->lockForUpdate()->firstOrFail();
+        if (TaskCatalogue::keyFor($fresh) !== 'autocare') {
+            throw ValidationException::withMessages(['programmeRef' => 'The loaded planning and RPL source is Autocare only. This programme needs its own controlled plan/KSB source.']);
+        }
         $row = Workspace::where('apprentice_id', $a->id)->lockForUpdate()->first();
         if ($r->integer('version') !== ($row?->version ?? 0)) {
             throw ValidationException::withMessages(['version' => 'This planning workspace changed. Reopen before saving.']);
@@ -45,6 +49,9 @@ class TrainingPlanController extends Controller
     public function show(Request $r, Apprentice $apprentice): View
     {
         abort_unless(Access::training($r->user(), $apprentice), 403);
+        if (TaskCatalogue::keyFor($apprentice) !== 'autocare') {
+            return view('plans.source-pending', compact('apprentice'));
+        }
         $row = Workspace::where('apprentice_id', $apprentice->id)->first();
         $manage = Access::manager($r->user());
         $reference = Source::load('training-plan-reference');

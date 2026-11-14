@@ -6,20 +6,22 @@
 @if(in_array(auth()->user()->role,['admin','ceo','tutor','apprentice'],true))<a href="{{ route('dashboard.index') }}">Dashboard</a>@endif
 @can('viewAny',\App\Models\Apprentice::class)<a href="{{ route('apprentices.index') }}" @if(request()->routeIs('apprentices.*'))aria-current="page"@endif>Apprentices</a>@endcan
 @if(in_array(auth()->user()->role,['admin','ceo','tutor','apprentice','functional_skills_tutor'],true))<a href="{{ route('em.caseload') }}">Maths and English</a>@endif
-@if(in_array(auth()->user()->role,['admin','ceo','tutor'],true))<a href="{{ route('attendance.index') }}">Groups and sessions</a>@endif
+@if(in_array(auth()->user()->role,['admin','ceo','tutor'],true))<a href="{{ route('attendance.index') }}">Groups and sessions</a><a href="{{ route('marking.index') }}">Marking worklist</a>@endif
 @if(in_array(auth()->user()->role,['admin','ceo','apprentice','careers_adviser'],true))<a href="{{ route('careers.worklist') }}">Careers</a>@endif
-@if(in_array(auth()->user()->role,['admin','ceo','inclusion_lead','inclusion_member'],true))<a href="{{ route('support.worklist') }}">Support and retention</a>@endif
+@if(\App\Support\SupportAccess::team(auth()->user()))<a href="{{ route('support.worklist') }}">Support and retention</a>@endif
 @if(in_array(auth()->user()->role,['admin','ceo','tutor','mentor'],true))<a href="{{ route('reviews.index') }}">Reviews</a>@endif
 @if(!in_array(auth()->user()->role,['apprentice','employer'],true))<a href="{{ route('staff.index') }}">Staff development</a>@endif
 @if(auth()->user()->role!=='apprentice')<a href="{{ route('cases.index') }}">Case studies</a>@endif
+@if(in_array(auth()->user()->role,['admin','ceo'],true))<a href="{{ route('support.permissions') }}">Support permissions</a>@endif
 @can('manage-directories')
 @foreach(['employers'=>'Employers','staff'=>'Staff','groups'=>'Tutor groups','programmes'=>'Programmes'] as $kind=>$title)<a href="{{ route('directories.index',$kind) }}" @if(request()->routeIs('directories.*') && request()->route('kind')===$kind)aria-current="page"@endif>{{ $title }}</a>@endforeach
 @endcan
 @if(auth()->user()->role==='ceo')<a href="{{ route('executive.index') }}">CEO emergency access</a>@endif
-<a href="{{ route('help.index') }}">Help and how to</a></nav>@endauth
-<p class="release">Local development checkpoint<br>v0.7.0 · Fictional data only</p></aside>
+<a href="{{ route('account.password') }}">Change password</a><a href="{{ route('help.index') }}">Help and how to</a></nav>@endauth
+<p class="release">Local development checkpoint<br>v0.33.0 · Fictional data only</p></aside>
 <div class="workspace"><header class="topbar"><span>{{ auth()->user()?->name ?? 'GTA sign in' }} @auth<small>{{ ucfirst(auth()->user()->role) }}</small>@endauth</span><div class="toolbar"><button type="button" id="theme-toggle">Dark mode</button>@auth<form action="{{ route('logout') }}" method="post">@csrf<button>Sign out</button></form>@endauth</div></header>
 <main><div class="test-notice">Fictional local test application · Working modules are linked below. Formal plan approval, completed reviews/signatures, complete reporting and live deployment remain in development.</div>
 @if(session('status'))<div class="notice" role="status">{{ session('status') }}</div>@endif
 @if(auth()->user()?->role==='ceo'&&\App\Support\ExecutiveAccess::enabled(request()))<div class="errors" role="status">CEO emergency override is on for this session. Uses are recorded. <a href="{{ route('executive.index') }}">Review or end override</a></div>@endif
+@if(app()->environment('staging'))<p class="test-notice">Staging portal — use fictional test records. Live release, real-data migration and target-environment acceptance remain separate.</p>@endif
 @yield('content')</main></div></div></body></html>

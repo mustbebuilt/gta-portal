@@ -1,0 +1,402 @@
+[
+  {
+    "id": "paint-b1-t1",
+    "block": 1,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--paint--b01-t1.pdf"
+  },
+  {
+    "id": "paint-b1-t2",
+    "block": 1,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--paint--b01-t2.pdf"
+  },
+  {
+    "id": "paint-b1-t3",
+    "block": 1,
+    "task": 3,
+    "title": "Task 3: Workshop Safety Tools and Safe Vehicle Support",
+    "theme": "Workshop Safety Tools and Safe Vehicle Support",
+    "template": "final-20261113-qa2--paint--b01-t3.pdf"
+  },
+  {
+    "id": "paint-b1-t4",
+    "block": 1,
+    "task": 4,
+    "title": "Task 4: Measurement Technical Information and Professional Handover",
+    "theme": "Measurement Technical Information and Professional Handover",
+    "template": "final-20261113-qa2--paint--b01-t4.pdf"
+  },
+  {
+    "id": "paint-b1-t5",
+    "block": 1,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--paint--b01-t5.pdf"
+  },
+  {
+    "id": "paint-b2-t1",
+    "block": 2,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Core Paint Preparation, Materials and Workflow",
+    "template": "final-20261113-qa2--paint--b02-t1.pdf"
+  },
+  {
+    "id": "paint-b2-t2",
+    "block": 2,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Core Paint Preparation, Materials and Workflow",
+    "template": "final-20261113-qa2--paint--b02-t2.pdf"
+  },
+  {
+    "id": "paint-b2-t3",
+    "block": 2,
+    "task": 3,
+    "title": "Task 3: Substrate Identification and Repair Method Selection",
+    "theme": "Substrate Identification and Repair Method Selection",
+    "template": "final-20261113-qa2--paint--b02-t3.pdf"
+  },
+  {
+    "id": "paint-b2-t4",
+    "block": 2,
+    "task": 4,
+    "title": "Task 4: Feather Edging Filler Preparation and Primer Readiness",
+    "theme": "Feather Edging Filler Preparation and Primer Readiness",
+    "template": "final-20261113-qa2--paint--b02-t4.pdf"
+  },
+  {
+    "id": "paint-b2-t5",
+    "block": 2,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Core Paint Preparation, Materials and Workflow",
+    "template": "final-20261113-qa2--paint--b02-t5.pdf"
+  },
+  {
+    "id": "paint-b3-t1",
+    "block": 3,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Fillers, Primers, Masking and Corrosion Protection",
+    "template": "final-20261113-qa2--paint--b03-t1.pdf"
+  },
+  {
+    "id": "paint-b3-t2",
+    "block": 3,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Fillers, Primers, Masking and Corrosion Protection",
+    "template": "final-20261113-qa2--paint--b03-t2.pdf"
+  },
+  {
+    "id": "paint-b3-t3",
+    "block": 3,
+    "task": 3,
+    "title": "Task 3: Filler Shaping Primer Application and Quality Check",
+    "theme": "Filler Shaping Primer Application and Quality Check",
+    "template": "final-20261113-qa2--paint--b03-t3.pdf"
+  },
+  {
+    "id": "paint-b3-t4",
+    "block": 3,
+    "task": 4,
+    "title": "Task 4: Complex Masking Corrosion Protection and Seam Sealer Control",
+    "theme": "Complex Masking Corrosion Protection and Seam Sealer Control",
+    "template": "final-20261113-qa2--paint--b03-t4.pdf"
+  },
+  {
+    "id": "paint-b3-t5",
+    "block": 3,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Fillers, Primers, Masking and Corrosion Protection",
+    "template": "final-20261113-qa2--paint--b03-t5.pdf"
+  },
+  {
+    "id": "paint-b4-t1",
+    "block": 4,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Colour Theory, Paint Mixing and Technical Data",
+    "template": "final-20261113-qa2--paint--b04-t1.pdf"
+  },
+  {
+    "id": "paint-b4-t2",
+    "block": 4,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Colour Theory, Paint Mixing and Technical Data",
+    "template": "final-20261113-qa2--paint--b04-t2.pdf"
+  },
+  {
+    "id": "paint-b4-t3",
+    "block": 4,
+    "task": 3,
+    "title": "Task 3: Colour Code Variant Selection and Spray out Card",
+    "theme": "Colour Code Variant Selection and Spray out Card",
+    "template": "final-20261113-qa2--paint--b04-t3.pdf"
+  },
+  {
+    "id": "paint-b4-t4",
+    "block": 4,
+    "task": 4,
+    "title": "Task 4: Mixing Ratios Viscosity VOC and Material Planning",
+    "theme": "Mixing Ratios Viscosity VOC and Material Planning",
+    "template": "final-20261113-qa2--paint--b04-t4.pdf"
+  },
+  {
+    "id": "paint-b4-t5",
+    "block": 4,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Colour Theory, Paint Mixing and Technical Data",
+    "template": "final-20261113-qa2--paint--b04-t5.pdf"
+  },
+  {
+    "id": "paint-b5-t1",
+    "block": 5,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Spray Equipment, Booths, Application and Curing",
+    "template": "final-20261113-qa2--paint--b05-t1.pdf"
+  },
+  {
+    "id": "paint-b5-t2",
+    "block": 5,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Spray Equipment, Booths, Application and Curing",
+    "template": "final-20261113-qa2--paint--b05-t2.pdf"
+  },
+  {
+    "id": "paint-b5-t3",
+    "block": 5,
+    "task": 3,
+    "title": "Task 3: Spray Gun Set up Air Pressure and Booth Controls",
+    "theme": "Spray Gun Set up Air Pressure and Booth Controls",
+    "template": "final-20261113-qa2--paint--b05-t3.pdf"
+  },
+  {
+    "id": "paint-b5-t4",
+    "block": 5,
+    "task": 4,
+    "title": "Task 4: Basecoat Clearcoat Flash off and Curing Control",
+    "theme": "Basecoat Clearcoat Flash off and Curing Control",
+    "template": "final-20261113-qa2--paint--b05-t4.pdf"
+  },
+  {
+    "id": "paint-b5-t5",
+    "block": 5,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Spray Equipment, Booths, Application and Curing",
+    "template": "final-20261113-qa2--paint--b05-t5.pdf"
+  },
+  {
+    "id": "paint-b6-t1",
+    "block": 6,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Process Integration, Productivity and Quality Control",
+    "template": "final-20261113-qa2--paint--b06-t1.pdf"
+  },
+  {
+    "id": "paint-b6-t2",
+    "block": 6,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Process Integration, Productivity and Quality Control",
+    "template": "final-20261113-qa2--paint--b06-t2.pdf"
+  },
+  {
+    "id": "paint-b6-t3",
+    "block": 6,
+    "task": 3,
+    "title": "Task 3: Full Paint Repair Plan Handover and QA Gates",
+    "theme": "Full Paint Repair Plan Handover and QA Gates",
+    "template": "final-20261113-qa2--paint--b06-t3.pdf"
+  },
+  {
+    "id": "paint-b6-t4",
+    "block": 6,
+    "task": 4,
+    "title": "Task 4: Paint Defect Diagnosis Rework Plan and Evidence Review",
+    "theme": "Paint Defect Diagnosis Rework Plan and Evidence Review",
+    "template": "final-20261113-qa2--paint--b06-t4.pdf"
+  },
+  {
+    "id": "paint-b6-t5",
+    "block": 6,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Process Integration, Productivity and Quality Control",
+    "template": "final-20261113-qa2--paint--b06-t5.pdf"
+  },
+  {
+    "id": "paint-b7-t1",
+    "block": 7,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Advanced Blending, Plastics and Defect Rectification",
+    "template": "final-20261113-qa2--paint--b07-t1.pdf"
+  },
+  {
+    "id": "paint-b7-t2",
+    "block": 7,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Advanced Blending, Plastics and Defect Rectification",
+    "template": "final-20261113-qa2--paint--b07-t2.pdf"
+  },
+  {
+    "id": "paint-b7-t3",
+    "block": 7,
+    "task": 3,
+    "title": "Task 3: Plastic Bumper Preparation and Adhesion System",
+    "theme": "Plastic Bumper Preparation and Adhesion System",
+    "template": "final-20261113-qa2--paint--b07-t3.pdf"
+  },
+  {
+    "id": "paint-b7-t4",
+    "block": 7,
+    "task": 4,
+    "title": "Task 4: Advanced Blending Three stage Colour and Defect Rectification",
+    "theme": "Advanced Blending Three stage Colour and Defect Rectification",
+    "template": "final-20261113-qa2--paint--b07-t4.pdf"
+  },
+  {
+    "id": "paint-b7-t5",
+    "block": 7,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Advanced Blending, Plastics and Defect Rectification",
+    "template": "final-20261113-qa2--paint--b07-t5.pdf"
+  },
+  {
+    "id": "paint-b8-t1",
+    "block": 8,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Emerging Technology, Specialist Surfaces and Sustainability",
+    "template": "final-20261113-qa2--paint--b08-t1.pdf"
+  },
+  {
+    "id": "paint-b8-t2",
+    "block": 8,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Emerging Technology, Specialist Surfaces and Sustainability",
+    "template": "final-20261113-qa2--paint--b08-t2.pdf"
+  },
+  {
+    "id": "paint-b8-t3",
+    "block": 8,
+    "task": 3,
+    "title": "Task 3: EV Hybrid ADAS and Alternative Fuel Paint Safety Referral",
+    "theme": "EV Hybrid ADAS and Alternative Fuel Paint Safety Referral",
+    "template": "final-20261113-qa2--paint--b08-t3.pdf"
+  },
+  {
+    "id": "paint-b8-t4",
+    "block": 8,
+    "task": 4,
+    "title": "Task 4: Specialist Surfaces Matte Finish and Sustainable Curing",
+    "theme": "Specialist Surfaces Matte Finish and Sustainable Curing",
+    "template": "final-20261113-qa2--paint--b08-t4.pdf"
+  },
+  {
+    "id": "paint-b8-t5",
+    "block": 8,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Emerging Technology, Specialist Surfaces and Sustainability",
+    "template": "final-20261113-qa2--paint--b08-t5.pdf"
+  },
+  {
+    "id": "paint-b9-t1",
+    "block": 9,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Commercial Workflow, Customer Communication and Portfolio Consolidation",
+    "template": "final-20261113-qa2--paint--b09-t1.pdf"
+  },
+  {
+    "id": "paint-b9-t2",
+    "block": 9,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Commercial Workflow, Customer Communication and Portfolio Consolidation",
+    "template": "final-20261113-qa2--paint--b09-t2.pdf"
+  },
+  {
+    "id": "paint-b9-t3",
+    "block": 9,
+    "task": 3,
+    "title": "Task 3: Customer Insurer and Workshop Update with Quality Handover",
+    "theme": "Customer Insurer and Workshop Update with Quality Handover",
+    "template": "final-20261113-qa2--paint--b09-t3.pdf"
+  },
+  {
+    "id": "paint-b9-t4",
+    "block": 9,
+    "task": 4,
+    "title": "Task 4: Portfolio Evidence Gap Analysis Stock Audit and Capstone Plan",
+    "theme": "Portfolio Evidence Gap Analysis Stock Audit and Capstone Plan",
+    "template": "final-20261113-qa2--paint--b09-t4.pdf"
+  },
+  {
+    "id": "paint-b9-t5",
+    "block": 9,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Commercial Workflow, Customer Communication and Portfolio Consolidation",
+    "template": "final-20261113-qa2--paint--b09-t5.pdf"
+  },
+  {
+    "id": "paint-b10-t1",
+    "block": 10,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Final Consolidation, Portfolio Completion and EPA Readiness",
+    "template": "final-20261113-qa2--paint--b10-t1.pdf"
+  },
+  {
+    "id": "paint-b10-t2",
+    "block": 10,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Final Consolidation, Portfolio Completion and EPA Readiness",
+    "template": "final-20261113-qa2--paint--b10-t2.pdf"
+  },
+  {
+    "id": "paint-b10-t3",
+    "block": 10,
+    "task": 3,
+    "title": "Task 3: EPA Mock Practical Integrated Paint Repair Scenario",
+    "theme": "EPA Mock Practical Integrated Paint Repair Scenario",
+    "template": "final-20261113-qa2--paint--b10-t3.pdf"
+  },
+  {
+    "id": "paint-b10-t4",
+    "block": 10,
+    "task": 4,
+    "title": "Task 4: EPA Readiness Portfolio and Professional Discussion Action Plan",
+    "theme": "EPA Readiness Portfolio and Professional Discussion Action Plan",
+    "template": "final-20261113-qa2--paint--b10-t4.pdf"
+  },
+  {
+    "id": "paint-b10-t5",
+    "block": 10,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Final Consolidation, Portfolio Completion and EPA Readiness",
+    "template": "final-20261113-qa2--paint--b10-t5.pdf"
+  }
+]

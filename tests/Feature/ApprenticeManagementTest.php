@@ -238,14 +238,9 @@ class ApprenticeManagementTest extends TestCase
         $this->assertDatabaseCount('users', 1);
     }
 
-    public function test_application_applies_security_headers_in_production(): void
+    public function test_application_refuses_production_operation(): void
     {
         $this->app['env'] = 'production';
-        $response = $this->get('/login');
-        $response->assertStatus(200);
-        $response->assertHeader('Cache-Control', 'no-store, private');
-        $response->assertHeader('X-Frame-Options', 'DENY');
-        $response->assertHeader('X-Content-Type-Options', 'nosniff');
-        $response->assertHeader('Referrer-Policy', 'same-origin');
+        $this->get('/login')->assertStatus(503);
     }
 }

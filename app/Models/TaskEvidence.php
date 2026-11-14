@@ -8,5 +8,5 @@ class TaskEvidence extends Model
 {
     protected $table = 'task_evidence';
 
-    protected $fillable = ['learning_task_id', 'uploaded_by', 'path', 'name', 'mime', 'sha256', 'bytes', 'kind'];
+    protected $fillable = ['learning_task_id', 'uploaded_by', 'disk', 'path', 'name', 'mime', 'sha256', 'bytes', 'kind'];
 }

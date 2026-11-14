@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        ResetPassword::createUrlUsing(fn (User $user, string $token) => rtrim(config('app.url'), '/').route('password.reset', ['token' => $token, 'email' => $user->email], false));
         Gate::define('manage-directories', fn (User $user): bool => $user->active && in_array($user->role, ['admin', 'ceo'], true));
     }
 }

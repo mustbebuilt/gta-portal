@@ -1,0 +1,152 @@
+{
+  "checkpoint": "v0.33.0",
+  "batches": [
+    "v0.32.0",
+    "v0.33.0"
+  ],
+  "createdAt": "2026-11-13T16:03:23.690093+00:00",
+  "previousCheckpoint": "v0.31.0",
+  "previousSourceLibraryVersion": 23,
+  "changes": [
+    {
+      "path": ".env.example",
+      "change": "updated"
+    },
+    {
+      "path": "BATCH_QUEUE.json",
+      "change": "updated"
+    },
+    {
+      "path": "CHANGES_v0.32.0.md",
+      "change": "added"
+    },
+    {
+      "path": "CHANGES_v0.33.0.md",
+      "change": "added"
+    },
+    {
+      "path": "CLOUD_START_HERE_MARTIN.md",
+      "change": "updated"
+    },
+    {
+      "path": "DATA_REQUIREMENTS_AND_GAPS.md",
+      "change": "updated"
+    },
+    {
+      "path": "DEVELOPMENT_STATUS.txt",
+      "change": "updated"
+    },
+    {
+      "path": "GTA_Laravel_Portal_Test_Report.html",
+      "change": "updated"
+    },
+    {
+      "path": "MARTIN_AI_INTEGRATION_INSTRUCTIONS.md",
+      "change": "updated"
+    },
+    {
+      "path": "MARTIN_BATCH_v0.33.0.md",
+      "change": "added"
+    },
+    {
+      "path": "QUEUE_COMPLETION_REVIEW.md",
+      "change": "updated"
+    },
+    {
+      "path": "README.md",
+      "change": "updated"
+    },
+    {
+      "path": "START_HERE_MARTIN.txt",
+      "change": "updated"
+    },
+    {
+      "path": "TEST_RESULTS.json",
+      "change": "updated"
+    },
+    {
+      "path": "app/Models/EvidenceCopyPlan.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Support/EvidenceCopies.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Support/EvidenceInventory.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Support/PrivateEvidence.php",
+      "change": "updated"
+    },
+    {
+      "path": "config/evidence_copy.php",
+      "change": "added"
+    },
+    {
+      "path": "database/migrations/2026_11_13_230000_create_evidence_copy_plans.php",
+      "change": "added"
+    },
+    {
+      "path": "deploy/cloud.env.example",
+      "change": "updated"
+    },
+    {
+      "path": "evidence/v0.31.0-TEST_RESULTS.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.33.0-cloud-build.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.33.0-console-copy-flow.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.33.0-mariadb-http-cli.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.33.0-mariadb-suite.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.33.0-s3-wire-conditional-copy.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.33.0-sqlite-http-cli.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.33.0-static-results.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/layout.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/pdf/layout.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "routes/console.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/Feature/EvidenceCopiesTest.php",
+      "change": "added"
+    },
+    {
+      "path": "tests/evidence_copy_flow.py",
+      "change": "added"
+    },
+    {
+      "path": "tests/s3_wire.py",
+      "change": "updated"
+    }
+  ]
+}

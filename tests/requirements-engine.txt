@@ -1,0 +1,2 @@
+# Test-only native HTTP fixture connector; not an application runtime dependency.
+PyMySQL==1.1.2

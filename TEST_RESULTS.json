@@ -1,555 +1,24 @@
 {
-  "release": "GTA Laravel local development checkpoint v0.7.0",
-  "checkedAt": "2026-11-11T23:15:20.806456+00:00",
+  "release": "GTA Laravel development checkpoint v0.33.0",
+  "batches": [
+    "v0.32.0 protected exact-preview evidence copy planning",
+    "v0.33.0 exclusive verified staging copies"
+  ],
+  "checkedAt": "2026-11-13T16:03:23.690093+00:00",
   "framework": "Laravel 13.42.0",
-  "php": "8.4.27",
+  "php": "8.4.27 with PDO MySQL/mysqlnd",
   "minimumPhp": "8.4.1",
-  "hostingTarget": "Laravel Cloud; environment not accessed",
+  "hostingTarget": "Laravel Cloud; actual repository/source/target not accessed",
   "sqliteSuite": {
-    "tests": 259,
-    "assertions": 2318,
-    "errors": 0,
-    "failures": 0,
-    "skipped": 0,
-    "cases": [
-      "test_that_true_is_true",
-      "test_released_questions_are_exact_source_and_new_tasks_do_not_add_extra_achievements",
-      "test_partial_adas_draft_saves_but_submission_needs_both_answers_and_freezes_release",
-      "test_original_pdf_remains_available_and_hash_checked_for_released_schema",
-      "test_pre_release_saved_task_keeps_its_original_schema_and_submission_rules",
-      "test_default_seed_does_not_create_known_password_accounts",
-      "test_guest_cannot_read_or_submit_apprentices",
-      "test_admin_can_add_and_reopen_all_recorded_fields",
-      "test_missing_optional_information_remains_null_and_not_rated",
-      "test_duplicate_reference_case_and_whitespace_do_not_create_another_record",
-      "test_missing_names_and_invalid_email_are_rejected",
-      "test_finish_date_before_start_is_rejected",
-      "test_invalid_tutor_or_wrong_role_is_rejected",
-      "test_edit_updates_same_record_and_increments_version",
-      "test_stale_edit_cannot_overwrite_saved_changes",
-      "test_tutor_sees_only_assigned_records_and_cannot_edit",
-      "test_apprentice_sees_only_own_record_and_cannot_create",
-      "test_unsupported_roles_are_denied",
-      "test_revoked_account_loses_access_even_with_a_session",
-      "test_untrusted_fields_cannot_grant_access_or_change_version",
-      "test_names_are_escaped_on_output",
-      "test_search_is_scoped_and_handles_sql_looking_input",
-      "test_audit_failure_rolls_back_record_creation",
-      "test_login_logout_and_bad_password",
-      "test_login_throttles_repeated_failures",
-      "test_ceo_can_manage_core_records_without_new_private_permissions",
-      "test_existing_inactive_assignment_is_not_silently_removed",
-      "test_demo_setup_refuses_non_local_environments",
-      "test_local_demo_setup_refuses_to_overwrite_existing_records",
-      "test_application_refuses_production_operation",
-      "test_session_planner_snapshots_roster_without_attendance_or_hours",
-      "test_time_subtraction_handles_overlapping_exclusions_and_late_arrival",
-      "test_register_records_exact_confirmed_minutes_and_reopens",
-      "test_unconfirmed_attendance_counts_for_attendance_but_not_otj",
-      "test_reductions_need_explanation_and_never_exceed_actual_time",
-      "test_non_attended_codes_cannot_generate_otj",
-      "test_future_session_cannot_record_actual_attendance",
-      "test_overlapping_confirmed_training_is_not_double_counted",
-      "test_cancellation_excludes_hours_and_attendance_but_keeps_source_mark",
-      "test_other_tutor_apprentice_and_employer_cannot_open_register",
-      "test_group_tutor_does_not_gain_access_to_other_main_tutor_apprentice",
-      "test_marks_for_non_roster_apprentice_and_stale_updates_are_rejected",
-      "test_attendance_exclusions_unmarked_and_two_week_flag_match_source_rules",
-      "test_current_incomplete_week_and_week_gaps_are_not_consecutive_week_flags",
-      "test_assigned_adviser_saves_and_apprentice_reopens_private_discussion",
-      "test_employer_main_tutor_and_previous_adviser_cannot_read_or_write",
-      "test_apprentice_cannot_record_advice_or_read_another_apprentice",
-      "test_missing_adviser_and_specialist_referral_are_not_invented",
-      "test_private_smart_action_and_apprentice_followup_require_adviser_confirmation",
-      "test_action_needs_smart_confirmation_and_stale_save_is_rejected",
-      "test_followup_does_not_allow_an_action_from_another_discussion",
-      "test_resources_are_available_to_staff_and_apprentices_but_not_employers",
-      "test_private_text_is_escaped_and_does_not_appear_in_shared_action_plan",
-      "test_non_apprentice_creates_case_but_apprentice_is_excluded",
-      "test_only_author_edits_and_other_staff_cannot_read_the_case",
-      "test_independent_review_requires_checks_and_current_approved_copy_enters_inspection",
-      "test_admin_author_cannot_approve_own_case_and_missing_evidence_blocks_submission",
-      "test_submitted_case_locks_draft_and_stale_version_is_rejected",
-      "test_unresolved_outcome_needs_followup_and_no_wider_pattern_without_reference",
-      "test_survey_receipt_and_inclusion_check_are_separate_and_store_no_answers",
-      "test_survey_duplicate_wrong_concern_and_check_before_submission_are_rejected",
-      "test_corrected_survey_date_does_not_reuse_an_old_check_even_when_date_is_changed_back",
-      "test_tutor_apprentice_and_employer_cannot_access_survey_tracking",
-      "test_dashboard_with_missing_records_does_not_invent_overall_progress",
-      "test_tutor_and_apprentice_scope_stays_with_current_assignment",
-      "test_dashboard_overdue_marking_uses_source_submission_date",
-      "test_journey_uses_only_dated_recorded_public_learning_sources",
-      "test_undated_and_future_milestones_are_not_invented",
-      "test_large_fictional_scope_does_not_leak_other_tutor_records",
-      "test_employer_and_unrelated_specialist_cannot_access_dashboard_or_journey",
-      "test_demo_setup_is_rejected_outside_local_environment",
-      "test_local_demo_links_two_profiles_without_overwriting_existing_records",
-      "test_directory_only_data_also_prevents_demo_overwrite",
-      "test_local_password_reset_is_blocked_outside_local_and_does_not_change_role",
-      "test_admin_can_create_reopen_edit_and_reject_stale_directory_updates with data set #0",
-      "test_admin_can_create_reopen_edit_and_reject_stale_directory_updates with data set #1",
-      "test_admin_can_create_reopen_edit_and_reject_stale_directory_updates with data set #2",
-      "test_admin_can_create_reopen_edit_and_reject_stale_directory_updates with data set #3",
-      "test_non_administrators_cannot_read_or_write_directories with data set #0",
-      "test_non_administrators_cannot_read_or_write_directories with data set #1",
-      "test_non_administrators_cannot_read_or_write_directories with data set #2",
-      "test_non_administrators_cannot_read_or_write_directories with data set #3",
-      "test_non_administrators_cannot_read_or_write_directories with data set #4",
-      "test_non_administrators_cannot_read_or_write_directories with data set #5",
-      "test_guest_directory_access_requires_sign_in",
-      "test_ceo_can_manage_directory_records",
-      "test_staff_directory_cannot_create_or_modify_protected_administrators",
-      "test_subject_scope_is_required_for_functional_skills_staff",
-      "test_posted_password_cannot_set_staff_credentials",
-      "test_programme_code_can_have_distinct_versions_but_not_duplicate_same_version",
-      "test_employer_reference_normalisation_prevents_duplicates",
-      "test_deactivation_preserves_assignments_and_edit_selection",
-      "test_directory_text_is_escaped_and_unknown_kind_is_not_resolved",
-      "test_directory_audit_failure_rolls_back_creation",
-      "test_qualification_create_reopen_and_twelve_month_target_are_individual",
-      "test_achieved_needs_real_date_and_functional_skills_has_no_grade_band",
-      "test_start_change_requires_reason_and_stale_edit_is_rejected",
-      "test_leap_day_target_and_overdue_filters_do_not_change_recorded_result",
-      "test_missing_dates_remain_unknown_and_cannot_be_reported_as_achieved",
-      "test_specialist_tutor_can_only_read_and_edit_assigned_subject",
-      "test_topic_acceptance_does_not_complete_training_or_qualification",
-      "test_pending_or_referred_evidence_prevents_premature_completion",
-      "test_manual_training_completion_is_separate_and_needs_date_and_basis",
-      "test_zero_hours_is_secure_and_excluded_from_training_percentage",
-      "test_topic_assignment_rejects_duplicate_and_catalogue_tampering",
-      "test_private_topic_upload_download_and_draft_survive_reopen",
-      "test_employer_cannot_see_training_or_record_results",
-      "test_qualification_nested_id_cannot_update_another_apprentice",
-      "test_specialist_caseload_and_login_do_not_expand_core_profile_scope",
-      "test_root_redirects_to_apprentice_records",
-      "test_ceo_must_explicitly_enable_with_reason_password_and_confirmation",
-      "test_emergency_instruction_use_is_audited_and_retains_private_copy_separation",
-      "test_ordinary_administrator_or_other_account_cannot_enable_or_reuse_ceo_session",
-      "test_end_removes_elevation_without_deleting_history_or_ordinary_oversight",
-      "test_logout_ends_override_and_new_sign_in_does_not_restore_it",
-      "test_override_does_not_bypass_stale_source_checks_or_inactive_accounts",
-      "test_emergency_audit_failure_rolls_back_restricted_action",
-      "test_duplicate_enable_is_rejected_without_creating_another_session",
-      "test_outside_hours_need_own_agreement_sufficient_actual_compensation_and_tutor_approval",
-      "test_staff_agreement_needs_actual_apprentice_confirmation_reference",
-      "test_other_apprentice_employer_unassigned_tutor_and_subject_tutor_cannot_record_or_approve",
-      "test_normal_paid_hours_still_need_explicit_tutor_eligibility_check",
-      "test_future_training_zero_time_or_missing_group_cannot_be_recorded",
-      "test_future_compensation_invalid_source_and_stale_confirmation_stay_pending",
-      "test_overlap_with_confirmed_normal_register_blocks_extra_credit",
-      "test_overlap_guard_also_blocks_register_credit_after_extra_approval",
-      "test_overlapping_extra_records_cannot_both_count_and_adjoining_times_can",
-      "test_withdrawal_removes_subtotal_and_retains_approval_history",
-      "test_optional_training_file_is_private_and_cannot_set_approval",
-      "test_audit_failure_rolls_back_pending_training_and_cleans_uploaded_file",
-      "test_explicit_allocation_creates_fifty_source_tasks_once_without_dates",
-      "test_draft_submit_refer_resubmit_approve_retains_history",
-      "test_unrelated_roles_are_denied with data set #0",
-      "test_unrelated_roles_are_denied with data set #1",
-      "test_unrelated_roles_are_denied with data set #2",
-      "test_unrelated_roles_are_denied with data set #3",
-      "test_unassigned_tutor_and_other_apprentice_are_denied",
-      "test_answer_and_decision_permissions_are_separate",
-      "test_stale_and_forged_fields_do_not_override_state",
-      "test_submission_needs_name_and_own_work",
-      "test_checklist_upload_is_private_and_snapshot_pinned",
-      "test_bad_upload_and_upload_to_locked_submission_are_rejected",
-      "test_impact_scores_may_be_partial_in_draft_only",
-      "test_paper_test_rejects_invalid_score_and_records_explicit_outcome",
-      "test_jobcard_approval_requires_mentor_verification",
-      "test_marking_deadline_is_more_than_seven_days_and_unknown_is_not_zero",
-      "test_all_41_pdfs_match_hashes_and_download_works_for_owner",
-      "test_reopened_answers_are_html_escaped",
-      "test_tutor_decision_cannot_precede_the_submission",
-      "test_original_pdf_must_match_the_recorded_source_version",
-      "test_all_directory_and_staff_links_save_and_reopen",
-      "test_specialist_assignment_refuses_the_wrong_subject with data set #0",
-      "test_specialist_assignment_refuses_the_wrong_subject with data set #1",
-      "test_staff_assignment_refuses_the_wrong_role with data set #0",
-      "test_staff_assignment_refuses_the_wrong_role with data set #1",
-      "test_staff_assignment_refuses_the_wrong_role with data set #2",
-      "test_unknown_ids_are_rejected",
-      "test_inactive_links_are_retained_but_cannot_be_newly_assigned",
-      "test_group_membership_does_not_silently_assign_tutor_or_expand_access",
-      "test_group_change_does_not_reassign_existing_apprentices",
-      "test_old_text_is_preserved_until_confirmed_mapping",
-      "test_changed_subject_scope_is_flagged_without_clearing_link",
-      "test_upgrade_preserves_old_text_dates_and_unmapped_identity",
-      "test_qualification_certificate_is_private_and_does_not_set_achievement",
-      "test_qualification_upload_retains_subject_scope_and_rejects_stale_or_executable",
-      "test_support_activity_records_unknown_duration_and_actual_approved_source_without_otj",
-      "test_support_activity_needs_active_current_plan_actual_date_and_positive_duration",
-      "test_support_activity_duplicate_form_and_tutor_cannot_create_private_records",
-      "test_support_evidence_upload_and_download_stay_restricted_and_bound_to_original_plan",
-      "test_closed_support_records_reject_new_files_and_activities_but_retain_history",
-      "test_private_file_audit_failure_rolls_back_database_and_cleans_new_file",
-      "test_assigned_mentor_saves_reopens_draft_and_proposed_seventy_day_reference",
-      "test_apprentice_employer_and_unassigned_mentor_cannot_see_private_draft",
-      "test_stale_and_nested_draft_updates_cannot_override_saved_record",
-      "test_source_snapshot_is_preserved_on_reopen_and_has_no_compliance_score",
-      "test_training_period_and_future_actual_meeting_dates_are_validated",
-      "test_actual_delivered_and_planned_subjects_come_from_the_register_with_distinct_labels",
-      "test_reference_has_approved_hours_s9_note_links_and_no_individual_approval",
-      "test_reference_does_not_broaden_private_apprentice_scope",
-      "test_own_apprentice_sees_source_and_original_block9_amendment",
-      "test_help_guides_are_role_scoped_and_never_contain_record_text",
-      "test_inactive_and_unsigned_users_cannot_read_authenticated_help",
-      "test_completed_programme_does_not_automatically_mean_achieved",
-      "test_completion_end_date_and_achievement_date_require_sourced_chronology",
-      "test_withdrawal_reason_and_support_context_need_basis_and_source",
-      "test_employer_headcount_needs_employer_date_and_source",
-      "test_retention_context_is_admin_only_and_unknown_history_stays_unknown",
-      "test_stale_outcome_and_unsupported_source_fields_cannot_replace_current",
-      "test_monthly_snapshot_preserves_not_observed_and_is_unique_per_calendar_month",
-      "test_low_or_unobserved_month_needs_comment_and_absence_is_not_zero",
-      "test_apprentice_can_see_own_feedback_but_cannot_score_or_see_another",
-      "test_future_month_and_out_of_range_score_are_rejected",
-      "test_saved_monthly_feedback_feeds_review_draft_without_duplicate_targets",
-      "test_smart_creation_builds_measure_and_reopens_saved_target",
-      "test_missing_measures_agreement_support_and_deadline_are_rejected",
-      "test_outcome_targets_need_observable_confirmation",
-      "test_manual_action_flows_to_tutor_and_completion_requires_tutor_evidence",
-      "test_return_to_apprentice_preserves_deadline_and_evidence",
-      "test_linked_actions_follow_task_status_and_date_without_duplicate_decisions",
-      "test_other_apprentice_task_cannot_be_linked",
-      "test_employer_and_unassigned_tutor_cannot_read_or_create_actions",
-      "test_apprentice_cannot_create_targets_or_submit_tutor_owned_work",
-      "test_stale_edit_and_nested_record_tampering_are_rejected",
-      "test_overdue_filter_uses_open_source_deadline_and_completed_is_blue",
-      "test_employee_creates_own_cpd_and_reopens_it_without_private_management_access",
-      "test_admin_does_not_automatically_receive_private_hr_records_but_ceo_does",
-      "test_only_ceo_assigns_manager_and_circular_assignments_are_rejected",
-      "test_manager_private_notes_and_unshared_observations_are_excluded_from_employee_view",
-      "test_shared_tutor_one_to_one_uses_source_headings_but_excludes_private_notes",
-      "test_employee_cannot_create_observations_or_private_notes",
-      "test_cpd_completion_requires_evidence_and_stale_edits_do_not_replace_current",
-      "test_staff_evidence_is_private_and_former_manager_loses_access",
-      "test_development_action_needs_smart_checks_and_manager_confirms_completion",
-      "test_brief_teaching_note_does_not_complete_full_observation_booking",
-      "test_month_capture_uses_current_source_position_and_leaves_plan_otj_unknown",
-      "test_apprentice_and_employer_cannot_access_staff_records",
-      "test_manager_records_separate_impact_with_frozen_source_and_private_notes",
-      "test_employee_and_unassigned_admin_cannot_record_staff_impact",
-      "test_impact_cannot_claim_improvement_from_missing_baseline_unchecked_or_unstarted_cpd",
-      "test_impact_respects_source_revision_chronology_and_future_followup",
-      "test_private_observation_cannot_be_exposed_by_shared_impact_and_brief_note_is_not_full_observation",
-      "test_existing_impact_remains_private_if_underlying_observation_sharing_is_revoked",
-      "test_planned_review_reschedule_and_cancel_require_reason_and_keep_history",
-      "test_cancelled_staff_booking_cannot_be_completed_and_employee_cannot_change_booking",
-      "test_tutor_raises_without_codes_and_lead_acknowledges_assigns",
-      "test_cannot_raise_for_unassigned_apprentice_or_self_allocate_marker",
-      "test_members_cannot_classify_and_private_notes_are_excluded_from_tutor_receipt",
-      "test_apprentice_and_employer_have_no_private_support_access",
-      "test_multiple_markers_keep_descriptions_and_stale_edit_protection",
-      "test_prefer_not_to_say_does_not_create_plan_requirement",
-      "test_weekly_followup_is_chronological_and_needs_measurable_target",
-      "test_approved_teaching_instruction_shares_only_released_text_with_named_current_tutor",
-      "test_member_draft_needs_lead_approval_and_cannot_target_unlinked_staff",
-      "test_private_support_plan_draft_approval_and_review_keep_active_version_separate",
-      "test_unclassified_other_apprentice_and_disclosure_only_concerns_cannot_be_plan_sources",
-      "test_changed_code_blocks_approval_until_checked_draft_is_saved",
-      "test_closed_plan_is_immutable_and_does_not_generate_funding_or_otj",
-      "test_current_plan_cannot_be_duplicated_and_als_needs_rationale_before_approval",
-      "test_draft_proposal_saves_reopens_without_applying_dates_or_target",
-      "test_proposal_requires_programme_basis_valid_date_positive_hours_and_current_version",
-      "test_missing_rpl_outcome_is_unknown_and_exposure_retains_training_without_totals",
-      "test_reduction_needs_specific_evidence_and_matching_partial_or_full_omission",
-      "test_zero_outcome_cannot_omit_training_and_unknown_code_cannot_be_added",
-      "test_only_admin_ceo_assess_and_own_apprentice_main_tutor_receive_safe_projection",
-      "test_incomplete_assessment_cannot_be_approved_or_circumvented_by_posted_totals",
-      "test_complete_assessment_approval_is_separate_from_plan_application_and_source_change_invalidates_it",
-      "test_return_requires_reason_and_current_approval_must_be_withdrawn_before_return",
-      "test_stale_binding_source_and_source_hash_mismatch_cannot_overwrite_saved_assessments",
-      "test_resaving_unchanged_assessment_does_not_clear_a_changes_needed_review",
-      "test_invalid_saved_assessor_version_or_future_timestamp_is_not_approval_ready",
-      "test_discussion_amendment_retains_original_adviser_and_previous_terms",
-      "test_discussion_date_cannot_pass_followup_and_stale_cannot_overwrite",
-      "test_cross_apprentice_and_nonwriter_cannot_amend_discussion",
-      "test_only_to_do_careers_action_can_be_revised_without_duplication",
-      "test_careers_worklist_filters_original_type_due_owner_and_current_scope",
-      "test_instruction_amendment_keeps_published_copy_until_new_approval",
-      "test_instruction_withdrawal_removes_tutor_access_and_preserves_reason",
-      "test_instruction_amendment_permissions_stale_and_recipient_changes_are_enforced",
-      "test_instruction_team_view_renders_amendment_and_withdraw_controls"
-    ]
+    "tool": "phpunit",
+    "result": "passed",
+    "tests": 547,
+    "passed": 547,
+    "assertions": 6339,
+    "duration_ms": 53423
   },
-  "mariaDbSuite": {
-    "tests": 259,
-    "assertions": 2318,
-    "errors": 0,
-    "failures": 0,
-    "skipped": 0,
-    "cases": [
-      "test_that_true_is_true",
-      "test_released_questions_are_exact_source_and_new_tasks_do_not_add_extra_achievements",
-      "test_partial_adas_draft_saves_but_submission_needs_both_answers_and_freezes_release",
-      "test_original_pdf_remains_available_and_hash_checked_for_released_schema",
-      "test_pre_release_saved_task_keeps_its_original_schema_and_submission_rules",
-      "test_default_seed_does_not_create_known_password_accounts",
-      "test_guest_cannot_read_or_submit_apprentices",
-      "test_admin_can_add_and_reopen_all_recorded_fields",
-      "test_missing_optional_information_remains_null_and_not_rated",
-      "test_duplicate_reference_case_and_whitespace_do_not_create_another_record",
-      "test_missing_names_and_invalid_email_are_rejected",
-      "test_finish_date_before_start_is_rejected",
-      "test_invalid_tutor_or_wrong_role_is_rejected",
-      "test_edit_updates_same_record_and_increments_version",
-      "test_stale_edit_cannot_overwrite_saved_changes",
-      "test_tutor_sees_only_assigned_records_and_cannot_edit",
-      "test_apprentice_sees_only_own_record_and_cannot_create",
-      "test_unsupported_roles_are_denied",
-      "test_revoked_account_loses_access_even_with_a_session",
-      "test_untrusted_fields_cannot_grant_access_or_change_version",
-      "test_names_are_escaped_on_output",
-      "test_search_is_scoped_and_handles_sql_looking_input",
-      "test_audit_failure_rolls_back_record_creation",
-      "test_login_logout_and_bad_password",
-      "test_login_throttles_repeated_failures",
-      "test_ceo_can_manage_core_records_without_new_private_permissions",
-      "test_existing_inactive_assignment_is_not_silently_removed",
-      "test_demo_setup_refuses_non_local_environments",
-      "test_local_demo_setup_refuses_to_overwrite_existing_records",
-      "test_application_refuses_production_operation",
-      "test_session_planner_snapshots_roster_without_attendance_or_hours",
-      "test_time_subtraction_handles_overlapping_exclusions_and_late_arrival",
-      "test_register_records_exact_confirmed_minutes_and_reopens",
-      "test_unconfirmed_attendance_counts_for_attendance_but_not_otj",
-      "test_reductions_need_explanation_and_never_exceed_actual_time",
-      "test_non_attended_codes_cannot_generate_otj",
-      "test_future_session_cannot_record_actual_attendance",
-      "test_overlapping_confirmed_training_is_not_double_counted",
-      "test_cancellation_excludes_hours_and_attendance_but_keeps_source_mark",
-      "test_other_tutor_apprentice_and_employer_cannot_open_register",
-      "test_group_tutor_does_not_gain_access_to_other_main_tutor_apprentice",
-      "test_marks_for_non_roster_apprentice_and_stale_updates_are_rejected",
-      "test_attendance_exclusions_unmarked_and_two_week_flag_match_source_rules",
-      "test_current_incomplete_week_and_week_gaps_are_not_consecutive_week_flags",
-      "test_assigned_adviser_saves_and_apprentice_reopens_private_discussion",
-      "test_employer_main_tutor_and_previous_adviser_cannot_read_or_write",
-      "test_apprentice_cannot_record_advice_or_read_another_apprentice",
-      "test_missing_adviser_and_specialist_referral_are_not_invented",
-      "test_private_smart_action_and_apprentice_followup_require_adviser_confirmation",
-      "test_action_needs_smart_confirmation_and_stale_save_is_rejected",
-      "test_followup_does_not_allow_an_action_from_another_discussion",
-      "test_resources_are_available_to_staff_and_apprentices_but_not_employers",
-      "test_private_text_is_escaped_and_does_not_appear_in_shared_action_plan",
-      "test_non_apprentice_creates_case_but_apprentice_is_excluded",
-      "test_only_author_edits_and_other_staff_cannot_read_the_case",
-      "test_independent_review_requires_checks_and_current_approved_copy_enters_inspection",
-      "test_admin_author_cannot_approve_own_case_and_missing_evidence_blocks_submission",
-      "test_submitted_case_locks_draft_and_stale_version_is_rejected",
-      "test_unresolved_outcome_needs_followup_and_no_wider_pattern_without_reference",
-      "test_survey_receipt_and_inclusion_check_are_separate_and_store_no_answers",
-      "test_survey_duplicate_wrong_concern_and_check_before_submission_are_rejected",
-      "test_corrected_survey_date_does_not_reuse_an_old_check_even_when_date_is_changed_back",
-      "test_tutor_apprentice_and_employer_cannot_access_survey_tracking",
-      "test_dashboard_with_missing_records_does_not_invent_overall_progress",
-      "test_tutor_and_apprentice_scope_stays_with_current_assignment",
-      "test_dashboard_overdue_marking_uses_source_submission_date",
-      "test_journey_uses_only_dated_recorded_public_learning_sources",
-      "test_undated_and_future_milestones_are_not_invented",
-      "test_large_fictional_scope_does_not_leak_other_tutor_records",
-      "test_employer_and_unrelated_specialist_cannot_access_dashboard_or_journey",
-      "test_demo_setup_is_rejected_outside_local_environment",
-      "test_local_demo_links_two_profiles_without_overwriting_existing_records",
-      "test_directory_only_data_also_prevents_demo_overwrite",
-      "test_local_password_reset_is_blocked_outside_local_and_does_not_change_role",
-      "test_admin_can_create_reopen_edit_and_reject_stale_directory_updates with data set #0",
-      "test_admin_can_create_reopen_edit_and_reject_stale_directory_updates with data set #1",
-      "test_admin_can_create_reopen_edit_and_reject_stale_directory_updates with data set #2",
-      "test_admin_can_create_reopen_edit_and_reject_stale_directory_updates with data set #3",
-      "test_non_administrators_cannot_read_or_write_directories with data set #0",
-      "test_non_administrators_cannot_read_or_write_directories with data set #1",
-      "test_non_administrators_cannot_read_or_write_directories with data set #2",
-      "test_non_administrators_cannot_read_or_write_directories with data set #3",
-      "test_non_administrators_cannot_read_or_write_directories with data set #4",
-      "test_non_administrators_cannot_read_or_write_directories with data set #5",
-      "test_guest_directory_access_requires_sign_in",
-      "test_ceo_can_manage_directory_records",
-      "test_staff_directory_cannot_create_or_modify_protected_administrators",
-      "test_subject_scope_is_required_for_functional_skills_staff",
-      "test_posted_password_cannot_set_staff_credentials",
-      "test_programme_code_can_have_distinct_versions_but_not_duplicate_same_version",
-      "test_employer_reference_normalisation_prevents_duplicates",
-      "test_deactivation_preserves_assignments_and_edit_selection",
-      "test_directory_text_is_escaped_and_unknown_kind_is_not_resolved",
-      "test_directory_audit_failure_rolls_back_creation",
-      "test_qualification_create_reopen_and_twelve_month_target_are_individual",
-      "test_achieved_needs_real_date_and_functional_skills_has_no_grade_band",
-      "test_start_change_requires_reason_and_stale_edit_is_rejected",
-      "test_leap_day_target_and_overdue_filters_do_not_change_recorded_result",
-      "test_missing_dates_remain_unknown_and_cannot_be_reported_as_achieved",
-      "test_specialist_tutor_can_only_read_and_edit_assigned_subject",
-      "test_topic_acceptance_does_not_complete_training_or_qualification",
-      "test_pending_or_referred_evidence_prevents_premature_completion",
-      "test_manual_training_completion_is_separate_and_needs_date_and_basis",
-      "test_zero_hours_is_secure_and_excluded_from_training_percentage",
-      "test_topic_assignment_rejects_duplicate_and_catalogue_tampering",
-      "test_private_topic_upload_download_and_draft_survive_reopen",
-      "test_employer_cannot_see_training_or_record_results",
-      "test_qualification_nested_id_cannot_update_another_apprentice",
-      "test_specialist_caseload_and_login_do_not_expand_core_profile_scope",
-      "test_root_redirects_to_apprentice_records",
-      "test_ceo_must_explicitly_enable_with_reason_password_and_confirmation",
-      "test_emergency_instruction_use_is_audited_and_retains_private_copy_separation",
-      "test_ordinary_administrator_or_other_account_cannot_enable_or_reuse_ceo_session",
-      "test_end_removes_elevation_without_deleting_history_or_ordinary_oversight",
-      "test_logout_ends_override_and_new_sign_in_does_not_restore_it",
-      "test_override_does_not_bypass_stale_source_checks_or_inactive_accounts",
-      "test_emergency_audit_failure_rolls_back_restricted_action",
-      "test_duplicate_enable_is_rejected_without_creating_another_session",
-      "test_outside_hours_need_own_agreement_sufficient_actual_compensation_and_tutor_approval",
-      "test_staff_agreement_needs_actual_apprentice_confirmation_reference",
-      "test_other_apprentice_employer_unassigned_tutor_and_subject_tutor_cannot_record_or_approve",
-      "test_normal_paid_hours_still_need_explicit_tutor_eligibility_check",
-      "test_future_training_zero_time_or_missing_group_cannot_be_recorded",
-      "test_future_compensation_invalid_source_and_stale_confirmation_stay_pending",
-      "test_overlap_with_confirmed_normal_register_blocks_extra_credit",
-      "test_overlap_guard_also_blocks_register_credit_after_extra_approval",
-      "test_overlapping_extra_records_cannot_both_count_and_adjoining_times_can",
-      "test_withdrawal_removes_subtotal_and_retains_approval_history",
-      "test_optional_training_file_is_private_and_cannot_set_approval",
-      "test_audit_failure_rolls_back_pending_training_and_cleans_uploaded_file",
-      "test_explicit_allocation_creates_fifty_source_tasks_once_without_dates",
-      "test_draft_submit_refer_resubmit_approve_retains_history",
-      "test_unrelated_roles_are_denied with data set #0",
-      "test_unrelated_roles_are_denied with data set #1",
-      "test_unrelated_roles_are_denied with data set #2",
-      "test_unrelated_roles_are_denied with data set #3",
-      "test_unassigned_tutor_and_other_apprentice_are_denied",
-      "test_answer_and_decision_permissions_are_separate",
-      "test_stale_and_forged_fields_do_not_override_state",
-      "test_submission_needs_name_and_own_work",
-      "test_checklist_upload_is_private_and_snapshot_pinned",
-      "test_bad_upload_and_upload_to_locked_submission_are_rejected",
-      "test_impact_scores_may_be_partial_in_draft_only",
-      "test_paper_test_rejects_invalid_score_and_records_explicit_outcome",
-      "test_jobcard_approval_requires_mentor_verification",
-      "test_marking_deadline_is_more_than_seven_days_and_unknown_is_not_zero",
-      "test_all_41_pdfs_match_hashes_and_download_works_for_owner",
-      "test_reopened_answers_are_html_escaped",
-      "test_tutor_decision_cannot_precede_the_submission",
-      "test_original_pdf_must_match_the_recorded_source_version",
-      "test_all_directory_and_staff_links_save_and_reopen",
-      "test_specialist_assignment_refuses_the_wrong_subject with data set #0",
-      "test_specialist_assignment_refuses_the_wrong_subject with data set #1",
-      "test_staff_assignment_refuses_the_wrong_role with data set #0",
-      "test_staff_assignment_refuses_the_wrong_role with data set #1",
-      "test_staff_assignment_refuses_the_wrong_role with data set #2",
-      "test_unknown_ids_are_rejected",
-      "test_inactive_links_are_retained_but_cannot_be_newly_assigned",
-      "test_group_membership_does_not_silently_assign_tutor_or_expand_access",
-      "test_group_change_does_not_reassign_existing_apprentices",
-      "test_old_text_is_preserved_until_confirmed_mapping",
-      "test_changed_subject_scope_is_flagged_without_clearing_link",
-      "test_upgrade_preserves_old_text_dates_and_unmapped_identity",
-      "test_qualification_certificate_is_private_and_does_not_set_achievement",
-      "test_qualification_upload_retains_subject_scope_and_rejects_stale_or_executable",
-      "test_support_activity_records_unknown_duration_and_actual_approved_source_without_otj",
-      "test_support_activity_needs_active_current_plan_actual_date_and_positive_duration",
-      "test_support_activity_duplicate_form_and_tutor_cannot_create_private_records",
-      "test_support_evidence_upload_and_download_stay_restricted_and_bound_to_original_plan",
-      "test_closed_support_records_reject_new_files_and_activities_but_retain_history",
-      "test_private_file_audit_failure_rolls_back_database_and_cleans_new_file",
-      "test_assigned_mentor_saves_reopens_draft_and_proposed_seventy_day_reference",
-      "test_apprentice_employer_and_unassigned_mentor_cannot_see_private_draft",
-      "test_stale_and_nested_draft_updates_cannot_override_saved_record",
-      "test_source_snapshot_is_preserved_on_reopen_and_has_no_compliance_score",
-      "test_training_period_and_future_actual_meeting_dates_are_validated",
-      "test_actual_delivered_and_planned_subjects_come_from_the_register_with_distinct_labels",
-      "test_reference_has_approved_hours_s9_note_links_and_no_individual_approval",
-      "test_reference_does_not_broaden_private_apprentice_scope",
-      "test_own_apprentice_sees_source_and_original_block9_amendment",
-      "test_help_guides_are_role_scoped_and_never_contain_record_text",
-      "test_inactive_and_unsigned_users_cannot_read_authenticated_help",
-      "test_completed_programme_does_not_automatically_mean_achieved",
-      "test_completion_end_date_and_achievement_date_require_sourced_chronology",
-      "test_withdrawal_reason_and_support_context_need_basis_and_source",
-      "test_employer_headcount_needs_employer_date_and_source",
-      "test_retention_context_is_admin_only_and_unknown_history_stays_unknown",
-      "test_stale_outcome_and_unsupported_source_fields_cannot_replace_current",
-      "test_monthly_snapshot_preserves_not_observed_and_is_unique_per_calendar_month",
-      "test_low_or_unobserved_month_needs_comment_and_absence_is_not_zero",
-      "test_apprentice_can_see_own_feedback_but_cannot_score_or_see_another",
-      "test_future_month_and_out_of_range_score_are_rejected",
-      "test_saved_monthly_feedback_feeds_review_draft_without_duplicate_targets",
-      "test_smart_creation_builds_measure_and_reopens_saved_target",
-      "test_missing_measures_agreement_support_and_deadline_are_rejected",
-      "test_outcome_targets_need_observable_confirmation",
-      "test_manual_action_flows_to_tutor_and_completion_requires_tutor_evidence",
-      "test_return_to_apprentice_preserves_deadline_and_evidence",
-      "test_linked_actions_follow_task_status_and_date_without_duplicate_decisions",
-      "test_other_apprentice_task_cannot_be_linked",
-      "test_employer_and_unassigned_tutor_cannot_read_or_create_actions",
-      "test_apprentice_cannot_create_targets_or_submit_tutor_owned_work",
-      "test_stale_edit_and_nested_record_tampering_are_rejected",
-      "test_overdue_filter_uses_open_source_deadline_and_completed_is_blue",
-      "test_employee_creates_own_cpd_and_reopens_it_without_private_management_access",
-      "test_admin_does_not_automatically_receive_private_hr_records_but_ceo_does",
-      "test_only_ceo_assigns_manager_and_circular_assignments_are_rejected",
-      "test_manager_private_notes_and_unshared_observations_are_excluded_from_employee_view",
-      "test_shared_tutor_one_to_one_uses_source_headings_but_excludes_private_notes",
-      "test_employee_cannot_create_observations_or_private_notes",
-      "test_cpd_completion_requires_evidence_and_stale_edits_do_not_replace_current",
-      "test_staff_evidence_is_private_and_former_manager_loses_access",
-      "test_development_action_needs_smart_checks_and_manager_confirms_completion",
-      "test_brief_teaching_note_does_not_complete_full_observation_booking",
-      "test_month_capture_uses_current_source_position_and_leaves_plan_otj_unknown",
-      "test_apprentice_and_employer_cannot_access_staff_records",
-      "test_manager_records_separate_impact_with_frozen_source_and_private_notes",
-      "test_employee_and_unassigned_admin_cannot_record_staff_impact",
-      "test_impact_cannot_claim_improvement_from_missing_baseline_unchecked_or_unstarted_cpd",
-      "test_impact_respects_source_revision_chronology_and_future_followup",
-      "test_private_observation_cannot_be_exposed_by_shared_impact_and_brief_note_is_not_full_observation",
-      "test_existing_impact_remains_private_if_underlying_observation_sharing_is_revoked",
-      "test_planned_review_reschedule_and_cancel_require_reason_and_keep_history",
-      "test_cancelled_staff_booking_cannot_be_completed_and_employee_cannot_change_booking",
-      "test_tutor_raises_without_codes_and_lead_acknowledges_assigns",
-      "test_cannot_raise_for_unassigned_apprentice_or_self_allocate_marker",
-      "test_members_cannot_classify_and_private_notes_are_excluded_from_tutor_receipt",
-      "test_apprentice_and_employer_have_no_private_support_access",
-      "test_multiple_markers_keep_descriptions_and_stale_edit_protection",
-      "test_prefer_not_to_say_does_not_create_plan_requirement",
-      "test_weekly_followup_is_chronological_and_needs_measurable_target",
-      "test_approved_teaching_instruction_shares_only_released_text_with_named_current_tutor",
-      "test_member_draft_needs_lead_approval_and_cannot_target_unlinked_staff",
-      "test_private_support_plan_draft_approval_and_review_keep_active_version_separate",
-      "test_unclassified_other_apprentice_and_disclosure_only_concerns_cannot_be_plan_sources",
-      "test_changed_code_blocks_approval_until_checked_draft_is_saved",
-      "test_closed_plan_is_immutable_and_does_not_generate_funding_or_otj",
-      "test_current_plan_cannot_be_duplicated_and_als_needs_rationale_before_approval",
-      "test_draft_proposal_saves_reopens_without_applying_dates_or_target",
-      "test_proposal_requires_programme_basis_valid_date_positive_hours_and_current_version",
-      "test_missing_rpl_outcome_is_unknown_and_exposure_retains_training_without_totals",
-      "test_reduction_needs_specific_evidence_and_matching_partial_or_full_omission",
-      "test_zero_outcome_cannot_omit_training_and_unknown_code_cannot_be_added",
-      "test_only_admin_ceo_assess_and_own_apprentice_main_tutor_receive_safe_projection",
-      "test_incomplete_assessment_cannot_be_approved_or_circumvented_by_posted_totals",
-      "test_complete_assessment_approval_is_separate_from_plan_application_and_source_change_invalidates_it",
-      "test_return_requires_reason_and_current_approval_must_be_withdrawn_before_return",
-      "test_stale_binding_source_and_source_hash_mismatch_cannot_overwrite_saved_assessments",
-      "test_resaving_unchanged_assessment_does_not_clear_a_changes_needed_review",
-      "test_invalid_saved_assessor_version_or_future_timestamp_is_not_approval_ready",
-      "test_discussion_amendment_retains_original_adviser_and_previous_terms",
-      "test_discussion_date_cannot_pass_followup_and_stale_cannot_overwrite",
-      "test_cross_apprentice_and_nonwriter_cannot_amend_discussion",
-      "test_only_to_do_careers_action_can_be_revised_without_duplication",
-      "test_careers_worklist_filters_original_type_due_owner_and_current_scope",
-      "test_instruction_amendment_keeps_published_copy_until_new_approval",
-      "test_instruction_withdrawal_removes_tutor_access_and_preserves_reason",
-      "test_instruction_amendment_permissions_stale_and_recipient_changes_are_enforced",
-      "test_instruction_team_view_renders_amendment_and_withdraw_controls"
-    ]
-  },
-  "mariaDbEngine": {
-    "engine": "11.8.6-MariaDB-0+deb13u1 from Debian",
-    "connection": "Laravel mysql driver",
-    "exit": 0,
-    "isolatedDatabase": true,
-    "oracleMySQLTested": false
-  },
-  "httpPersistence": {
-    "passed": 45,
+  "sqliteHttpCli": {
+    "passed": 98,
     "failed": 0,
     "checks": [
       {
@@ -602,6 +71,90 @@
       },
       {
         "name": "HTTP edit updates the saved apprentice",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP Panel allocation assigns ten real source reflections",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP reflection source loading rejects a missing CSRF token",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP guarded source loading creates a versioned draft and audit event",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP repeated reflection loading leaves the saved draft unchanged",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP calendar mutation rejects a missing CSRF token",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP twelve-block calendar saves without assigning task deadlines",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP plan preparer cannot approve their own draft",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP independent reviewer approves the exact controlled plan revision",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP confirmed plan preview applies fifty unset deadlines with saved versions",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP current approved delivery plan exports a protected PDF",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP review saves the exact approved plan and next-period block snapshot",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP review readiness freezes its revision without claiming completion or resetting the cycle",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP OTJ ledger links the approved target without claiming a complete historical record",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP scoped OTJ ledger exports a real source summary PDF",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP administrator records due Block 10/11 Careers prompts with CSRF protection",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP assigned adviser acknowledges a current prompt without recording delivered advice",
+        "passed": true
+      },
+      {
+        "name": "Actual multipart signed-copy upload enforces CSRF and remains pending without moving a review date",
+        "passed": true
+      },
+      {
+        "name": "Actual signed-copy confirmation rejects the uploading administrator",
+        "passed": true
+      },
+      {
+        "name": "Actual independent signed-copy check tracks meeting plus seventy days and retains the exact private PDF",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP review reminders enforce CSRF and record one source per current tutor and mentor without duplicates",
+        "passed": true
+      },
+      {
+        "name": "Actual tutor and mentor acknowledgement is scoped, idempotent and leaves frozen review content and overdue date unchanged",
         "passed": true
       },
       {
@@ -701,6 +254,130 @@
         "passed": true
       },
       {
+        "name": "Actual HTTP administrator grant enables a separate scoped support duty for a tutor",
+        "passed": true
+      },
+      {
+        "name": "Support duty does not grant permission administration or private Careers access",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP revocation removes private team access and retains both reasoned audit events",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP register correction retains a reason and replaces the confirmed subtotal",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP repeated plans create separate registers without actual attendance or hours",
+        "passed": true
+      },
+      {
+        "name": "Block exceptions, marker history and minimal assignment events are persisted through actual HTTP workflows",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP recorded-work, scoped operational and protected review-draft downloads return real PDF bytes",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP marking worklist shows a dated fictional overdue source",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP reminder creation rejects a missing CSRF token",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP administrator creates one deduplicated in-portal reminder",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP correction proposal opens from tutor feedback without creating an action",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP agreed source-bound proposal creates one linked action without approving the task",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP tutor acknowledgement retains the outstanding task without approving it",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP apprentice cannot access the staff marking worklist",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP disabled recovery returns generic responses without creating a token",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP password change rejects a missing CSRF token",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP current-password change signs out the changing session",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP password change invalidates an already signed-in second browser session",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP new password signs in with the current account security version",
+        "passed": true
+      },
+      {
+        "name": "Actual command preview is read-only and explicit combined recording deduplicates existing in-portal prompts",
+        "passed": true
+      },
+      {
+        "name": "Actual multipart result import saves a read-only exact-row preview",
+        "passed": true
+      },
+      {
+        "name": "Actual result application enforces CSRF and rejects the batch preparer",
+        "passed": true
+      },
+      {
+        "name": "Actual independent result check applies the result while preserving topic status and custom start",
+        "passed": true
+      },
+      {
+        "name": "Actual historical upload previews net minutes without adding hours or attendance",
+        "passed": true
+      },
+      {
+        "name": "Actual independent historic check adds ninety source minutes to the ledger without inventing attendance",
+        "passed": true
+      },
+      {
+        "name": "Actual management capture saves a scoped fixed position and exports its protected PDF",
+        "passed": true
+      },
+      {
+        "name": "Actual historical withdrawal preserves source history and the earlier captured management pack",
+        "passed": true
+      },
+      {
+        "name": "Actual signed-copy withdrawal retains the private PDF, history and earlier management snapshot",
+        "passed": true
+      },
+      {
+        "name": "Actual source withdrawal hides obsolete review prompts and rejects stale acknowledgement while retaining reminders and audits",
+        "passed": true
+      },
+      {
+        "name": "Actual CLI inventory reports registered upload counts without document contents or source mutation",
+        "passed": true
+      },
+      {
+        "name": "Explicit CLI inventory hash-verifies all registered fixture objects while saved rows and file bytes remain unchanged",
+        "passed": true
+      },
+      {
         "name": "Actual HTTP create rejects a missing CSRF token",
         "passed": true
       },
@@ -713,7 +390,11 @@
         "passed": true
       },
       {
-        "name": "Complete saved records for twenty-one connected module tables survive PHP restart unchanged",
+        "name": "Actual HTTP updated credentials and security version persist after PHP restart",
+        "passed": true
+      },
+      {
+        "name": "Complete saved records for forty-one connected module tables survive PHP restart unchanged",
         "passed": true
       },
       {
@@ -746,29 +427,705 @@
       "Not a production deployment or full-portal acceptance"
     ]
   },
+  "nativeDatabaseSuite": {
+    "engine": "11.8.6-MariaDB-0+deb13u1 from Debian",
+    "driver": "pdo_mysql / Laravel mysql connection",
+    "suite": {
+      "tool": "phpunit",
+      "result": "passed",
+      "tests": 547,
+      "passed": 547,
+      "assertions": 6865,
+      "duration_ms": 196436
+    },
+    "http": null,
+    "seconds": 197.4,
+    "isolated": true,
+    "network": "Private disposable 127.0.0.1 TCP listener only, passed through socket activation; no external listener",
+    "schemaReset": "Fresh private schema per database-backed test; no false enclosing transaction around DDL",
+    "nativeAuditErrors": true,
+    "initialAdminConcurrency": {
+      "result": "passed",
+      "attempts": 2,
+      "created": 1,
+      "rejected": 1,
+      "accounts": 1,
+      "creationAudits": 1,
+      "consumedMarkers": 1,
+      "scope": "Real concurrent PHP workers released from a common barrier on a separate native InnoDB schema; other concurrency paths not certified"
+    },
+    "actualCloudAccess": false,
+    "actualOracleMySqlAccess": false,
+    "limits": [
+      "MariaDB is not the exact Cloud MySQL version; actual Cloud engine/schema acceptance remains",
+      "No existing/live database or real data accessed",
+      "This suite does not establish all target concurrency, performance, backup or migration mappings"
+    ]
+  },
+  "nativeDatabaseHttpCli": {
+    "engine": "11.8.6-MariaDB-0+deb13u1 from Debian",
+    "driver": "pdo_mysql / Laravel mysql connection",
+    "suite": {
+      "result": "not_run",
+      "tests": 0,
+      "passed": 0,
+      "assertions": 0
+    },
+    "http": {
+      "passed": 98,
+      "failed": 0,
+      "checks": [
+        {
+          "name": "Fresh disposable database migrated and fictional setup created",
+          "passed": true
+        },
+        {
+          "name": "Unauthenticated HTTP request redirects to sign in",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP login rejects a missing CSRF token",
+          "passed": true
+        },
+        {
+          "name": "Generated fictional administrator can sign in through HTTP",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP creates, saves and reopens employers directory record",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP creates, saves and reopens programmes directory record",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP creates, saves and reopens staff directory record",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP creates, saves and reopens groups directory record",
+          "passed": true
+        },
+        {
+          "name": "Actual add-apprentice form is served",
+          "passed": true
+        },
+        {
+          "name": "HTTP add form saves and opens the new apprentice",
+          "passed": true
+        },
+        {
+          "name": "Linked apprentice detail displays saved directory names",
+          "passed": true
+        },
+        {
+          "name": "Independent database query confirms exactly one saved record",
+          "passed": true
+        },
+        {
+          "name": "HTTP edit updates the saved apprentice",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP Panel allocation assigns ten real source reflections",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP reflection source loading rejects a missing CSRF token",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP guarded source loading creates a versioned draft and audit event",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP repeated reflection loading leaves the saved draft unchanged",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP calendar mutation rejects a missing CSRF token",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP twelve-block calendar saves without assigning task deadlines",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP plan preparer cannot approve their own draft",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP independent reviewer approves the exact controlled plan revision",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP confirmed plan preview applies fifty unset deadlines with saved versions",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP current approved delivery plan exports a protected PDF",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP review saves the exact approved plan and next-period block snapshot",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP review readiness freezes its revision without claiming completion or resetting the cycle",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP OTJ ledger links the approved target without claiming a complete historical record",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP scoped OTJ ledger exports a real source summary PDF",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP administrator records due Block 10/11 Careers prompts with CSRF protection",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP assigned adviser acknowledges a current prompt without recording delivered advice",
+          "passed": true
+        },
+        {
+          "name": "Actual multipart signed-copy upload enforces CSRF and remains pending without moving a review date",
+          "passed": true
+        },
+        {
+          "name": "Actual signed-copy confirmation rejects the uploading administrator",
+          "passed": true
+        },
+        {
+          "name": "Actual independent signed-copy check tracks meeting plus seventy days and retains the exact private PDF",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP review reminders enforce CSRF and record one source per current tutor and mentor without duplicates",
+          "passed": true
+        },
+        {
+          "name": "Actual tutor and mentor acknowledgement is scoped, idempotent and leaves frozen review content and overdue date unchanged",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP explicitly assigns all 50 source tasks",
+          "passed": true
+        },
+        {
+          "name": "Apprentice HTTP draft and submission retain answers and lock the submitted version",
+          "passed": true
+        },
+        {
+          "name": "Authorised HTTP tutor decision saves the whole task approval",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP qualification form records an individual twelve-month target",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP topic assignment stays separate from qualification achievement",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP SMART action saves an objective completion measure",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP Careers discussion is stored in the private Careers area",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP session plan and register confirm exactly six eligible hours",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP concern acknowledgement records its marker and responsible owner",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP progress-review draft saves a fixed source snapshot without completing a review",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP retention context saves without inventing achievement or historical changes",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP monthly snapshot preserves unobserved areas separately from observed scores",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP case-study draft saves and reopens without appearing as approved evidence",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP survey receipt saves separately from a private Inclusion Team check",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP staff CPD record saves and reopens under employee scope",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP connected dashboards, journey, curriculum reference and scoped help respond successfully",
+          "passed": true
+        },
+        {
+          "name": "Actual multipart HTTP saves a private qualification file without recording achievement",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP active support plan records delivered support separately from OTJ and formal review",
+          "passed": true
+        },
+        {
+          "name": "Actual multipart HTTP saves restricted support evidence against the original plan",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP staff impact records uncertainty without claiming proven improvement",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP saves an explicit draft plan proposal without applying an individual target",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP saves a source-bound RPL decision while incomplete programme totals stay unknown",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP CEO password confirmation starts and explicitly ends an audited session override",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP outside-hours training requires own apprentice agreement, actual employer compensation and tutor approval",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP administrator grant enables a separate scoped support duty for a tutor",
+          "passed": true
+        },
+        {
+          "name": "Support duty does not grant permission administration or private Careers access",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP revocation removes private team access and retains both reasoned audit events",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP register correction retains a reason and replaces the confirmed subtotal",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP repeated plans create separate registers without actual attendance or hours",
+          "passed": true
+        },
+        {
+          "name": "Block exceptions, marker history and minimal assignment events are persisted through actual HTTP workflows",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP recorded-work, scoped operational and protected review-draft downloads return real PDF bytes",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP marking worklist shows a dated fictional overdue source",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP reminder creation rejects a missing CSRF token",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP administrator creates one deduplicated in-portal reminder",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP correction proposal opens from tutor feedback without creating an action",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP agreed source-bound proposal creates one linked action without approving the task",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP tutor acknowledgement retains the outstanding task without approving it",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP apprentice cannot access the staff marking worklist",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP disabled recovery returns generic responses without creating a token",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP password change rejects a missing CSRF token",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP current-password change signs out the changing session",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP password change invalidates an already signed-in second browser session",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP new password signs in with the current account security version",
+          "passed": true
+        },
+        {
+          "name": "Actual command preview is read-only and explicit combined recording deduplicates existing in-portal prompts",
+          "passed": true
+        },
+        {
+          "name": "Actual multipart result import saves a read-only exact-row preview",
+          "passed": true
+        },
+        {
+          "name": "Actual result application enforces CSRF and rejects the batch preparer",
+          "passed": true
+        },
+        {
+          "name": "Actual independent result check applies the result while preserving topic status and custom start",
+          "passed": true
+        },
+        {
+          "name": "Actual historical upload previews net minutes without adding hours or attendance",
+          "passed": true
+        },
+        {
+          "name": "Actual independent historic check adds ninety source minutes to the ledger without inventing attendance",
+          "passed": true
+        },
+        {
+          "name": "Actual management capture saves a scoped fixed position and exports its protected PDF",
+          "passed": true
+        },
+        {
+          "name": "Actual historical withdrawal preserves source history and the earlier captured management pack",
+          "passed": true
+        },
+        {
+          "name": "Actual signed-copy withdrawal retains the private PDF, history and earlier management snapshot",
+          "passed": true
+        },
+        {
+          "name": "Actual source withdrawal hides obsolete review prompts and rejects stale acknowledgement while retaining reminders and audits",
+          "passed": true
+        },
+        {
+          "name": "Actual CLI inventory reports registered upload counts without document contents or source mutation",
+          "passed": true
+        },
+        {
+          "name": "Explicit CLI inventory hash-verifies all registered fixture objects while saved rows and file bytes remain unchanged",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP create rejects a missing CSRF token",
+          "passed": true
+        },
+        {
+          "name": "Version, null tutor and two audit events are persisted",
+          "passed": true
+        },
+        {
+          "name": "PHP server stops and restarts against the same SQLite file",
+          "passed": true
+        },
+        {
+          "name": "Actual HTTP updated credentials and security version persist after PHP restart",
+          "passed": true
+        },
+        {
+          "name": "Complete saved records for forty-one connected module tables survive PHP restart unchanged",
+          "passed": true
+        },
+        {
+          "name": "Private qualification and support evidence bytes retain their hashes after PHP restart",
+          "passed": true
+        },
+        {
+          "name": "Linked foreign keys and complete directory rows survive PHP restart",
+          "passed": true
+        },
+        {
+          "name": "Fresh sign-in after restart reopens an identical complete database row",
+          "passed": true
+        },
+        {
+          "name": "Logout removes access to the saved record",
+          "passed": true
+        }
+      ],
+      "database": "Isolated MariaDB via PDO MySQL and independent Python connector",
+      "http": "Actual PHP/Laravel loopback requests, not browser automation",
+      "recordProof": {
+        "reference": "HTTP-001",
+        "employer": "Updated Demo Workshop",
+        "version": 2,
+        "allFieldsUnchangedAfterRestart": true
+      },
+      "limits": [
+        "No browser or mobile layout acceptance",
+        "Not a production deployment or full-portal acceptance"
+      ]
+    },
+    "seconds": 55.11,
+    "isolated": true,
+    "network": "Private disposable 127.0.0.1 TCP listener only, passed through socket activation; no external listener",
+    "schemaReset": "Fresh private schema per database-backed test; no false enclosing transaction around DDL",
+    "nativeAuditErrors": true,
+    "initialAdminConcurrency": {
+      "result": "passed",
+      "attempts": 2,
+      "created": 1,
+      "rejected": 1,
+      "accounts": 1,
+      "creationAudits": 1,
+      "consumedMarkers": 1,
+      "scope": "Real concurrent PHP workers released from a common barrier on a separate native InnoDB schema; other concurrency paths not certified"
+    },
+    "actualCloudAccess": false,
+    "actualOracleMySqlAccess": false,
+    "limits": [
+      "MariaDB is not the exact Cloud MySQL version; actual Cloud engine/schema acceptance remains",
+      "No existing/live database or real data accessed",
+      "This suite does not establish all target concurrency, performance, backup or migration mappings"
+    ]
+  },
+  "httpPersistenceTablesPerEngine": 41,
+  "cleanLocalNoDevBuild": {
+    "passed": 7,
+    "failed": 0,
+    "checks": [
+      {
+        "name": "Fresh composer install --no-dev succeeds from the supplied lock, including actual post-autoload package discovery",
+        "passed": true
+      },
+      {
+        "name": "Fresh runtime-only dependencies satisfy this PHP platform",
+        "passed": true
+      },
+      {
+        "name": "S3 runtime classes load while PHPUnit development classes are absent",
+        "passed": true
+      },
+      {
+        "name": "Fresh runtime-only config:cache succeeds",
+        "passed": true
+      },
+      {
+        "name": "Fresh runtime-only route:cache succeeds",
+        "passed": true
+      },
+      {
+        "name": "Fresh runtime-only view:cache succeeds",
+        "passed": true
+      },
+      {
+        "name": "Build creates no real .env, application database or administrator",
+        "passed": true
+      }
+    ],
+    "php": "8.4.27",
+    "actualCloudBuild": false,
+    "limits": [
+      "Clean local runtime-only build, not an actual Laravel Cloud deployment",
+      "No target database, private bucket, real secret configuration or user acceptance tested"
+    ]
+  },
+  "s3WireConditionalCopyFixture": {
+    "passed": 14,
+    "failed": 0,
+    "checks": [
+      {
+        "name": "Configuration-only check creates no SDK network request",
+        "passed": true
+      },
+      {
+        "name": "Actual signed SDK upload, hash-read, unsigned denial and verified delete pass through HTTP fixture",
+        "passed": true
+      },
+      {
+        "name": "Serialised requests contain valid fixture SigV4 signatures and no object ACL/grant headers",
+        "passed": true
+      },
+      {
+        "name": "Anonymous probe uses an unsigned request to the configured API endpoint only",
+        "passed": true
+      },
+      {
+        "name": "An anonymously readable fixture object fails the probe and is removed",
+        "passed": true
+      },
+      {
+        "name": "Changed wire bytes fail SHA-256 readback and still clean up",
+        "passed": true
+      },
+      {
+        "name": "Anonymous redirect is inconclusive and not followed",
+        "passed": true
+      },
+      {
+        "name": "Denied cleanup reports the synthetic key and nonzero status without credential details",
+        "passed": true
+      },
+      {
+        "name": "Actual SDK evidence upload pins its disk and matches independently read persisted bytes",
+        "passed": true
+      },
+      {
+        "name": "A fresh PHP process with a changed default disk fingerprints, verifies and privately downloads the original pinned object",
+        "passed": true
+      },
+      {
+        "name": "Exclusive copy sends signed PutObject If-None-Match star without ACLs and verifies destination bytes",
+        "passed": true
+      },
+      {
+        "name": "A second actual SDK conditional copy receives collision refusal and preserves the existing destination",
+        "passed": true
+      },
+      {
+        "name": "Fresh-process SHA-256 check detects changed persisted bytes",
+        "passed": true
+      },
+      {
+        "name": "Missing object uses a file-only HEAD check without bucket listing",
+        "passed": true
+      }
+    ],
+    "transport": "Actual locked PHP AWS SDK HTTP requests to a local filesystem-backed SigV4-checking fixture",
+    "requests": 45,
+    "actualCloudAccess": false,
+    "realCredentialsOrLearnerData": false,
+    "limits": [
+      "Fixture is not full S3/R2 implementation or actual Cloud acceptance",
+      "No actual bucket/public aliases, private Cloud credentials, TLS endpoint, target database or deployment verified",
+      "Normal and failure fixtures prove application request/cleanup logic, not external infrastructure guarantees"
+    ]
+  },
+  "actualConsoleCopyFlow": {
+    "passed": 10,
+    "failed": 0,
+    "checks": [
+      {
+        "name": "Fresh disposable staging schema migrates with copy plans and restricted technical audit",
+        "passed": true
+      },
+      {
+        "name": "Fictional saved upload and retained duplicate metadata exist on the private source disk",
+        "passed": true
+      },
+      {
+        "name": "Actual preview command reports one deduplicated object and creates no destination",
+        "passed": true
+      },
+      {
+        "name": "Actual record command pins exact preview and saves one protected plan",
+        "passed": true
+      },
+      {
+        "name": "Inspection in a fresh process performs no copy",
+        "passed": true
+      },
+      {
+        "name": "A stale expected version refuses before any destination write",
+        "passed": true
+      },
+      {
+        "name": "Actual execution writes exclusively, hash-verifies private bytes and records ordered technical events",
+        "passed": true
+      },
+      {
+        "name": "Replaying the same command refuses and retains the destination unchanged",
+        "passed": true
+      },
+      {
+        "name": "Fresh-process inspection preserves plan state and all original source records and file bytes",
+        "passed": true
+      },
+      {
+        "name": "CLI summaries omit private locators and original registered evidence still verifies after the copy",
+        "passed": true
+      }
+    ],
+    "engine": "SQLite disposable fictional schema",
+    "applicationLinksChanged": false,
+    "sourcesDeleted": false,
+    "cutoverApproved": false,
+    "actualCloudAccess": false
+  },
   "static": {
-    "phpSyntaxFiles": 217,
+    "phpSyntaxFiles": 346,
     "javascriptSyntaxFiles": 1,
     "bladeCompilation": "passed",
     "compiledBladeSyntax": "passed",
     "originalPdfs": 41,
     "pdfHashMatches": 41,
+    "additionalProgrammePdfs": 90,
+    "finalReleasePdfs": 200,
+    "priorFinalReleasePdfsRetained": 200,
+    "totalRetainedSourcePdfs": 531,
+    "additionalProgrammePdfHashes": "all match source receipts",
+    "privateEvidenceCallers": "all use the shared configured service",
     "originalBrandAssets": "unchanged",
-    "composerValidation": "passed",
-    "platformRequirements": "passed",
+    "brandAssetFiles": 2,
+    "responsiveViewport": "present; layout not rendered",
+    "composerValidation": "Not performed by this script; see checkpoint-specific TEST_RESULTS.json",
+    "platformRequirements": "Not performed by this script; see checkpoint-specific TEST_RESULTS.json",
     "visualBrowserVerification": false
   },
-  "dependencyAudit": "Same locked dependencies as audited v0.2.0; no package changes in this batch",
-  "fictionalDemoApprentices": 2,
-  "fictionalDemoAccounts": 10,
-  "realApprenticeDataUsed": false,
-  "productionDeployed": false,
+  "newFeatureTests": 17,
+  "sourcePdfs": 531,
+  "priorSourcePdfsUnchanged": 531,
+  "newMigration": "2026_11_13_230000_create_evidence_copy_plans.php",
+  "evidenceCopies": {
+    "preview": "Metadata/configuration-bound counts and proposal hash; no upload bytes/network/database writes",
+    "plan": "Staging-only exact preview/reference with private server manifest and atomic console-origin technical audit",
+    "namespace": "gta-staged-copies/{plan UUID}/{opaque object token}.bin",
+    "execution": "Opt-in staging-only, exact version/hash, unchanged source/config binding, once-only SQL claim",
+    "sourceValidation": "Bounded source spool with declared SHA-256/size match before destination creation",
+    "exclusiveDestination": "Local xb creation / 0600 / symlink parent refusal; S3 PutObject IfNoneMatch star, no ACL/grants",
+    "verification": "Immediate destination readback; final all source/destination readback and metadata/configuration re-scan",
+    "failure": "Stop on first failure; retain original/partial outputs and technical intent; no automatic retry/resume/adoption/delete",
+    "states": [
+      "Planned",
+      "Running",
+      "Verified staging copies",
+      "Needs checks"
+    ],
+    "auditOrigin": "console; no impersonated human signer or independent business approval",
+    "applicationLinksChanged": false,
+    "sourceFilesDeleted": false,
+    "automaticCutover": false,
+    "productionExecution": false
+  },
+  "dependencies": "Composer/lock/all vendor bytes unchanged from v0.31.0",
+  "previousEvidence": "evidence/v0.31.0-TEST_RESULTS.json (historical scope only)",
+  "actualOracleMySqlAccess": false,
+  "actualCloudAccess": false,
   "limits": [
-    "Expanded local checkpoint, not the full v1.2.8 portal; see BATCH_QUEUE.json",
-    "No browser, phone, keyboard or print visual acceptance",
-    "No Windows-native runtime execution verified",
-    "MariaDB via Laravel mysql driver tested; Oracle MySQL and Laravel Cloud not tested",
-    "No live schema migration, production mail, real-data migration or security certification",
-    "Unsupported roles/modules remain denied, not represented as working features"
+    "Actual Martin repository/source/target private aliases and managed Cloud database/bucket were not accessed. Local results do not establish hosted installation, TLS/bucket policy, redeployment, restore or browser acceptance.",
+    "Copy planning covers known upload references and retained metadata in eight source families. It does not discover unregistered bucket/directory objects or reconcile other applications. Logical disk/path deduplication does not merge physical aliases.",
+    "Preview and record use database/configuration metadata without uploaded-file/network reads. Execution is off by default, staging-only and explicitly requires unchanged bindings, exact plan version/hash and the configured opt-in.",
+    "Console-origin technical audit and an operator-supplied reference are not an authenticated human signature, independent business approval, assessment decision or migration/cutover authorisation.",
+    "Verified staging copies means finite sequential SHA-256/size readbacks and final source/reference/configuration checks succeeded at read time. No atomic freeze, complete backup or ongoing consistency guarantee. Use a controlled write window and independently verify actual sources/targets.",
+    "Exclusive destinations are not overwritten or adopted. Failed/partial outputs remain. An interrupted/final-audit-failed run can stay Running; it cannot automatically retry/resume. Database rollback cannot undo object writes. Reconcile using the protected manifest/events privately.",
+    "Original files, application references, disk pins/defaults, saved schemas and snapshots remain unchanged. Portal downloads continue using the original locations. No cutover/relink/delete/rollback-switch workflow or production execution is supplied.",
+    "The default copy cap is 20 MiB per declared object. A private temporary spool may spill past 2 MiB. Larger/unknown legacy uploads need a separately reviewed workflow; staging root/temp/bucket permissions need actual acceptance.",
+    "Native database proof uses local MariaDB 11.8.6/PDO MySQL, not Oracle MySQL or the exact managed Cloud engine. The signed S3 conditional-copy fixture uses the actual locked SDK but is not actual Cloud/R2 acceptance.",
+    "One additive plans/events migration; no dependency changes. All 531 source PDFs, Composer/lock/vendor bytes retained. No real learner data, credentials, external messages, real copies or deployment used."
   ]
 }

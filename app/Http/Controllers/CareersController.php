@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Apprentice;
 use App\Models\CareerDiscussion;
+use App\Models\LearningBlockControl;
+use App\Models\LearningTask;
 use App\Models\User;
+use App\Support\BlockRelease;
 use App\Support\LearningAccess as Access;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -56,7 +59,32 @@ class CareersController extends Controller
             'overdue' => $i['overdue'], 'today' => ($i['action']['due_date'] ?? null) === today()->toDateString(), 'checking' => $i['action']['status'] === 'Ready for adviser check', default => true
         })->sortBy(fn ($i) => ($i['overdue'] ? '0' : '1').($i['action']['due_date'] ?? '9999'));
 
-        return view('careers.worklist', compact('apprentices', 'items', 'all', 'show', 'type'));
+        $blockPrompts = [];
+        if ($r->user()->role !== 'apprentice') {
+            $controls = LearningBlockControl::whereIn('apprentice_id', $apprentices->pluck('id'))->where('enabled', true)->pluck('apprentice_id')->all();
+            $blockTasks = LearningTask::whereIn('apprentice_id', $controls)->where('block', 10)->orderBy('id')->get()->groupBy('apprentice_id');
+            foreach ($apprentices as $a) {
+                $task = $blockTasks->get($a->id)?->first();
+                if ($task && BlockRelease::state($task)['open']) {
+                    $blockPrompts[] = ['apprentice' => $a, 'discussion' => CareerDiscussion::where('apprentice_id', $a->id)->where('type', 'progression')->orderByDesc('discussion_date')->first()];
+                }
+            }
+        }
+
+        return view('careers.worklist', ['plannedPrompts'=>$r->user()->role==='apprentice' ? [] : \App\Support\CareersPrompts::worklist($apprentices),'apprentices'=>$apprentices,'items'=>$items,'all'=>$all,'show'=>$show,'type'=>$type,'blockPrompts'=>$blockPrompts]);
+    }
+
+    public function recordPrompts(Request $r): RedirectResponse
+    {
+        abort_unless(Access::manager($r->user()),403);
+        $counts=\App\Support\CareersPrompts::generate(true,$r->user());
+        return back()->with('status',$counts['created'].' new in-portal Careers prompts recorded. No advice, email or completion recorded.');
+    }
+
+    public function seenPrompt(Request $r, \App\Models\CareersPrompt $prompt): RedirectResponse
+    {
+        \App\Support\CareersPrompts::seen($prompt,$r->user());
+        return back()->with('status','Prompt marked seen. Record any delivered advice in the original Careers discussion.');
     }
 
     public function index(Request $r, Apprentice $apprentice): View

@@ -1,0 +1,449 @@
+{
+  "release": "GTA Laravel local development checkpoint v0.22.0",
+  "batches": [
+    {
+      "version": "v0.19.0",
+      "title": "Audited QA2 task sources",
+      "result": "200 new immutable QA2 PDFs; all 331 older PDFs retained. New allocations use corrected sources; saved work and source snapshots are preserved."
+    },
+    {
+      "version": "v0.20.0",
+      "title": "Recorded OTJ ledger",
+      "result": "Current registers/extra training, cumulative recorded hours, approved target and closed-block plan comparison, with protected PDF and fixed review snapshot."
+    },
+    {
+      "version": "v0.21.0",
+      "title": "SMART action proposals",
+      "result": "Referred work and feedback form a source-bound proposal; explicit agreement/support required; existing actions linked and duplicate creation rejected."
+    },
+    {
+      "version": "v0.22.0",
+      "title": "Careers calendar prompts and opt-in in-portal scheduling",
+      "result": "Approved Block 10/11 starts/current advisers drive deduplicated prompts. Acknowledgement does not create advice. Combined daily in-portal processing is off by default."
+    }
+  ],
+  "checkedAt": "2026-11-13T11:10:29.211714+00:00",
+  "framework": "Laravel 13.42.0",
+  "php": "8.4.27",
+  "minimumPhp": "8.4.1",
+  "hostingTarget": "Laravel Cloud; actual environment not accessed",
+  "sqliteSuite": {
+    "tool": "phpunit",
+    "result": "passed",
+    "tests": 433,
+    "passed": 433,
+    "assertions": 5324,
+    "duration_ms": 36640
+  },
+  "http": {
+    "passed": 82,
+    "failed": 0,
+    "checks": [
+      {
+        "name": "Fresh disposable database migrated and fictional setup created",
+        "passed": true
+      },
+      {
+        "name": "Unauthenticated HTTP request redirects to sign in",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP login rejects a missing CSRF token",
+        "passed": true
+      },
+      {
+        "name": "Generated fictional administrator can sign in through HTTP",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP creates, saves and reopens employers directory record",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP creates, saves and reopens programmes directory record",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP creates, saves and reopens staff directory record",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP creates, saves and reopens groups directory record",
+        "passed": true
+      },
+      {
+        "name": "Actual add-apprentice form is served",
+        "passed": true
+      },
+      {
+        "name": "HTTP add form saves and opens the new apprentice",
+        "passed": true
+      },
+      {
+        "name": "Linked apprentice detail displays saved directory names",
+        "passed": true
+      },
+      {
+        "name": "Independent database query confirms exactly one saved record",
+        "passed": true
+      },
+      {
+        "name": "HTTP edit updates the saved apprentice",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP Panel allocation assigns ten real source reflections",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP reflection source loading rejects a missing CSRF token",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP guarded source loading creates a versioned draft and audit event",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP repeated reflection loading leaves the saved draft unchanged",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP calendar mutation rejects a missing CSRF token",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP twelve-block calendar saves without assigning task deadlines",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP plan preparer cannot approve their own draft",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP independent reviewer approves the exact controlled plan revision",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP confirmed plan preview applies fifty unset deadlines with saved versions",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP current approved delivery plan exports a protected PDF",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP review saves the exact approved plan and next-period block snapshot",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP review readiness freezes its revision without claiming completion or resetting the cycle",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP OTJ ledger links the approved target without claiming a complete historical record",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP scoped OTJ ledger exports a real source summary PDF",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP administrator records due Block 10/11 Careers prompts with CSRF protection",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP assigned adviser acknowledges a current prompt without recording delivered advice",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP explicitly assigns all 50 source tasks",
+        "passed": true
+      },
+      {
+        "name": "Apprentice HTTP draft and submission retain answers and lock the submitted version",
+        "passed": true
+      },
+      {
+        "name": "Authorised HTTP tutor decision saves the whole task approval",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP qualification form records an individual twelve-month target",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP topic assignment stays separate from qualification achievement",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP SMART action saves an objective completion measure",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP Careers discussion is stored in the private Careers area",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP session plan and register confirm exactly six eligible hours",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP concern acknowledgement records its marker and responsible owner",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP progress-review draft saves a fixed source snapshot without completing a review",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP retention context saves without inventing achievement or historical changes",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP monthly snapshot preserves unobserved areas separately from observed scores",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP case-study draft saves and reopens without appearing as approved evidence",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP survey receipt saves separately from a private Inclusion Team check",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP staff CPD record saves and reopens under employee scope",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP connected dashboards, journey, curriculum reference and scoped help respond successfully",
+        "passed": true
+      },
+      {
+        "name": "Actual multipart HTTP saves a private qualification file without recording achievement",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP active support plan records delivered support separately from OTJ and formal review",
+        "passed": true
+      },
+      {
+        "name": "Actual multipart HTTP saves restricted support evidence against the original plan",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP staff impact records uncertainty without claiming proven improvement",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP saves an explicit draft plan proposal without applying an individual target",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP saves a source-bound RPL decision while incomplete programme totals stay unknown",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP CEO password confirmation starts and explicitly ends an audited session override",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP outside-hours training requires own apprentice agreement, actual employer compensation and tutor approval",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP administrator grant enables a separate scoped support duty for a tutor",
+        "passed": true
+      },
+      {
+        "name": "Support duty does not grant permission administration or private Careers access",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP revocation removes private team access and retains both reasoned audit events",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP register correction retains a reason and replaces the confirmed subtotal",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP repeated plans create separate registers without actual attendance or hours",
+        "passed": true
+      },
+      {
+        "name": "Block exceptions, marker history and minimal assignment events are persisted through actual HTTP workflows",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP recorded-work, scoped operational and protected review-draft downloads return real PDF bytes",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP marking worklist shows a dated fictional overdue source",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP reminder creation rejects a missing CSRF token",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP administrator creates one deduplicated in-portal reminder",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP correction proposal opens from tutor feedback without creating an action",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP agreed source-bound proposal creates one linked action without approving the task",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP tutor acknowledgement retains the outstanding task without approving it",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP apprentice cannot access the staff marking worklist",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP disabled recovery returns generic responses without creating a token",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP password change rejects a missing CSRF token",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP current-password change signs out the changing session",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP password change invalidates an already signed-in second browser session",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP new password signs in with the current account security version",
+        "passed": true
+      },
+      {
+        "name": "Actual command preview is read-only and explicit combined recording deduplicates existing in-portal prompts",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP create rejects a missing CSRF token",
+        "passed": true
+      },
+      {
+        "name": "Version, null tutor and two audit events are persisted",
+        "passed": true
+      },
+      {
+        "name": "PHP server stops and restarts against the same SQLite file",
+        "passed": true
+      },
+      {
+        "name": "Actual HTTP updated credentials and security version persist after PHP restart",
+        "passed": true
+      },
+      {
+        "name": "Complete saved records for thirty-three connected module tables survive PHP restart unchanged",
+        "passed": true
+      },
+      {
+        "name": "Private qualification and support evidence bytes retain their hashes after PHP restart",
+        "passed": true
+      },
+      {
+        "name": "Linked foreign keys and complete directory rows survive PHP restart",
+        "passed": true
+      },
+      {
+        "name": "Fresh sign-in after restart reopens an identical complete database row",
+        "passed": true
+      },
+      {
+        "name": "Logout removes access to the saved record",
+        "passed": true
+      }
+    ],
+    "database": "SQLite file-backed database",
+    "http": "Actual PHP/Laravel loopback requests, not browser automation",
+    "recordProof": {
+      "reference": "HTTP-001",
+      "employer": "Updated Demo Workshop",
+      "version": 2,
+      "allFieldsUnchangedAfterRestart": true
+    },
+    "limits": [
+      "No browser or mobile layout acceptance",
+      "Not a production deployment or full-portal acceptance"
+    ]
+  },
+  "httpPersistenceTables": 33,
+  "static": {
+    "phpSyntaxFiles": 293,
+    "javascriptSyntaxFiles": 1,
+    "bladeCompilation": "passed",
+    "compiledBladeSyntax": "passed",
+    "originalPdfs": 41,
+    "pdfHashMatches": 41,
+    "additionalProgrammePdfs": 90,
+    "finalReleasePdfs": 200,
+    "priorFinalReleasePdfsRetained": 200,
+    "totalRetainedSourcePdfs": 531,
+    "additionalProgrammePdfHashes": "all match source receipts",
+    "privateEvidenceCallers": "all use the shared configured service",
+    "originalBrandAssets": "unchanged",
+    "brandAssetFiles": 2,
+    "responsiveViewport": "present; layout not rendered",
+    "composerValidation": "Not performed by this script; see checkpoint-specific TEST_RESULTS.json",
+    "platformRequirements": "Not performed by this script; see checkpoint-specific TEST_RESULTS.json",
+    "visualBrowserVerification": false
+  },
+  "qa2SourceCheck": {
+    "release": "qa2",
+    "pdfs": 200,
+    "pagesRendered": 739,
+    "textFieldsChecked": 7998,
+    "allTextMultiline": true,
+    "fixedCharacterCaps": 0,
+    "sourceHashes": "all match",
+    "renderScope": "Every page rasterised at smoke-test resolution; not all-viewer/visual acceptance",
+    "providedAudit": "resources/data/task-pack-qa2-audit.json; its curriculum open items retained"
+  },
+  "generatedLedgerPdf": {
+    "file": "otj-ledger.pdf",
+    "pages": 2,
+    "sourceSubtotalAndPlanNotice": "present",
+    "renderedPages": [
+      1,
+      2
+    ]
+  },
+  "sourcePdfs": 531,
+  "priorSourcePdfsRetainedUnchanged": 331,
+  "activeQa2Pdfs": 200,
+  "newMigration": "2026_11_13_140000_create_careers_prompt_tables.php",
+  "sourceReproduction": "Audited importer reproduces all eight active catalogue/task files unchanged",
+  "dependencies": "composer.json, lock and installed vendor files unchanged; no new dependency/advisory/platform run",
+  "previousEvidence": "evidence/v0.18.0-TEST_RESULTS.json (historical scope only)",
+  "reminders": {
+    "defaultCommand": "Preview only",
+    "recordCommand": "Explicit --record; marking/Careers/run history in one transaction",
+    "automaticScheduleEnabled": false,
+    "scheduledEvent": "Daily 09:00 application timezone, overlap-protected, opt-in condition",
+    "actualSchedulerProvisioned": false,
+    "externalMessagesSent": false,
+    "acknowledgement": "Current assigned adviser may mark a source-current prompt seen; does not record delivered advice"
+  },
+  "limits": [
+    "Only local PHP 8.4.27/Laravel 13.42.0, SQLite and loopback HTTP tested; no actual Cloud/MySQL/MariaDB deployment.",
+    "OTJ historical completeness/import and eligibility remain unverified. Loaded subtotal/target and closed-block gap are not a final achievement or compliance judgement.",
+    "Automatic scheduling is disabled by default. Actual server/shared-cache/mutex/scheduler acceptance remains pending; no external messages were sent.",
+    "Formal participant signing, completed-review history/cycle, employer mapping, live identity/email/MFA and gateway criterion content remain unfinished.",
+    "Paint controlled SOW version/cohort applicability and Autocare Foundation/primary KSB/S9 source decisions remain open and are visible in the relevant task/plan pages.",
+    "All source pages were rasterised at smoke-test resolution; selected generated ledger pages were inspected. Browser/mobile/keyboard/all-viewer physical print acceptance was not performed."
+  ]
+}

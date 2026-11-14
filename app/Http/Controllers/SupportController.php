@@ -9,12 +9,15 @@ use App\Models\TeachingInstruction;
 use App\Models\User;
 use App\Support\ExecutiveAccess;
 use App\Support\LearningAccess as Access;
+use App\Support\MarkerHistory;
+use App\Support\PortalPdf;
 use App\Support\PrivateEvidence;
+use App\Support\SupportAccess;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -23,19 +26,19 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SupportController extends Controller
 {
-    private function team(Request $r): bool
+    private function team(Request $r, ?Apprentice $apprentice = null): bool
     {
-        return Access::manager($r->user()) || in_array($r->user()->role, ['inclusion_lead', 'inclusion_member'], true);
+        return SupportAccess::team($r->user(), $apprentice);
     }
 
-    private function lead(Request $r): bool
+    private function lead(Request $r, ?Apprentice $apprentice = null): bool
     {
-        return Access::manager($r->user()) || $r->user()->role === 'inclusion_lead';
+        return SupportAccess::lead($r->user(), $apprentice);
     }
 
     private function raiseAllowed(Request $r, Apprentice $a): bool
     {
-        return $this->team($r) || Access::tutor($r->user(), $a) || Access::subject($r->user(), $a, 'maths') || Access::subject($r->user(), $a, 'english') || ($r->user()->role === 'mentor' && $a->mentor_id === $r->user()->id) || ($r->user()->role === 'careers_adviser' && $a->careers_adviser_id === $r->user()->id);
+        return $this->team($r, $a) || Access::tutor($r->user(), $a) || Access::subject($r->user(), $a, 'maths') || Access::subject($r->user(), $a, 'english') || ($r->user()->role === 'mentor' && $a->mentor_id === $r->user()->id) || ($r->user()->role === 'careers_adviser' && $a->careers_adviser_id === $r->user()->id);
     }
 
     private function codes(): array
@@ -51,7 +54,7 @@ class SupportController extends Controller
     public function worklist(Request $r): View
     {
         abort_unless($this->team($r), 403);
-        $q = SupportConcern::with(['apprentice', 'owner']);
+        $q = SupportConcern::with(['apprentice', 'owner'])->whereIn('apprentice_id', SupportAccess::ids($r->user()));
         if ($r->query('state') === 'new') {
             $q->whereNull('acknowledged_at');
         } elseif ($r->query('state') === 'overdue') {
@@ -68,10 +71,10 @@ class SupportController extends Controller
     public function index(Request $r, Apprentice $apprentice): View
     {
         abort_unless($this->raiseAllowed($r, $apprentice), 403);
-        $team = $this->team($r);
+        $team = $this->team($r, $apprentice);
         $concerns = SupportConcern::with('owner')->where('apprentice_id', $apprentice->id)->when(! $team, fn ($q) => $q->where('raised_by', $r->user()->id))->orderByDesc('created_at')->get();
 
-        return view('support.index', ['apprentice' => $apprentice, 'team' => $team, 'lead' => $this->lead($r), 'concerns' => $concerns, 'codes' => $this->codes(), 'markers' => $team ? DB::table('apprentice_markers')->where('apprentice_id', $apprentice->id)->pluck('code')->all() : [], 'owners' => $team ? User::where('active', true)->whereIn('role', ['admin', 'ceo', 'inclusion_lead', 'inclusion_member'])->get() : collect(), 'instructions' => $team ? TeachingInstruction::where('apprentice_id', $apprentice->id)->get() : collect(), 'plans' => $team ? SupportPlan::where('apprentice_id', $apprentice->id)->get() : collect(), 'recipients' => $team ? User::whereIn('id', $this->recipients($apprentice))->where('active', true)->get() : collect()]);
+        return view('support.index', ['apprentice' => $apprentice, 'team' => $team, 'lead' => $this->lead($r, $apprentice), 'concerns' => $concerns, 'codes' => $this->codes(), 'markers' => $team ? DB::table('apprentice_markers')->where('apprentice_id', $apprentice->id)->pluck('code')->all() : [], 'markerHistory' => $team ? DB::table('marker_change_events')->where('apprentice_id', $apprentice->id)->orderByDesc('id')->get() : collect(), 'owners' => $team ? SupportAccess::owners($apprentice) : collect(), 'instructionWriter' => SupportAccess::writer($r->user(), $apprentice) || ExecutiveAccess::enabled($r), 'instructionApprover' => SupportAccess::approver($r->user(), $apprentice) || ExecutiveAccess::enabled($r), 'instructions' => $team ? TeachingInstruction::where('apprentice_id', $apprentice->id)->get() : collect(), 'plans' => $team ? SupportPlan::where('apprentice_id', $apprentice->id)->get() : collect(), 'recipients' => $team ? User::whereIn('id', $this->recipients($apprentice))->where('active', true)->get() : collect()]);
     }
 
     public function raise(Request $r, Apprentice $apprentice): RedirectResponse
@@ -79,6 +82,8 @@ class SupportController extends Controller
         abort_unless($this->raiseAllowed($r, $apprentice), 403);
         $data = $r->validate(['initial_note' => ['required', 'string', 'max:10000'], 'code' => ['prohibited'], 'owner_id' => ['prohibited']]);
         DB::transaction(function () use ($r, $apprentice, $data): void {
+            $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->raiseAllowed($r, $fresh), 403);
             $c = SupportConcern::create([...$data, 'apprentice_id' => $apprentice->id, 'raised_by' => $r->user()->id]);
             $this->audit($r, $apprentice->id, $c->id, 'concern_raised');
         });
@@ -88,8 +93,8 @@ class SupportController extends Controller
 
     public function classify(Request $r, SupportConcern $concern): RedirectResponse
     {
-        abort_unless($this->lead($r), 403);
-        $data = $r->validate(['version' => ['required', 'integer'], 'code' => ['required', Rule::in(array_keys($this->codes()))], 'other_code' => ['nullable', 'required_if:code,IM40', 'string', 'max:250'], 'owner_id' => ['required', 'integer', Rule::exists('users', 'id')->where('active', true)->whereIn('role', ['admin', 'ceo', 'inclusion_lead', 'inclusion_member'])], 'next_action' => ['required', 'string', 'max:5000'], 'action_due' => ['required', 'date_format:Y-m-d'], 'next_review' => ['required', 'date_format:Y-m-d']]);
+        abort_unless($this->lead($r, $concern->apprentice), 403);
+        $data = $r->validate(['version' => ['required', 'integer'], 'code' => ['required', Rule::in(array_keys($this->codes()))], 'other_code' => ['nullable', 'required_if:code,IM40', 'string', 'max:250'], 'owner_id' => ['required', 'integer', Rule::in(SupportAccess::owners($concern->apprentice)->pluck('id')->all())], 'next_action' => ['required', 'string', 'max:5000'], 'action_due' => ['required', 'date_format:Y-m-d'], 'next_review' => ['required', 'date_format:Y-m-d']]);
         DB::transaction(function () use ($r, $concern, $data): void {
             $profile = Apprentice::whereKey($concern->apprentice_id)->lockForUpdate()->firstOrFail();
             $c = SupportConcern::whereKey($concern->id)->lockForUpdate()->firstOrFail();
@@ -101,6 +106,7 @@ class SupportController extends Controller
             $c->history = $h;
             $c->code = $data['code'];
             $c->other_code = $data['code'] === 'IM40' ? $data['other_code'] : null;
+            abort_unless(SupportAccess::team(User::findOrFail($data['owner_id']), $profile), 403);
             $c->owner_id = $data['owner_id'];
             $c->next_action = $data['next_action'];
             $c->action_due = $data['action_due'];
@@ -110,7 +116,9 @@ class SupportController extends Controller
             $c->status = 'Monitoring';
             $c->version++;
             $c->save();
-            DB::table('apprentice_markers')->updateOrInsert(['apprentice_id' => $c->apprentice_id, 'code' => $c->code], ['recorded_by' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
+            $beforeMarkers = MarkerHistory::codes($profile->id);
+            DB::table('apprentice_markers')->insertOrIgnore(['apprentice_id' => $c->apprentice_id, 'code' => $c->code, 'recorded_by' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
+            MarkerHistory::record($profile->id, $r->user()->id, 'concern_classification', $beforeMarkers, 'Concern '.$c->id);
             $profile->version++;
             $profile->save();
             $this->audit($r, $c->apprentice_id, $c->id, 'acknowledged_classified');
@@ -121,7 +129,7 @@ class SupportController extends Controller
 
     public function followup(Request $r, SupportConcern $concern): RedirectResponse
     {
-        abort_unless($this->team($r), 403);
+        abort_unless($this->team($r, $concern->apprentice), 403);
         $data = $r->validate(['version' => ['required', 'integer'], 'date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'note' => ['required', 'string', 'max:10000'], 'target' => ['required', 'string', 'max:5000'], 'measure' => ['required', 'string', 'max:5000'], 'owner' => ['required', 'string', 'max:150'], 'due_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:date'], 'next_review' => ['required', 'date_format:Y-m-d', 'after_or_equal:date'], 'outcome' => ['required', Rule::in(['Progress made', 'More support needed', 'No progress yet', 'Target completed'])], 'agreed' => ['accepted']]);
         DB::transaction(function () use ($r, $concern, $data): void {
             $c = SupportConcern::whereKey($concern->id)->lockForUpdate()->firstOrFail();
@@ -146,7 +154,7 @@ class SupportController extends Controller
 
     public function close(Request $r, SupportConcern $concern): RedirectResponse
     {
-        abort_unless($this->lead($r), 403);
+        abort_unless($this->lead($r, $concern->apprentice), 403);
         $r->validate(['version' => ['required', 'integer'], 'outcome' => ['required', 'string', 'max:10000']]);
         DB::transaction(function () use ($r, $concern): void {
             $c = SupportConcern::whereKey($concern->id)->lockForUpdate()->firstOrFail();
@@ -166,17 +174,21 @@ class SupportController extends Controller
 
     public function markers(Request $r, Apprentice $apprentice): RedirectResponse
     {
-        abort_unless($this->lead($r), 403);
-        $data = $r->validate(['version' => ['required', 'integer'], 'codes' => ['nullable', 'array', 'max:40'], 'codes.*' => ['required', Rule::in(array_keys($this->codes()))], 'confirmed' => ['accepted']]);
+        abort_unless($this->lead($r, $apprentice), 403);
+        $data = $r->validate(['version' => ['required', 'integer'], 'marker_reason' => ['nullable', 'string', 'max:2000'], 'codes' => ['nullable', 'array', 'max:40'], 'codes.*' => ['required', Rule::in(array_keys($this->codes()))], 'confirmed' => ['accepted']]);
         DB::transaction(function () use ($r, $apprentice, $data): void {
             $locked = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $locked);
             $locked->version++;
             $locked->save();
-            DB::table('apprentice_markers')->where('apprentice_id', $apprentice->id)->delete();
-            foreach (array_unique($data['codes'] ?? []) as $code) {
+            $before = MarkerHistory::codes($apprentice->id);
+            $selected = array_values(array_unique($data['codes'] ?? []));
+            DB::table('apprentice_markers')->where('apprentice_id', $apprentice->id)->whereNotIn('code', $selected)->delete();
+            foreach (array_diff($selected, $before) as $code) {
                 DB::table('apprentice_markers')->insert(['apprentice_id' => $apprentice->id, 'code' => $code, 'recorded_by' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
-            }$this->audit($r, $apprentice->id, 0, 'markers_updated');
+            }
+            MarkerHistory::record($apprentice->id, $r->user()->id, 'manual_selection', $before, $data['marker_reason'] ?? null);
+            $this->audit($r, $apprentice->id, 0, 'markers_updated');
         });
 
         return back()->with('status', 'Inclusion markers saved. A support-plan requirement is separate from an approved active plan.');
@@ -184,9 +196,11 @@ class SupportController extends Controller
 
     public function instruction(Request $r, Apprentice $apprentice): RedirectResponse
     {
-        abort_unless(in_array($r->user()->role, ['inclusion_lead', 'inclusion_member'], true) || ExecutiveAccess::enabled($r), 403);
+        abort_unless(SupportAccess::writer($r->user(), $apprentice) || ExecutiveAccess::enabled($r), 403);
         $data = $r->validate(['draft_text' => ['required', 'string', 'max:10000'], 'private_note' => ['nullable', 'string', 'max:10000'], 'recipient_ids' => ['required', 'array', 'min:1'], 'recipient_ids.*' => ['required', 'integer', Rule::in($this->recipients($apprentice))]]);
         DB::transaction(function () use ($r, $apprentice, $data): void {
+            $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless(SupportAccess::writer($r->user(), $fresh) || ExecutiveAccess::enabled($r), 403);
             $i = TeachingInstruction::create([...$data, 'recipient_ids' => array_map('intval', array_unique($data['recipient_ids'])), 'apprentice_id' => $apprentice->id]);
             $this->audit($r, $apprentice->id, $i->id, 'instruction_drafted');
         });
@@ -196,7 +210,7 @@ class SupportController extends Controller
 
     public function amendInstruction(Request $r, TeachingInstruction $instruction): RedirectResponse
     {
-        abort_unless(in_array($r->user()->role, ['inclusion_lead', 'inclusion_member'], true) || ExecutiveAccess::enabled($r), 403);
+        abort_unless(SupportAccess::writer($r->user(), $instruction->apprentice) || ExecutiveAccess::enabled($r), 403);
         $data = $r->validate(['version' => ['required', 'integer'], 'draft_text' => ['required', 'string', 'max:10000'], 'private_note' => ['nullable', 'string', 'max:10000'], 'recipient_ids' => ['required', 'array', 'min:1'], 'recipient_ids.*' => ['integer', Rule::in($this->recipients($instruction->apprentice))]]);
         DB::transaction(function () use ($r, $instruction, $data): void {
             $i = TeachingInstruction::whereKey($instruction->id)->lockForUpdate()->firstOrFail();
@@ -217,7 +231,7 @@ class SupportController extends Controller
 
     public function withdrawInstruction(Request $r, TeachingInstruction $instruction): RedirectResponse
     {
-        abort_unless($r->user()->role === 'inclusion_lead' || ExecutiveAccess::enabled($r), 403);
+        abort_unless(SupportAccess::approver($r->user(), $instruction->apprentice) || ExecutiveAccess::enabled($r), 403);
         $data = $r->validate(['version' => ['required', 'integer'], 'release_version' => ['required', 'integer'], 'reason' => ['required', 'string', 'max:5000']]);
         DB::transaction(function () use ($r, $instruction, $data): void {
             $i = TeachingInstruction::whereKey($instruction->id)->lockForUpdate()->firstOrFail();
@@ -243,7 +257,7 @@ class SupportController extends Controller
 
     public function release(Request $r, TeachingInstruction $instruction): RedirectResponse
     {
-        abort_unless($r->user()->role === 'inclusion_lead' || ExecutiveAccess::enabled($r), 403);
+        abort_unless(SupportAccess::approver($r->user(), $instruction->apprentice) || ExecutiveAccess::enabled($r), 403);
         $r->validate(['version' => ['required', 'integer'], 'confirmed' => ['accepted']]);
         DB::transaction(function () use ($r, $instruction): void {
             $i = TeachingInstruction::whereKey($instruction->id)->lockForUpdate()->firstOrFail();
@@ -296,25 +310,34 @@ class SupportController extends Controller
         return back()->with('status', 'Instruction acknowledged.');
     }
 
+    public function planPdf(Request $r, SupportPlan $plan): Response
+    {
+        abort_unless($this->team($r, $plan->apprentice), 403);
+        abort_unless($plan->active_plan, 409, 'No approved support-plan snapshot exists.');
+
+        return PortalPdf::response('pdf.support', ['plan' => $plan, 'codes' => $this->codes()], 'GTA-Private-ASP-'.$plan->apprentice->reference.'-'.$plan->id);
+    }
+
     public function plan(Request $r, Apprentice $apprentice, ?SupportPlan $plan = null): View
     {
-        abort_unless($this->team($r), 403);
+        abort_unless($this->team($r, $apprentice), 403);
         if ($plan) {
             abort_unless($plan->apprentice_id === $apprentice->id, 404);
         }
 
-        return view('support.plan', ['apprentice' => $apprentice, 'plan' => $plan ?? new SupportPlan, 'concerns' => SupportConcern::where('apprentice_id', $apprentice->id)->whereNotNull('code')->whereNotIn('code', ['IM18', 'IM19', 'IM27', 'IM28', 'IM32', 'IM33'])->get(), 'lead' => $this->lead($r), 'activityStaff' => User::where('active', true)->whereNotIn('role', ['apprentice', 'employer'])->get(['id', 'name']), 'codes' => $this->codes()]);
+        return view('support.plan', ['apprentice' => $apprentice, 'plan' => $plan ?? new SupportPlan, 'concerns' => SupportConcern::where('apprentice_id', $apprentice->id)->whereNotNull('code')->whereNotIn('code', ['IM18', 'IM19', 'IM27', 'IM28', 'IM32', 'IM33'])->get(), 'lead' => $this->lead($r, $apprentice), 'activityStaff' => User::where('active', true)->whereNotIn('role', ['apprentice', 'employer'])->get(['id', 'name']), 'codes' => $this->codes()]);
     }
 
     public function savePlan(Request $r, Apprentice $apprentice, ?SupportPlan $plan = null): RedirectResponse
     {
-        abort_unless($this->team($r), 403);
+        abort_unless($this->team($r, $apprentice), 403);
         if ($plan) {
             abort_unless($plan->apprentice_id === $apprentice->id, 404);
         }
         $data = $r->validate(['version' => $plan ? ['required', 'integer'] : ['prohibited'], 'concern_ids' => ['required', 'array', 'min:1'], 'concern_ids.*' => ['required', 'integer', Rule::exists('support_concerns', 'id')->where('apprentice_id', $apprentice->id)->whereNotNull('code')->whereNotIn('code', ['IM18', 'IM19', 'IM27', 'IM28', 'IM32', 'IM33'])], 'fields' => ['required', 'array'], 'fields.type' => ['nullable', Rule::in(['full', 'light_touch'])], 'fields.frequency' => ['nullable', Rule::in(['Every 4 weeks', 'Every 6 weeks', 'Every 8 weeks', 'Quarterly'])], 'fields.funding' => ['nullable', Rule::in(['not_funded', 'awaiting_assessment', 'als_funded'])], 'fields.referral' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'], 'fields.review' => ['nullable', 'date_format:Y-m-d'], 'fields.referred' => ['nullable', 'string', 'max:500'], 'fields.source' => ['nullable', 'string', 'max:1000'], 'fields.barriers' => ['nullable', 'string', 'max:10000'], 'fields.strengths' => ['nullable', 'string', 'max:10000'], 'fields.view' => ['nullable', 'string', 'max:10000'], 'fields.support' => ['nullable', 'string', 'max:10000'], 'fields.rationale' => ['nullable', 'string', 'max:10000']]);
         $saved = DB::transaction(function () use ($r, $apprentice, $plan, $data) {
-            Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->team($r, $fresh), 403);
             if (! $plan && SupportPlan::where('apprentice_id', $apprentice->id)->where('status', '!=', 'Closed')->exists()) {
                 throw ValidationException::withMessages(['fields' => 'A current plan already exists. Open that plan to update it.']);
             }
@@ -345,7 +368,7 @@ class SupportController extends Controller
 
     public function approvePlan(Request $r, SupportPlan $plan): RedirectResponse
     {
-        abort_unless($this->lead($r), 403);
+        abort_unless($this->lead($r, $plan->apprentice), 403);
         $r->validate(['version' => ['required', 'integer'], 'confirmed' => ['accepted'], 'reason' => ['required', 'string', 'max:2000']]);
         DB::transaction(function () use ($r, $plan): void {
             $p = SupportPlan::whereKey($plan->id)->lockForUpdate()->firstOrFail();
@@ -383,7 +406,7 @@ class SupportController extends Controller
 
     public function supportActivity(Request $r, SupportPlan $plan): RedirectResponse
     {
-        abort_unless($this->team($r), 403);
+        abort_unless($this->team($r, $plan->apprentice), 403);
         $data = $r->validate(['version' => ['required', 'integer'], 'approved_at' => ['required', 'string'], 'request_id' => ['required', 'uuid'], 'date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'type' => ['required', Rule::in(self::ACTIVITY_TYPES)], 'minutes' => ['nullable', 'integer', 'min:1', 'max:1440'], 'who' => ['required', 'string'], 'other_name' => ['nullable', 'required_if:who,other', 'string', 'max:250'], 'delivered' => ['required', 'string', 'max:10000'], 'response' => ['nullable', 'string', 'max:10000'], 'impact' => ['nullable', 'string', 'max:10000']]);
         DB::transaction(function () use ($r, $plan, $data): void {
             $p = SupportPlan::whereKey($plan->id)->lockForUpdate()->firstOrFail();
@@ -415,7 +438,7 @@ class SupportController extends Controller
 
     public function uploadPlanEvidence(Request $r, SupportPlan $plan): RedirectResponse
     {
-        abort_unless($this->team($r), 403);
+        abort_unless($this->team($r, $plan->apprentice), 403);
         $data = $r->validate(['version' => ['required', 'integer'], 'file' => PrivateEvidence::rules(), 'purpose' => ['required', 'string', 'max:2000'], 'activity_id' => ['nullable', 'uuid']]);
         $entry = null;
         try {
@@ -438,7 +461,7 @@ class SupportController extends Controller
             });
         } catch (\Throwable $error) {
             if ($entry) {
-                PrivateEvidence::delete($entry['path']);
+                PrivateEvidence::delete($entry);
             } throw $error;
         }
 
@@ -447,16 +470,16 @@ class SupportController extends Controller
 
     public function downloadPlanEvidence(Request $r, SupportPlan $plan, string $file): StreamedResponse
     {
-        abort_unless($this->team($r), 403);
+        abort_unless($this->team($r, $plan->apprentice), 403);
         $entry = collect($plan->files ?? [])->firstWhere('id', $file);
-        abort_unless($entry && PrivateEvidence::exists($entry['path']), 404);
+        abort_unless($entry && PrivateEvidence::exists($entry), 404);
 
-        return PrivateEvidence::download($entry['path'], $entry['name']);
+        return PrivateEvidence::download($entry);
     }
 
     public function reviewPlan(Request $r, SupportPlan $plan): RedirectResponse
     {
-        abort_unless($this->team($r), 403);
+        abort_unless($this->team($r, $plan->apprentice), 403);
         $data = $r->validate(['version' => ['required', 'integer'], 'date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'baseline' => ['required', 'string', 'max:10000'], 'delivered' => ['required', 'string', 'max:10000'], 'impact' => ['required', 'string', 'max:10000'], 'evidence' => ['required', 'string', 'max:10000'], 'direction' => ['required', Rule::in(['continue', 'adjust_support', 'escalate', 'step_down_close'])], 'next' => ['required', 'date_format:Y-m-d', 'after_or_equal:date'], 'notes' => ['nullable', 'string', 'max:10000']]);
         DB::transaction(function () use ($r, $plan, $data): void {
             $p = SupportPlan::whereKey($plan->id)->lockForUpdate()->firstOrFail();
@@ -479,7 +502,7 @@ class SupportController extends Controller
 
     public function closePlan(Request $r, SupportPlan $plan): RedirectResponse
     {
-        abort_unless($this->lead($r), 403);
+        abort_unless($this->lead($r, $plan->apprentice), 403);
         $r->validate(['version' => ['required', 'integer'], 'outcome' => ['required', 'string', 'max:10000'], 'confirmed' => ['accepted']]);
         DB::transaction(function () use ($r, $plan): void {
             $p = SupportPlan::whereKey($plan->id)->lockForUpdate()->firstOrFail();
@@ -498,6 +521,18 @@ class SupportController extends Controller
 
     private function version(Request $r, Model $row): void
     {
+        $a = $row instanceof Apprentice ? $row : $row->apprentice;
+        $route = $r->route()->getName();
+        if ($row instanceof SupportConcern) {
+            abort_unless(in_array($route, ['support.classify', 'support.close'], true) ? $this->lead($r, $a) : $this->team($r, $a), 403);
+        } elseif ($row instanceof SupportPlan) {
+            abort_unless(in_array($route, ['support.plan.approve', 'support.plan.close'], true) ? $this->lead($r, $a) : $this->team($r, $a), 403);
+        } elseif ($row instanceof Apprentice) {
+            abort_unless($this->lead($r, $a), 403);
+        } elseif ($row instanceof TeachingInstruction && $route !== 'support.instruction.ack') {
+            abort_unless((in_array($route, ['support.release', 'support.instruction.withdraw'], true) ? SupportAccess::approver($r->user(), $a) : SupportAccess::writer($r->user(), $a)) || ExecutiveAccess::enabled($r), 403);
+        }
+
         if ($row->version !== $r->integer('version')) {
             throw ValidationException::withMessages(['version' => 'This record changed. Reopen before saving.']);
         }

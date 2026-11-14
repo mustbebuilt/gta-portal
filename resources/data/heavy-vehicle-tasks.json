@@ -1,0 +1,402 @@
+[
+  {
+    "id": "heavy-vehicle-b1-t1",
+    "block": 1,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Motor Vehicle Foundation Skills",
+    "template": "final-20261113-qa2--heavy-vehicle--b01-t1.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b1-t2",
+    "block": 1,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Motor Vehicle Foundation Skills",
+    "template": "final-20261113-qa2--heavy-vehicle--b01-t2.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b1-t3",
+    "block": 1,
+    "task": 3,
+    "title": "Task 3: Workshop Safety Vehicle Support and Technical Measurement",
+    "theme": "Workshop Safety Vehicle Support and Technical Measurement",
+    "template": "final-20261113-qa2--heavy-vehicle--b01-t3.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b1-t4",
+    "block": 1,
+    "task": 4,
+    "title": "Task 4: 24V Electrical Measurement and Technical Documentation",
+    "theme": "24V Electrical Measurement and Technical Documentation",
+    "template": "final-20261113-qa2--heavy-vehicle--b01-t4.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b1-t5",
+    "block": 1,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Motor Vehicle Foundation Skills",
+    "template": "final-20261113-qa2--heavy-vehicle--b01-t5.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b2-t1",
+    "block": 2,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Inspection, Planned Maintenance and Operator's Licence Compliance",
+    "template": "final-20261113-qa2--heavy-vehicle--b02-t1.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b2-t2",
+    "block": 2,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Inspection, Planned Maintenance and Operator's Licence Compliance",
+    "template": "final-20261113-qa2--heavy-vehicle--b02-t2.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b2-t3",
+    "block": 2,
+    "task": 3,
+    "title": "Task 3: Full Heavy Vehicle and Trailer Safety Inspection",
+    "theme": "Full Heavy Vehicle and Trailer Safety Inspection",
+    "template": "final-20261113-qa2--heavy-vehicle--b02-t3.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b2-t4",
+    "block": 2,
+    "task": 4,
+    "title": "Task 4: Planned Maintenance Service and Operator s Licence Record",
+    "theme": "Planned Maintenance Service and Operator s Licence Record",
+    "template": "final-20261113-qa2--heavy-vehicle--b02-t4.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b2-t5",
+    "block": 2,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Inspection, Planned Maintenance and Operator's Licence Compliance",
+    "template": "final-20261113-qa2--heavy-vehicle--b02-t5.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b3-t1",
+    "block": 3,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Chassis, Steering, Suspension, Wheels, Tyres and Trailers",
+    "template": "final-20261113-qa2--heavy-vehicle--b03-t1.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b3-t2",
+    "block": 3,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Chassis, Steering, Suspension, Wheels, Tyres and Trailers",
+    "template": "final-20261113-qa2--heavy-vehicle--b03-t2.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b3-t3",
+    "block": 3,
+    "task": 3,
+    "title": "Task 3: Steering Suspension and Axle Inspection",
+    "theme": "Steering Suspension and Axle Inspection",
+    "template": "final-20261113-qa2--heavy-vehicle--b03-t3.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b3-t4",
+    "block": 3,
+    "task": 4,
+    "title": "Task 4: Fifth Wheel Trailer and Wheel Security Inspection",
+    "theme": "Fifth Wheel Trailer and Wheel Security Inspection",
+    "template": "final-20261113-qa2--heavy-vehicle--b03-t4.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b3-t5",
+    "block": 3,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Chassis, Steering, Suspension, Wheels, Tyres and Trailers",
+    "template": "final-20261113-qa2--heavy-vehicle--b03-t5.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b4-t1",
+    "block": 4,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Air Braking, Pneumatic and Hydraulic Systems",
+    "template": "final-20261113-qa2--heavy-vehicle--b04-t1.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b4-t2",
+    "block": 4,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Air Braking, Pneumatic and Hydraulic Systems",
+    "template": "final-20261113-qa2--heavy-vehicle--b04-t2.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b4-t3",
+    "block": 4,
+    "task": 3,
+    "title": "Task 3: Air Pressure Build Up Leak and Warning Device Tests",
+    "theme": "Air Pressure Build Up Leak and Warning Device Tests",
+    "template": "final-20261113-qa2--heavy-vehicle--b04-t3.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b4-t4",
+    "block": 4,
+    "task": 4,
+    "title": "Task 4: Foundation Brake Inspection and EBS Diagnostic Check",
+    "theme": "Foundation Brake Inspection and EBS Diagnostic Check",
+    "template": "final-20261113-qa2--heavy-vehicle--b04-t4.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b4-t5",
+    "block": 4,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Air Braking, Pneumatic and Hydraulic Systems",
+    "template": "final-20261113-qa2--heavy-vehicle--b04-t5.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b5-t1",
+    "block": 5,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "12/24V Electrical, Electronic and Networked Systems",
+    "template": "final-20261113-qa2--heavy-vehicle--b05-t1.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b5-t2",
+    "block": 5,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "12/24V Electrical, Electronic and Networked Systems",
+    "template": "final-20261113-qa2--heavy-vehicle--b05-t2.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b5-t3",
+    "block": 5,
+    "task": 3,
+    "title": "Task 3: 24V Starting and Charging System Diagnosis",
+    "theme": "24V Starting and Charging System Diagnosis",
+    "template": "final-20261113-qa2--heavy-vehicle--b05-t3.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b5-t4",
+    "block": 5,
+    "task": 4,
+    "title": "Task 4: CAN Network and Trailer Electrical Fault Diagnosis",
+    "theme": "CAN Network and Trailer Electrical Fault Diagnosis",
+    "template": "final-20261113-qa2--heavy-vehicle--b05-t4.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b5-t5",
+    "block": 5,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "12/24V Electrical, Electronic and Networked Systems",
+    "template": "final-20261113-qa2--heavy-vehicle--b05-t5.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b6-t1",
+    "block": 6,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Engines, Fuel, Emissions, Thermal Management and Emerging Technology",
+    "template": "final-20261113-qa2--heavy-vehicle--b06-t1.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b6-t2",
+    "block": 6,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Engines, Fuel, Emissions, Thermal Management and Emerging Technology",
+    "template": "final-20261113-qa2--heavy-vehicle--b06-t2.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b6-t3",
+    "block": 6,
+    "task": 3,
+    "title": "Task 3: Engine Fuel and Cooling System Diagnosis",
+    "theme": "Engine Fuel and Cooling System Diagnosis",
+    "template": "final-20261113-qa2--heavy-vehicle--b06-t3.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b6-t4",
+    "block": 6,
+    "task": 4,
+    "title": "Task 4: DPF SCR Aftertreatment Diagnosis and Verification",
+    "theme": "DPF SCR Aftertreatment Diagnosis and Verification",
+    "template": "final-20261113-qa2--heavy-vehicle--b06-t4.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b6-t5",
+    "block": 6,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Engines, Fuel, Emissions, Thermal Management and Emerging Technology",
+    "template": "final-20261113-qa2--heavy-vehicle--b06-t5.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b7-t1",
+    "block": 7,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Transmission, Driveline, Hydraulics, Ancillaries and Complex Repair",
+    "template": "final-20261113-qa2--heavy-vehicle--b07-t1.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b7-t2",
+    "block": 7,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Transmission, Driveline, Hydraulics, Ancillaries and Complex Repair",
+    "template": "final-20261113-qa2--heavy-vehicle--b07-t2.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b7-t3",
+    "block": 7,
+    "task": 3,
+    "title": "Task 3: Driveline Noise and Vibration Diagnosis",
+    "theme": "Driveline Noise and Vibration Diagnosis",
+    "template": "final-20261113-qa2--heavy-vehicle--b07-t3.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b7-t4",
+    "block": 7,
+    "task": 4,
+    "title": "Task 4: PTO and Hydraulic Ancillary Fault Diagnosis",
+    "theme": "PTO and Hydraulic Ancillary Fault Diagnosis",
+    "template": "final-20261113-qa2--heavy-vehicle--b07-t4.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b7-t5",
+    "block": 7,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Transmission, Driveline, Hydraulics, Ancillaries and Complex Repair",
+    "template": "final-20261113-qa2--heavy-vehicle--b07-t5.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b8-t1",
+    "block": 8,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Advanced Diagnostic Strategy and Roadside Assistance",
+    "template": "final-20261113-qa2--heavy-vehicle--b08-t1.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b8-t2",
+    "block": 8,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Advanced Diagnostic Strategy and Roadside Assistance",
+    "template": "final-20261113-qa2--heavy-vehicle--b08-t2.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b8-t3",
+    "block": 8,
+    "task": 3,
+    "title": "Task 3: Advanced Intermittent Fault Diagnostic Investigation",
+    "theme": "Advanced Intermittent Fault Diagnostic Investigation",
+    "template": "final-20261113-qa2--heavy-vehicle--b08-t3.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b8-t4",
+    "block": 8,
+    "task": 4,
+    "title": "Task 4: Roadside Triage Risk Control and Recovery Decision",
+    "theme": "Roadside Triage Risk Control and Recovery Decision",
+    "template": "final-20261113-qa2--heavy-vehicle--b08-t4.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b8-t5",
+    "block": 8,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Advanced Diagnostic Strategy and Roadside Assistance",
+    "template": "final-20261113-qa2--heavy-vehicle--b08-t5.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b9-t1",
+    "block": 9,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Customer, Business, Records, Quality and Continuous Improvement",
+    "template": "final-20261113-qa2--heavy-vehicle--b09-t1.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b9-t2",
+    "block": 9,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Customer, Business, Records, Quality and Continuous Improvement",
+    "template": "final-20261113-qa2--heavy-vehicle--b09-t2.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b9-t3",
+    "block": 9,
+    "task": 3,
+    "title": "Task 3: Customer Defect Explanation Estimate and Authorisation",
+    "theme": "Customer Defect Explanation Estimate and Authorisation",
+    "template": "final-20261113-qa2--heavy-vehicle--b09-t3.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b9-t4",
+    "block": 9,
+    "task": 4,
+    "title": "Task 4: Job Card Quality Warranty and Workshop Improvement Review",
+    "theme": "Job Card Quality Warranty and Workshop Improvement Review",
+    "template": "final-20261113-qa2--heavy-vehicle--b09-t4.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b9-t5",
+    "block": 9,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Customer, Business, Records, Quality and Continuous Improvement",
+    "template": "final-20261113-qa2--heavy-vehicle--b09-t5.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b10-t1",
+    "block": 10,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+    "template": "final-20261113-qa2--heavy-vehicle--b10-t1.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b10-t2",
+    "block": 10,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+    "template": "final-20261113-qa2--heavy-vehicle--b10-t2.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b10-t3",
+    "block": 10,
+    "task": 3,
+    "title": "Task 3: Integrated Full Vehicle and Trailer Inspection",
+    "theme": "Integrated Full Vehicle and Trailer Inspection",
+    "template": "final-20261113-qa2--heavy-vehicle--b10-t3.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b10-t4",
+    "block": 10,
+    "task": 4,
+    "title": "Task 4: Integrated Diagnostic Capstone and Professional Discussion",
+    "theme": "Integrated Diagnostic Capstone and Professional Discussion",
+    "template": "final-20261113-qa2--heavy-vehicle--b10-t4.pdf"
+  },
+  {
+    "id": "heavy-vehicle-b10-t5",
+    "block": 10,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+    "template": "final-20261113-qa2--heavy-vehicle--b10-t5.pdf"
+  }
+]

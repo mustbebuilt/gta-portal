@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Apprentice;
+use App\Models\LearningBlockControl;
 use App\Models\LearningTask;
 use App\Models\TaskEvidence;
+use App\Support\BlockRelease;
 use App\Support\LearningAccess as Access;
+use App\Support\PortalPdf;
 use App\Support\PrivateEvidence;
 use App\Support\TaskCatalogue;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -24,11 +27,11 @@ class LearningTaskController extends Controller
     {
         abort_unless(Access::training($r->user(), $apprentice), 403);
         $q = LearningTask::where('apprentice_id', $apprentice->id);
-        if (in_array($r->query('status'), ['Draft', 'Awaiting marking', 'Referred', 'Approved'], true)) {
+        if (in_array($r->query('status'), ['Draft', 'Awaiting marking', 'Referred', 'Approved', 'Source required'], true)) {
             $q->where('status', $r->query('status'));
         }
 
-        return view('learning.index', ['apprentice' => $apprentice, 'tasks' => $q->orderBy('block')->orderBy('reference')->get(), 'manage' => Access::manager($r->user()), 'counts' => LearningTask::where('apprentice_id', $apprentice->id)->selectRaw('status, COUNT(*) AS total')->groupBy('status')->pluck('total', 'status')]);
+        return view('learning.index', ['blockControl' => LearningBlockControl::where('apprentice_id', $apprentice->id)->first(), 'apprentice' => $apprentice, 'tasks' => $q->orderBy('block')->orderBy('reference')->get(), 'manage' => Access::manager($r->user()), 'counts' => LearningTask::where('apprentice_id', $apprentice->id)->selectRaw('status, COUNT(*) AS total')->groupBy('status')->pluck('total', 'status')]);
     }
 
     public function allocate(Request $r, Apprentice $apprentice): RedirectResponse
@@ -36,24 +39,85 @@ class LearningTaskController extends Controller
         abort_unless(Access::manager($r->user()), 403);
         $r->validate(['confirmed' => ['accepted']]);
         DB::transaction(function () use ($r, $apprentice): void {
-            Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            if ($fresh->programme_id) {
+                $fresh->programmeRecord()->lockForUpdate()->first();
+            }
+            if (! TaskCatalogue::appliesTo($fresh)) {
+                throw ValidationException::withMessages(['confirmed' => 'The linked programme/version has no loaded task catalogue. No tasks were assigned.']);
+            }
             if (LearningTask::where('apprentice_id', $apprentice->id)->exists()) {
                 throw ValidationException::withMessages(['confirmed' => 'Tasks are already assigned. No duplicate allocation was made.']);
             }
-            foreach (TaskCatalogue::tasks() as $t) {
-                LearningTask::create(['apprentice_id' => $apprentice->id, 'reference' => $t['id'], 'block' => $t['block'], 'title' => $t['title'], 'theme' => $t['theme'], 'template' => TaskCatalogue::template($t['id'])]);
+            $key = TaskCatalogue::keyFor($fresh);
+            foreach (TaskCatalogue::tasks($key) as $t) {
+                $task = new LearningTask(['apprentice_id' => $apprentice->id, 'reference' => $t['id'], 'block' => $t['block'], 'title' => $t['title'], 'theme' => $t['theme'], 'template' => [...TaskCatalogue::template($t['id'], $key), 'catalogueId' => $key]]);
+                $task->status = $task->template['kind'] === 'source-pending' ? 'Source required' : 'Draft';
+                $task->save();
             }
+            LearningBlockControl::firstOrCreate(['apprentice_id' => $apprentice->id], ['enabled' => true, 'exceptions' => [], 'history' => [['event' => 'new_allocation', 'by' => $r->user()->id, 'at' => now()->toIso8601String()]]]);
             $this->audit($r, $apprentice->id, 0, 'allocated');
         });
 
-        return back()->with('status', 'Assigned 50 Autocare source tasks. Dates and individual plan approval remain separate.');
+        return back()->with('status', 'Assigned programme task slots. Dates and individual plan approval remain separate.');
+    }
+
+    public function loadReflectionSources(Request $r, Apprentice $apprentice): RedirectResponse
+    {
+        abort_unless(Access::manager($r->user()), 403);
+        $r->validate(['confirmed' => ['accepted']]);
+        $count = DB::transaction(function () use ($r, $apprentice): int {
+            $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            if ($fresh->programme_id) {
+                $fresh->programmeRecord()->lockForUpdate()->first();
+            }
+            if (TaskCatalogue::keyFor($fresh) !== 'panel') {
+                throw ValidationException::withMessages(['confirmed' => 'The linked programme/version must match the Panel source catalogue.']);
+            }
+            $hashes = json_decode(file_get_contents(resource_path('data/panel-placeholder-hashes.json')), true, 512, JSON_THROW_ON_ERROR);
+            $tasks = LearningTask::where('apprentice_id', $fresh->id)->orderBy('id')->lockForUpdate()->get();
+            $changes = [];
+            foreach ($tasks as $t) {
+                if ($t->status !== 'Source required' || ($t->template['kind'] ?? null) !== 'source-pending'
+                    || TaskCatalogue::savedKey($t) !== 'panel' || ! isset($hashes[$t->reference])
+                    || ($t->template['sha256'] ?? null) !== $hashes[$t->reference]
+                    || (int) ($t->template['sourceBlock'] ?? 0) !== $t->block || (int) ($t->template['sourceTask'] ?? 0) !== 5
+                    || $t->version !== 1 || ! empty($t->answers) || ! empty($t->submissions) || $t->submitted_at
+                    || $t->evidence()->exists() || DB::table('learning_events')->where('kind', 'task')->where('record_id', $t->id)->exists()) {
+                    continue;
+                }
+                $template = TaskCatalogue::template($t->reference, 'panel');
+                if (($template['kind'] ?? null) !== 'impact') {
+                    continue;
+                }
+                $changes[] = ['task_id' => $t->id, 'reference' => $t->reference, 'old_hash' => $t->template['sha256'], 'new_hash' => $template['sha256'], 'source_pdf_hash' => $template['sourceTemplateHash']];
+                $t->template = $template;
+                $t->title = 'Task 5: '.$template['title'];
+                $t->status = 'Draft';
+                $t->version++;
+                $t->save();
+                $this->audit($r, $fresh->id, $t->id, 'reflection_source_loaded');
+            }
+            if ($changes) {
+                $control = LearningBlockControl::where('apprentice_id', $fresh->id)->lockForUpdate()->firstOrFail();
+                $control->history = [...($control->history ?? []), ['event' => 'reflection_sources_loaded', 'by' => $r->user()->id, 'at' => now()->toIso8601String(), 'changes' => $changes]];
+                $control->version++;
+                $control->save();
+            }
+
+            return count($changes);
+        });
+
+        return back()->with('status', $count.' untouched reflection placeholders loaded. Other saved records were preserved.');
     }
 
     public function show(Request $r, LearningTask $task): View
     {
         abort_unless(Access::training($r->user(), $task->apprentice), 403);
 
-        return view('learning.task', ['planning' => collect(json_decode(file_get_contents(resource_path('data/training-plan-reference.json')), true, 512, JSON_THROW_ON_ERROR)['curriculumAmendment']['block9Planning']['activities'])->where('taskId', $task->reference), 'task' => $task->load('evidence'), 'apprentice' => $task->apprentice, 'tutor' => Access::tutor($r->user(), $task->apprentice) || Access::manager($r->user()), 'learner' => Access::learner($r->user(), $task->apprentice)]);
+        $release = BlockRelease::state($task);
+
+        return view('learning.task', ['release' => $release, 'planning' => collect(TaskCatalogue::savedKey($task) === 'autocare' ? json_decode(file_get_contents(resource_path('data/training-plan-reference.json')), true, 512, JSON_THROW_ON_ERROR)['curriculumAmendment']['block9Planning']['activities'] : [])->where('taskId', $task->reference), 'task' => $task->load('evidence'), 'apprentice' => $task->apprentice, 'tutor' => ($release['open'] || $task->status === 'Awaiting marking') && (Access::tutor($r->user(), $task->apprentice) || Access::manager($r->user())), 'learner' => $release['open'] && Access::learner($r->user(), $task->apprentice)]);
     }
 
     public function save(Request $r, LearningTask $task): RedirectResponse
@@ -63,6 +127,7 @@ class LearningTaskController extends Controller
         DB::transaction(function () use ($r, $task): void {
             $t = LearningTask::whereKey($task->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $t);
+            BlockRelease::check($t);
             if (! $t->editable() || $t->template['kind'] === 'knowledge') {
                 throw ValidationException::withMessages(['intent' => 'This task cannot be edited or submitted in its current state.']);
             }
@@ -76,7 +141,12 @@ class LearningTaskController extends Controller
                 if ($t->template['kind'] === 'impact') {
                     foreach ($t->template['fields'] as $f) {
                         if ($f['type'] === 'score' && ! filled($answers[$f['name']] ?? null)) {
-                            throw ValidationException::withMessages(['answers' => 'Complete all START and END scores, or save a draft.']);
+                            if (! isset($t->template['unassessedReasonField'])) {
+                                throw ValidationException::withMessages(['answers' => 'Complete all START and END scores, or save a draft.']);
+                            }
+                            if (! filled($answers[$t->template['unassessedReasonField']] ?? null)) {
+                                throw ValidationException::withMessages(['answers' => 'Explain each unassessed START or END score in the practice/support field, or save a draft.']);
+                            }
                         }
                     }
                 }
@@ -85,7 +155,7 @@ class LearningTaskController extends Controller
                         throw ValidationException::withMessages(['answers.'.$name => 'Answer both released ADAS questions before submitting, or save a draft.']);
                     }
                 }
-                if ($t->reference === 'b1-t3' && ! $t->evidence()->where('kind', 'inspection-checklist')->exists()) {
+                if (TaskCatalogue::savedKey($t) === 'autocare' && $t->reference === 'b1-t3' && ! $t->evidence()->where('kind', 'inspection-checklist')->exists()) {
                     throw ValidationException::withMessages(['answers' => 'Attach the completed inspection checklist before submitting.']);
                 }
                 $history = $t->submissions ?? [];
@@ -106,10 +176,13 @@ class LearningTaskController extends Controller
     public function decide(Request $r, LearningTask $task): RedirectResponse
     {
         abort_unless(Access::tutor($r->user(), $task->apprentice) || Access::manager($r->user()), 403);
-        $r->validate(['version' => ['required', 'integer'], 'decision' => ['required', Rule::in(['Approved', 'Referred'])], 'decision_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'feedback' => ['nullable', 'required_if:decision,Referred', 'string', 'max:20000'], 'confirmed' => ['accepted']]);
+        $r->validate(['version' => ['required', 'integer'], 'decision' => ['required', Rule::in(['Approved', 'Referred'])], 'decision_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'feedback' => ['nullable', 'required_if:decision,Referred', 'string'], 'confirmed' => ['accepted']]);
         DB::transaction(function () use ($r, $task): void {
             $t = LearningTask::whereKey($task->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $t);
+            if ($t->status !== 'Awaiting marking') {
+                BlockRelease::check($t);
+            }
             $knowledge = $t->template['kind'] === 'knowledge';
             if ((! $knowledge && $t->status !== 'Awaiting marking') || ($knowledge && ! $t->editable())) {
                 throw ValidationException::withMessages(['decision' => 'Only the current awaiting submission can receive a decision.']);
@@ -119,7 +192,7 @@ class LearningTaskController extends Controller
             }
             $evidence = $this->answers($r, $t, ['trainer', 'observer']);
             if ($knowledge) {
-                $r->validate(['test_title' => ['required', 'string', 'max:500'], 'marks_available' => ['required', 'numeric', 'gt:0'], 'marks_achieved' => ['required', 'numeric', 'min:0', 'lte:marks_available']]);
+                $r->validate(['test_title' => ['required', 'string'], 'marks_available' => ['required', 'numeric', 'gt:0'], 'marks_achieved' => ['required', 'numeric', 'min:0', 'lte:marks_available']]);
                 $evidence = [...$evidence, ...$r->only('test_title', 'marks_available', 'marks_achieved')];
             }
             if ($t->template['kind'] === 'jobcard' && $r->input('decision') === 'Approved') {
@@ -161,26 +234,24 @@ class LearningTaskController extends Controller
     {
         abort_unless(Access::learner($r->user(), $task->apprentice), 403);
         $r->validate(['version' => ['required', 'integer'], 'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,docx', 'extensions:pdf,jpg,jpeg,png,docx', 'max:15360'], 'kind' => ['required', Rule::in(['supporting-evidence', 'inspection-checklist'])]]);
-        $path = null;
+        $entry = null;
         try {
-            DB::transaction(function () use ($r, $task, &$path): void {
+            DB::transaction(function () use ($r, $task, &$entry): void {
                 $t = LearningTask::whereKey($task->id)->lockForUpdate()->firstOrFail();
                 $this->version($r, $t);
+                BlockRelease::check($t);
                 if (! $t->editable()) {
                     throw ValidationException::withMessages(['file' => 'The submitted version is locked.']);
                 }
-                $path = $r->file('file')->store('task-evidence', PrivateEvidence::diskName());
-                if (! $path) {
-                    throw new \RuntimeException('Evidence could not be stored.');
-                }
-                TaskEvidence::create(['learning_task_id' => $t->id, 'uploaded_by' => $r->user()->id, 'path' => $path, 'name' => mb_substr(basename(str_replace('\\', '/', $r->file('file')->getClientOriginalName())), 0, 255), 'mime' => $r->file('file')->getMimeType(), 'sha256' => hash_file('sha256', $r->file('file')->getRealPath()), 'bytes' => $r->file('file')->getSize(), 'kind' => $r->input('kind')]);
+                $entry = PrivateEvidence::store($r->file('file'), 'task-evidence', $r->user()->id);
+                TaskEvidence::create(['learning_task_id' => $t->id, 'uploaded_by' => $r->user()->id, ...array_intersect_key($entry, array_flip(['disk', 'path', 'name', 'mime', 'sha256', 'bytes'])), 'kind' => $r->input('kind')]);
                 $t->version++;
                 $t->save();
                 $this->audit($r, $t->apprentice_id, $t->id, 'evidence_added');
             });
         } catch (\Throwable $e) {
-            if ($path) {
-                PrivateEvidence::delete($path);
+            if ($entry) {
+                PrivateEvidence::delete($entry);
             }throw $e;
         }
 
@@ -190,9 +261,18 @@ class LearningTaskController extends Controller
     public function download(Request $r, LearningTask $task, TaskEvidence $evidence): StreamedResponse
     {
         abort_unless($evidence->learning_task_id === $task->id && Access::training($r->user(), $task->apprentice), 403);
-        abort_unless(PrivateEvidence::exists($evidence->path), 404);
+        abort_unless(PrivateEvidence::exists($evidence->toArray()), 404);
 
-        return PrivateEvidence::download($evidence->path, $evidence->name);
+        return PrivateEvidence::download($evidence->toArray());
+    }
+
+    public function recordedPdf(Request $r, LearningTask $task): Response
+    {
+        abort_unless(Access::training($r->user(), $task->apprentice), 403);
+
+        abort_if($task->template['kind'] === 'source-pending', 404, 'Task source has not been loaded.');
+
+        return PortalPdf::response('pdf.task', ['task' => $task->load(['apprentice', 'evidence'])], 'GTA-Task-'.$task->apprentice->reference.'-'.$task->reference.'-v'.$task->version);
     }
 
     public function pdf(Request $r, LearningTask $task): BinaryFileResponse
@@ -223,12 +303,18 @@ class LearningTaskController extends Controller
                 continue;
             }
             $rule = match ($f['type']) {
-                'date' => ['nullable', 'date_format:Y-m-d'],'score' => ['nullable', 'integer', 'between:1,10'],'number' => ['nullable', 'numeric', 'min:0'],'choice' => ['nullable', Rule::in($f['options'])],'checkbox' => ['nullable', Rule::in(['on', '1'])],default => ['nullable', 'string', 'max:50000']
+                'date' => ['nullable', 'date_format:Y-m-d'],'score' => ['nullable', 'integer', 'between:1,10'],'number' => ['nullable', 'numeric', 'min:0'],'choice' => ['nullable', Rule::in($f['options'])],'checkbox' => ['nullable', Rule::in(['on', '1'])],default => ['nullable', 'string']
             };
             $rules['answers.'.$f['name']] = $rule;
         }$valid = $r->validate($rules);
+        $answers = $valid['answers'] ?? [];
+        foreach ($t->template['exclusiveCheckboxGroups'] ?? [] as $group) {
+            if (collect($group)->filter(fn ($name) => in_array($answers[$name] ?? null, ['on', '1'], true))->count() > 1) {
+                throw ValidationException::withMessages(['answers' => 'Choose only one status for each inspection item. Done and N/A cannot both be selected.']);
+            }
+        }
 
-        return $valid['answers'] ?? [];
+        return $answers;
     }
 
     private function audit(Request $r, int $a, int $id, string $event): void

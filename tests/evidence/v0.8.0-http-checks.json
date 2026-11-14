@@ -1,0 +1,210 @@
+{
+  "passed": 48,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "Fresh disposable database migrated and fictional setup created",
+      "passed": true
+    },
+    {
+      "name": "Unauthenticated HTTP request redirects to sign in",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP login rejects a missing CSRF token",
+      "passed": true
+    },
+    {
+      "name": "Generated fictional administrator can sign in through HTTP",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP creates, saves and reopens employers directory record",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP creates, saves and reopens programmes directory record",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP creates, saves and reopens staff directory record",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP creates, saves and reopens groups directory record",
+      "passed": true
+    },
+    {
+      "name": "Actual add-apprentice form is served",
+      "passed": true
+    },
+    {
+      "name": "HTTP add form saves and opens the new apprentice",
+      "passed": true
+    },
+    {
+      "name": "Linked apprentice detail displays saved directory names",
+      "passed": true
+    },
+    {
+      "name": "Independent database query confirms exactly one saved record",
+      "passed": true
+    },
+    {
+      "name": "HTTP edit updates the saved apprentice",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP explicitly assigns all 50 source tasks",
+      "passed": true
+    },
+    {
+      "name": "Apprentice HTTP draft and submission retain answers and lock the submitted version",
+      "passed": true
+    },
+    {
+      "name": "Authorised HTTP tutor decision saves the whole task approval",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP qualification form records an individual twelve-month target",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP topic assignment stays separate from qualification achievement",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP SMART action saves an objective completion measure",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP Careers discussion is stored in the private Careers area",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP session plan and register confirm exactly six eligible hours",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP concern acknowledgement records its marker and responsible owner",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP progress-review draft saves a fixed source snapshot without completing a review",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP retention context saves without inventing achievement or historical changes",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP monthly snapshot preserves unobserved areas separately from observed scores",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP case-study draft saves and reopens without appearing as approved evidence",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP survey receipt saves separately from a private Inclusion Team check",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP staff CPD record saves and reopens under employee scope",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP connected dashboards, journey, curriculum reference and scoped help respond successfully",
+      "passed": true
+    },
+    {
+      "name": "Actual multipart HTTP saves a private qualification file without recording achievement",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP active support plan records delivered support separately from OTJ and formal review",
+      "passed": true
+    },
+    {
+      "name": "Actual multipart HTTP saves restricted support evidence against the original plan",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP staff impact records uncertainty without claiming proven improvement",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP saves an explicit draft plan proposal without applying an individual target",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP saves a source-bound RPL decision while incomplete programme totals stay unknown",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP CEO password confirmation starts and explicitly ends an audited session override",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP outside-hours training requires own apprentice agreement, actual employer compensation and tutor approval",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP administrator grant enables a separate scoped support duty for a tutor",
+      "passed": true
+    },
+    {
+      "name": "Support duty does not grant permission administration or private Careers access",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP revocation removes private team access and retains both reasoned audit events",
+      "passed": true
+    },
+    {
+      "name": "Actual HTTP create rejects a missing CSRF token",
+      "passed": true
+    },
+    {
+      "name": "Version, null tutor and two audit events are persisted",
+      "passed": true
+    },
+    {
+      "name": "PHP server stops and restarts against the same SQLite file",
+      "passed": true
+    },
+    {
+      "name": "Complete saved records for twenty-three connected module tables survive PHP restart unchanged",
+      "passed": true
+    },
+    {
+      "name": "Private qualification and support evidence bytes retain their hashes after PHP restart",
+      "passed": true
+    },
+    {
+      "name": "Linked foreign keys and complete directory rows survive PHP restart",
+      "passed": true
+    },
+    {
+      "name": "Fresh sign-in after restart reopens an identical complete database row",
+      "passed": true
+    },
+    {
+      "name": "Logout removes access to the saved record",
+      "passed": true
+    }
+  ],
+  "database": "SQLite file-backed database",
+  "http": "Actual PHP/Laravel loopback requests, not browser automation",
+  "recordProof": {
+    "reference": "HTTP-001",
+    "employer": "Updated Demo Workshop",
+    "version": 2,
+    "allFieldsUnchangedAfterRestart": true
+  },
+  "limits": [
+    "No browser or mobile layout acceptance",
+    "Not a production deployment or full-portal acceptance"
+  ]
+}

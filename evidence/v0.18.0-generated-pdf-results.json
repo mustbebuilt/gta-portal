@@ -1,0 +1,42 @@
+[
+  {
+    "file": "individual-delivery-plan.pdf",
+    "pages": 2,
+    "textMarkers": [
+      "Provider-approved",
+      "Fictional controlled plan v1",
+      "Block 12"
+    ],
+    "contentCheck": "passed",
+    "renderedPages": [
+      1,
+      2
+    ]
+  },
+  {
+    "file": "delivery-review.pdf",
+    "pages": 3,
+    "textMarkers": [
+      "Linked provider delivery plan",
+      "Fictional controlled plan v1"
+    ],
+    "contentCheck": "passed",
+    "renderedPages": [
+      1,
+      3
+    ]
+  },
+  {
+    "file": "final-paper-long-answer.pdf",
+    "pages": 27,
+    "textMarkers": [
+      "END TITLE MARKER",
+      "END FEEDBACK MARKER"
+    ],
+    "contentCheck": "passed",
+    "renderedPages": [
+      1,
+      27
+    ]
+  }
+]

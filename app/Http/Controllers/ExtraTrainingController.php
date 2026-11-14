@@ -12,7 +12,6 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -100,7 +99,7 @@ class ExtraTrainingController extends Controller
             });
         } catch (\Throwable $e) {
             if ($file) {
-                PrivateEvidence::delete($file['path']);
+                PrivateEvidence::delete($file);
             }throw $e;
         }
 
@@ -186,8 +185,8 @@ class ExtraTrainingController extends Controller
     public function download(Request $r, ExtraTraining $extra): StreamedResponse
     {
         abort_unless(Access::training($r->user(), $extra->apprentice), 403);
-        abort_unless($extra->file && PrivateEvidence::exists($extra->file['path']), 404);
+        abort_unless($extra->file && PrivateEvidence::exists($extra->file), 404);
 
-        return PrivateEvidence::download($extra->file['path'], $extra->file['name']);
+        return PrivateEvidence::download($extra->file);
     }
 }

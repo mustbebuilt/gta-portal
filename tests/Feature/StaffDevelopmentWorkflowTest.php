@@ -101,7 +101,7 @@ class StaffDevelopmentWorkflowTest extends TestCase
 
     public function test_staff_evidence_is_private_and_former_manager_loses_access(): void
     {
-        Storage::fake('local');
+        Storage::fake(config('evidence.disk'));
         $target = $this->actor('tutor');
         $m = $this->actor('manager');
         $this->assign($target, $m);

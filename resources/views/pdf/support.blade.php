@@ -1,0 +1,7 @@
+@extends('pdf.layout')
+@section('title','Private approved support plan')
+@section('content')
+<h1>Private Apprentice Support Plan</h1><p>{{ $plan->apprentice->reference }} · {{ $plan->apprentice->first_name }} {{ $plan->apprentice->last_name }}</p><div class="notice">PRIVATE TEAM COPY · Last approved snapshot {{ $plan->active_plan['approved_at'] }} · Current record status {{ $plan->status }}. Unapproved draft changes are excluded. This export does not grant permission to share with an employer or any other recipient.</div>
+<h2>Approved inclusion markers</h2>@foreach($plan->active_plan['codes']??[] as $concern=>$code)<p>{{ $code }} · {{ $codes[$code]??'Check source code' }} · Source concern {{ $concern }}</p>@endforeach
+<h2>Approved plan</h2>@foreach(['type'=>'Plan type','referral'=>'Referral date','frequency'=>'Review frequency','funding'=>'Funding status','referred'=>'Referral details','source'=>'Evidence source','barriers'=>'Barriers to learning','strengths'=>'Strengths','view'=>'Apprentice views','support'=>'Agreed support','review'=>'Review date at approval','rationale'=>'ALS rationale'] as $key=>$label)<div class="field"><p class="label">{{ $label }}</p><p class="answer">{{ $plan->active_plan['fields'][$key]??'Not recorded' }}</p></div>@endforeach<p>Approval reason: {{ $plan->active_plan['reason']??'Not recorded' }}</p><p>Current source review reference: {{ $plan->nextReview()??'Not recorded' }}. Later activities and reviews remain in the original restricted record.</p>
+@endsection

@@ -11,9 +11,12 @@ use App\Models\SmartAction;
 use App\Models\TrainingSession;
 use App\Models\TrainingTopic;
 use App\Support\LearningAccess as Access;
+use App\Support\PortalPdf;
+use App\Support\DeliveryPlan;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -28,13 +31,15 @@ class ProgressReviewController extends Controller
 
     public function index(Request $r): View
     {
-        abort_unless(in_array($r->user()->role, ['admin', 'ceo', 'tutor', 'mentor'], true), 403);
+        abort_unless(\App\Support\ReviewReminders::allowed($r->user()), 403);
         $q = Apprentice::with(['mentor', 'tutor']);
         if (! Access::manager($r->user())) {
             $q->where($r->user()->role === 'mentor' ? 'mentor_id' : 'tutor_id', $r->user()->id);
         }
 
-        return view('reviews.index', ['apprentices' => $q->orderBy('last_name')->get()]);
+        $apprentices=$q->orderBy('last_name')->get();$positions=[];
+        foreach($apprentices as $a){$positions[$a->id]=\App\Support\ReviewReminders::position($a);}
+        return view('reviews.index', ['apprentices'=>$apprentices,'positions'=>$positions,'manager'=>Access::manager($r->user()),'reminderPreview'=>Access::manager($r->user()) ? \App\Support\ReviewReminders::generate() : null,'reminderScheduleEnabled'=>(bool)config('portal_reminders.scheduled',false),'lastReminderRun'=>Access::manager($r->user()) ? DB::table('portal_reminder_runs')->latest('id')->first() : null]);
     }
 
     public function form(Request $r, Apprentice $apprentice, ?ProgressReviewDraft $review = null): View
@@ -44,7 +49,18 @@ class ProgressReviewController extends Controller
             abort_unless($review->apprentice_id === $apprentice->id, 404);
         }
 
-        return view('reviews.form', ['apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $review?->source_snapshot ?? $this->snapshot($apprentice, []), 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
+        $signedRecords=$review ? \App\Models\SignedReviewRecord::where('progress_review_draft_id',$review->id)->whereNull('withdrawn_at')->get() : collect();
+        $signedConfirmed=$signedRecords->contains(fn($r)=>$r->checked_at && \App\Support\SignedReviews::intact($r));
+
+        return view('reviews.form', ['signedConfirmed'=>$signedConfirmed,'hasSignedSource'=>$signedRecords->isNotEmpty(),'apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $review?->source_snapshot ?? $this->snapshot($apprentice, []), 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
+    }
+
+    public function pdf(Request $r, Apprentice $apprentice, ProgressReviewDraft $review): Response
+    {
+        abort_unless($this->allowed($r, $apprentice), 403);
+        abort_unless($review->apprentice_id === $apprentice->id, 404);
+
+        return PortalPdf::response('pdf.review', compact('review', 'apprentice'), ($review->state==='Ready for signatures'?'GTA-Review-For-Signing-':'GTA-Review-DRAFT-').$apprentice->reference.'-v'.$review->version);
     }
 
     public function save(Request $r, Apprentice $apprentice, ?ProgressReviewDraft $review = null): RedirectResponse
@@ -74,7 +90,14 @@ class ProgressReviewController extends Controller
         }
         $fields['nextReview'] = filled($fields['reviewDate'] ?? null) ? Carbon::parse($fields['reviewDate'])->addDays(70)->toDateString() : null;
         $saved = DB::transaction(function () use ($r, $apprentice, $review, $fields) {
+            $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->allowed($r, $fresh), 403);
+            if ($fresh->programme_id) { $fresh->programmeRecord()->lockForUpdate()->first(); }
+            \App\Models\IndividualDeliveryPlan::where('apprentice_id', $fresh->id)->lockForUpdate()->first();
             $row = $review ? ProgressReviewDraft::whereKey($review->id)->lockForUpdate()->firstOrFail() : new ProgressReviewDraft(['apprentice_id' => $apprentice->id, 'author_id' => $r->user()->id]);
+            if ($row->exists && $row->state !== 'Draft') {
+                throw ValidationException::withMessages(['version' => 'This revision is frozen for signatures. Reopen it with a reason before making changes.']);
+            }
             if ($row->exists && $row->version !== $r->integer('version')) {
                 throw ValidationException::withMessages(['version' => 'This review draft changed. Reopen before saving.']);
             }$history = $row->history ?? [];
@@ -82,7 +105,7 @@ class ProgressReviewController extends Controller
                 $history[] = ['fields' => $row->fields, 'source_snapshot' => $row->source_snapshot, 'saved_by' => $r->user()->id, 'saved_at' => now()->toIso8601String()];
                 $row->version++;
             }$row->fields = $fields;
-            $row->source_snapshot = $this->snapshot($apprentice, $fields);
+            $row->source_snapshot = $this->snapshot($fresh, $fields);
             $row->history = $history;
             $row->save();
             DB::table('learning_events')->insert(['user_id' => $r->user()->id, 'apprentice_id' => $apprentice->id, 'kind' => 'review_draft', 'record_id' => $row->id, 'event' => 'draft_saved', 'created_at' => now()]);
@@ -93,8 +116,56 @@ class ProgressReviewController extends Controller
         return to_route('reviews.edit', [$apprentice, $saved])->with('status', 'Review draft saved privately. It is not completed, signed or shared, and does not reset the review cycle.');
     }
 
+    public function ready(Request $r, Apprentice $apprentice, ProgressReviewDraft $review): RedirectResponse
+    {
+        abort_unless($this->allowed($r, $apprentice), 403);
+        abort_unless($review->apprentice_id === $apprentice->id, 404);
+        $r->validate(['version' => ['required', 'integer'], 'confirmed' => ['accepted']]);
+        DB::transaction(function () use ($r, $apprentice, $review): void {
+            $a = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->allowed($r, $a), 403);
+            if ($a->programme_id) { $a->programmeRecord()->lockForUpdate()->first(); }
+            \App\Models\IndividualDeliveryPlan::where('apprentice_id', $a->id)->lockForUpdate()->first();
+            $row = ProgressReviewDraft::whereKey($review->id)->lockForUpdate()->firstOrFail();
+            if ($row->version !== $r->integer('version') || $row->state !== 'Draft') { throw ValidationException::withMessages(['version' => 'This review changed or is already frozen. Reopen the current revision.']); }
+            $f = $row->fields;
+            $required = ['reviewDate', 'trainingFrom', 'mentor', 'tutor', 'employerRep', 'method', 'attendance', 'judgement', 'previousCheck', 'planChange', 'summary', 'learning', 'progressDiscussion', 'previousNotes', 'planChangeNotes', 'sharedSupport', 'absence', 'newNeeds'];
+            foreach ($required as $key) {
+                if (! filled($f[$key] ?? null)) { throw ValidationException::withMessages(['version' => 'Complete every review section, using N/A where appropriate, before preparing signatures. Missing: '.$key]); }
+            }
+            if (! ($f['trainingChecked'] ?? false) || ! ($f['targetsAgreed'] ?? false) || ! ($f['providerPrepared'] ?? false) || $f['previousCheck'] === 'Unable to check') { throw ValidationException::withMessages(['version' => 'Check the training, previous actions, agreed targets and preparation before preparing signatures.']); }
+            $plan = DeliveryPlan::approved($a);
+            if (! $plan || ($row->source_snapshot['delivery_plan']['hash'] ?? null) !== $plan['hash']) { throw ValidationException::withMessages(['version' => 'Save this draft against the current provider-approved delivery plan before preparing signatures.']); }
+            $row->history = [...($row->history ?? []), ['event' => 'ready_for_signatures', 'fields' => $row->fields, 'source_snapshot' => $row->source_snapshot, 'saved_by' => $r->user()->id, 'saved_at' => now()->toIso8601String()]];
+            $row->state = 'Ready for signatures'; $row->version++; $row->save();
+            DB::table('learning_events')->insert(['user_id' => $r->user()->id, 'apprentice_id' => $a->id, 'kind' => 'review_draft', 'record_id' => $row->id, 'event' => 'ready_for_signatures', 'created_at' => now()]);
+        });
+
+        return back()->with('status', 'This review revision is frozen and ready for participant signatures. It is not completed or shared and does not reset the review deadline.');
+    }
+
+    public function reopen(Request $r, Apprentice $apprentice, ProgressReviewDraft $review): RedirectResponse
+    {
+        abort_unless($this->allowed($r, $apprentice), 403);
+        abort_unless($review->apprentice_id === $apprentice->id, 404);
+        $r->validate(['version' => ['required', 'integer'], 'reason' => ['required', 'string', 'max:2000']]);
+        DB::transaction(function () use ($r, $apprentice, $review): void {
+            $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->allowed($r, $fresh), 403);
+            $row = ProgressReviewDraft::whereKey($review->id)->lockForUpdate()->firstOrFail();
+            if (\App\Models\SignedReviewRecord::where('progress_review_draft_id',$row->id)->whereNull('withdrawn_at')->exists()) { throw ValidationException::withMessages(['version'=>'Withdraw the current signed-copy evidence/confirmation before reopening this frozen review.']); }
+            if ($row->version !== $r->integer('version') || $row->state !== 'Ready for signatures') { throw ValidationException::withMessages(['version' => 'Only the current frozen revision can be reopened.']); }
+            $row->history = [...($row->history ?? []), ['event' => 'reopened', 'reason' => $r->input('reason'), 'fields' => $row->fields, 'source_snapshot' => $row->source_snapshot, 'saved_by' => $r->user()->id, 'saved_at' => now()->toIso8601String()]];
+            $row->state = 'Draft'; $row->version++; $row->save();
+            DB::table('learning_events')->insert(['user_id' => $r->user()->id, 'apprentice_id' => $apprentice->id, 'kind' => 'review_draft', 'record_id' => $row->id, 'event' => 'review_reopened', 'created_at' => now()]);
+        });
+
+        return back()->with('status', 'Review reopened as a draft. The frozen revision and reason are retained.');
+    }
+
     private function snapshot(Apprentice $a, array $fields): array
     {
+        $plan = DeliveryPlan::approved($a);
         $tasks = LearningTask::where('apprentice_id', $a->id)->get();
         $topics = TrainingTopic::where('apprentice_id', $a->id)->get();
         $qualifications = Qualification::where('apprentice_id', $a->id)->get();
@@ -114,7 +185,9 @@ class ProgressReviewController extends Controller
             }
         }
 
-        return ['captured_at' => now()->toIso8601String(), 'scope_note' => 'Current source records captured when this draft was saved; not a reconstructed historical whole-plan assessment.', 'whole_plan' => 'Not linked — individual plan applicability and KSB/block coverage cannot be confirmed', 'approved_tasks' => $tasks->where('status', 'Approved')->count(), 'assigned_tasks' => $tasks->count(), 'blocks' => $tasks->groupBy('block')->map(fn ($rows) => ['title' => $rows->first()->theme, 'approved' => $rows->where('status', 'Approved')->count(), 'assigned' => $rows->count()])->all(), 'topics' => $topics->map(fn ($t) => $t->only('subject', 'level', 'topic', 'planned_hours', 'status', 'completion_date'))->all(), 'qualifications' => $qualifications->map(fn ($q) => [...$q->only('subject', 'title', 'level', 'status', 'result'), 'target' => $q->target()?->toDateString()])->all(), 'delivered' => $delivered, 'planned' => $planned, 'forecast_complete' => false, 'monthly_snapshots' => MonthlyScorecard::where('apprentice_id', $a->id)->when(filled($fields['trainingFrom'] ?? null), fn ($q) => $q->where('month', '>=', substr($fields['trainingFrom'], 0, 7)))->when(filled($fields['reviewDate'] ?? null), fn ($q) => $q->where('month', '<=', substr($fields['reviewDate'], 0, 7)))->get(['month', 'scores', 'comment'])->toArray(),
-            'training_plan_source' => 'Reference remains the supplied scheme of work; no substitute individual plan created'];
+        return ['captured_at' => now()->toIso8601String(), 'otj_position' => \App\Support\OtjPosition::forApprentice($a)['summary'], 'scope_note' => 'Current source records captured when this draft was saved; not a reconstructed historical whole-plan assessment.', 'whole_plan' => $plan ? 'Provider delivery plan linked; participant signatures and formal KSB achievement remain separate' : 'Not linked — individual plan applicability and KSB/block coverage cannot be confirmed', 'delivery_plan' => $plan ? ['hash' => $plan['hash'], 'approved_at' => $plan['approved_at'], 'source_ref' => $plan['details']['source_ref'], 'target_hours' => $plan['details']['target_hours'], 'blocks' => $plan['blocks'], 'next_period_blocks' => filled($fields['reviewDate'] ?? null) ? array_values(array_filter($plan['blocks'], fn ($b) => $b['end'] > $fields['reviewDate'] && $b['start'] <= Carbon::parse($fields['reviewDate'])->addDays(70)->toDateString())) : []] : null, 'approved_tasks' => $tasks->where('status', 'Approved')->count(), 'assigned_tasks' => $tasks->count(), 'blocks' => $tasks->groupBy('block')->map(fn ($rows) => ['title' => $rows->first()->theme, 'approved' => $rows->where('status', 'Approved')->count(), 'assigned' => $rows->count()])->all(), 'topics' => $topics->map(fn ($t) => $t->only('subject', 'level', 'topic', 'planned_hours', 'status', 'completion_date'))->all(), 'qualifications' => $qualifications->map(fn ($q) => [...$q->only('subject', 'title', 'level', 'status', 'result'), 'target' => $q->target()?->toDateString()])->all(), 'delivered' => $delivered, 'planned' => $planned, 'forecast_complete' => false, 'monthly_snapshots' => MonthlyScorecard::where('apprentice_id', $a->id)->when(filled($fields['trainingFrom'] ?? null), fn ($q) => $q->where('month', '>=', substr($fields['trainingFrom'], 0, 7)))->when(filled($fields['reviewDate'] ?? null), fn ($q) => $q->where('month', '<=', substr($fields['reviewDate'], 0, 7)))->get(['month', 'scores', 'comment'])->toArray(),
+            'action_plan' => SmartAction::with('task')->where('apprentice_id', $a->id)->get()->map(fn ($action) => ['id' => $action->id, 'title' => $action->title, 'owner' => $action->owner, 'status' => $action->currentStatus(), 'due_date' => $action->deadline()?->toDateString(), 'completion_date' => $action->completion_date?->toDateString(), 'task_id' => $action->learning_task_id])->all(),
+            'known_next_period_tasks' => filled($fields['reviewDate'] ?? null) ? $tasks->filter(fn ($t) => $t->status !== 'Approved' && $t->due_date && $t->due_date->toDateString() >= $fields['reviewDate'] && $t->due_date->toDateString() <= $end)->map(fn ($t) => ['id' => $t->id, 'title' => $t->title, 'block' => $t->block, 'due_date' => $t->due_date->toDateString(), 'status' => $t->status])->values()->all() : [],
+            'training_plan_source' => $plan ? $plan['details']['source_ref'] : 'Reference remains the supplied scheme of work; no substitute individual plan created'];
     }
 }

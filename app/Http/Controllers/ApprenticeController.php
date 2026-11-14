@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SaveApprenticeRequest;
 use App\Models\Apprentice;
 use App\Models\Employer;
+use App\Models\LearningTask;
 use App\Models\Programme;
 use App\Models\TutorGroup;
 use App\Models\User;
+use App\Support\AssignmentHistory;
 use App\Support\DirectoryCatalog;
+use App\Support\TaskCatalogue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,6 +47,7 @@ class ApprenticeController extends Controller
     {
         $record = DB::transaction(function () use ($request) {
             $record = Apprentice::create($request->safe()->except('version'));
+            AssignmentHistory::record($record, $request->user()->id, null);
             $this->audit($request, $record, 'created');
 
             return $record;
@@ -73,9 +77,14 @@ class ApprenticeController extends Controller
             if ($locked->version !== (int) $request->validated('version')) {
                 throw ValidationException::withMessages(['version' => 'This record changed while you were editing. Reopen it before making further changes.']);
             }
+            $beforeLinks = $locked->only(AssignmentHistory::KEYS);
             $locked->fill($request->safe()->except('version'));
+            if ($locked->isDirty('programme_id') && LearningTask::where('apprentice_id', $locked->id)->exists() && ! TaskCatalogue::historyMatches($locked)) {
+                throw ValidationException::withMessages(['programme_id' => 'Assigned programme task history cannot be transferred to another programme automatically. Keep the current mapping until a controlled programme transfer is available.']);
+            }
             $locked->version++;
             $locked->save();
+            AssignmentHistory::record($locked, $request->user()->id, $beforeLinks);
             $this->audit($request, $locked, 'updated');
         });
 

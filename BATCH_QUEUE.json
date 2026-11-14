@@ -1,5 +1,5 @@
 {
-  "checkpoint": "v0.7.0",
+  "checkpoint": "v0.33.0",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -10,52 +10,97 @@
     {
       "batch": "Autocare task workspaces",
       "status": "working_tested_core",
-      "remaining": "Approved ADAS release and Block 9 source guidance now included, older schemas retained. Sequential block releases/exceptions, formal block/KSB sign-off, other programmes and filled-PDF export remain."
+      "remaining": "QA2 audited 50-task/PDF release integrated for new allocations. Saved schemas and all older PDFs retained. Formal cohort source/KSB applicability, participant signatures, gateway criteria and live acceptance remain separate; visible Paint/Autocare source warnings retained where applicable."
+    },
+    {
+      "batch": "Heavy Vehicle Level 3 task integration",
+      "status": "working_tested_core",
+      "remaining": "QA2 audited 50-task/PDF release integrated for new allocations. Saved schemas and all older PDFs retained. Formal cohort source/KSB applicability, participant signatures, gateway criteria and live acceptance remain separate; visible Paint/Autocare source warnings retained where applicable."
+    },
+    {
+      "batch": "Vehicle Damage Paint Level 3 task integration",
+      "status": "working_tested_core",
+      "remaining": "QA2 audited 50-task/PDF release integrated for new allocations. Saved schemas and all older PDFs retained. Formal cohort source/KSB applicability, participant signatures, gateway criteria and live acceptance remain separate; visible Paint/Autocare source warnings retained where applicable."
+    },
+    {
+      "batch": "Vehicle Damage Panel Level 3 task workflow",
+      "status": "working_tested_core",
+      "remaining": "QA2 audited 50-task/PDF release integrated for new allocations. Saved schemas and all older PDFs retained. Formal cohort source/KSB applicability, participant signatures, gateway criteria and live acceptance remain separate; visible Paint/Autocare source warnings retained where applicable."
+    },
+    {
+      "batch": "Individual operational delivery calendars and provider approval",
+      "status": "working_tested",
+      "remaining": "Twelve-block dates, explicit hours/controlled references, independent approval, preserved snapshots and separate guarded deadline application work. Actual document applicability, participant signing, funding decisions and production acceptance are separate."
+    },
+    {
+      "batch": "Recorded OTJ ledger and approved-plan comparison",
+      "status": "working_tested_loaded_records",
+      "remaining": "Reviewed historical CSV sources now add separate minutes, with overlap/source drift reconciliation and reasoned withdrawal. Actual evidence, full historical completeness and final eligibility/compliance assurance remain unverified."
+    },
+    {
+      "batch": "Reviewed result and historical OTJ import workflows",
+      "status": "working_tested_local",
+      "remaining": "Exact CSV previews, independent atomic application, source/version/overlap checks, history and withdrawal work. Real source/ID mapping, evidence verification and historic completeness remain provider/staging work."
+    },
+    {
+      "batch": "Configurable private evidence service",
+      "status": "working_tested_copy_planning_and_staging_execution",
+      "remaining": "Known-reference inventory, protected exact-preview plans, opt-in exclusive staged copies and final hash/binding verification supplied. Actual private source/target rehearsal, legacy/unregistered reconciliation, reference cutover, restore and Cloud acceptance remain. No source deletion/link change."
+    },
+    {
+      "batch": "Marking worklist and in-portal reminders",
+      "status": "working_tested_in_portal",
+      "remaining": "Combined explicit/default-preview command and opt-in daily in-portal scheduler now work alongside existing marking source deduplication. Scheduling off by default. Actual server/shared-cache infrastructure and external email remain separate."
+    },
+    {
+      "batch": "Account access and password recovery preparation",
+      "status": "working_tested_local_recovery",
+      "remaining": "Own-account password change, session version binding, sensitive-account invalidation and audit work. Broker recovery is disabled by default and local/testing array-sink only. Production verification/invitations/MFA/delivery, session-cutover acceptance and actual identity-provider integration remain pending."
     },
     {
       "batch": "Maths/English training and qualifications",
       "status": "working_tested_core",
-      "remaining": "Full authoritative topic catalogue reconciliation and external result import remain. Private certificate/evidence uploads now work without setting achievement."
+      "remaining": "Generic reviewed CSV result imports into unchanged working/awaiting aims now work, without topic/start/target changes. Full authoritative topic catalogue reconciliation, actual awarding-body/PICS source mapping and live connectors remain separate."
     },
     {
       "batch": "SMART Action Plan",
       "status": "working_tested_core",
-      "remaining": "Review auto-targets and remaining source-linked action types pending; manual actions and referred-task links work"
+      "remaining": "Source-bound referred-task proposals, existing-action links and known next-period task dates now work. Creation requires explicit support/realism/agreement and a current source binding; no automatic target agreement or duplicated evidence. Remaining broader action policy/user acceptance stays separate."
     },
     {
       "batch": "Sessions and registers",
       "status": "working_tested_core",
-      "remaining": "Actual extra/out-of-hours training, agreement/actual-compensation gates, tutor approval, bidirectional overlap prevention and withdrawal now work. Recurring session planning, formal reopen/correction workflow, complete historical OTJ coverage, approved individual targets and pace reporting remain."
+      "remaining": "Reviewed historical OTJ is separate from attendance. Ledgers/subtotals include valid imports and flag later overlap rather than double count. Real history/evidence completeness and any formal register reopening/approval window remain separate."
     },
     {
       "batch": "Private Careers",
       "status": "working_tested_core",
-      "remaining": "Amendments, To do action revisions and current adviser worklist now work. Block 10 trigger depends on individual block plan; notification delivery remains."
+      "remaining": "Approved-calendar Block 10/11 prompts with current adviser, source-bound deduplication, acknowledgement and opt-in in-portal schedule now work. Seen does not create advice. External delivery and actual scheduler/Cloud acceptance remain separate."
     },
     {
       "batch": "Support and retention cases",
       "status": "working_tested_core",
-      "remaining": "Granular multi-role capabilities, marker-history audit expansion and configurable team scope pending"
+      "remaining": "Scoped duties remain. Marker additions/removals and classification-created markers now retain before/after codes, actor, time and optional reason/source, atomically. Unchanged marker timestamps are retained. Historical paper marker data is not reconstructed."
     },
     {
       "batch": "Private Apprentice Support Plans",
       "status": "working_tested_core",
-      "remaining": "Delivered support activities and private evidence now work. Consent-controlled sharing and original source PDF exports remain."
+      "remaining": "Scoped private evidence/activity and native approved-plan PDF now work. Export uses the last approved snapshot and excludes draft replacements. Consent-controlled employer sharing requires agreed recipient mapping/consent workflow and is not enabled."
     },
     {
       "batch": "Approved tutor instructions",
       "status": "working_tested_core",
-      "remaining": "Amendment/replacement/withdrawal and explicit authenticated CEO emergency override now work. Granular support duties/area scopes and their administration remain."
+      "remaining": "Separate support-member drafting and support-lead approval now work inside the current apprentice scope, with one active team lead. Ordinary administrator oversight does not itself grant instruction drafting/approval; explicit CEO emergency access is retained. User acceptance and production security review remain."
     },
     {
       "batch": "Training plans, RPL and curriculum/KSB coverage",
-      "status": "working_tested_preparation_and_assessment",
-      "remaining": "Portal-first draft projection, proposal inputs and source-bound individual RPL assessment/review now work. Formal plan approval/application, primary KSB allocation, S9 internal basis reconciliation, Foundation/individual applicability, revised block calendar, signatures and final gateway source checks remain."
+      "status": "working_tested_operational_provider_plan",
+      "remaining": "Individual twelve-block calendars, controlled references, occupational target, independent provider snapshot approval/withdrawal and guarded deadline preview/application work for four routes. Current approved Autocare RPL can be bound, without automatic price/hours reduction. Formal document contents/primary KSB/Foundation/S9 source reconciliation, participant signatures and financial/funding approval remain."
     },
     {
       "batch": "Ten-week progress reviews",
-      "status": "working_tested_drafts",
-      "remaining": "Original fields, scoped mentor/tutor worklist, locked source snapshot, register subjects, booked next-period subjects and monthly snapshots. Drafts do not complete a review or reset its clock. Whole-plan comparison, completion/history scheduling, three signatures, sharing and original PDF workflow remain."
+      "status": "working_tested_signed_sources_and_in_portal_reminders",
+      "remaining": "Checked external copies, actual meeting + 70-day tracking, sourced Active status eligibility and source-bound tutor/mentor reminders/acknowledgement work locally. Electronic signatures/authentication, employer sharing, different-plan reconciliation, whole-history compliance, external email and actual scheduler acceptance remain separate."
     },
     {
       "batch": "Monthly apprentice scorecard",
@@ -65,12 +110,12 @@
     {
       "batch": "Retention and early-leaver analysis",
       "status": "working_tested_core",
-      "remaining": "Admin-only source-referenced programme outcome/context and descriptive comparable start-cohort report; completion separate from achievement. Historical employer/tutor coverage, retention interval days, destinations verification and approved KPI policy remain."
+      "remaining": "Recorded acknowledged concern durations union overlapping inclusive calendar dates, preserving unknown/date checks. Minimal assignment-ID history and distinct recorded linked employers/main tutors now work; historical counts remain unknown. Source attendance is connected. Full historic import, verified destinations and approved comparison/KPI policy remain pending."
     },
     {
       "batch": "Dashboards, journey and management/inspection reports",
       "status": "working_tested_core",
-      "remaining": "Scoped actual-source dashboard, operational summary, date-based visual journey and partial inspection evidence with approved cases. Full management report contents/KPIs, provider outcome/governance sources and controlled exports remain."
+      "remaining": "Fixed operational packs now capture checked external review counts and actual-meeting-based due references without private source/identity details. Older packs remain fixed. Full governance/financial/inspection evidence, historic cohort rates, approved KPI policy and production acceptance remain separate."
     },
     {
       "batch": "Case studies",
@@ -80,12 +125,12 @@
     {
       "batch": "Staff development",
       "status": "working_tested_core",
-      "remaining": "Employee/manager core, private evidence, actual planned review links, reasoned reschedule/cancel and source-linked development impact work. Fuller team reporting and remaining detailed template reconciliation remain."
+      "remaining": "Scoped staff summary and supplied HR3.8 v1.3 appraisal discussion/capability fields now work beside existing HR3.9 v1.1 tutor headings. Self/manager assessments stay separate. Legacy Grade 2/85% wording is not adopted as current KPI policy. Signed HR workflow and any additional controlled observation criteria remain pending confirmation."
     },
     {
       "batch": "Induction/wellbeing surveys",
       "status": "working_tested_receipt_tracking",
-      "remaining": "Original induction/six-week/voluntary ongoing timing retained; private receipt versus versioned Inclusion check and existing concern link. No questionnaire answers stored. Actual external respondent forms/questionnaire source reconciliation remain."
+      "remaining": "Previously supplied questionnaire PDFs were located; their documents are not being requested again. Current code records private receipts/checks, not questionnaire answers. External responder URLs/configuration are still required; document design/edit URLs must not be treated as respondent links. Any internal sensitive-answer storage needs a separate approved privacy/access decision."
     },
     {
       "batch": "Help and optional voice explanations",
@@ -94,18 +139,31 @@
     },
     {
       "batch": "Reminder delivery and account administration",
-      "status": "not_ported",
-      "remaining": "Local password command works; production invitations/recovery/MFA, mail/queue/schedules and employer-account mapping pending"
+      "status": "partial",
+      "remaining": "First empty-staging administrator bootstrap now works with once-only audit/marker and private credentials; shared sessions/cache tested via local HTTPS. Existing-user onboarding/invitations, verification/MFA/recovery email, actual scheduler/resources and employer mapping remain pending. Reminder schedule off by default."
     },
     {
       "batch": "Polishing and acceptance",
       "status": "partial",
-      "remaining": "Shared responsive layout, clear source/unknown labels, aligned control grids and section navigation. No browser/phone/keyboard/print visual acceptance; unchanged original assets and 41 PDFs verified."
+      "remaining": "Shared responsive controls, spacing, source labels, report meters and source-safe guidance polished. Native PDF task sample inspected using non-browser PDF rendering. No browser/phone/keyboard/print user acceptance or full-device QA performed."
     },
     {
       "batch": "Laravel Cloud release",
-      "status": "blocked_live_environment",
-      "remaining": "Martin must supply/review actual Cloud/database/storage/mail/backup environment and release process; local guard intentionally remains"
+      "status": "working_tested_native_mariadb_pending_actual_cloud",
+      "remaining": "Actual repository/schema/resource mapping, source-target copy rehearsal, exact managed engine, real bucket policies, separately reviewed cutover/restore and browser acceptance remain; production is blocked."
+    },
+    {
+      "batch": "v0.32.0 protected evidence copy plans",
+      "status": "working_tested",
+      "remaining": "Actual source/target environment and controlled operator review."
+    },
+    {
+      "batch": "v0.33.0 exclusive verified staging copies",
+      "status": "working_tested",
+      "remaining": "Actual remote rehearsal/reconciliation and separately reviewed cutover/restore."
     }
-  ]
+  ],
+  "queue_review": "v0.32.0 adds exact-preview, protected evidence copy plans; v0.33.0 adds explicit once-only staging execution with exclusive destination creation, source SHA-256/size validation, destination readback, final verification and technical audit. Original files, application references and retained snapshots are not changed. No storage cutover or production execution is enabled.",
+  "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
+  "next_priority": "Actual repository/environment integration and source/target rehearsal; reconcile real legacy/unregistered files, then separately review reference cutover and restore proof. No automatic link switch or production access."
 }

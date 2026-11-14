@@ -1,1 +1,402 @@
-[{"id": "b1-t1", "block": 1, "task": 1, "title": "Task 1: Knowledge Assessment", "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme", "template": "portal-block-1-knowledge-result-v1.0"}, {"id": "b1-t2", "block": 1, "task": 2, "title": "Task 2: Apprentice workplace job card", "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme", "template": "Task_2_Apprentice_Workplace_Job_Card_v2.2.pdf"}, {"id": "b1-t3", "block": 1, "task": 3, "title": "Task 3: Vehicle safety inspection and workshop preparation", "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme", "template": "Block_1_Task_3_Vehicle_Safety_Inspection_v2.1.pdf"}, {"id": "b1-t4", "block": 1, "task": 4, "title": "Task 4: Basic brake and tyre condition check", "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme", "template": "Block_1_Task_4_Basic_Braking_and_Tyre_Check_v2.1.pdf"}, {"id": "b1-t5", "block": 1, "task": 5, "title": "Task 5: Learning impact record", "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme", "template": "Block_1_Learning_Impact_Record_v2.1.pdf"}, {"id": "b2-t1", "block": 2, "task": 1, "title": "Task 1: Knowledge Assessment", "theme": "Vehicle Inspection, Servicing and Customer Interaction", "template": "portal-block-2-knowledge-result-v1.0"}, {"id": "b2-t2", "block": 2, "task": 2, "title": "Task 2: Apprentice workplace job card", "theme": "Vehicle Inspection, Servicing and Customer Interaction", "template": "Task_2_Apprentice_Workplace_Job_Card_v2.2.pdf"}, {"id": "b2-t3", "block": 2, "task": 3, "title": "Task 3: Battery and charging system inspection", "theme": "Vehicle Inspection, Servicing and Customer Interaction", "template": "Block_2_Task_3_Battery_and_Charging_Check_v2.1.pdf"}, {"id": "b2-t4", "block": 2, "task": 4, "title": "Task 4: TPMS, tyre pressure and customer documentation", "theme": "Vehicle Inspection, Servicing and Customer Interaction", "template": "Block_2_Task_4_TPMS_and_Tyre_Service_v2.1.pdf"}, {"id": "b2-t5", "block": 2, "task": 5, "title": "Task 5: Learning impact record", "theme": "Vehicle Inspection, Servicing and Customer Interaction", "template": "Block_2_Learning_Impact_Record_v2.1.pdf"}, {"id": "b3-t1", "block": 3, "task": 1, "title": "Task 1: Knowledge Assessment", "theme": "Workshop Processes, Tools and Environmental Awareness", "template": "portal-block-3-knowledge-result-v1.0"}, {"id": "b3-t2", "block": 3, "task": 2, "title": "Task 2: Apprentice workplace job card", "theme": "Workshop Processes, Tools and Environmental Awareness", "template": "Task_2_Apprentice_Workplace_Job_Card_v2.2.pdf"}, {"id": "b3-t3", "block": 3, "task": 3, "title": "Task 3: Interim service, inspection and documentation", "theme": "Workshop Processes, Tools and Environmental Awareness", "template": "Block_3_Task_3_Interim_Service_and_Documentation_v2.1.pdf"}, {"id": "b3-t4", "block": 3, "task": 4, "title": "Task 4: Environmental spill response and waste control", "theme": "Workshop Processes, Tools and Environmental Awareness", "template": "Block_3_Task_4_Environmental_Spill_and_Waste_Control_v2.1.pdf"}, {"id": "b3-t5", "block": 3, "task": 5, "title": "Task 5: Learning impact record", "theme": "Workshop Processes, Tools and Environmental Awareness", "template": "Block_3_Learning_Impact_Record_v2.1.pdf"}, {"id": "b4-t1", "block": 4, "task": 1, "title": "Task 1: Knowledge Assessment", "theme": "Emerging Technology and Driveline Systems", "template": "portal-block-4-knowledge-result-v1.0"}, {"id": "b4-t2", "block": 4, "task": 2, "title": "Task 2: Apprentice workplace job card", "theme": "Emerging Technology and Driveline Systems", "template": "Task_2_Apprentice_Workplace_Job_Card_v2.2.pdf"}, {"id": "b4-t3", "block": 4, "task": 3, "title": "Task 3: Front wheel alignment and steering geometry checks", "theme": "Emerging Technology and Driveline Systems", "template": "Block_4_Task_3_Front_Wheel_Alignment_v2.1.pdf"}, {"id": "b4-t4", "block": 4, "task": 4, "title": "Task 4: EV/hybrid component location and safety awareness", "theme": "Emerging Technology and Driveline Systems", "template": "Block_4_Task_4_EV_Hybrid_Component_Location_v2.1.pdf"}, {"id": "b4-t5", "block": 4, "task": 5, "title": "Task 5: Learning impact record", "theme": "Emerging Technology and Driveline Systems", "template": "Block_4_Learning_Impact_Record_v2.1.pdf"}, {"id": "b5-t1", "block": 5, "task": 1, "title": "Task 1: Knowledge Assessment", "theme": "Diagnostic Thinking and Complex Repair Activities", "template": "portal-block-5-knowledge-result-v1.0"}, {"id": "b5-t2", "block": 5, "task": 2, "title": "Task 2: Apprentice workplace job card", "theme": "Diagnostic Thinking and Complex Repair Activities", "template": "Task_2_Apprentice_Workplace_Job_Card_v2.2.pdf"}, {"id": "b5-t3", "block": 5, "task": 3, "title": "Task 3: Brake inspection, measurement and replacement", "theme": "Diagnostic Thinking and Complex Repair Activities", "template": "Block_5_Task_3_Brake_Inspection_and_Replacement_v2.1.pdf"}, {"id": "b5-t4", "block": 5, "task": 4, "title": "Task 4: Suspension component replacement and alignment preparation", "theme": "Diagnostic Thinking and Complex Repair Activities", "template": "Block_5_Task_4_Suspension_Component_Replacement_v2.1.pdf"}, {"id": "b5-t5", "block": 5, "task": 5, "title": "Task 5: Learning impact record", "theme": "Diagnostic Thinking and Complex Repair Activities", "template": "Block_5_Learning_Impact_Record_v2.1.pdf"}, {"id": "b6-t1", "block": 6, "task": 1, "title": "Task 1: Knowledge Assessment", "theme": "Vehicle Systems Integration and Advanced Diagnostics", "template": "portal-block-6-knowledge-result-v1.0"}, {"id": "b6-t2", "block": 6, "task": 2, "title": "Task 2: Apprentice workplace job card", "theme": "Vehicle Systems Integration and Advanced Diagnostics", "template": "Task_2_Apprentice_Workplace_Job_Card_v2.2.pdf"}, {"id": "b6-t3", "block": 6, "task": 3, "title": "Task 3: Electrical diagnostic testing and evidence recording", "theme": "Vehicle Systems Integration and Advanced Diagnostics", "template": "Block_6_Task_3_Electrical_Diagnostic_Check_v2.1.pdf"}, {"id": "b6-t4", "block": 6, "task": 4, "title": "Task 4: Air conditioning and climate-control checks", "theme": "Vehicle Systems Integration and Advanced Diagnostics", "template": "Block_6_Task_4_Air_Conditioning_Climate_Check_v2.1.pdf"}, {"id": "b6-t5", "block": 6, "task": 5, "title": "Task 5: Learning impact record", "theme": "Vehicle Systems Integration and Advanced Diagnostics", "template": "Block_6_Learning_Impact_Record_v2.1.pdf"}, {"id": "b7-t1", "block": 7, "task": 1, "title": "Task 1: Knowledge Assessment", "theme": "Advanced Workshop Practice and Technical Communication", "template": "portal-block-7-knowledge-result-v1.0"}, {"id": "b7-t2", "block": 7, "task": 2, "title": "Task 2: Apprentice workplace job card", "theme": "Advanced Workshop Practice and Technical Communication", "template": "Task_2_Apprentice_Workplace_Job_Card_v2.2.pdf"}, {"id": "b7-t3", "block": 7, "task": 3, "title": "Task 3: Steering component replacement and customer recommendations", "theme": "Advanced Workshop Practice and Technical Communication", "template": "Block_7_Task_3_Steering_Component_Replacement_v2.1.pdf"}, {"id": "b7-t4", "block": 7, "task": 4, "title": "Task 4: Engine management sensor check and handover", "theme": "Advanced Workshop Practice and Technical Communication", "template": "Block_7_Task_4_Engine_Management_Sensor_Check_v2.1.pdf"}, {"id": "b7-t5", "block": 7, "task": 5, "title": "Task 5: Learning impact record", "theme": "Advanced Workshop Practice and Technical Communication", "template": "Block_7_Learning_Impact_Record_v2.1.pdf"}, {"id": "b8-t1", "block": 8, "task": 1, "title": "Task 1: Knowledge Assessment", "theme": "Advanced Diagnostics and Workshop Organisation", "template": "portal-block-8-knowledge-result-v1.0"}, {"id": "b8-t2", "block": 8, "task": 2, "title": "Task 2: Apprentice workplace job card", "theme": "Advanced Diagnostics and Workshop Organisation", "template": "Task_2_Apprentice_Workplace_Job_Card_v2.2.pdf"}, {"id": "b8-t3", "block": 8, "task": 3, "title": "Task 3: ABS wheel speed sensor diagnostic investigation", "theme": "Advanced Diagnostics and Workshop Organisation", "template": "Block_8_Task_3_ABS_Wheel_Speed_Diagnostic_v2.1.pdf"}, {"id": "b8-t4", "block": 8, "task": 4, "title": "Task 4: Tyre wear root-cause and geometry investigation", "theme": "Advanced Diagnostics and Workshop Organisation", "template": "Block_8_Task_4_Tyre_Wear_Root_Cause_v2.1.pdf"}, {"id": "b8-t5", "block": 8, "task": 5, "title": "Task 5: Learning impact record", "theme": "Advanced Diagnostics and Workshop Organisation", "template": "Block_8_Learning_Impact_Record_v2.1.pdf"}, {"id": "b9-t1", "block": 9, "task": 1, "title": "Task 1: Knowledge Assessment", "theme": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness", "template": "portal-block-9-knowledge-result-v1.0"}, {"id": "b9-t2", "block": 9, "task": 2, "title": "Task 2: Apprentice workplace job card", "theme": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness", "template": "Task_2_Apprentice_Workplace_Job_Card_v2.2.pdf"}, {"id": "b9-t3", "block": 9, "task": 3, "title": "Task 3: EV/hybrid customer handover and charging awareness", "theme": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness", "template": "Block_9_Task_3_EV_Customer_Handover_v2.1.pdf"}, {"id": "b9-t4", "block": 9, "task": 4, "title": "Task 4: ADAS pre-calibration and sensor awareness check", "theme": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness", "template": "Block_9_Task_4_ADAS_Pre_Calibration_Check_v2.1.pdf"}, {"id": "b9-t5", "block": 9, "task": 5, "title": "Task 5: Learning impact record", "theme": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness", "template": "Block_9_Learning_Impact_Record_v2.1.pdf"}, {"id": "b10-t1", "block": 10, "task": 1, "title": "Task 1: Knowledge Assessment", "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training", "template": "portal-block-10-knowledge-result-v1.0"}, {"id": "b10-t2", "block": 10, "task": 2, "title": "Task 2: Apprentice workplace job card", "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training", "template": "Task_2_Apprentice_Workplace_Job_Card_v2.2.pdf"}, {"id": "b10-t3", "block": 10, "task": 3, "title": "Task 3: EPA mock integrated practical inspection", "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training", "template": "Block_10_Task_3_EPA_Mock_Integrated_Inspection_v2.1.pdf"}, {"id": "b10-t4", "block": 10, "task": 4, "title": "Task 4: Capstone practical task, qa and professional discussion evidence", "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training", "template": "Block_10_Task_4_Capstone_Practical_Task_v2.1.pdf"}, {"id": "b10-t5", "block": 10, "task": 5, "title": "Task 5: Learning impact record", "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training", "template": "Block_10_Learning_Impact_Record_v2.1.pdf"}]
+[
+  {
+    "id": "b1-t1",
+    "block": 1,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--autocare--b01-t1.pdf"
+  },
+  {
+    "id": "b1-t2",
+    "block": 1,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--autocare--b01-t2.pdf"
+  },
+  {
+    "id": "b1-t3",
+    "block": 1,
+    "task": 3,
+    "title": "Task 3: Vehicle safety inspection and workshop preparation",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--autocare--b01-t3.pdf"
+  },
+  {
+    "id": "b1-t4",
+    "block": 1,
+    "task": 4,
+    "title": "Task 4: Basic brake and tyre condition check",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--autocare--b01-t4.pdf"
+  },
+  {
+    "id": "b1-t5",
+    "block": 1,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--autocare--b01-t5.pdf"
+  },
+  {
+    "id": "b2-t1",
+    "block": 2,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Vehicle Inspection, Servicing and Customer Interaction",
+    "template": "final-20261113-qa2--autocare--b02-t1.pdf"
+  },
+  {
+    "id": "b2-t2",
+    "block": 2,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Vehicle Inspection, Servicing and Customer Interaction",
+    "template": "final-20261113-qa2--autocare--b02-t2.pdf"
+  },
+  {
+    "id": "b2-t3",
+    "block": 2,
+    "task": 3,
+    "title": "Task 3: Battery and charging system inspection",
+    "theme": "Vehicle Inspection, Servicing and Customer Interaction",
+    "template": "final-20261113-qa2--autocare--b02-t3.pdf"
+  },
+  {
+    "id": "b2-t4",
+    "block": 2,
+    "task": 4,
+    "title": "Task 4: TPMS, tyre pressure and customer documentation",
+    "theme": "Vehicle Inspection, Servicing and Customer Interaction",
+    "template": "final-20261113-qa2--autocare--b02-t4.pdf"
+  },
+  {
+    "id": "b2-t5",
+    "block": 2,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Vehicle Inspection, Servicing and Customer Interaction",
+    "template": "final-20261113-qa2--autocare--b02-t5.pdf"
+  },
+  {
+    "id": "b3-t1",
+    "block": 3,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Workshop Processes, Tools and Environmental Awareness",
+    "template": "final-20261113-qa2--autocare--b03-t1.pdf"
+  },
+  {
+    "id": "b3-t2",
+    "block": 3,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Workshop Processes, Tools and Environmental Awareness",
+    "template": "final-20261113-qa2--autocare--b03-t2.pdf"
+  },
+  {
+    "id": "b3-t3",
+    "block": 3,
+    "task": 3,
+    "title": "Task 3: Interim service, inspection and documentation",
+    "theme": "Workshop Processes, Tools and Environmental Awareness",
+    "template": "final-20261113-qa2--autocare--b03-t3.pdf"
+  },
+  {
+    "id": "b3-t4",
+    "block": 3,
+    "task": 4,
+    "title": "Task 4: Environmental spill response and waste control",
+    "theme": "Workshop Processes, Tools and Environmental Awareness",
+    "template": "final-20261113-qa2--autocare--b03-t4.pdf"
+  },
+  {
+    "id": "b3-t5",
+    "block": 3,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Workshop Processes, Tools and Environmental Awareness",
+    "template": "final-20261113-qa2--autocare--b03-t5.pdf"
+  },
+  {
+    "id": "b4-t1",
+    "block": 4,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Emerging Technology and Driveline Systems",
+    "template": "final-20261113-qa2--autocare--b04-t1.pdf"
+  },
+  {
+    "id": "b4-t2",
+    "block": 4,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Emerging Technology and Driveline Systems",
+    "template": "final-20261113-qa2--autocare--b04-t2.pdf"
+  },
+  {
+    "id": "b4-t3",
+    "block": 4,
+    "task": 3,
+    "title": "Task 3: Front wheel alignment and steering geometry checks",
+    "theme": "Emerging Technology and Driveline Systems",
+    "template": "final-20261113-qa2--autocare--b04-t3.pdf"
+  },
+  {
+    "id": "b4-t4",
+    "block": 4,
+    "task": 4,
+    "title": "Task 4: EV/hybrid component location and safety awareness",
+    "theme": "Emerging Technology and Driveline Systems",
+    "template": "final-20261113-qa2--autocare--b04-t4.pdf"
+  },
+  {
+    "id": "b4-t5",
+    "block": 4,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Emerging Technology and Driveline Systems",
+    "template": "final-20261113-qa2--autocare--b04-t5.pdf"
+  },
+  {
+    "id": "b5-t1",
+    "block": 5,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Diagnostic Thinking and Complex Repair Activities",
+    "template": "final-20261113-qa2--autocare--b05-t1.pdf"
+  },
+  {
+    "id": "b5-t2",
+    "block": 5,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Diagnostic Thinking and Complex Repair Activities",
+    "template": "final-20261113-qa2--autocare--b05-t2.pdf"
+  },
+  {
+    "id": "b5-t3",
+    "block": 5,
+    "task": 3,
+    "title": "Task 3: Brake inspection, measurement and replacement",
+    "theme": "Diagnostic Thinking and Complex Repair Activities",
+    "template": "final-20261113-qa2--autocare--b05-t3.pdf"
+  },
+  {
+    "id": "b5-t4",
+    "block": 5,
+    "task": 4,
+    "title": "Task 4: Suspension component replacement and alignment preparation",
+    "theme": "Diagnostic Thinking and Complex Repair Activities",
+    "template": "final-20261113-qa2--autocare--b05-t4.pdf"
+  },
+  {
+    "id": "b5-t5",
+    "block": 5,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Diagnostic Thinking and Complex Repair Activities",
+    "template": "final-20261113-qa2--autocare--b05-t5.pdf"
+  },
+  {
+    "id": "b6-t1",
+    "block": 6,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Vehicle Systems Integration and Advanced Diagnostics",
+    "template": "final-20261113-qa2--autocare--b06-t1.pdf"
+  },
+  {
+    "id": "b6-t2",
+    "block": 6,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Vehicle Systems Integration and Advanced Diagnostics",
+    "template": "final-20261113-qa2--autocare--b06-t2.pdf"
+  },
+  {
+    "id": "b6-t3",
+    "block": 6,
+    "task": 3,
+    "title": "Task 3: Electrical diagnostic testing and evidence recording",
+    "theme": "Vehicle Systems Integration and Advanced Diagnostics",
+    "template": "final-20261113-qa2--autocare--b06-t3.pdf"
+  },
+  {
+    "id": "b6-t4",
+    "block": 6,
+    "task": 4,
+    "title": "Task 4: Air conditioning and climate-control checks",
+    "theme": "Vehicle Systems Integration and Advanced Diagnostics",
+    "template": "final-20261113-qa2--autocare--b06-t4.pdf"
+  },
+  {
+    "id": "b6-t5",
+    "block": 6,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Vehicle Systems Integration and Advanced Diagnostics",
+    "template": "final-20261113-qa2--autocare--b06-t5.pdf"
+  },
+  {
+    "id": "b7-t1",
+    "block": 7,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Advanced Workshop Practice and Technical Communication",
+    "template": "final-20261113-qa2--autocare--b07-t1.pdf"
+  },
+  {
+    "id": "b7-t2",
+    "block": 7,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Advanced Workshop Practice and Technical Communication",
+    "template": "final-20261113-qa2--autocare--b07-t2.pdf"
+  },
+  {
+    "id": "b7-t3",
+    "block": 7,
+    "task": 3,
+    "title": "Task 3: Steering component replacement and customer recommendations",
+    "theme": "Advanced Workshop Practice and Technical Communication",
+    "template": "final-20261113-qa2--autocare--b07-t3.pdf"
+  },
+  {
+    "id": "b7-t4",
+    "block": 7,
+    "task": 4,
+    "title": "Task 4: Engine management sensor check and handover",
+    "theme": "Advanced Workshop Practice and Technical Communication",
+    "template": "final-20261113-qa2--autocare--b07-t4.pdf"
+  },
+  {
+    "id": "b7-t5",
+    "block": 7,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Advanced Workshop Practice and Technical Communication",
+    "template": "final-20261113-qa2--autocare--b07-t5.pdf"
+  },
+  {
+    "id": "b8-t1",
+    "block": 8,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Advanced Diagnostics and Workshop Organisation",
+    "template": "final-20261113-qa2--autocare--b08-t1.pdf"
+  },
+  {
+    "id": "b8-t2",
+    "block": 8,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Advanced Diagnostics and Workshop Organisation",
+    "template": "final-20261113-qa2--autocare--b08-t2.pdf"
+  },
+  {
+    "id": "b8-t3",
+    "block": 8,
+    "task": 3,
+    "title": "Task 3: ABS wheel speed sensor diagnostic investigation",
+    "theme": "Advanced Diagnostics and Workshop Organisation",
+    "template": "final-20261113-qa2--autocare--b08-t3.pdf"
+  },
+  {
+    "id": "b8-t4",
+    "block": 8,
+    "task": 4,
+    "title": "Task 4: Tyre wear root-cause and geometry investigation",
+    "theme": "Advanced Diagnostics and Workshop Organisation",
+    "template": "final-20261113-qa2--autocare--b08-t4.pdf"
+  },
+  {
+    "id": "b8-t5",
+    "block": 8,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Advanced Diagnostics and Workshop Organisation",
+    "template": "final-20261113-qa2--autocare--b08-t5.pdf"
+  },
+  {
+    "id": "b9-t1",
+    "block": 9,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness",
+    "template": "final-20261113-qa2--autocare--b09-t1.pdf"
+  },
+  {
+    "id": "b9-t2",
+    "block": 9,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness",
+    "template": "final-20261113-qa2--autocare--b09-t2.pdf"
+  },
+  {
+    "id": "b9-t3",
+    "block": 9,
+    "task": 3,
+    "title": "Task 3: EV/hybrid customer handover and charging awareness",
+    "theme": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness",
+    "template": "final-20261113-qa2--autocare--b09-t3.pdf"
+  },
+  {
+    "id": "b9-t4",
+    "block": 9,
+    "task": 4,
+    "title": "Task 4: ADAS pre-calibration and sensor awareness check",
+    "theme": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness",
+    "template": "final-20261113-qa2--autocare--b09-t4.pdf"
+  },
+  {
+    "id": "b9-t5",
+    "block": 9,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness",
+    "template": "final-20261113-qa2--autocare--b09-t5.pdf"
+  },
+  {
+    "id": "b10-t1",
+    "block": 10,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+    "template": "final-20261113-qa2--autocare--b10-t1.pdf"
+  },
+  {
+    "id": "b10-t2",
+    "block": 10,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+    "template": "final-20261113-qa2--autocare--b10-t2.pdf"
+  },
+  {
+    "id": "b10-t3",
+    "block": 10,
+    "task": 3,
+    "title": "Task 3: EPA mock integrated practical inspection",
+    "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+    "template": "final-20261113-qa2--autocare--b10-t3.pdf"
+  },
+  {
+    "id": "b10-t4",
+    "block": 10,
+    "task": 4,
+    "title": "Task 4: Capstone practical task, qa and professional discussion evidence",
+    "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+    "template": "final-20261113-qa2--autocare--b10-t4.pdf"
+  },
+  {
+    "id": "b10-t5",
+    "block": 10,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+    "template": "final-20261113-qa2--autocare--b10-t5.pdf"
+  }
+]

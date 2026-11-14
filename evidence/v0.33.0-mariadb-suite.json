@@ -1,0 +1,35 @@
+{
+  "engine": "11.8.6-MariaDB-0+deb13u1 from Debian",
+  "driver": "pdo_mysql / Laravel mysql connection",
+  "suite": {
+    "tool": "phpunit",
+    "result": "passed",
+    "tests": 547,
+    "passed": 547,
+    "assertions": 6865,
+    "duration_ms": 196436
+  },
+  "http": null,
+  "seconds": 197.4,
+  "isolated": true,
+  "network": "Private disposable 127.0.0.1 TCP listener only, passed through socket activation; no external listener",
+  "schemaReset": "Fresh private schema per database-backed test; no false enclosing transaction around DDL",
+  "nativeAuditErrors": true,
+  "initialAdminConcurrency": {
+    "result": "passed",
+    "attempts": 2,
+    "created": 1,
+    "rejected": 1,
+    "accounts": 1,
+    "creationAudits": 1,
+    "consumedMarkers": 1,
+    "scope": "Real concurrent PHP workers released from a common barrier on a separate native InnoDB schema; other concurrency paths not certified"
+  },
+  "actualCloudAccess": false,
+  "actualOracleMySqlAccess": false,
+  "limits": [
+    "MariaDB is not the exact Cloud MySQL version; actual Cloud engine/schema acceptance remains",
+    "No existing/live database or real data accessed",
+    "This suite does not establish all target concurrency, performance, backup or migration mappings"
+  ]
+}

@@ -10,7 +10,7 @@ class ProgressReviewDraft extends Model
 {
     use HasFactory;
 
-    protected $attributes = ['version' => 1];
+    protected $attributes = ['version' => 1, 'state' => 'Draft'];
 
     protected $fillable = ['apprentice_id', 'author_id', 'fields', 'source_snapshot'];
 

@@ -57,7 +57,7 @@ class AdasReleaseTest extends TestCase
     public function test_original_pdf_remains_available_and_hash_checked_for_released_schema(): void
     {
         [$t, $u] = $this->fixture();
-        $this->actingAs($u)->get('/tasks/'.$t->id)->assertOk()->assertSee('Download original PDF')->assertSee('does not include these portal questions');
+        $this->actingAs($u)->get('/tasks/'.$t->id)->assertOk()->assertSee('Download original PDF')->assertSee('includes these two ADAS questions');
         $this->get('/tasks/'.$t->id.'/original-pdf')->assertOk();
         $template = $t->template;
         $template['sourceTemplateHash'] = str_repeat('0', 64);
@@ -69,8 +69,7 @@ class AdasReleaseTest extends TestCase
     public function test_pre_release_saved_task_keeps_its_original_schema_and_submission_rules(): void
     {
         [$t, $u, $answers] = $this->fixture();
-        $c = json_decode(file_get_contents(resource_path('data/autocare-catalogue.json')), true);
-        $original = $c['templates'][$t->template['sourcePdfFilename']];
+        $original = json_decode(file_get_contents(base_path('tests/Fixtures/pre-adas-b5-t4.json')), true);
         $t->template = $original;
         $t->save();
         $this->actingAs($u)->post('/tasks/'.$t->id, ['version' => 1, 'intent' => 'submit', 'own_work' => 1, 'answers' => $answers])->assertRedirect()->assertSessionHasNoErrors();

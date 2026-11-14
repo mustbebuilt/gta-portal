@@ -1,0 +1,1567 @@
+{
+  "checkpoint": "v0.9.0",
+  "createdAt": "2026-11-12T12:11:31.352957+00:00",
+  "sourceLibraryVersion": 8,
+  "previousCheckpoint": "v0.8.0",
+  "changes": [
+    {
+      "path": "BATCH_QUEUE.json",
+      "change": "updated"
+    },
+    {
+      "path": "CHANGES_v0.9.0.md",
+      "change": "added"
+    },
+    {
+      "path": "DATA_REQUIREMENTS_AND_GAPS.md",
+      "change": "added"
+    },
+    {
+      "path": "DEVELOPMENT_STATUS.txt",
+      "change": "updated"
+    },
+    {
+      "path": "QUEUE_COMPLETION_REVIEW.md",
+      "change": "added"
+    },
+    {
+      "path": "README.md",
+      "change": "updated"
+    },
+    {
+      "path": "START_HERE_MARTIN.txt",
+      "change": "updated"
+    },
+    {
+      "path": "TEST_RESULTS.json",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/ApprenticeController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/AttendanceController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/BlockControlController.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Http/Controllers/CareersController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/DashboardController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/HelpController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/LearningTaskController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/ProgressReviewController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/RetentionReportController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/StaffDevelopmentController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/SupportController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Models/LearningBlockControl.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Support/AppraisalTemplate.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Support/AssignmentHistory.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Support/AttendanceLedger.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Support/BlockRelease.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Support/ConcernDuration.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Support/MarkerHistory.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Support/PortalPdf.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Support/TaskCatalogue.php",
+      "change": "updated"
+    },
+    {
+      "path": "composer.json",
+      "change": "updated"
+    },
+    {
+      "path": "composer.lock",
+      "change": "updated"
+    },
+    {
+      "path": "database/migrations/2026_11_12_120000_create_marker_change_events_table.php",
+      "change": "added"
+    },
+    {
+      "path": "database/migrations/2026_11_12_120100_create_learning_block_controls_table.php",
+      "change": "added"
+    },
+    {
+      "path": "database/migrations/2026_11_12_120200_create_assignment_change_events_table.php",
+      "change": "added"
+    },
+    {
+      "path": "public/assets/portal.css",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/attendance/index.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/attendance/session.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/careers/worklist.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/dashboard/inspection.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/dashboard/report.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/layout.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/learning/block-controls.blade.php",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/learning/index.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/learning/task.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/pdf/layout.blade.php",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/pdf/operational.blade.php",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/pdf/review.blade.php",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/pdf/support.blade.php",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/pdf/task.blade.php",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/retention/report.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/reviews/form.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/staff/index.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/staff/show.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/support/index.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/support/plan.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "routes/console.php",
+      "change": "updated"
+    },
+    {
+      "path": "routes/web.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/Feature/ConnectedBatchCompletionTest.php",
+      "change": "added"
+    },
+    {
+      "path": "tests/Feature/DemoSetupTest.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/Feature/NativePdfDownloadTest.php",
+      "change": "added"
+    },
+    {
+      "path": "tests/Feature/RemainingOperationalBatchTest.php",
+      "change": "added"
+    },
+    {
+      "path": "tests/evidence/v0.9.0-composer-audit.json",
+      "change": "added"
+    },
+    {
+      "path": "tests/evidence/v0.9.0-http-checks.json",
+      "change": "added"
+    },
+    {
+      "path": "tests/evidence/v0.9.0-mariadb-junit.xml",
+      "change": "added"
+    },
+    {
+      "path": "tests/evidence/v0.9.0-sqlite-junit.xml",
+      "change": "added"
+    },
+    {
+      "path": "tests/http_persistence.py",
+      "change": "updated"
+    },
+    {
+      "path": "tests/original-brand-hashes.json",
+      "change": "added"
+    },
+    {
+      "path": "tests/static_checks.py",
+      "change": "added"
+    },
+    {
+      "path": "vendor/composer/autoload_classmap.php",
+      "change": "updated"
+    },
+    {
+      "path": "vendor/composer/autoload_files.php",
+      "change": "updated"
+    },
+    {
+      "path": "vendor/composer/autoload_psr4.php",
+      "change": "updated"
+    },
+    {
+      "path": "vendor/composer/autoload_static.php",
+      "change": "updated"
+    },
+    {
+      "path": "vendor/composer/installed.json",
+      "change": "updated"
+    },
+    {
+      "path": "vendor/composer/installed.php",
+      "change": "updated"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/AUTHORS.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/LICENSE.LGPL",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/README.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/VERSION",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/composer.json",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/Cpdf.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Courier-Bold.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Courier-BoldOblique.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Courier-Oblique.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Courier.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSans-Bold.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSans-Bold.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSans-BoldOblique.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSans-BoldOblique.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSans-Oblique.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSans-Oblique.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSans.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSans.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSansMono-Bold.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSansMono-Bold.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSansMono-BoldOblique.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSansMono-BoldOblique.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSansMono-Oblique.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSansMono-Oblique.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSansMono.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSansMono.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSerif-Bold.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSerif-Bold.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSerif-BoldItalic.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSerif-BoldItalic.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSerif-Italic.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSerif-Italic.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSerif.ttf",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/DejaVuSerif.ufm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Helvetica-Bold.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Helvetica-BoldOblique.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Helvetica-Oblique.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Helvetica.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Symbol.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Times-Bold.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Times-BoldItalic.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Times-Italic.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/Times-Roman.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/ZapfDingbats.afm",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/installed-fonts.dist.json",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/fonts/mustRead.html",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/res/broken_image.png",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/res/broken_image.svg",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/res/html.css",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/res/sRGB2014.icc",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/lib/res/sRGB2014.icc.LICENSE",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/phpunit.xml",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Adapter/CPDF.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Adapter/GD.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Adapter/PDFLib.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Canvas.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/CanvasFactory.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Cellmap.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/AttributeTranslator.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Color.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Content/Attr.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Content/CloseQuote.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Content/ContentPart.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Content/Counter.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Content/Counters.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Content/NoCloseQuote.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Content/NoOpenQuote.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Content/OpenQuote.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Content/StringPart.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Content/Url.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Style.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Css/Stylesheet.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Dompdf.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Exception/ImageException.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Exception.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FontMetrics.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Frame/Factory.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Frame/FrameListIterator.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Frame/FrameTree.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Frame/FrameTreeIterator.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Frame.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/AbstractFrameDecorator.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/Block.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/Image.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/Inline.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/ListBullet.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/ListBulletImage.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/NullFrameDecorator.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/Page.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/Table.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/TableCell.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/TableRow.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/TableRowGroup.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameDecorator/Text.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/AbstractFrameReflower.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/Block.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/Image.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/Inline.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/ListBullet.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/NullFrameReflower.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/Page.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/Table.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/TableCell.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/TableRow.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/TableRowGroup.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/FrameReflower/Text.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Helpers.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Image/Cache.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/JavascriptEmbedder.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/LineBox.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Options.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/PhpEvaluator.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Positioner/Absolute.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Positioner/AbstractPositioner.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Positioner/Block.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Positioner/Fixed.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Positioner/Inline.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Positioner/ListBullet.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Positioner/NullPositioner.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Positioner/TableCell.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Positioner/TableRow.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Renderer/AbstractRenderer.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Renderer/Block.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Renderer/Image.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Renderer/Inline.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Renderer/ListBullet.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Renderer/TableCell.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Renderer/TableRow.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Renderer/TableRowGroup.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Renderer/Text.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/dompdf/src/Renderer.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/LICENSE",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/README.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/composer.json",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/adobe-standard-encoding.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/cp1250.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/cp1251.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/cp1252.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/cp1253.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/cp1254.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/cp1255.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/cp1257.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/cp1258.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/cp874.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/iso-8859-1.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/iso-8859-11.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/iso-8859-15.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/iso-8859-16.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/iso-8859-2.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/iso-8859-4.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/iso-8859-5.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/iso-8859-7.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/iso-8859-9.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/koi8-r.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/maps/koi8-u.map",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/AdobeFontMetrics.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/BinaryStream.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/EOT/File.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/EOT/Header.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/EncodingMap.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Exception/FontNotFoundException.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Font.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Glyph/Outline.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Glyph/OutlineComponent.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Glyph/OutlineComposite.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Glyph/OutlineSimple.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Header.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/OpenType/File.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/OpenType/TableDirectoryEntry.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/DirectoryEntry.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Table.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/cmap.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/cvt.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/fpgm.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/glyf.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/head.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/hhea.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/hmtx.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/kern.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/loca.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/maxp.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/name.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/nameRecord.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/os2.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/post.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/Table/Type/prep.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/TrueType/Collection.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/TrueType/File.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/TrueType/Header.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/TrueType/TableDirectoryEntry.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/WOFF/File.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/WOFF/Header.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-font-lib/src/FontLib/WOFF/TableDirectoryEntry.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/AUTHORS.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/LICENSE",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/README.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/composer.json",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/CssLength.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/DefaultStyle.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Document.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Gradient/Stop.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Style.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Surface/CPdf.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Surface/SurfaceCpdf.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Surface/SurfaceInterface.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Surface/SurfacePDFLib.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/AbstractTag.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Anchor.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Circle.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/ClipPath.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Ellipse.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Group.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Image.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Line.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/LinearGradient.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Path.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Polygon.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Polyline.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/RadialGradient.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Rect.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Shape.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Stop.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/StyleTag.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Symbol.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/Text.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/dompdf/php-svg-lib/src/Svg/Tag/UseTag.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/CREDITS",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/LICENSE.txt",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/README.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/RELEASE.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/SECURITY.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/UPGRADING.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/bin/entities.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/composer.json",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Elements.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Entities.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Exception.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/InstructionProcessor.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/CharacterReference.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/DOMTreeBuilder.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/EventHandler.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/FileInputStream.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/InputStream.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/ParseError.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/README.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/Scanner.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/StringInputStream.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/Tokenizer.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/TreeBuildingRules.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Parser/UTF8Utils.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Serializer/OutputRules.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Serializer/README.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Serializer/RulesInterface.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5/Serializer/Traverser.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/masterminds/html5/src/HTML5.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/CHANGELOG.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/LICENSE",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/README.md",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/composer.json",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/CSSElement.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/CSSList/AtRuleBlockList.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/CSSList/CSSBlockList.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/CSSList/CSSList.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/CSSList/CSSListItem.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/CSSList/Document.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/CSSList/KeyFrame.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Comment/Comment.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Comment/CommentContainer.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Comment/Commentable.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/OutputFormat.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/OutputFormatter.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Parser.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Parsing/Anchor.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Parsing/OutputException.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Parsing/ParserState.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Parsing/SourceException.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Parsing/UnexpectedEOFException.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Parsing/UnexpectedTokenException.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Position/Position.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Position/Positionable.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/AtRule.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/AtRuleStatement.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/CSSNamespace.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/Charset.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/Declaration.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/Import.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/KeyframeSelector.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/Selector/Combinator.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/Selector/Component.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/Selector/CompoundSelector.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/Selector/SpecificityCalculator.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Property/Selector.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Renderable.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Rule/Rule.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/RuleSet/AtRuleSet.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/RuleSet/DeclarationBlock.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/RuleSet/DeclarationList.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/RuleSet/LegacyDeclarationListMethods.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/RuleSet/RuleContainer.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/RuleSet/RuleSet.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Settings.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/ShortClassNameProvider.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/CSSFunction.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/CSSString.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/CalcFunction.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/CalcRuleValueList.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/Color.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/LineName.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/PrimitiveValue.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/RuleValueList.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/Size.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/URL.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/Value.php",
+      "change": "added"
+    },
+    {
+      "path": "vendor/sabberworm/php-css-parser/src/Value/ValueList.php",
+      "change": "added"
+    }
+  ],
+  "testEvidence": "TEST_RESULTS.json",
+  "queue": "QUEUE_COMPLETION_REVIEW.md",
+  "gaps": "DATA_REQUIREMENTS_AND_GAPS.md",
+  "originalPdfMatches": 41,
+  "originalArtworkMatches": 2,
+  "seedApprentices": 2,
+  "seedAccounts": 10,
+  "productionDeployment": false,
+  "realRecordsImported": false,
+  "nativePdfSampleInspection": "Three recorded-work pages only; no browser/phone/physical print QA",
+  "allBatchesComplete": false
+}

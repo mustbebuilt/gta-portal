@@ -31,6 +31,13 @@ class SmartActionController extends Controller
         return view('actions.index', ['apprentice' => $apprentice, 'actions' => $filtered, 'all' => $actions, 'manage' => $this->manage($r, $apprentice)]);
     }
 
+    public function proposals(Request $r, Apprentice $apprentice): View
+    {
+        abort_unless($this->manage($r,$apprentice),403);
+
+        return view('actions.proposals',['apprentice'=>$apprentice,...\App\Support\ActionProposals::forApprentice($apprentice)]);
+    }
+
     public function form(Request $r, Apprentice $apprentice, ?SmartAction $action = null): View
     {
         abort_unless($this->manage($r, $apprentice), 403);
@@ -38,7 +45,16 @@ class SmartActionController extends Controller
             abort_unless($action->apprentice_id === $apprentice->id, 404);
         }
 
-        return view('actions.form', ['apprentice' => $apprentice, 'action' => $action ?? new SmartAction, 'tasks' => LearningTask::where('apprentice_id', $apprentice->id)->where('status', 'Referred')->get()]);
+        $proposalTask = null; $sourceBinding = null;
+        if ($r->filled('source_task_id')) {
+            abort_if($action,404);
+            $proposalTask = LearningTask::where('apprentice_id',$apprentice->id)->where('status','Referred')->findOrFail($r->integer('source_task_id'));
+            if (! $proposalTask->due_date || SmartAction::where('learning_task_id',$proposalTask->id)->exists()) { throw ValidationException::withMessages(['learning_task_id'=>'This source needs an agreed deadline or already has an action. Reopen the proposals list.']); }
+            $sourceBinding = \App\Support\ActionProposals::binding($proposalTask);
+            $action = new SmartAction(['title'=>'Correct and resubmit '.$proposalTask->reference.': '.$proposalTask->title,'owner'=>'Apprentice','method'=>'linked-task','learning_task_id'=>$proposalTask->id,'evidence_method'=>'portal','relevance'=>'correction','learning_reference'=>$proposalTask->reference]);
+        }
+
+        return view('actions.form', ['proposalTask'=>$proposalTask,'sourceBinding'=>$sourceBinding,'apprentice' => $apprentice, 'action' => $action ?? new SmartAction, 'tasks' => LearningTask::where('apprentice_id', $apprentice->id)->where('status', 'Referred')->get()]);
     }
 
     public function save(Request $r, Apprentice $apprentice, ?SmartAction $action = null): RedirectResponse
@@ -47,9 +63,10 @@ class SmartActionController extends Controller
         if ($action) {
             abort_unless($action->apprentice_id === $apprentice->id, 404);
         }
-        $data = $r->validate(['title' => ['required', 'string', 'max:2000'], 'owner' => ['required', Rule::in(SmartAction::OWNERS)], 'due_date' => ['nullable', 'date_format:Y-m-d'], 'method' => ['required', Rule::in(['quantity', 'outcomes', 'linked-task'])], 'quantity' => ['nullable', 'required_if:method,quantity', 'integer', 'min:1'], 'unit' => ['nullable', 'required_if:method,quantity', Rule::in(['questions', 'exercises', 'worksheets', 'tasks', 'jobcards', 'evidence', 'other'])], 'custom_unit' => ['nullable', 'required_if:unit,other', 'string', 'max:100'], 'criteria' => ['nullable', 'required_if:method,outcomes', 'string', 'max:5000'], 'observable' => ['exclude_unless:method,outcomes', 'accepted'], 'evidence_method' => ['required', Rule::in(['portal', 'worksheet', 'observation', 'discussion', 'other'])], 'relevance' => ['required', Rule::in(['block', 'englishmaths', 'correction', 'review', 'workplace', 'other'])], 'learning_reference' => ['required', 'string', 'max:250'], 'support' => ['required', 'string', 'max:2000'], 'achievable' => ['accepted'], 'agreed' => ['accepted'], 'learning_task_id' => ['nullable', 'required_if:method,linked-task', 'integer'], 'version' => $action ? ['required', 'integer'] : ['prohibited']]);
+        $data = $r->validate(['source_task_id' => ['nullable','required_with:source_binding','integer'], 'source_binding' => ['nullable','required_with:source_task_id','string','size:64'], 'title' => ['required', 'string', 'max:2000'], 'owner' => ['required', Rule::in(SmartAction::OWNERS)], 'due_date' => ['nullable', 'date_format:Y-m-d'], 'method' => ['required', Rule::in(['quantity', 'outcomes', 'linked-task'])], 'quantity' => ['nullable', 'required_if:method,quantity', 'integer', 'min:1'], 'unit' => ['nullable', 'required_if:method,quantity', Rule::in(['questions', 'exercises', 'worksheets', 'tasks', 'jobcards', 'evidence', 'other'])], 'custom_unit' => ['nullable', 'required_if:unit,other', 'string', 'max:100'], 'criteria' => ['nullable', 'required_if:method,outcomes', 'string', 'max:5000'], 'observable' => ['exclude_unless:method,outcomes', 'accepted'], 'evidence_method' => ['required', Rule::in(['portal', 'worksheet', 'observation', 'discussion', 'other'])], 'relevance' => ['required', Rule::in(['block', 'englishmaths', 'correction', 'review', 'workplace', 'other'])], 'learning_reference' => ['required', 'string', 'max:250'], 'support' => ['required', 'string', 'max:2000'], 'achievable' => ['accepted'], 'agreed' => ['accepted'], 'learning_task_id' => ['nullable', 'required_if:method,linked-task', 'integer'], 'version' => $action ? ['required', 'integer'] : ['prohibited']]);
         DB::transaction(function () use ($r, $apprentice, $action, $data): void {
-            Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->manage($r,$fresh),403);
             $a = $action ? SmartAction::whereKey($action->id)->lockForUpdate()->firstOrFail() : new SmartAction(['apprentice_id' => $apprentice->id, 'created_by' => $r->user()->id]);
             if ($a->exists) {
                 $this->version($r, $a);
@@ -59,11 +76,16 @@ class SmartActionController extends Controller
             }
             $linked = null;
             if ($data['method'] === 'linked-task') {
-                $linked = LearningTask::where('apprentice_id', $apprentice->id)->find($data['learning_task_id']);
+                $linked = LearningTask::where('apprentice_id', $apprentice->id)->lockForUpdate()->find($data['learning_task_id']);
                 if (! $linked || (! $a->exists && $linked->status !== 'Referred')) {
                     throw ValidationException::withMessages(['learning_task_id' => 'Choose a referred task belonging to this apprentice.']);
                 }if (SmartAction::where('apprentice_id', $apprentice->id)->where('learning_task_id', $linked->id)->when($a->exists, fn ($q) => $q->where('id', '!=', $a->id))->exists()) {
                     throw ValidationException::withMessages(['learning_task_id' => 'This task already has an action. Open the existing action.']);
+                }
+            }
+            if (filled($data['source_task_id']??null)) {
+                if ($a->exists || ! $linked || $linked->id !== (int)$data['source_task_id'] || ! $linked->due_date || \App\Support\ActionProposals::binding($linked) !== $data['source_binding']) {
+                    throw ValidationException::withMessages(['source_binding'=>'The proposed source task or decision changed. Reopen the proposal and agree the current target.']);
                 }
             }
             if ($a->exists && $a->learning_task_id && (! $linked || $linked->id !== $a->learning_task_id)) {
@@ -76,7 +98,7 @@ class SmartActionController extends Controller
                 'quantity' => $data['quantity'].' '.($data['unit'] === 'other' ? $data['custom_unit'] : $data['unit']),'outcomes' => $data['criteria'],default => 'Approval of linked task '.$linked->reference
             };
             $history = $a->history ?? [];
-            $history[] = ['event' => 'target_saved', 'title' => $data['title'], 'measure' => $measure, 'due_date' => $linked ? $linked->due_date?->toDateString() : ($data['due_date'] ?? null), 'by' => $r->user()->id, 'at' => now()->toIso8601String()];
+            $history[] = ['event' => 'target_saved', 'proposal_source' => filled($data['source_task_id']??null) ? ['task_id'=>(int)$data['source_task_id'],'binding'=>$data['source_binding']] : null, 'title' => $data['title'], 'measure' => $measure, 'due_date' => $linked ? $linked->due_date?->toDateString() : ($data['due_date'] ?? null), 'by' => $r->user()->id, 'at' => now()->toIso8601String()];
             $a->fill(collect($data)->only('title', 'owner', 'method', 'evidence_method', 'relevance', 'learning_reference', 'support')->all());
             $a->learning_task_id = $linked?->id;
             $a->due_date = $linked ? null : ($data['due_date'] ?? null);

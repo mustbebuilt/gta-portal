@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Support;
+
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Support\Facades\DB;
+
+class CloudReadiness
+{
+    // Read-only diagnostic. Never echoes environment values, credentials or database errors.
+    public static function inspect(bool $database=false): array
+    {
+        $checks=[];
+        $add=function(string $name,bool $pass,string $action) use(&$checks): void {$checks[]=['check'=>$name,'status'=>$pass?'pass':'blocked','action'=>$pass?'Configuration present; actual staging acceptance still required.':$action];};
+        $add('php',version_compare(PHP_VERSION,'8.4.1','>='),'Select PHP 8.4.1+; the tested runtime is PHP 8.4.27.');
+        $add('hosted_environment',app()->environment('staging'),'Use a separate Cloud staging environment; this local checkout is not a Cloud test.');
+        $add('debug_disabled',config('app.debug')===false,'Set APP_DEBUG=false.');
+        $key=(string)config('app.key');$rawKey=str_starts_with($key,'base64:')?base64_decode(substr($key,7),true):$key;$add('application_key',is_string($rawKey) && \Illuminate\Encryption\Encrypter::supported($rawKey,(string)config('app.cipher')),'Use the environment application key. Preserve any existing key; do not generate over an existing application.');
+        $url=parse_url((string)config('app.url'));$add('https_url',($url['scheme']??null)==='https' && !empty($url['host']),'Set APP_URL to the actual HTTPS staging hostname.');
+        $web=app(Kernel::class)->getMiddlewareGroups()['web']??[];
+        $add('hosted_web_gate',in_array(\App\Http\Middleware\LocalTestOnly::class,$web,true) && StagingAccess::errors()===[],'Use APP_ENV=staging, explicitly enable staging access and satisfy its HTTPS/key/session/cache profile. Production access remains blocked; actual Cloud acceptance is separate.');
+        $driver=config('database.default');$add('database_driver',in_array($driver,['mysql','mariadb'],true),'Confirm the target database. This release targets MySQL/MariaDB; SQLite tests do not verify it.');
+        $add('pdo_mysql',extension_loaded('pdo_mysql'),'Enable the PDO MySQL extension in the selected Cloud PHP runtime.');
+        $add('shared_sessions',in_array(config('session.driver'),['database','redis'],true),'Use database or Redis sessions, with matching provisioned resources/tables.');
+        $add('secure_sessions',config('session.secure')===true && config('session.encrypt')===true,'Enable secure encrypted session cookies for the HTTPS environment.');
+        $add('shared_cache',in_array(config('cache.default'),['database','redis'],true),'Use a shared database/Redis cache for rate limits and scheduler locks.');
+        try{$disk=PrivateEvidence::diskName();$diskDriver=config('filesystems.disks.'.$disk.'.driver');$diskOk=$diskDriver==='s3';}catch(\Throwable){$diskOk=false;}
+        $add('durable_private_evidence',$diskOk,'Attach a private S3-compatible bucket and configure/pin the permitted evidence disk; migrate and reconcile any earlier files.');
+        $add('s3_adapter',class_exists(\League\Flysystem\AwsS3V3\AwsS3V3Adapter::class),'Restore the supplied locked S3 dependency with composer install; verify private bucket configuration and actual staging access.');
+        $checks[]=['check'=>'database_connection_and_migrations','status'=>'not_checked','action'=>'Run with --database in the authorised staging environment to perform read-only connection/schema checks.'];
+        if($database){
+            if(!in_array($driver,['mysql','mariadb'],true)){$checks[count($checks)-1]=['check'=>'database_connection_and_migrations','status'=>'blocked','action'=>'Choose the target MySQL/MariaDB connection before probing; no fallback SQLite database was opened.'];}
+            else{
+                try{
+                    $connection=DB::connection();$connection->select('select 1');$repo=app('migration.repository');
+                    if(!$repo->repositoryExists()){$ok=false;}else{$files=app('migrator')->getMigrationFiles([database_path('migrations')]);$ok=count(array_diff(array_keys($files),$repo->getRan()))===0;}
+                    $checks[count($checks)-1]=['check'=>'database_connection_and_migrations','status'=>$ok?'pass':'blocked','action'=>$ok?'Connection and migration names checked read-only; schema equivalence/data correctness are not certified.':'Migration repository missing or migrations pending. Review actual schema and apply incremental migrations in staging; no migration was run.'];
+                }catch(\Throwable){$checks[count($checks)-1]=['check'=>'database_connection_and_migrations','status'=>'blocked','action'=>'Staging connection/schema probe failed. Check credentials/network/privileges privately; no database change was attempted.'];}
+            }
+        }
+        $blocked=count(array_filter($checks,fn($c)=>$c['status']==='blocked'));
+        return ['target'=>'Laravel Cloud staging','result'=>$blocked?'blocked':'configuration_checks_only','blocking_checks'=>$blocked,'checks'=>$checks,'database_probe_requested'=>$database,'writes_performed'=>false,'deployment_performed'=>false,'limits'=>['This is a diagnostic, not deployment approval or actual Cloud acceptance.','Staging gate and one-time empty-database administrator bootstrap are implemented; actual Cloud access, storage, first real account, schema mapping, backups and target-engine/browser acceptance remain unverified.','Do not point this standalone application at an existing portal database without reviewed schema/source-ID mapping.']];
+    }
+}

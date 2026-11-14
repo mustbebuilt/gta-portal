@@ -13,3 +13,10 @@
 .staff-entry{padding:20px 0;border-bottom:1px solid var(--line)}.staff-entry:last-child{border-bottom:0}.staff-entry h3{font-size:18px}.staff-entry h4{font-size:15px}
 @media print{.survey-private{display:none!important}}
 .score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:18px}.score-grid meter{width:100%;height:18px;accent-color:#687b8d}.score-grid strong{display:block;font-size:14px}
+
+.report-meter{display:block;width:100%;max-width:460px;height:20px;accent-color:var(--accent);margin:12px 0} .panel form>button,.panel form>.form-actions{margin-top:16px} .form-grid textarea{min-height:92px} .panel summary{overflow-wrap:anywhere} @media(max-width:650px){.form-actions>*{max-width:100%}.panel fieldset{min-width:0}.page-heading>.toolbar{width:100%}.toolbar .button{flex:1 1 160px}}
+
+.print-full-answer{display:none}@media print{textarea.has-print-answer{display:none!important}.print-full-answer{display:block;white-space:pre-wrap;overflow-wrap:anywhere;break-inside:auto}.panel:has([data-print-full-answer]){break-inside:auto}.form-grid:has([data-print-full-answer]){display:block}}
+
+/* Individual delivery calendar: retain column labels and allow horizontal scrolling on narrow screens. */
+.table-wrap{max-width:100%;overflow-x:auto}.table-wrap table{border-collapse:collapse;width:100%;min-width:680px}.table-wrap th,.table-wrap td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}.table-wrap input{min-width:140px}.table-wrap td:last-child input{min-width:90px;width:110px}

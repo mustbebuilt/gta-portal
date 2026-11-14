@@ -2,29 +2,8 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
-@source '../views/**/*.blade.php';
 
 @theme {
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    --color-gta-charcoal: #10141d;
-    --color-gta-header: #171c29;
-    --color-gta-accent: #7059d3;
-    --color-gta-steel: #254c6a;
-    --color-gta-bg: #f4f5f8;
-}
-
-/* GTA Approved Design Tokens from v1.2.6 */
-:root {
-    --sim-blue: #7059d3;
-    --sim-text: #202b3d;
-    --sim-line: #dfe3ec;
-    --sim-soft: #f3f1fc;
-    --dark-blue: #58429b;
-    --view-blue: #254c6a;
-}
-
-[data-theme="dark"] {
-    --sim-text: #e7eaf2;
-    --sim-line: #283245;
-    --sim-soft: #1b2130;
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
 }

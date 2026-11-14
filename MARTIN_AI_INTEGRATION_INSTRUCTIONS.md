@@ -1,3 +1,47 @@
+> Current checkpoint v0.33.0 — two linked batches.
+
+v0.32.0 adds exact-preview, protected evidence copy plans; v0.33.0 adds explicit once-only staging execution with exclusive destination creation, source SHA-256/size validation, destination readback, final verification and technical audit. Original files, application references and retained snapshots are not changed. No storage cutover or production execution is enabled. Read MARTIN_BATCH_v0.33.0.md and TEST_RESULTS.json for current instructions/evidence. One additive migration; no new dependency. Earlier entries describe historical scope.
+
+> Current checkpoint v0.31.0. Read CLOUD_START_HERE_MARTIN.md, MARTIN_BATCH_v0.31.0.md and TEST_RESULTS.json first.
+
+A read-only migration inventory now covers registered private uploads and retained file metadata/links across eight portal source families. Default mode reads database references/configuration only. Explicit verification checks each logical disk/path once against SHA-256 and declared size, flags problems and re-scans for drift. It does not move, relink, delete or approve migration of evidence. Earlier entries/counts retain historical scope.
+
+> Current checkpoint v0.30.0. Read CLOUD_START_HERE_MARTIN.md, MARTIN_BATCH_v0.30.0.md and TEST_RESULTS.json first.
+
+Native database compatibility is now checked against MariaDB 11.8.6 through PDO MySQL as well as SQLite. A real fresh-install index-length blocker is corrected, with a data-preserving forward normalisation for older SQLite checkpoints. Native audit-failure, persistence and initial-administrator concurrency tests are included. Actual Cloud/Oracle MySQL/schema acceptance remains separate. Earlier notes/counts below retain historical scope.
+
+> Current checkpoint v0.29.0. Read CLOUD_START_HERE_MARTIN.md, MARTIN_BATCH_v0.29.0.md and TEST_RESULTS.json first.
+
+Cloud-compatible private S3 evidence storage now has a locked runtime adapter, bucket-level permission handling, file-only existence checks and an explicit synthetic storage probe. Original disk references and records are preserved. Actual Cloud bucket visibility, resource configuration and deployment still need Martin’s environment. Earlier instructions/counts below are historical.
+
+> Current checkpoint v0.28.0. Read CLOUD_START_HERE_MARTIN.md, MARTIN_BATCH_v0.28.0.md and TEST_RESULTS.json first.
+
+Controlled hosted staging access and once-only first-administrator setup are implemented and tested locally. Explicit staging flags, valid application key, HTTPS origin/requests, secure encrypted shared sessions and shared cache are required. Production remains blocked. Existing records/accounts are never overwritten; actual Cloud resources and repository integration remain unverified. Earlier notes/counts below are historical.
+
+Laravel Cloud is the confirmed target. Read CLOUD_START_HERE_MARTIN.md first for actual setup blockers, value-free environment reference and the read-only gta:cloud-check command. The local-only web gate remains until integration against Martin’s actual repository; this pack has not been deployed.
+
+> Current checkpoint v0.27.0. Read MARTIN_BATCH_v0.27.0.md, CHANGES_v0.27.0.md and TEST_RESULTS.json first.
+
+Review reminders now use checked actual meeting dates and sourced Active programme status. Current assigned tutor and mentor receive one in-portal prompt per source when due today or overdue. Seen does not complete a review or reset its date. Superseded sources and old assignments cannot be acknowledged. Existing evidence and history are retained. Automatic generation stays disabled by default. Earlier notes/counts below are historical.
+
+> Current checkpoint v0.26.0. Read MARTIN_BATCH_v0.26.0.md, CHANGES_v0.26.0.md and TEST_RESULTS.json first.
+
+Externally signed progress-review records, independent manager checks and actual-meeting-based ten-week tracking are implemented/tested locally. Pending copies do not reset dates. The latest active checked meeting sets the next reference at meeting + 70 days. Electronic signing, employer portal access, complete historical compliance and live deployment remain separate. Current evidence: TEST_RESULTS.json. Earlier entries/counts below are historical.
+
+> Current checkpoint v0.25.0. Read MARTIN_BATCH_v0.25.0.md, CHANGES_v0.23.0.md through CHANGES_v0.25.0.md and TEST_RESULTS.json first. The prior narrative/counts below retain historical scope. Import previews require independent checking; operational packs do not replace complete history, signing, funding or live acceptance.
+
+> Current checkpoint v0.22.0. Read MARTIN_BATCH_v0.22.0.md, CHANGES_v0.19.0.md through CHANGES_v0.22.0.md and TEST_RESULTS.json first. Prior instructions/counts below retain historical scope. Scheduling is disabled by default and sends no external messages; source/identity/signature/live boundaries remain.
+
+> Current checkpoint: v0.18.0, consolidating v0.15.0-v0.18.0. Read MARTIN_BATCH_v0.18.0.md and the four CHANGES files first. Current evidence is in TEST_RESULTS.json. Provider operational approval and readiness do not replace formal applicability, signatures, funding decisions or live acceptance. Earlier text/counts below retain their historical scope.
+
+> Current checkpoint: v0.14.0. Read MARTIN_BATCH_v0.14.0.md and CHANGES_v0.14.0.md first; current tests are in TEST_RESULTS.json. Panel reflections are now supplied. Earlier notes/counts below retain their historical scope.
+
+> Current v0.13.0: first read MARTIN_BATCH_v0.13.0.md and TEST_RESULTS.json. The account-version migration/login/middleware update deliberately requires old sessions to sign in again. Recovery is local sink-only and off by default. Current addenda supersede historical counts/features below.
+
+> Current v0.12.0: read MARTIN_BATCH_v0.12.0.md and TEST_RESULTS.json first. Marking reminders now work in the portal; no email or schedule is enabled. Current addenda and BATCH_QUEUE.json supersede old pending-feature lists/counts below.
+
+> Current v0.11.0 checkpoint: read MARTIN_BATCH_v0.11.0.md and TEST_RESULTS.json first. The private evidence service is now configurable; actual adapter/bucket setup and file migration are still staging work. Historical pending-feature lists and counts below are superseded by the current queue/addendum.
+
 # GTA portal: instructions for Martin and his development AI
 
 Documentation revision 1.0 · 12 November 2026 · Application checkpoint v0.7.0

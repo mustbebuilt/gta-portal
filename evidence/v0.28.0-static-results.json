@@ -1,0 +1,20 @@
+{
+  "phpSyntaxFiles": 331,
+  "javascriptSyntaxFiles": 1,
+  "bladeCompilation": "passed",
+  "compiledBladeSyntax": "passed",
+  "originalPdfs": 41,
+  "pdfHashMatches": 41,
+  "additionalProgrammePdfs": 90,
+  "finalReleasePdfs": 200,
+  "priorFinalReleasePdfsRetained": 200,
+  "totalRetainedSourcePdfs": 531,
+  "additionalProgrammePdfHashes": "all match source receipts",
+  "privateEvidenceCallers": "all use the shared configured service",
+  "originalBrandAssets": "unchanged",
+  "brandAssetFiles": 2,
+  "responsiveViewport": "present; layout not rendered",
+  "composerValidation": "Not performed by this script; see checkpoint-specific TEST_RESULTS.json",
+  "platformRequirements": "Not performed by this script; see checkpoint-specific TEST_RESULTS.json",
+  "visualBrowserVerification": false
+}

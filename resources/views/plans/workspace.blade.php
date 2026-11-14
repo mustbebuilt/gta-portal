@@ -2,6 +2,7 @@
 @section('title','Training-plan preparation')
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }} · {{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Training-plan preparation</h1><p>A draft assembled from saved portal records.</p></div><div class="toolbar"><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Back to apprentice</a><a class="button" href="{{ route('curriculum.show',$apprentice) }}">Blocks and KSB source</a></div></header>
+<p><a class="button" href="{{ route('delivery.show',$apprentice) }}">Individual delivery plan and block calendar</a></p>
 @include('learning.errors')
 <div class="test-notice">Not an approved individual training plan. Source applicability, primary KSB allocation, block calendar, employer agreement and gateway checks remain to be confirmed. Saving or approving an RPL assessment does not apply a reduction.</div>
 @if(!$sourceOk)<div class="errors">The source changed. Saved records are retained; controlled reconciliation is required before further changes.</div>@endif

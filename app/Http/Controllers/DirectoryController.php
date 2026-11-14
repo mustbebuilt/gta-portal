@@ -3,7 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SaveDirectoryRequest;
+use App\Models\User;
+use App\Models\Apprentice;
+use App\Models\LearningTask;
 use App\Support\DirectoryCatalog;
+use App\Support\AccountAccess;
+use App\Support\SupportAccess;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,11 +44,18 @@ class DirectoryController extends Controller
     public function store(SaveDirectoryRequest $request, string $kind): RedirectResponse
     {
         $record = DB::transaction(function () use ($request, $kind) {
+            if ($kind === 'staff') {
+                User::orderBy('id')->lockForUpdate()->get(['id']);
+            }
             $record = DirectoryCatalog::blank($kind);
             $this->fillRecord($record, $kind, $request->safe()->except('record_version'));
             if ($kind === 'staff') {
                 $record->password = Str::password(32);
-            }$record->save();
+            }
+            if ($kind === 'staff') {
+                SupportAccess::assertSingleLead($record);
+            }
+            $record->save();
             $this->audit($request, $kind, $record->id, 'created');
 
             return $record;
@@ -71,12 +83,25 @@ class DirectoryController extends Controller
     public function update(SaveDirectoryRequest $request, string $kind, int $record): RedirectResponse
     {
         DB::transaction(function () use ($request, $kind, $record) {
+            if ($kind === 'staff') {
+                User::orderBy('id')->lockForUpdate()->get(['id']);
+            }
             $row = DirectoryCatalog::query($kind)->whereKey($record)->lockForUpdate()->firstOrFail();
             if ($row->record_version !== (int) $request->validated('record_version')) {
                 throw ValidationException::withMessages(['record_version' => 'This record changed while you were editing. Reopen it before saving.']);
             }$this->fillRecord($row, $kind, $request->safe()->except('record_version'));
-            $row->record_version++;
-            $row->save();
+            if ($kind === 'programmes' && $row->isDirty(['standard_code', 'version']) && LearningTask::whereIn('apprentice_id', Apprentice::where('programme_id', $row->id)->select('id'))->exists()) {
+                throw ValidationException::withMessages(['standard_code' => 'This programme has assigned task history. Create a separate programme/version instead of relabelling its source.']);
+            }
+            if ($kind === 'staff') {
+                SupportAccess::assertSingleLead($row);
+            }
+            if ($kind === 'staff' && $row->isDirty(['email', 'active', 'role', 'subject_scope'])) {
+                AccountAccess::invalidate($row, $request->user()->id, 'staff_access_changed', 'administrator');
+            } else {
+                $row->record_version++;
+                $row->save();
+            }
             $this->audit($request, $kind, $row->id, 'updated');
         });
 

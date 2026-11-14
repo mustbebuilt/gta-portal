@@ -50,7 +50,7 @@ class PrivateEvidenceActivityTest extends TestCase
 
     public function test_qualification_certificate_is_private_and_does_not_set_achievement(): void
     {
-        Storage::fake('local');
+        Storage::fake(config('evidence.disk'));
         $admin = $this->actor('admin');
         $l = $this->actor('apprentice');
         $a = Apprentice::factory()->create(['user_id' => $l->id]);
@@ -60,7 +60,7 @@ class PrivateEvidenceActivityTest extends TestCase
         $file = $q->files[0];
         $this->assertSame('Working towards', $q->status);
         $this->assertNull($q->achievement_date);
-        Storage::disk('local')->assertExists($file['path']);
+        Storage::disk(config('evidence.disk'))->assertExists($file['path']);
         $this->actingAs($l)->get('/apprentices/'.$a->id.'/maths-english')->assertOk()->assertSee('fictional-certificate.pdf')->assertDontSee($file['path']);
         $this->get('/qualifications/'.$q->id.'/files/'.$file['id'])->assertOk()->assertDownload();
         $this->actingAs($this->actor('employer'))->get('/qualifications/'.$q->id.'/files/'.$file['id'])->assertForbidden();
@@ -68,7 +68,7 @@ class PrivateEvidenceActivityTest extends TestCase
 
     public function test_qualification_upload_retains_subject_scope_and_rejects_stale_or_executable(): void
     {
-        Storage::fake('local');
+        Storage::fake(config('evidence.disk'));
         $u = $this->actor('functional_skills_tutor');
         $u->subject_scope = 'maths';
         $u->save();
@@ -78,7 +78,7 @@ class PrivateEvidenceActivityTest extends TestCase
         $this->actingAs($this->actor('admin'))->post('/qualifications/'.$q->id.'/files', ['version' => 0, 'purpose' => 'Certificate', 'file' => UploadedFile::fake()->create('proof.pdf', 4, 'application/pdf')])->assertSessionHasErrors('version');
         $this->post('/qualifications/'.$q->id.'/files', ['version' => 1, 'purpose' => 'Certificate', 'file' => UploadedFile::fake()->createWithContent('payload.php', '<?php echo "bad";')])->assertSessionHasErrors('file');
         $this->assertNull($q->fresh()->files);
-        $this->assertSame([], Storage::disk('local')->allFiles());
+        $this->assertSame([], Storage::disk(config('evidence.disk'))->allFiles());
     }
 
     public function test_support_activity_records_unknown_duration_and_actual_approved_source_without_otj(): void
@@ -123,7 +123,7 @@ class PrivateEvidenceActivityTest extends TestCase
 
     public function test_support_evidence_upload_and_download_stay_restricted_and_bound_to_original_plan(): void
     {
-        Storage::fake('local');
+        Storage::fake(config('evidence.disk'));
         [$p,$a,$u] = $this->plan();
         $this->actingAs($u)->post('/support-plans/'.$p->id.'/files', ['version' => 2, 'purpose' => 'Fictional coaching record', 'file' => UploadedFile::fake()->createWithContent('support.txt', 'Fictional support record only')])->assertRedirect()->assertSessionHasNoErrors();
         $file = $p->fresh()->files[0];
@@ -138,18 +138,18 @@ class PrivateEvidenceActivityTest extends TestCase
 
     public function test_closed_support_records_reject_new_files_and_activities_but_retain_history(): void
     {
-        Storage::fake('local');
+        Storage::fake(config('evidence.disk'));
         [$p,$a,$u] = $this->plan();
         $this->actingAs($u)->post('/support-plans/'.$p->id.'/close', ['version' => 2, 'confirmed' => 1, 'outcome' => 'Support complete with arrangements retained'])->assertRedirect()->assertSessionHasNoErrors();
         $p = $p->fresh();
         $this->post('/support-plans/'.$p->id.'/files', ['version' => $p->version, 'purpose' => 'Late file', 'file' => UploadedFile::fake()->createWithContent('late.txt', 'Fictional')])->assertSessionHasErrors('file');
         $this->post('/support-plans/'.$p->id.'/activities', $this->activity($p, $u))->assertSessionHasErrors('approved_at');
-        $this->assertSame([], Storage::disk('local')->allFiles());
+        $this->assertSame([], Storage::disk(config('evidence.disk'))->allFiles());
     }
 
     public function test_private_file_audit_failure_rolls_back_database_and_cleans_new_file(): void
     {
-        Storage::fake('local');
+        Storage::fake(config('evidence.disk'));
         $q = Qualification::factory()->create();
         $u = $this->actor('admin');
         DB::listen(function (QueryExecuted $event): void {
@@ -160,6 +160,6 @@ class PrivateEvidenceActivityTest extends TestCase
         $this->actingAs($u)->post('/qualifications/'.$q->id.'/files', ['version' => 1, 'purpose' => 'Fictional', 'file' => UploadedFile::fake()->create('proof.pdf', 4, 'application/pdf')])->assertStatus(500);
         $this->assertNull($q->fresh()->files);
         $this->assertSame(1, $q->fresh()->version);
-        $this->assertSame([], Storage::disk('local')->allFiles());
+        $this->assertSame([], Storage::disk(config('evidence.disk'))->allFiles());
     }
 }

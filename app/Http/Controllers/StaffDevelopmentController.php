@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\PrivateEvidence;
+
 use App\Models\Apprentice;
 use App\Models\LearningTask;
 use App\Models\StaffDevelopmentProfile as Profile;
 use App\Models\User;
-use App\Support\PrivateEvidence;
+use App\Support\AppraisalTemplate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -67,7 +68,20 @@ class StaffDevelopmentController extends Controller
             $q->where(fn ($q) => $q->where('id', $r->user()->id)->orWhereIn('id', $ids));
         }
 
-        return view('staff.index', ['people' => $q->orderBy('name')->get()]);
+        $people = $q->orderBy('name')->get();
+        $profiles = Profile::whereIn('user_id', $people->pluck('id'))->get()->keyBy('user_id');
+        $summary = [];
+        foreach ($people as $person) {
+            $profile = $profiles->get($person->id);
+            $v = $profile?->payload ?? [];
+            $manager = $person->id !== $r->user()->id && $this->manage($r, $person);
+            $entries = collect($v['entries'] ?? [])->filter(fn ($e) => $manager || ($e['kind'] ?? null) === 'cpd' || ($e['shared'] ?? false));
+            $actions = collect($v['actions'] ?? [])->where('status', '!=', 'Completed');
+            $planned = collect($v['schedules'] ?? [])->where('status', 'Planned');
+            $summary[$person->id] = ['recorded' => (bool) $profile, 'entries' => $entries->count(), 'open_actions' => $actions->count(), 'overdue_actions' => $actions->filter(fn ($a) => filled($a['due'] ?? null) && $a['due'] < today()->toDateString())->count(), 'due_reviews' => $planned->filter(fn ($a) => filled($a['due'] ?? null) && $a['due'] <= today()->toDateString())->count(), 'date_checks' => $actions->filter(fn ($a) => ! filled($a['due'] ?? null))->count()];
+        }
+
+        return view('staff.index', compact('people', 'summary'));
     }
 
     public function show(Request $r, User $target): View
@@ -123,7 +137,7 @@ class StaffDevelopmentController extends Controller
     {
         $this->assertView($r, $target);
         $manage = $this->manage($r, $target);
-        $data = $r->validate(['version' => ['required', 'integer'], 'entry_id' => ['nullable', 'string'], 'kind' => ['required', Rule::in(array_keys(self::KINDS))], 'date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'title' => ['required', 'string', 'max:250'], 'summary' => ['required', 'string', 'max:20000'], 'status' => ['nullable', Rule::in(['Planned', 'In progress', 'Completed'])], 'hours' => ['nullable', 'numeric', 'min:0', 'max:9999'], 'evidence' => ['nullable', 'string', 'max:5000'], 'private_notes' => ['nullable', 'string', 'max:20000'], 'shared' => ['nullable', 'boolean'], 'schedule_id' => ['nullable', 'string'], 'tutor121' => ['nullable', 'array']]);
+        $data = $r->validate(['version' => ['required', 'integer'], 'entry_id' => ['nullable', 'string'], 'kind' => ['required', Rule::in(array_keys(self::KINDS))], 'date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'title' => ['required', 'string', 'max:250'], 'summary' => ['required', 'string', 'max:20000'], 'status' => ['nullable', Rule::in(['Planned', 'In progress', 'Completed'])], 'hours' => ['nullable', 'numeric', 'min:0', 'max:9999'], 'evidence' => ['nullable', 'string', 'max:5000'], 'private_notes' => ['nullable', 'string', 'max:20000'], 'shared' => ['nullable', 'boolean'], 'schedule_id' => ['nullable', 'string'], 'tutor121' => ['nullable', 'array'], 'appraisal' => ['nullable', 'array']]);
         if (! $manage) {
             abort_unless($data['kind'] === 'cpd', 403);
             if (filled($data['private_notes'] ?? null)) {
@@ -140,7 +154,25 @@ class StaffDevelopmentController extends Controller
         if ($tutorFields && ($data['kind'] !== 'one-to-one' || $target->role !== 'tutor' || ! $manage)) {
             throw ValidationException::withMessages(['tutor121' => 'HR3.9 headings apply only to a tutor one-to-one recorded by the manager.']);
         }
-        DB::transaction(function () use ($r, $target, $data, $manage, $tutorFields): void {
+        $appraisal = [];
+        foreach (AppraisalTemplate::FIELDS as $key => $label) {
+            $value = $r->validate(['appraisal.'.$key => ['nullable', 'string', 'max:10000']]);
+            if (filled($value['appraisal'][$key] ?? null)) {
+                $appraisal[$key] = $value['appraisal'][$key];
+            }
+        }
+        foreach (['self_scores', 'manager_scores'] as $side) {
+            foreach (AppraisalTemplate::AREAS as $key => $label) {
+                $value = $r->validate(['appraisal.'.$side.'.'.$key => ['nullable', Rule::in([...range(1, 10), 'Not applicable', 'Not observed'])]]);
+                if (filled($value['appraisal'][$side][$key] ?? null)) {
+                    $appraisal[$side][$key] = $value['appraisal'][$side][$key];
+                }
+            }
+        }
+        if ($appraisal && (! $manage || $data['kind'] !== 'appraisal')) {
+            throw ValidationException::withMessages(['appraisal' => 'Source appraisal fields can be recorded only by the authorised manager on an appraisal entry.']);
+        }
+        DB::transaction(function () use ($r, $target, $data, $tutorFields, $manage, $appraisal): void {
             $p = $this->locked($r, $target);
             $payload = $p->payload;
             $entries = $payload['entries'];
@@ -184,7 +216,7 @@ class StaffDevelopmentController extends Controller
                 unset($snapshot['history']);
                 $history[] = ['at' => now()->toIso8601String(), 'by' => $r->user()->id, 'before' => $snapshot];
             }
-            $entry = ['id' => $id, 'kind' => $data['kind'], 'revision' => ($old['revision'] ?? 0) + 1, 'date' => $data['date'], 'title' => $data['title'], 'summary' => $data['summary'], 'status' => $status, 'hours' => $data['kind'] === 'cpd' ? ($data['hours'] ?? null) : null, 'evidence' => $data['evidence'] ?? null, 'shared' => $data['kind'] === 'cpd' || (bool) ($data['shared'] ?? false), 'private_notes' => $manage ? ($data['private_notes'] ?? null) : ($old['private_notes'] ?? null), 'author' => $old['author'] ?? $r->user()->name, 'comments' => $old['comments'] ?? [], 'history' => $history, 'files' => $old['files'] ?? [], 'tutor121' => $tutorFields ?: ($old['tutor121'] ?? []), 'schedule_id' => $scheduleId, 'recording_mode' => $scheduleId ? 'Planned' : ($data['kind'] === 'observation-note' ? 'Brief teaching note' : (in_array($data['kind'], ['observation', 'one-to-one', 'appraisal'], true) ? 'Unplanned' : ''))];
+            $entry = ['id' => $id, 'kind' => $data['kind'], 'revision' => ($old['revision'] ?? 0) + 1, 'date' => $data['date'], 'title' => $data['title'], 'summary' => $data['summary'], 'status' => $status, 'hours' => $data['kind'] === 'cpd' ? ($data['hours'] ?? null) : null, 'evidence' => $data['evidence'] ?? null, 'shared' => $data['kind'] === 'cpd' || (bool) ($data['shared'] ?? false), 'private_notes' => $manage ? ($data['private_notes'] ?? null) : ($old['private_notes'] ?? null), 'author' => $old['author'] ?? $r->user()->name, 'comments' => $old['comments'] ?? [], 'history' => $history, 'files' => $old['files'] ?? [], 'tutor121' => $tutorFields ?: ($old['tutor121'] ?? []), 'appraisal' => array_key_exists('appraisal', $data) ? $appraisal : ($old['appraisal'] ?? []), 'schedule_id' => $scheduleId, 'recording_mode' => $scheduleId ? 'Planned' : ($data['kind'] === 'observation-note' ? 'Brief teaching note' : (in_array($data['kind'], ['observation', 'one-to-one', 'appraisal'], true) ? 'Unplanned' : ''))];
             if ($index === null) {
                 $entries[] = $entry;
             } else {
@@ -382,9 +414,9 @@ class StaffDevelopmentController extends Controller
         $this->assertView($r, $target);
         $manage = $this->manage($r, $target);
         $data = $r->validate(['version' => ['required', 'integer'], 'entry_id' => ['required', 'string'], 'file' => ['required', 'file', 'mimes:pdf,docx,png,jpg,jpeg,txt', 'extensions:pdf,docx,png,jpg,jpeg,txt', 'max:20480']]);
-        $path = null;
+        $fileEntry = null;
         try {
-            DB::transaction(function () use ($r, $target, $data, $manage, &$path): void {
+            DB::transaction(function () use ($r, $target, $data, $manage, &$fileEntry): void {
                 $p = $this->locked($r, $target);
                 $v = $p->payload;
                 $index = null;
@@ -396,16 +428,14 @@ class StaffDevelopmentController extends Controller
                     throw ValidationException::withMessages(['entry_id' => 'Choose a CPD, observation, one-to-one or appraisal record.']);
                 }if (! $manage && $v['entries'][$index]['kind'] !== 'cpd') {
                     abort(403);
-                }$path = $r->file('file')->store('staff-evidence', PrivateEvidence::diskName());
-                if (! $path) {
-                    throw new \RuntimeException('Evidence could not be stored.');
-                }$v['entries'][$index]['files'][] = ['id' => (string) Str::uuid(), 'path' => $path, 'name' => mb_substr(basename(str_replace('\\', '/', $r->file('file')->getClientOriginalName())), 0, 255), 'bytes' => $r->file('file')->getSize(), 'sha256' => hash_file('sha256', $r->file('file')->getRealPath()), 'at' => now()->toIso8601String(), 'by' => $r->user()->id];
+                }$fileEntry = PrivateEvidence::store($r->file('file'), 'staff-evidence', $r->user()->id);
+                $v['entries'][$index]['files'][] = [...$fileEntry, 'at' => $fileEntry['uploaded_at'], 'by' => $r->user()->id];
                 $p->payload = $v;
                 $this->commit($r, $target, $p, 'staff_evidence_added');
             });
         } catch (\Throwable $e) {
-            if ($path) {
-                PrivateEvidence::delete($path);
+            if ($fileEntry) {
+                PrivateEvidence::delete($fileEntry);
             }throw $e;
         }
 
@@ -419,8 +449,8 @@ class StaffDevelopmentController extends Controller
         $e = collect($p->payload['entries'])->firstWhere('id', $entry);
         abort_unless($e && ($this->manage($r, $target) || $e['kind'] === 'cpd' || $e['shared']), 403);
         $f = collect($e['files'] ?? [])->firstWhere('id', $file);
-        abort_unless($f && PrivateEvidence::exists($f['path']), 404);
+        abort_unless($f && PrivateEvidence::exists($f), 404);
 
-        return PrivateEvidence::download($f['path'], $f['name']);
+        return PrivateEvidence::download($f);
     }
 }

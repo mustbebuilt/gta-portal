@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\SupportAccess;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -35,7 +36,7 @@ class HelpController extends Controller
         if (in_array($role, ['admin', 'ceo', 'careers_adviser'], true)) {
             $guides[] = ['Careers adviser', 'Record advice', 'Open Careers to see apprentices currently assigned to you. Choose the actual discussion type: career progression or employment support. Record goals, advice and outcome, then measurable actions with an owner and deadline. Employers do not receive access to these records.'];
         }
-        if (in_array($role, ['admin', 'ceo', 'inclusion_lead', 'inclusion_member'], true)) {
+        if (SupportAccess::team($request->user())) {
             $guides[] = ['Inclusion', 'Follow up a concern', 'Open Support and retention. A new concern is separate from acknowledgement, classification and a support plan. Use the original inclusion markers, allocate an owner and record chronological weekly follow-ups and measurable targets. Keep approved teaching instructions separate from restricted case notes. Do not enter safeguarding case details. Survey receipt and Inclusion Team checks are tracked separately from the external questionnaire.'];
         }
         if (! in_array($role, ['apprentice', 'employer'], true)) {
@@ -52,6 +53,15 @@ class HelpController extends Controller
             $guides[] = ['Case-study author', 'Show evidenced impact', 'Create an anonymous case study using the structured fields. Do not copy personal, health or safeguarding details. Include the starting point, support, recorded difference, source references, limitations and next check. A different administrator or CEO must approve the exact version before Inspection Overview can use it. Internal approval is not permission for external publication.'];
         }
 
+        if (in_array($role, ['admin', 'ceo'], true)) {
+            $guides[] = ['Administration', 'Release training blocks', 'New programme task allocations enable sequence controls. Open Training blocks and tasks, then Administrator block controls. A later block opens after all five source tasks in each previous block are approved. Record a reason for an exception. An exception releases work; it does not approve a task, KSB or training plan. Existing task sets are unchanged until you enable sequence controls.'];
+        }
+        if (in_array($role, ['admin', 'ceo', 'tutor'], true)) {
+            $guides[] = ['Marking', 'Use the marking worklist', 'Open Marking worklist for submitted tasks. Tutors see only current main-tutor assignments; management sees the full queue. Overdue means more than seven calendar days since submission. Missing/future dates need checking. Administration can record in-portal reminders once per current submission and recipient. Marking a reminder seen does not approve the task; open the task for its normal tutor decision. No email is sent.'];
+            $guides[] = ['Sessions', 'Repeat a plan or correct a register', 'Choose the number of weekly sessions when planning. Each week has a separate saved roster and empty register. Check closures and holidays individually. To change a saved actual register, reopen it, enter the correction reason and save. The previous marks stay in history; new minutes replace the old subtotal.'];
+        }
+
+        $guides[] = ['Your account', 'Change your password', 'Use Change password to enter your current password and choose a new passphrase of at least 12 characters. You will be signed out afterwards. Older sessions are invalidated. Live password recovery is not enabled in this checkpoint; contact your GTA administrator. Local recovery tests use an internal mail sink only.'];
         return view('help.index', compact('guides'));
     }
 }

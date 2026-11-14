@@ -1,0 +1,63 @@
+{
+  "passed": 12,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "Configuration-only check creates no SDK network request",
+      "passed": true
+    },
+    {
+      "name": "Actual signed SDK upload, hash-read, unsigned denial and verified delete pass through HTTP fixture",
+      "passed": true
+    },
+    {
+      "name": "Serialised requests contain valid fixture SigV4 signatures and no object ACL/grant headers",
+      "passed": true
+    },
+    {
+      "name": "Anonymous probe uses an unsigned request to the configured API endpoint only",
+      "passed": true
+    },
+    {
+      "name": "An anonymously readable fixture object fails the probe and is removed",
+      "passed": true
+    },
+    {
+      "name": "Changed wire bytes fail SHA-256 readback and still clean up",
+      "passed": true
+    },
+    {
+      "name": "Anonymous redirect is inconclusive and not followed",
+      "passed": true
+    },
+    {
+      "name": "Denied cleanup reports the synthetic key and nonzero status without credential details",
+      "passed": true
+    },
+    {
+      "name": "Actual SDK evidence upload pins its disk and matches independently read persisted bytes",
+      "passed": true
+    },
+    {
+      "name": "A fresh PHP process with a changed default disk fingerprints, verifies and privately downloads the original pinned object",
+      "passed": true
+    },
+    {
+      "name": "Fresh-process SHA-256 check detects changed persisted bytes",
+      "passed": true
+    },
+    {
+      "name": "Missing object uses a file-only HEAD check without bucket listing",
+      "passed": true
+    }
+  ],
+  "transport": "Actual locked PHP AWS SDK HTTP requests to a local filesystem-backed SigV4-checking fixture",
+  "requests": 39,
+  "actualCloudAccess": false,
+  "realCredentialsOrLearnerData": false,
+  "limits": [
+    "Fixture is not full S3/R2 implementation or actual Cloud acceptance",
+    "No actual bucket/public aliases, private Cloud credentials, TLS endpoint, target database or deployment verified",
+    "Normal and failure fixtures prove application request/cleanup logic, not external infrastructure guarantees"
+  ]
+}

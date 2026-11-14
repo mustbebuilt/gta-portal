@@ -1,0 +1,23 @@
+{
+  "panel": {
+    "pages": 25,
+    "savedAnswerCharacters": 57618,
+    "exportedRepeatedLines": 1200,
+    "endMarkerPresent": true,
+    "currentCheckpointHeader": "v0.11.0"
+  },
+  "heavy-vehicle": {
+    "pages": 25,
+    "savedAnswerCharacters": 57618,
+    "exportedRepeatedLines": 1200,
+    "endMarkerPresent": true,
+    "currentCheckpointHeader": "v0.11.0"
+  },
+  "paint": {
+    "pages": 25,
+    "savedAnswerCharacters": 57618,
+    "exportedRepeatedLines": 1200,
+    "endMarkerPresent": true,
+    "currentCheckpointHeader": "v0.11.0"
+  }
+}

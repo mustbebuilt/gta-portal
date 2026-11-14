@@ -1,0 +1,51 @@
+{
+  "passed": 10,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "Fresh disposable staging schema migrates with copy plans and restricted technical audit",
+      "passed": true
+    },
+    {
+      "name": "Fictional saved upload and retained duplicate metadata exist on the private source disk",
+      "passed": true
+    },
+    {
+      "name": "Actual preview command reports one deduplicated object and creates no destination",
+      "passed": true
+    },
+    {
+      "name": "Actual record command pins exact preview and saves one protected plan",
+      "passed": true
+    },
+    {
+      "name": "Inspection in a fresh process performs no copy",
+      "passed": true
+    },
+    {
+      "name": "A stale expected version refuses before any destination write",
+      "passed": true
+    },
+    {
+      "name": "Actual execution writes exclusively, hash-verifies private bytes and records ordered technical events",
+      "passed": true
+    },
+    {
+      "name": "Replaying the same command refuses and retains the destination unchanged",
+      "passed": true
+    },
+    {
+      "name": "Fresh-process inspection preserves plan state and all original source records and file bytes",
+      "passed": true
+    },
+    {
+      "name": "CLI summaries omit private locators and original registered evidence still verifies after the copy",
+      "passed": true
+    }
+  ],
+  "engine": "SQLite disposable fictional schema",
+  "applicationLinksChanged": false,
+  "sourcesDeleted": false,
+  "cutoverApproved": false,
+  "actualCloudAccess": false
+}

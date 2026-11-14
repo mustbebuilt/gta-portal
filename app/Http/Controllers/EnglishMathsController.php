@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -157,26 +156,24 @@ class EnglishMathsController extends Controller
     {
         abort_unless(Access::learner($r->user(), $topic->apprentice) || Access::subject($r->user(), $topic->apprentice, $topic->subject), 403);
         $r->validate(['version' => ['required', 'integer'], 'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,docx', 'extensions:pdf,jpg,jpeg,png,docx', 'max:15360']]);
-        $path = null;
+        $entry = null;
         try {
-            DB::transaction(function () use ($r, $topic, &$path): void {
+            DB::transaction(function () use ($r, $topic, &$entry): void {
                 $t = TrainingTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
                 $this->version($r, $t);
                 if (! $t->editable()) {
                     throw ValidationException::withMessages(['file' => 'Save is locked while evidence awaits review or training is complete.']);
-                }$path = $r->file('file')->store('topic-evidence', PrivateEvidence::diskName());
-                if (! $path) {
-                    throw new \RuntimeException('File could not be stored.');
-                }$files = $t->files ?? [];
-                $files[] = ['id' => (string) Str::uuid(), 'path' => $path, 'name' => mb_substr(basename(str_replace('\\', '/', $r->file('file')->getClientOriginalName())), 0, 255), 'sha256' => hash_file('sha256', $r->file('file')->getRealPath()), 'bytes' => $r->file('file')->getSize(), 'by' => $r->user()->id];
+                }$entry = PrivateEvidence::store($r->file('file'), 'topic-evidence', $r->user()->id);
+                $files = $t->files ?? [];
+                $files[] = [...$entry, 'by' => $r->user()->id];
                 $t->files = $files;
                 $t->version++;
                 $t->save();
                 $this->audit($r, $t->apprentice_id, 'topic', $t->id, 'evidence_added');
             });
         } catch (\Throwable $e) {
-            if ($path) {
-                PrivateEvidence::delete($path);
+            if ($entry) {
+                PrivateEvidence::delete($entry);
             }throw $e;
         }
 
@@ -187,9 +184,9 @@ class EnglishMathsController extends Controller
     {
         abort_unless(in_array($topic->subject, $this->subjects($r, $topic->apprentice), true), 403);
         $entry = collect($topic->files ?? [])->firstWhere('id', $file);
-        abort_unless($entry && PrivateEvidence::exists($entry['path']), 404);
+        abort_unless($entry && PrivateEvidence::exists($entry), 404);
 
-        return PrivateEvidence::download($entry['path'], $entry['name']);
+        return PrivateEvidence::download($entry);
     }
 
     public function qualificationForm(Request $r, Apprentice $apprentice, ?Qualification $qualification = null): View
@@ -223,7 +220,7 @@ class EnglishMathsController extends Controller
             });
         } catch (\Throwable $error) {
             if ($entry) {
-                PrivateEvidence::delete($entry['path']);
+                PrivateEvidence::delete($entry);
             } throw $error;
         }
 
@@ -234,9 +231,9 @@ class EnglishMathsController extends Controller
     {
         abort_unless(in_array($qualification->subject, $this->subjects($r, $qualification->apprentice), true), 403);
         $entry = collect($qualification->files ?? [])->firstWhere('id', $file);
-        abort_unless($entry && PrivateEvidence::exists($entry['path']), 404);
+        abort_unless($entry && PrivateEvidence::exists($entry), 404);
 
-        return PrivateEvidence::download($entry['path'], $entry['name']);
+        return PrivateEvidence::download($entry);
     }
 
     public function saveQualification(Request $r, Apprentice $apprentice, ?Qualification $qualification = null): RedirectResponse

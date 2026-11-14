@@ -1,0 +1,11 @@
+{
+  "release": "qa2",
+  "pdfs": 200,
+  "pagesRendered": 739,
+  "textFieldsChecked": 7998,
+  "allTextMultiline": true,
+  "fixedCharacterCaps": 0,
+  "sourceHashes": "all match",
+  "renderScope": "Every page rasterised at smoke-test resolution; not all-viewer/visual acceptance",
+  "providedAudit": "resources/data/task-pack-qa2-audit.json; its curriculum open items retained"
+}

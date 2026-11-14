@@ -1,0 +1,402 @@
+[
+  {
+    "id": "panel-b1-t1",
+    "block": 1,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--panel--b01-t1.pdf"
+  },
+  {
+    "id": "panel-b1-t2",
+    "block": 1,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--panel--b01-t2.pdf"
+  },
+  {
+    "id": "panel-b1-t3",
+    "block": 1,
+    "task": 3,
+    "title": "Task 3: Panel Workshop Safety and Body Construction",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--panel--b01-t3.pdf"
+  },
+  {
+    "id": "panel-b1-t4",
+    "block": 1,
+    "task": 4,
+    "title": "Task 4: Tool Control Damage Documentation and Evidence Capture",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--panel--b01-t4.pdf"
+  },
+  {
+    "id": "panel-b1-t5",
+    "block": 1,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+    "template": "final-20261113-qa2--panel--b01-t5.pdf"
+  },
+  {
+    "id": "panel-b2-t1",
+    "block": 2,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Panel Identification, Damage Assessment and Repair Planning",
+    "template": "final-20261113-qa2--panel--b02-t1.pdf"
+  },
+  {
+    "id": "panel-b2-t2",
+    "block": 2,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Panel Identification, Damage Assessment and Repair Planning",
+    "template": "final-20261113-qa2--panel--b02-t2.pdf"
+  },
+  {
+    "id": "panel-b2-t3",
+    "block": 2,
+    "task": 3,
+    "title": "Task 3: Damage Assessment and Repair Planning",
+    "theme": "Panel Identification, Damage Assessment and Repair Planning",
+    "template": "final-20261113-qa2--panel--b02-t3.pdf"
+  },
+  {
+    "id": "panel-b2-t4",
+    "block": 2,
+    "task": 4,
+    "title": "Task 4: Bolt on Panel Preparation and Supplementary Damage Check",
+    "theme": "Panel Identification, Damage Assessment and Repair Planning",
+    "template": "final-20261113-qa2--panel--b02-t4.pdf"
+  },
+  {
+    "id": "panel-b2-t5",
+    "block": 2,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Panel Identification, Damage Assessment and Repair Planning",
+    "template": "final-20261113-qa2--panel--b02-t5.pdf"
+  },
+  {
+    "id": "panel-b3-t1",
+    "block": 3,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Non-Structural Panel Removal, Refit and Alignment",
+    "template": "final-20261113-qa2--panel--b03-t1.pdf"
+  },
+  {
+    "id": "panel-b3-t2",
+    "block": 3,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Non-Structural Panel Removal, Refit and Alignment",
+    "template": "final-20261113-qa2--panel--b03-t2.pdf"
+  },
+  {
+    "id": "panel-b3-t3",
+    "block": 3,
+    "task": 3,
+    "title": "Task 3: Door or Wing Remove Refit and Alignment",
+    "theme": "Non-Structural Panel Removal, Refit and Alignment",
+    "template": "final-20261113-qa2--panel--b03-t3.pdf"
+  },
+  {
+    "id": "panel-b3-t4",
+    "block": 3,
+    "task": 4,
+    "title": "Task 4: Bumper Cover Seals and Quality Gate Inspection",
+    "theme": "Non-Structural Panel Removal, Refit and Alignment",
+    "template": "final-20261113-qa2--panel--b03-t4.pdf"
+  },
+  {
+    "id": "panel-b3-t5",
+    "block": 3,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Non-Structural Panel Removal, Refit and Alignment",
+    "template": "final-20261113-qa2--panel--b03-t5.pdf"
+  },
+  {
+    "id": "panel-b4-t1",
+    "block": 4,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Materials, Technical Data and Repair-Method Selection",
+    "template": "final-20261113-qa2--panel--b04-t1.pdf"
+  },
+  {
+    "id": "panel-b4-t2",
+    "block": 4,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Materials, Technical Data and Repair-Method Selection",
+    "template": "final-20261113-qa2--panel--b04-t2.pdf"
+  },
+  {
+    "id": "panel-b4-t3",
+    "block": 4,
+    "task": 3,
+    "title": "Task 3: Technical Data Material Identification and Repair Method Selection",
+    "theme": "Materials, Technical Data and Repair-Method Selection",
+    "template": "final-20261113-qa2--panel--b04-t3.pdf"
+  },
+  {
+    "id": "panel-b4-t4",
+    "block": 4,
+    "task": 4,
+    "title": "Task 4: Joining Process Selection and Method Deviation Record",
+    "theme": "Materials, Technical Data and Repair-Method Selection",
+    "template": "final-20261113-qa2--panel--b04-t4.pdf"
+  },
+  {
+    "id": "panel-b4-t5",
+    "block": 4,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Materials, Technical Data and Repair-Method Selection",
+    "template": "final-20261113-qa2--panel--b04-t5.pdf"
+  },
+  {
+    "id": "panel-b5-t1",
+    "block": 5,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Welding, Brazing, Bonding and Riveting",
+    "template": "final-20261113-qa2--panel--b05-t1.pdf"
+  },
+  {
+    "id": "panel-b5-t2",
+    "block": 5,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Welding, Brazing, Bonding and Riveting",
+    "template": "final-20261113-qa2--panel--b05-t2.pdf"
+  },
+  {
+    "id": "panel-b5-t3",
+    "block": 5,
+    "task": 3,
+    "title": "Task 3: Spot Weld Removal and Weld Test Piece Quality Check",
+    "theme": "Welding, Brazing, Bonding and Riveting",
+    "template": "final-20261113-qa2--panel--b05-t3.pdf"
+  },
+  {
+    "id": "panel-b5-t4",
+    "block": 5,
+    "task": 4,
+    "title": "Task 4: Bonding Riveting and Hybrid Joining Test Piece",
+    "theme": "Welding, Brazing, Bonding and Riveting",
+    "template": "final-20261113-qa2--panel--b05-t4.pdf"
+  },
+  {
+    "id": "panel-b5-t5",
+    "block": 5,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Welding, Brazing, Bonding and Riveting",
+    "template": "final-20261113-qa2--panel--b05-t5.pdf"
+  },
+  {
+    "id": "panel-b6-t1",
+    "block": 6,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Panel Repair, Pulling, Metal Finishing and Filler",
+    "template": "final-20261113-qa2--panel--b06-t1.pdf"
+  },
+  {
+    "id": "panel-b6-t2",
+    "block": 6,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Panel Repair, Pulling, Metal Finishing and Filler",
+    "template": "final-20261113-qa2--panel--b06-t2.pdf"
+  },
+  {
+    "id": "panel-b6-t3",
+    "block": 6,
+    "task": 3,
+    "title": "Task 3: Panel Pulling and Metal Finishing",
+    "theme": "Panel Repair, Pulling, Metal Finishing and Filler",
+    "template": "final-20261113-qa2--panel--b06-t3.pdf"
+  },
+  {
+    "id": "panel-b6-t4",
+    "block": 6,
+    "task": 4,
+    "title": "Task 4: Filler Application Shaping and Paint Handover",
+    "theme": "Panel Repair, Pulling, Metal Finishing and Filler",
+    "template": "final-20261113-qa2--panel--b06-t4.pdf"
+  },
+  {
+    "id": "panel-b6-t5",
+    "block": 6,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Panel Repair, Pulling, Metal Finishing and Filler",
+    "template": "final-20261113-qa2--panel--b06-t5.pdf"
+  },
+  {
+    "id": "panel-b7-t1",
+    "block": 7,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Structural Measurement, Jig Systems and Realignment",
+    "template": "final-20261113-qa2--panel--b07-t1.pdf"
+  },
+  {
+    "id": "panel-b7-t2",
+    "block": 7,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Structural Measurement, Jig Systems and Realignment",
+    "template": "final-20261113-qa2--panel--b07-t2.pdf"
+  },
+  {
+    "id": "panel-b7-t3",
+    "block": 7,
+    "task": 3,
+    "title": "Task 3: Underbody Measurement and Misalignment Report",
+    "theme": "Structural Measurement, Jig Systems and Realignment",
+    "template": "final-20261113-qa2--panel--b07-t3.pdf"
+  },
+  {
+    "id": "panel-b7-t4",
+    "block": 7,
+    "task": 4,
+    "title": "Task 4: Jig Setup Controlled Pull Plan and Post Check",
+    "theme": "Structural Measurement, Jig Systems and Realignment",
+    "template": "final-20261113-qa2--panel--b07-t4.pdf"
+  },
+  {
+    "id": "panel-b7-t5",
+    "block": 7,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Structural Measurement, Jig Systems and Realignment",
+    "template": "final-20261113-qa2--panel--b07-t5.pdf"
+  },
+  {
+    "id": "panel-b8-t1",
+    "block": 8,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Advanced Materials, Safety Systems and Emerging Technology",
+    "template": "final-20261113-qa2--panel--b08-t1.pdf"
+  },
+  {
+    "id": "panel-b8-t2",
+    "block": 8,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Advanced Materials, Safety Systems and Emerging Technology",
+    "template": "final-20261113-qa2--panel--b08-t2.pdf"
+  },
+  {
+    "id": "panel-b8-t3",
+    "block": 8,
+    "task": 3,
+    "title": "Task 3: Advanced Material Controls and Aluminium Contamination Prevention",
+    "theme": "Advanced Materials, Safety Systems and Emerging Technology",
+    "template": "final-20261113-qa2--panel--b08-t3.pdf"
+  },
+  {
+    "id": "panel-b8-t4",
+    "block": 8,
+    "task": 4,
+    "title": "Task 4: ADAS SRS and Alternative Fuel Safety Referral",
+    "theme": "Advanced Materials, Safety Systems and Emerging Technology",
+    "template": "final-20261113-qa2--panel--b08-t4.pdf"
+  },
+  {
+    "id": "panel-b8-t5",
+    "block": 8,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Advanced Materials, Safety Systems and Emerging Technology",
+    "template": "final-20261113-qa2--panel--b08-t5.pdf"
+  },
+  {
+    "id": "panel-b9-t1",
+    "block": 9,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Integrated Repair Workflow, Quality and Commercial Performance",
+    "template": "final-20261113-qa2--panel--b09-t1.pdf"
+  },
+  {
+    "id": "panel-b9-t2",
+    "block": 9,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Integrated Repair Workflow, Quality and Commercial Performance",
+    "template": "final-20261113-qa2--panel--b09-t2.pdf"
+  },
+  {
+    "id": "panel-b9-t3",
+    "block": 9,
+    "task": 3,
+    "title": "Task 3: Supplementary Damage Report and Repair Plan Update",
+    "theme": "Integrated Repair Workflow, Quality and Commercial Performance",
+    "template": "final-20261113-qa2--panel--b09-t3.pdf"
+  },
+  {
+    "id": "panel-b9-t4",
+    "block": 9,
+    "task": 4,
+    "title": "Task 4: Integrated Quality Audit and Portfolio Evidence Review",
+    "theme": "Integrated Repair Workflow, Quality and Commercial Performance",
+    "template": "final-20261113-qa2--panel--b09-t4.pdf"
+  },
+  {
+    "id": "panel-b9-t5",
+    "block": 9,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Integrated Repair Workflow, Quality and Commercial Performance",
+    "template": "final-20261113-qa2--panel--b09-t5.pdf"
+  },
+  {
+    "id": "panel-b10-t1",
+    "block": 10,
+    "task": 1,
+    "title": "Task 1: Knowledge Assessment",
+    "theme": "Consolidation, Portfolio and EPA Readiness",
+    "template": "final-20261113-qa2--panel--b10-t1.pdf"
+  },
+  {
+    "id": "panel-b10-t2",
+    "block": 10,
+    "task": 2,
+    "title": "Task 2: Apprentice workplace job card",
+    "theme": "Consolidation, Portfolio and EPA Readiness",
+    "template": "final-20261113-qa2--panel--b10-t2.pdf"
+  },
+  {
+    "id": "panel-b10-t3",
+    "block": 10,
+    "task": 3,
+    "title": "Task 3: EPA Mock Practical Integrated Panel Repair Scenario",
+    "theme": "Consolidation, Portfolio and EPA Readiness",
+    "template": "final-20261113-qa2--panel--b10-t3.pdf"
+  },
+  {
+    "id": "panel-b10-t4",
+    "block": 10,
+    "task": 4,
+    "title": "Task 4: EPA Readiness Portfolio Professional Discussion and Final Action Plan",
+    "theme": "Consolidation, Portfolio and EPA Readiness",
+    "template": "final-20261113-qa2--panel--b10-t4.pdf"
+  },
+  {
+    "id": "panel-b10-t5",
+    "block": 10,
+    "task": 5,
+    "title": "Task 5: Learning impact record",
+    "theme": "Consolidation, Portfolio and EPA Readiness",
+    "template": "final-20261113-qa2--panel--b10-t5.pdf"
+  }
+]

@@ -1,5 +1,21 @@
+Current checkpoint v0.33.0 — two linked batches
+
+v0.32.0 adds exact-preview, protected evidence copy plans; v0.33.0 adds explicit once-only staging execution with exclusive destination creation, source SHA-256/size validation, destination readback, final verification and technical audit. Original files, application references and retained snapshots are not changed. No storage cutover or production execution is enabled. Read MARTIN_BATCH_v0.33.0.md and TEST_RESULTS.json for current instructions/evidence. One additive migration; no new dependency. Earlier entries describe historical scope.
+
+Current v0.31.0: A read-only migration inventory now covers registered private uploads and retained file metadata/links across eight portal source families. Default mode reads database references/configuration only. Explicit verification checks each logical disk/path once against SHA-256 and declared size, flags problems and re-scans for drift. It does not move, relink, delete or approve migration of evidence. Read CLOUD_START_HERE_MARTIN.md, MARTIN_BATCH_v0.31.0.md and TEST_RESULTS.json. No new migration/dependency. Do not treat an inventory as a backup or file-move approval.
+
+Current v0.30.0: Native database compatibility is now checked against MariaDB 11.8.6 through PDO MySQL as well as SQLite. A real fresh-install index-length blocker is corrected, with a data-preserving forward normalisation for older SQLite checkpoints. Native audit-failure, persistence and initial-administrator concurrency tests are included. Actual Cloud/Oracle MySQL/schema acceptance remains separate. Read CLOUD_START_HERE_MARTIN.md, MARTIN_BATCH_v0.30.0.md and TEST_RESULTS.json. Apply the forward index-normalisation migration. No dependency/task-source change; never reset an existing portal with the isolated test routines.
+
+Current v0.29.0: Cloud-compatible private S3 evidence storage now has a locked runtime adapter, bucket-level permission handling, file-only existence checks and an explicit synthetic storage probe. Original disk references and records are preserved. Actual Cloud bucket visibility, resource configuration and deployment still need Martin’s environment. Read CLOUD_START_HERE_MARTIN.md, MARTIN_BATCH_v0.29.0.md and TEST_RESULTS.json. This supersedes old notes saying the S3 adapter is absent. No new migration; dependency restore is required.
+
+Current v0.28.0: Controlled hosted staging access and once-only first-administrator setup are implemented and tested locally. Explicit staging flags, valid application key, HTTPS origin/requests, secure encrypted shared sessions and shared cache are required. Production remains blocked. Existing records/accounts are never overwritten; actual Cloud resources and repository integration remain unverified. Start with CLOUD_START_HERE_MARTIN.md, MARTIN_BATCH_v0.28.0.md and TEST_RESULTS.json.
+
+Historical earlier instructions follow; current addendum supersedes the unconditional hosted-block statement.
+
+Laravel Cloud is the confirmed target. Read CLOUD_START_HERE_MARTIN.md first for actual setup blockers, value-free environment reference and the read-only gta:cloud-check command. The local-only web gate remains until integration against Martin’s actual repository; this pack has not been deployed.
+
 GTA PORTAL — START HERE, MARTIN
-12 November 2026 | Application checkpoint v0.7.0 | Handover instructions revision 1.0
+13 November 2026 | Application checkpoint v0.31.0 | Retained integration guide revision 1.0
 
 1. Extract the ZIP to a separate working folder/branch, not over the current portal.
 2. Give your development AI MARTIN_AI_INTEGRATION_INSTRUCTIONS.md and the complete source pack, in the context of your actual repository.
@@ -10,4 +26,42 @@ GTA PORTAL — START HERE, MARTIN
 7. The portal upgrade is unfinished. DEVELOPMENT_STATUS.txt and BATCH_QUEUE.json distinguish what works from remaining coding and business/source gaps.
 8. Return the reviewed diff, migration map, actual test results, staging screenshots, gap list and release/rollback runbook. Obtain Martin's explicit release approval before production or real-data import.
 
-This update adds instructions only. It does not change application code or claim new system tests. The retained application baseline is 259 tests/2,318 assertions on each of SQLite and MariaDB, plus 45 HTTP checks (11 November 2026). It was not a Cloud/live-portal test.
+Review reminders now use checked actual meeting dates and sourced Active programme status. Current assigned tutor and mentor receive one in-portal prompt per source when due today or overdue. Seen does not complete a review or reset its date. Superseded sources and old assignments cannot be acknowledged. Existing evidence and history are retained.
+
+Read MARTIN_BATCH_v0.27.0.md, CHANGES_v0.27.0.md and TEST_RESULTS.json first. Apply the additive review-reminder/event migration with all previous migrations. No dependency/task source changes. Combined generation now includes reviews, marking and Careers; existing opt-in scheduling stays off by default. No email or live deployment.
+
+Historical v0.26.0 notes follow:
+
+Externally signed progress-review records, independent manager checks and actual-meeting-based ten-week tracking are implemented/tested locally. Pending copies do not reset dates. The latest active checked meeting sets the next reference at meeting + 70 days. Electronic signing, employer portal access, complete historical compliance and live deployment remain separate.
+
+Read MARTIN_BATCH_v0.26.0.md and CHANGES_v0.26.0.md first, then the previous batch notes. Apply the additive signed-review-record/event migration with earlier migrations. No dependencies/task sources changed. All earlier work and 531 PDFs retained.
+
+466 automated tests / 5,732 assertions; 93 actual loopback HTTP checks; 39-table restart persistence; 317 PHP/compiled Blade checks; 531 unchanged source PDFs. A fictional three-page unsigned review was rendered and its first/signature pages inspected.
+
+Actual signatures/identity checks need human verification of the real file. No electronic signing or completed-history compliance is asserted. Review reminders are not scheduled. Existing in-portal marking/Careers scheduling stays disabled by default.
+
+Historical v0.25.0 checkpoint notes follow:
+
+Current checkpoint consolidates v0.23.0-v0.25.0: reviewed qualification results, independently reviewed historical OTJ imports/reconciliation and fixed operational management packs. Read MARTIN_BATCH_v0.25.0.md and the three current CHANGES files first.
+
+Apply the additive import/event/historical-OTJ/management-pack migration plus earlier migrations. No Composer dependency or task source changed. All 531 source PDFs and existing work are retained.
+
+Imports preview first, use exact headers/current source IDs and require an independent administrator/CEO within 24 hours. Actual source evidence must be checked. Stale/duplicate/overlapping/unfinished sources and failed audit reject atomic application. No topic completion, attendance mark or financial decision is created by import. Historical completeness remains unverified.
+
+Management packs freeze their operational scope/source position and actor/time. Later changes do not rewrite them. No private Careers/support/HR notes, official grade or complete review-cycle judgement is included. Current executed evidence is in TEST_RESULTS.json.
+
+Participant signing, completed-review scheduling, source/KSB/gateway decisions and actual target-engine/Cloud/identity/mail/storage acceptance remain outstanding. No real data or external messages. Automatic in-portal scheduling remains disabled by default.
+
+Consolidated executed evidence: 457 tests / 5,559 assertions; 89 actual HTTP checks; 37-table restart persistence; 311 PHP/compiled Blade checks; 531 unchanged source PDF hashes.
+
+Final executed v0.27.0 evidence: 479 tests / 5,966 assertions; 96 actual HTTP checks; 41-table restart persistence; 324 PHP/compiled Blade checks; 531 unchanged source PDF hashes. Cloud diagnostic expectedly blocked; no deployment performed. Read CLOUD_START_HERE_MARTIN.md for the installation priority.
+
+Final executed v0.28.0 evidence: 504 tests / 6,083 assertions; 96 loopback HTTP checks; 14 local TLS/CLI startup checks; 41-table restart persistence; 331 PHP/compiled Blade checks; 531 unchanged source PDF hashes. Actual Cloud remains unverified; see CLOUD_START_HERE_MARTIN.md.
+
+Final executed v0.29.0 evidence: 514 tests / 6,155 assertions; 96 loopback HTTP checks; 14 local HTTPS/CLI startup checks; 12 signed-S3 wire checks; 7 clean no-dev build checks; 333 PHP/compiled Blade checks; 531 unchanged source PDF hashes. Strict Composer/platform checks passed; no known advisories reported at check time. Actual Cloud remains unverified.
+
+Final executed v0.30.0 evidence: SQLite: 518 tests / 6,173 assertions; MariaDB 11.8.6: 518 tests / 6,670 assertions; 96 actual HTTP checks on each engine; 41-table restart persistence on each; native two-process first-admin race passed; 7 clean no-dev build checks; 339 PHP/compiled Blade checks; 531 unchanged PDF hashes. Exact managed Cloud/Oracle MySQL remains unverified.
+
+Final executed v0.31.0 evidence: SQLite: 530 tests / 6,243 assertions; MariaDB 11.8.6: 530 tests / 6,752 assertions; 98 HTTP/CLI checks per engine with 41-table/file-hash restart preservation; 12 actual SDK wire checks; 7 clean no-dev build checks; 341 PHP/compiled Blade checks; 531 unchanged source PDF hashes. Actual Cloud/storage migration remains unverified and unauthorised by any inventory result.
+
+Final executed v0.33.0 evidence: SQLite: 547 tests / 6,339 assertions; MariaDB 11.8.6: 547 tests / 6,865 assertions; 98 HTTP/CLI checks per engine with 41-table/file-hash restart preservation; 10 separate-process copy CLI checks; 14 actual SDK wire checks (45 requests); 7 clean no-dev build checks; 346 PHP/compiled Blade checks; 531 unchanged source PDF hashes. Actual Cloud/source-target rehearsal, cutover and restore remain unverified.

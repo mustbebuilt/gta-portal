@@ -1,0 +1,1213 @@
+{
+  "archive": "GTA_Final_Autocare_Panel_Paint_Heavy_Vehicle_Task_Packs_2026-11-13.zip",
+  "archiveHash": "a7521707193fb16f132ca81fbe7595c717ceca26a84f6d7f628c4022b84f312f",
+  "checkedMembers": 228,
+  "release": "final-2026-11-13-qa2",
+  "pdfs": [
+    {
+      "catalogue": "autocare",
+      "reference": "b1-t1",
+      "filename": "final-20261113-qa2--autocare--b01-t1.pdf",
+      "sha256": "d4b483bc8f70e2e68fbdd3b12e5ff8f206703561528df9f6218a60618d77cee3"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b1-t2",
+      "filename": "final-20261113-qa2--autocare--b01-t2.pdf",
+      "sha256": "630c534428ed9f0cd5dd60987e094448d304f74bb86357581667e9ec01de8cc9"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b1-t3",
+      "filename": "final-20261113-qa2--autocare--b01-t3.pdf",
+      "sha256": "09ae0e44d229b71606f819bac45b7418cae7e22ce66de546d62ffd8b9fb04063"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b1-t4",
+      "filename": "final-20261113-qa2--autocare--b01-t4.pdf",
+      "sha256": "b343c274b09b9132bb4a4cf74e701b08573ed50adb09a278fba0a4af1057b0b3"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b1-t5",
+      "filename": "final-20261113-qa2--autocare--b01-t5.pdf",
+      "sha256": "2c6f905ed9341186bd51f891da3f07a227edfdc301ab0e3795b5ae3fd4a58f57"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b2-t1",
+      "filename": "final-20261113-qa2--autocare--b02-t1.pdf",
+      "sha256": "eb63cd8be688ef4ee277b7038348d9c2b29309f0ec956be2a12e62f234570275"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b2-t2",
+      "filename": "final-20261113-qa2--autocare--b02-t2.pdf",
+      "sha256": "d6a01fa9508f360c2c38e7696b02b6687919c2c34ba7e681a1431cc5a70e4d5e"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b2-t3",
+      "filename": "final-20261113-qa2--autocare--b02-t3.pdf",
+      "sha256": "5776171b6ea827635e9eb8f88569bd72615b879d61971124269cba1f4870b960"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b2-t4",
+      "filename": "final-20261113-qa2--autocare--b02-t4.pdf",
+      "sha256": "8d3ce8f3ee358ac28012622e9ba882515bad194a5eca2084d37edba210e0040b"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b2-t5",
+      "filename": "final-20261113-qa2--autocare--b02-t5.pdf",
+      "sha256": "43966d18ad127a3b2bd9526847a3185b8bf2c929e8c5dec776ee66f6edcd608e"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b3-t1",
+      "filename": "final-20261113-qa2--autocare--b03-t1.pdf",
+      "sha256": "42c12290c34b623d61fba5a86fb97d9449b626e5d4f76f493883d2e312f30405"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b3-t2",
+      "filename": "final-20261113-qa2--autocare--b03-t2.pdf",
+      "sha256": "b121a7875b8c850f11deca841454160d67c03fee60ebed0c6a5f2315d4fa5e17"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b3-t3",
+      "filename": "final-20261113-qa2--autocare--b03-t3.pdf",
+      "sha256": "a2b26c5eec6afad5f1ad188503fb0651425521efdd9c37c1976ce99f7e2ece22"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b3-t4",
+      "filename": "final-20261113-qa2--autocare--b03-t4.pdf",
+      "sha256": "6ebbd039bcac513a9021ad7d86604e1e52e2252a729e5246d0fb5779cc426aa9"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b3-t5",
+      "filename": "final-20261113-qa2--autocare--b03-t5.pdf",
+      "sha256": "ad1379cefa1bb88acfa980b2aa100e65436fc8615a2efa15180fff1d1f1db0ca"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b4-t1",
+      "filename": "final-20261113-qa2--autocare--b04-t1.pdf",
+      "sha256": "d9d69b275becafc29d665e9f44820486ee8375d9485d1ac3f3596059527e1492"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b4-t2",
+      "filename": "final-20261113-qa2--autocare--b04-t2.pdf",
+      "sha256": "6aa048d8298d008a8ffb10ee0a419b2fbecfe38131a86db224e9d963aabf17a4"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b4-t3",
+      "filename": "final-20261113-qa2--autocare--b04-t3.pdf",
+      "sha256": "62fa15d3b337ba4eb43dffb1173a1c3a925f89985d04154e4c3f928b6543a255"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b4-t4",
+      "filename": "final-20261113-qa2--autocare--b04-t4.pdf",
+      "sha256": "c2ebf15b6f8092c912efb948fb0f9f8cf50a653dca3b9ee5de1f621b63dc4b4d"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b4-t5",
+      "filename": "final-20261113-qa2--autocare--b04-t5.pdf",
+      "sha256": "756bcbb4680d13118c3a74208085aa2759d86d1e91ec22f127cc6601652a85f7"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b5-t1",
+      "filename": "final-20261113-qa2--autocare--b05-t1.pdf",
+      "sha256": "9be0de734e88eafb16b173e453690d786ce3d20baf1387cface3edc711fe2f67"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b5-t2",
+      "filename": "final-20261113-qa2--autocare--b05-t2.pdf",
+      "sha256": "f153b0816e77a9966655ba8d5c2b4b462066814d2b916d031970f49b82eca47e"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b5-t3",
+      "filename": "final-20261113-qa2--autocare--b05-t3.pdf",
+      "sha256": "da13116d9452c2db56ece3ee86d67220282179d65691330db4668e8241030789"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b5-t4",
+      "filename": "final-20261113-qa2--autocare--b05-t4.pdf",
+      "sha256": "4bdebf99997bcf7956fcfe2c26341eaeb774c908b74325461579caffabf7f3a6"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b5-t5",
+      "filename": "final-20261113-qa2--autocare--b05-t5.pdf",
+      "sha256": "76313b142ce2997543d62c52d70659ebc49f30a52934a5889fb15cdb8ba45834"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b6-t1",
+      "filename": "final-20261113-qa2--autocare--b06-t1.pdf",
+      "sha256": "5bd3da2028287a92233f41b5aa7d8182e37e5b51ee9f9c5b1da5b696d824dd62"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b6-t2",
+      "filename": "final-20261113-qa2--autocare--b06-t2.pdf",
+      "sha256": "bbf19440c646cd816957866395c783ed42da6f619373916dbcbb3df722b68b6a"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b6-t3",
+      "filename": "final-20261113-qa2--autocare--b06-t3.pdf",
+      "sha256": "f91811be8ba3e3c535b6d62d9f32544245516579a3fae36ea5e59fb473d21c8b"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b6-t4",
+      "filename": "final-20261113-qa2--autocare--b06-t4.pdf",
+      "sha256": "5fb7946cd954801270d3bd4a39937f6fee1ebaa01b80e2788abd249808c662f9"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b6-t5",
+      "filename": "final-20261113-qa2--autocare--b06-t5.pdf",
+      "sha256": "55977d325fa616e450b433edef29b65aa8dc9ff7807efba38803a37950a36b6c"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b7-t1",
+      "filename": "final-20261113-qa2--autocare--b07-t1.pdf",
+      "sha256": "e51d3ebc038b4b5784a2b9b02f8b24dab3cae506142df2e1319d5cf23b7d2b13"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b7-t2",
+      "filename": "final-20261113-qa2--autocare--b07-t2.pdf",
+      "sha256": "ab51a017022b4797658ff23f3ed89d87fee3555dede719a982749fedfb8d26d0"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b7-t3",
+      "filename": "final-20261113-qa2--autocare--b07-t3.pdf",
+      "sha256": "3c8c4bcc9db4c2bddad038f8359d68594f51a032e9017879c52f2fc5c498f144"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b7-t4",
+      "filename": "final-20261113-qa2--autocare--b07-t4.pdf",
+      "sha256": "2bf1ccfd30ec5142b35cc2f11b2647cc6fde234c338e15cf0f5198c1a25b5639"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b7-t5",
+      "filename": "final-20261113-qa2--autocare--b07-t5.pdf",
+      "sha256": "865ee4e6fc2091a775923add9e4d7a3056fe5c45db0ef268f2f257a45de957b2"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b8-t1",
+      "filename": "final-20261113-qa2--autocare--b08-t1.pdf",
+      "sha256": "8b04258127353afc1cde630b2466e8027cbec7740cbdee02e5f41e0eca65ae5e"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b8-t2",
+      "filename": "final-20261113-qa2--autocare--b08-t2.pdf",
+      "sha256": "00c87571036d44e34ac5dcd31e4e7297489fa2ce43a59d867ccdfaf2be0454f6"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b8-t3",
+      "filename": "final-20261113-qa2--autocare--b08-t3.pdf",
+      "sha256": "b28fc3fc17508ff56706b8629bfece9a951839234e877abbecd773e6cdb532a4"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b8-t4",
+      "filename": "final-20261113-qa2--autocare--b08-t4.pdf",
+      "sha256": "5ff005cd1b0be4d79d7646e53d3195cbdbeddcdb4b43229c4d0f18c62bf32a0e"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b8-t5",
+      "filename": "final-20261113-qa2--autocare--b08-t5.pdf",
+      "sha256": "c03301f41450c3dfae0943278a22329d9976d945aa5ed4a107894659eb8ce1d5"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b9-t1",
+      "filename": "final-20261113-qa2--autocare--b09-t1.pdf",
+      "sha256": "99b228a7fdbba51cfce57cbdeb5925017102e74062b49ff42b3f83706aad2ed8"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b9-t2",
+      "filename": "final-20261113-qa2--autocare--b09-t2.pdf",
+      "sha256": "1d4c0c2d1900f1bcfea10867a646d2872a70065c2ea14f4df93710ee66fb2561"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b9-t3",
+      "filename": "final-20261113-qa2--autocare--b09-t3.pdf",
+      "sha256": "0755a3f5ea8360fabb0e3c8efad6866c5a15ec6193ee5e5cabb9afc6037a60ef"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b9-t4",
+      "filename": "final-20261113-qa2--autocare--b09-t4.pdf",
+      "sha256": "94933854c8720ce6881c50c1a221074fb70e864908c037b46106d66dda48a9af"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b9-t5",
+      "filename": "final-20261113-qa2--autocare--b09-t5.pdf",
+      "sha256": "cd1640ab9d0c5914589412b04ce8ac768c5484d27fe1209d42f0684e83a9e980"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b10-t1",
+      "filename": "final-20261113-qa2--autocare--b10-t1.pdf",
+      "sha256": "4f8b2157b974d35f6a600079c12ec48cf9d00dc49530d75ca524cfbf89c257b5"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b10-t2",
+      "filename": "final-20261113-qa2--autocare--b10-t2.pdf",
+      "sha256": "facdd13eefc9bdc12e8c8f87c70e40a70516136d101277bc80524b4ee33cb20e"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b10-t3",
+      "filename": "final-20261113-qa2--autocare--b10-t3.pdf",
+      "sha256": "c1b8fcb9181ceafd2d54cc850b93ce439db25f42d2907c9f096c58aba1e2ed0d"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b10-t4",
+      "filename": "final-20261113-qa2--autocare--b10-t4.pdf",
+      "sha256": "f93c456b068ef8d8bd860ecd90eac2f140ec9b1008d49dc799973371d769606a"
+    },
+    {
+      "catalogue": "autocare",
+      "reference": "b10-t5",
+      "filename": "final-20261113-qa2--autocare--b10-t5.pdf",
+      "sha256": "eb39c1f9d3f217e364793dae8dffc2ced29ca63ce003aa22adc185e836bd833d"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b1-t1",
+      "filename": "final-20261113-qa2--heavy-vehicle--b01-t1.pdf",
+      "sha256": "143dcb9318280e9d4f4063c4d3e0dd2af3d2323ce00768841c248d8ffd38bb90"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b1-t2",
+      "filename": "final-20261113-qa2--heavy-vehicle--b01-t2.pdf",
+      "sha256": "eea8cb939ba37befdeb8d96bbf7871de91315286efb4e1a045678d9dce28f3b7"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b1-t3",
+      "filename": "final-20261113-qa2--heavy-vehicle--b01-t3.pdf",
+      "sha256": "998edc4a2baad91643af30214c7aa3e8dca0814cbcb3f1c187106b667f350fc4"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b1-t4",
+      "filename": "final-20261113-qa2--heavy-vehicle--b01-t4.pdf",
+      "sha256": "fc9863df877b4c2018008037640a21125328f64118609366f45772f1bcd5a54c"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b1-t5",
+      "filename": "final-20261113-qa2--heavy-vehicle--b01-t5.pdf",
+      "sha256": "4d528aefa98158462b9d3290b9bd5c113a387b1fed87a6a66f681f5d8c6fcdb0"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b2-t1",
+      "filename": "final-20261113-qa2--heavy-vehicle--b02-t1.pdf",
+      "sha256": "41ec5814af6c1d88be1fab98ac7f2fa559345a07418c071938d75e5693adef0d"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b2-t2",
+      "filename": "final-20261113-qa2--heavy-vehicle--b02-t2.pdf",
+      "sha256": "588792e8d074137753a2d83ee7a65f0eb758371b47605e26a8c8ba5099c8f302"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b2-t3",
+      "filename": "final-20261113-qa2--heavy-vehicle--b02-t3.pdf",
+      "sha256": "6fd8e391d479dc9b3e32526cbfc5f4b9a5c379e5ff0c3a67a5c52b9eae0d7b33"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b2-t4",
+      "filename": "final-20261113-qa2--heavy-vehicle--b02-t4.pdf",
+      "sha256": "f3c8c2c75f4cfbb9cf1bbfc8a9c9368a916da4b222efe9e2eea87dd80c7bf6a6"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b2-t5",
+      "filename": "final-20261113-qa2--heavy-vehicle--b02-t5.pdf",
+      "sha256": "731a94695797db7999376b5bd860dda8d60dec04707164bb777b802866e83610"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b3-t1",
+      "filename": "final-20261113-qa2--heavy-vehicle--b03-t1.pdf",
+      "sha256": "27b445012225b74695693d171539983eb4e406e3428b115b8a808c06ad3d9897"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b3-t2",
+      "filename": "final-20261113-qa2--heavy-vehicle--b03-t2.pdf",
+      "sha256": "1332f294ca0bad38bde753caf52feed6f192e5c72379cc86a686fba8b5df3104"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b3-t3",
+      "filename": "final-20261113-qa2--heavy-vehicle--b03-t3.pdf",
+      "sha256": "adbaa40a2d0fc5f008d4fdd4c8d741d7f7f48572d7c99b574916345e3cdf999a"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b3-t4",
+      "filename": "final-20261113-qa2--heavy-vehicle--b03-t4.pdf",
+      "sha256": "0c4affcbc9cbc92d55f85cad6fd377f45e7a5cb16d713cc4ed4ab590536a9f50"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b3-t5",
+      "filename": "final-20261113-qa2--heavy-vehicle--b03-t5.pdf",
+      "sha256": "5fe56b783cb4d061762b8dbb0eee669d99c03ea81e037e508216f91a5479977e"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b4-t1",
+      "filename": "final-20261113-qa2--heavy-vehicle--b04-t1.pdf",
+      "sha256": "457e0b02b8614cea893723713d3dc43e21a9dea8fec4344386b3f542cf4961d5"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b4-t2",
+      "filename": "final-20261113-qa2--heavy-vehicle--b04-t2.pdf",
+      "sha256": "2eb2f1681902ceda815ba26e840b533f4c6b29fe847895ce18ed241a58a7f8c3"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b4-t3",
+      "filename": "final-20261113-qa2--heavy-vehicle--b04-t3.pdf",
+      "sha256": "34bc2474094e2132431a27432f336074fe4bee874d3aed8aed668a79b9b5898b"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b4-t4",
+      "filename": "final-20261113-qa2--heavy-vehicle--b04-t4.pdf",
+      "sha256": "503123f834d990f3b8a0960ce79071b7a698020a944679e896db6fd051204716"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b4-t5",
+      "filename": "final-20261113-qa2--heavy-vehicle--b04-t5.pdf",
+      "sha256": "c2967337f01cdeb17b5a852fe76eea18c716ab1c2d4115c369ac60e06b587d34"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b5-t1",
+      "filename": "final-20261113-qa2--heavy-vehicle--b05-t1.pdf",
+      "sha256": "2f79a63ad19a70571c2096e18b8d08f66a0cb745410d732cb256e3ac32aeef18"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b5-t2",
+      "filename": "final-20261113-qa2--heavy-vehicle--b05-t2.pdf",
+      "sha256": "62959685b01c566389f33feeeb5ce2edd375444b9d07f20bb4bbc0b918a45172"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b5-t3",
+      "filename": "final-20261113-qa2--heavy-vehicle--b05-t3.pdf",
+      "sha256": "8127613a7dc84ca4e9b603d8cbd14d476f9229621f195ce117665bdf3a3a4eac"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b5-t4",
+      "filename": "final-20261113-qa2--heavy-vehicle--b05-t4.pdf",
+      "sha256": "701d198198aa240c3c668908f61b3a2e4d4e2280d395811ec6d39d1825c6a722"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b5-t5",
+      "filename": "final-20261113-qa2--heavy-vehicle--b05-t5.pdf",
+      "sha256": "ce86617ad27e1e8e03ac941ed7bb2082cfaa627b2fd8ab3a9b7ac7830e9d2077"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b6-t1",
+      "filename": "final-20261113-qa2--heavy-vehicle--b06-t1.pdf",
+      "sha256": "8990a5076d179773ae7ed259c5645dedb757f0d113854aa78cc9cd1ca54e82eb"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b6-t2",
+      "filename": "final-20261113-qa2--heavy-vehicle--b06-t2.pdf",
+      "sha256": "1924c86158531cb7bd08fff88620056627790c5b726db242dbfd6ce0dfd90e2d"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b6-t3",
+      "filename": "final-20261113-qa2--heavy-vehicle--b06-t3.pdf",
+      "sha256": "1409a1ec41d2e5c10b904f8bc0b9385e73a251fccf21f6271762c8f03efffb34"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b6-t4",
+      "filename": "final-20261113-qa2--heavy-vehicle--b06-t4.pdf",
+      "sha256": "1a18bb54c681ba696f204b231dea7d24ab7527fd64d2be3a008603e60213e128"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b6-t5",
+      "filename": "final-20261113-qa2--heavy-vehicle--b06-t5.pdf",
+      "sha256": "253007b7558230ea569a0f66342e772065b1c60981e75b8b1e0d68cb5844f7af"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b7-t1",
+      "filename": "final-20261113-qa2--heavy-vehicle--b07-t1.pdf",
+      "sha256": "8ed010247fc3282e681cde42ed590b961ddab440c1a301dae5fee3fd2ed01cbd"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b7-t2",
+      "filename": "final-20261113-qa2--heavy-vehicle--b07-t2.pdf",
+      "sha256": "53c9a760a879dabd90aec45554f5de43756d864e29aa61ae73fa67efdf84252f"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b7-t3",
+      "filename": "final-20261113-qa2--heavy-vehicle--b07-t3.pdf",
+      "sha256": "8c8c7f13f37963e4a20c55595d47172d0cb509c67b9450cc50ea123849a51fbc"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b7-t4",
+      "filename": "final-20261113-qa2--heavy-vehicle--b07-t4.pdf",
+      "sha256": "e8cc6b652917e9463a3bb99a0727dbc7ea0ca94f7bf0e29dd339b74c6c2a7673"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b7-t5",
+      "filename": "final-20261113-qa2--heavy-vehicle--b07-t5.pdf",
+      "sha256": "ac56f13a8cfbe9ddb4440855f43b4895a23200b56c1d8a65262dc68470a9304b"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b8-t1",
+      "filename": "final-20261113-qa2--heavy-vehicle--b08-t1.pdf",
+      "sha256": "04a7582c5953270bbf52b624f55b6034c3ed8c354fca2bfe7f92bba41f70878e"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b8-t2",
+      "filename": "final-20261113-qa2--heavy-vehicle--b08-t2.pdf",
+      "sha256": "51a50316a324086775444a0c4a4e18af29cbcc9ea7f750b4d662d55140cfc0ca"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b8-t3",
+      "filename": "final-20261113-qa2--heavy-vehicle--b08-t3.pdf",
+      "sha256": "ee00cb7ac3d3266cf7b6057a177fa69d153c4ce9694455b0652b1884e89e41be"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b8-t4",
+      "filename": "final-20261113-qa2--heavy-vehicle--b08-t4.pdf",
+      "sha256": "e0720fc2c04d68b0e565f33b7b53116e0fb8f28687432bcf2a359fab3f9b080a"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b8-t5",
+      "filename": "final-20261113-qa2--heavy-vehicle--b08-t5.pdf",
+      "sha256": "12dfd3468b5dc515deee00ea72fc5c73406ea53fcb010e7cf042dbf60dbe003e"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b9-t1",
+      "filename": "final-20261113-qa2--heavy-vehicle--b09-t1.pdf",
+      "sha256": "e409085794c0abbbc207c3dc04e0002f77d086762116c4195348b17606e58cdd"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b9-t2",
+      "filename": "final-20261113-qa2--heavy-vehicle--b09-t2.pdf",
+      "sha256": "e49586471892d36e84cc415ac88e4d25e963c319ac3e801a7c15b046d476e62e"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b9-t3",
+      "filename": "final-20261113-qa2--heavy-vehicle--b09-t3.pdf",
+      "sha256": "a5a992f38f3bd0b993dcc0d556fe53f8501ff386621e36f747228c78c270e3e5"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b9-t4",
+      "filename": "final-20261113-qa2--heavy-vehicle--b09-t4.pdf",
+      "sha256": "9426849ac4b383e3b77177c421f058c12f529dbd0897f88ca6d97a23dbeac082"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b9-t5",
+      "filename": "final-20261113-qa2--heavy-vehicle--b09-t5.pdf",
+      "sha256": "646b414648397d0727cf5802eb6b745d33a75237b5d188448efe427c06371726"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b10-t1",
+      "filename": "final-20261113-qa2--heavy-vehicle--b10-t1.pdf",
+      "sha256": "1e9ef5bf4a9f36d5bb8279ebb7361a76d442d3e8f470e7ddf68a93403f4bf45b"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b10-t2",
+      "filename": "final-20261113-qa2--heavy-vehicle--b10-t2.pdf",
+      "sha256": "8d725f757f5819e279113e460b2c8206257285a765a6356812ad66fc102d0687"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b10-t3",
+      "filename": "final-20261113-qa2--heavy-vehicle--b10-t3.pdf",
+      "sha256": "8a505dbe44d3c517b62ffc36fa00f187f69b5fd859fda5ff47bfb5b2c2f9998f"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b10-t4",
+      "filename": "final-20261113-qa2--heavy-vehicle--b10-t4.pdf",
+      "sha256": "f662ed4d94af6dc5b1a964a347d153bb1d0ad9f40ed2c88fcdf72cc09ccbe198"
+    },
+    {
+      "catalogue": "heavy-vehicle",
+      "reference": "heavy-vehicle-b10-t5",
+      "filename": "final-20261113-qa2--heavy-vehicle--b10-t5.pdf",
+      "sha256": "48683d3316166d4eb5a258e2ab0b75e42c747d4591c150196d7678bd23d58e19"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b1-t1",
+      "filename": "final-20261113-qa2--paint--b01-t1.pdf",
+      "sha256": "597fe197ccf2f8b9438e7119db69d53292a4801c73f630fed0946f69b474cb0a"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b1-t2",
+      "filename": "final-20261113-qa2--paint--b01-t2.pdf",
+      "sha256": "a9c9af0c80a3e455bda056449f4632b1abe2f6f53f4c37728f891747bb8c8716"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b1-t3",
+      "filename": "final-20261113-qa2--paint--b01-t3.pdf",
+      "sha256": "d5f37f7909cb50f8caf3fd6730ff8f789b3659b8392ea65b89dd909dc9431205"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b1-t4",
+      "filename": "final-20261113-qa2--paint--b01-t4.pdf",
+      "sha256": "ac01d5c9e79cbaf24490d10b18f05f80c3c77fde5ba5b02fb78d96f0816a1da6"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b1-t5",
+      "filename": "final-20261113-qa2--paint--b01-t5.pdf",
+      "sha256": "2f73c5194dc0f2187080af54c5a4635c4c5f6d6ee65f07a0f704f97a123beb54"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b2-t1",
+      "filename": "final-20261113-qa2--paint--b02-t1.pdf",
+      "sha256": "c2a012a78a87fe76ce05d07fb4145d995e7f4fdf458da5b803f51e7147a16e87"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b2-t2",
+      "filename": "final-20261113-qa2--paint--b02-t2.pdf",
+      "sha256": "296db83c9f46487c828d2de74aadb70577c4f19447f16aa7e288842ff8a3b82f"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b2-t3",
+      "filename": "final-20261113-qa2--paint--b02-t3.pdf",
+      "sha256": "37eee32c07b00a095ded6753545790f8f140157c0b61d95419e6d5f53f0b25fb"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b2-t4",
+      "filename": "final-20261113-qa2--paint--b02-t4.pdf",
+      "sha256": "265d1c8329a790d7f0bca3629befb2d9ff84951fa9ace1d390f06bb72fef9507"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b2-t5",
+      "filename": "final-20261113-qa2--paint--b02-t5.pdf",
+      "sha256": "531ebdfb964cfecfe865d974f797f9f8e9ee48801fcbebf15014c2a249bcd353"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b3-t1",
+      "filename": "final-20261113-qa2--paint--b03-t1.pdf",
+      "sha256": "03a83550ca65253a56a75042ab2214a43ee3d23356d89c0b9711cc9562aba6c0"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b3-t2",
+      "filename": "final-20261113-qa2--paint--b03-t2.pdf",
+      "sha256": "0bd5a2e4b8cf9246a4ebfe78b3c0c407d68176b2dc05fd8111d8bfc504fcca4f"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b3-t3",
+      "filename": "final-20261113-qa2--paint--b03-t3.pdf",
+      "sha256": "13635aebff9530612f96d3f1dbf224ae009c10a5a0317798adab5110ae63c0d7"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b3-t4",
+      "filename": "final-20261113-qa2--paint--b03-t4.pdf",
+      "sha256": "c9c7446046aef616dd88067df670e89f1a540a3588f90ff286991c0def827402"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b3-t5",
+      "filename": "final-20261113-qa2--paint--b03-t5.pdf",
+      "sha256": "60989ff172245cec56cf79616a0ff19db6cdb5c28f116ad583d37192b9dbfc52"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b4-t1",
+      "filename": "final-20261113-qa2--paint--b04-t1.pdf",
+      "sha256": "d610dea9688210f7ff25b421072a7aeb07f4ce83b85e51f19b9fdddf30064abb"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b4-t2",
+      "filename": "final-20261113-qa2--paint--b04-t2.pdf",
+      "sha256": "7fa8bfb5eaf916281ed9133ab9622c7806c7b418ff33a832243bdb31494a90e0"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b4-t3",
+      "filename": "final-20261113-qa2--paint--b04-t3.pdf",
+      "sha256": "a558d2f1fe8983488d4acfaa0b218a074ebc9d822c8b36c4220ef57fc9e3108b"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b4-t4",
+      "filename": "final-20261113-qa2--paint--b04-t4.pdf",
+      "sha256": "1ccdd0289a676c27a232e49304c9060c9661dc76bdb51188a2fe32891308694d"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b4-t5",
+      "filename": "final-20261113-qa2--paint--b04-t5.pdf",
+      "sha256": "17a9a993bfd307a1f5b89ba735a011f3523e1712adae4ce2cc4ba5dbce3460ca"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b5-t1",
+      "filename": "final-20261113-qa2--paint--b05-t1.pdf",
+      "sha256": "a1cebac1fa8e04bf1eb340cf178221ca6b3322dc6b9119de14fb560ba3b56603"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b5-t2",
+      "filename": "final-20261113-qa2--paint--b05-t2.pdf",
+      "sha256": "81383a10449282f4fdd369b72cd8362fa1f3e338846f71cf63860282eaa7ccfb"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b5-t3",
+      "filename": "final-20261113-qa2--paint--b05-t3.pdf",
+      "sha256": "b7ef713f64e837fdcfe2f814fe5cf9a54f7b805873dbc2c76c8e78447b79de1d"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b5-t4",
+      "filename": "final-20261113-qa2--paint--b05-t4.pdf",
+      "sha256": "9e4972acbb8bb491bb7d6f433b983a7986712179a679fdbd9c6315a5c05e6af6"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b5-t5",
+      "filename": "final-20261113-qa2--paint--b05-t5.pdf",
+      "sha256": "e847d480be8f7e4c518242510f0e39c64ef2c88e1e9cf2adbb10d64b0c9c56b3"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b6-t1",
+      "filename": "final-20261113-qa2--paint--b06-t1.pdf",
+      "sha256": "f6990878a4fb58d8291d614643e2f8e03f79d85976bd039d9cf9dba3360b95de"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b6-t2",
+      "filename": "final-20261113-qa2--paint--b06-t2.pdf",
+      "sha256": "ff1496fc5d7a36171105e157b8d521e04be7781327d1dcd7e0c182d37267e794"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b6-t3",
+      "filename": "final-20261113-qa2--paint--b06-t3.pdf",
+      "sha256": "79a0d1d9f847741d5b6216b424e508fedf2f6dc06b3d0b997b6846bd3f002af9"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b6-t4",
+      "filename": "final-20261113-qa2--paint--b06-t4.pdf",
+      "sha256": "1e5e3eaac229539cd865d7593d60224ec74624fbb333e31a54757065286c2ab8"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b6-t5",
+      "filename": "final-20261113-qa2--paint--b06-t5.pdf",
+      "sha256": "be83005b414532acbc4bfb396acb0a823864a09282e3bf4fb2340f0de4e094e1"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b7-t1",
+      "filename": "final-20261113-qa2--paint--b07-t1.pdf",
+      "sha256": "b5cbf0551532c8a3eb8776742b6b66324694ea2b4060ad0d3c709c8818440145"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b7-t2",
+      "filename": "final-20261113-qa2--paint--b07-t2.pdf",
+      "sha256": "69c8906d7b504dd0931ee138673ecf7cd522308f5e9138613c6f379c9a10bd9e"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b7-t3",
+      "filename": "final-20261113-qa2--paint--b07-t3.pdf",
+      "sha256": "7207b850b1305ecc71b8c577580d4ac1fa179205ada05428ab0fff56ef71b2fc"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b7-t4",
+      "filename": "final-20261113-qa2--paint--b07-t4.pdf",
+      "sha256": "363b753502d52095d4a4d343033d5541093737be21fc1f55c5f10b197078955e"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b7-t5",
+      "filename": "final-20261113-qa2--paint--b07-t5.pdf",
+      "sha256": "0543832562c684c458fc6a21a92a535e1d3c4a319fe5496f977e26cd85a53bd1"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b8-t1",
+      "filename": "final-20261113-qa2--paint--b08-t1.pdf",
+      "sha256": "4ddcf4f149f29d37f3f1a605cef14049a007b188ab14c5766d2593054b9678d6"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b8-t2",
+      "filename": "final-20261113-qa2--paint--b08-t2.pdf",
+      "sha256": "a1101c8f70fe2da84afb302b88e67053125f3fdf48157c950fa3e10c2689aad9"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b8-t3",
+      "filename": "final-20261113-qa2--paint--b08-t3.pdf",
+      "sha256": "fdfa6f13ff43aa77652b09029777c62a312a30e752bf67cd3bfc44dd1d74d753"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b8-t4",
+      "filename": "final-20261113-qa2--paint--b08-t4.pdf",
+      "sha256": "b1fb0fc282a6e3b71a0e64f183faa12abe430000d56452545a011e7ad5c8325e"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b8-t5",
+      "filename": "final-20261113-qa2--paint--b08-t5.pdf",
+      "sha256": "fc6ce81b50a8e88e60567b1363809da7f36f221283fa37293d5f03ca71c52141"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b9-t1",
+      "filename": "final-20261113-qa2--paint--b09-t1.pdf",
+      "sha256": "266311220999c7974b14ca9c05bf498f323ea398779da09e7dd6f68561573a21"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b9-t2",
+      "filename": "final-20261113-qa2--paint--b09-t2.pdf",
+      "sha256": "3112ad5b597d3cc324b0385c8126f4a8a8cb8b3b60c21e1a2606213454a37086"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b9-t3",
+      "filename": "final-20261113-qa2--paint--b09-t3.pdf",
+      "sha256": "dc36eceb215b97b7d4a75338a9ec854de14e54bab8fa0bb1e8fdffa097462f15"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b9-t4",
+      "filename": "final-20261113-qa2--paint--b09-t4.pdf",
+      "sha256": "958490eb99727e2e6612b429fd95c6d2223661cf0a469b79b92e0117f84daa67"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b9-t5",
+      "filename": "final-20261113-qa2--paint--b09-t5.pdf",
+      "sha256": "3f2dabde995e1c5de97be08605ed7b319240a8afe96c606017dcd9c34b9718d6"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b10-t1",
+      "filename": "final-20261113-qa2--paint--b10-t1.pdf",
+      "sha256": "21ddc63650b54b901829a694410c567e8deb1b9c0a8842582ec9e8ff5b52ce28"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b10-t2",
+      "filename": "final-20261113-qa2--paint--b10-t2.pdf",
+      "sha256": "d6eb7cbbc6444bf439a5bb10264e6b74c93176e1f53ae1d1b80fe151df42ea80"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b10-t3",
+      "filename": "final-20261113-qa2--paint--b10-t3.pdf",
+      "sha256": "9a1552979e0a0c5a4b3f98f7b40b9103cc0322c418c9a4bb3b59a05e0b6cca59"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b10-t4",
+      "filename": "final-20261113-qa2--paint--b10-t4.pdf",
+      "sha256": "17e8386bd1e4b8c1f73855ecbea8d7a79d3d25f5de97510a0f8ec4cf60abb6ff"
+    },
+    {
+      "catalogue": "paint",
+      "reference": "paint-b10-t5",
+      "filename": "final-20261113-qa2--paint--b10-t5.pdf",
+      "sha256": "cc84cb3091ac248167a41d3cd547d09b3df1cd97fa680ce5b6e61232842d78b4"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b1-t1",
+      "filename": "final-20261113-qa2--panel--b01-t1.pdf",
+      "sha256": "6f273dd8b96e25dd7cd40d77a6325f8d16c367852cb7c0afea84216c33533637"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b1-t2",
+      "filename": "final-20261113-qa2--panel--b01-t2.pdf",
+      "sha256": "11fb0dd9072cd50e9e1cdd31d331873ee38ea4d002f55401d224bfe98ddf36f0"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b1-t3",
+      "filename": "final-20261113-qa2--panel--b01-t3.pdf",
+      "sha256": "f20e1b5fc2fbc8ba00eea3e1990df32e9c4ebd73e94f4e1fa64e22134389e22e"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b1-t4",
+      "filename": "final-20261113-qa2--panel--b01-t4.pdf",
+      "sha256": "4f385341955878d92f4fc524d1d93f426ec5dc136aac2015bb33906ea42a79d2"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b1-t5",
+      "filename": "final-20261113-qa2--panel--b01-t5.pdf",
+      "sha256": "d9bd0a2178db6be7ef7f06066d502df3a81ad2d21b6518e7dc07b689c56161e3"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b2-t1",
+      "filename": "final-20261113-qa2--panel--b02-t1.pdf",
+      "sha256": "2407d144e701e212b7e0533fbb7a92528b4c495ff3d82f4329131bc87286c0b4"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b2-t2",
+      "filename": "final-20261113-qa2--panel--b02-t2.pdf",
+      "sha256": "81a483ab3248ed80abdec6242532991b297c0673ba4f81834a7fe47630594dc7"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b2-t3",
+      "filename": "final-20261113-qa2--panel--b02-t3.pdf",
+      "sha256": "de40f00e781efb8f3ef012eb2fe2d12e2afc15ae122e445108227456ff547d3c"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b2-t4",
+      "filename": "final-20261113-qa2--panel--b02-t4.pdf",
+      "sha256": "f82cdc1d0572ddfe39b8369c9df732038abce52b22f5cd85abfddaaca97e0292"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b2-t5",
+      "filename": "final-20261113-qa2--panel--b02-t5.pdf",
+      "sha256": "3bcf4ba8c36044e2e3dc3a50b8e80a6cc1150fb9dd80193004b4f79d4b62e109"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b3-t1",
+      "filename": "final-20261113-qa2--panel--b03-t1.pdf",
+      "sha256": "62b97b616bebaa574c87db0551460abffe86338f610d04522414bbcce677c3e1"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b3-t2",
+      "filename": "final-20261113-qa2--panel--b03-t2.pdf",
+      "sha256": "c0257bfdf3b36b3e207fb7d633301ac8b85e63e2b8fcbcc45d95c512d9017ed2"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b3-t3",
+      "filename": "final-20261113-qa2--panel--b03-t3.pdf",
+      "sha256": "df560f2b03c3896573e4896f48c9d662ddfb3166554ef93cdf2ab4e028993fbe"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b3-t4",
+      "filename": "final-20261113-qa2--panel--b03-t4.pdf",
+      "sha256": "247bed7a98ca79e7fa16066a38dfcc24bc0c7ba31a728ebf3241545fbac38175"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b3-t5",
+      "filename": "final-20261113-qa2--panel--b03-t5.pdf",
+      "sha256": "427bf88b38920724c78e3851a6fefb456c428cfcd0731c18746a9e29427050e8"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b4-t1",
+      "filename": "final-20261113-qa2--panel--b04-t1.pdf",
+      "sha256": "55ed3d705fba81c0110e3ae6f910af17e3f179059990e8916e286e083f63a2a7"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b4-t2",
+      "filename": "final-20261113-qa2--panel--b04-t2.pdf",
+      "sha256": "95cfb3f95ac4d30cf8a5bc4b6faa971d8fb06f19ca1a57bf33b255175110bde4"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b4-t3",
+      "filename": "final-20261113-qa2--panel--b04-t3.pdf",
+      "sha256": "d0d178e0ca01b0a1967a99c7f4a52a0c347715ff68ba9385a8fef4e4642cfaf4"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b4-t4",
+      "filename": "final-20261113-qa2--panel--b04-t4.pdf",
+      "sha256": "df0fd0eb663dd543417ac237a1bcdb781157538108f89220e901d35e86987525"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b4-t5",
+      "filename": "final-20261113-qa2--panel--b04-t5.pdf",
+      "sha256": "c2b6f3afa2d9163f3b2120bfa64182caf575e547467ed85bad1dd0e12dd90cae"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b5-t1",
+      "filename": "final-20261113-qa2--panel--b05-t1.pdf",
+      "sha256": "13b145f73deb64da4f15438938322ebe598851e2e622527d285e884d1e2d66bc"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b5-t2",
+      "filename": "final-20261113-qa2--panel--b05-t2.pdf",
+      "sha256": "b31484f53d6169f74c4876cd85510a6c9fa485abdd171c81c5d84754d90fec5f"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b5-t3",
+      "filename": "final-20261113-qa2--panel--b05-t3.pdf",
+      "sha256": "4059f78c409de0887b43579bc5dfeffbd48dd4fc7299e11d248b4b22ad1801a1"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b5-t4",
+      "filename": "final-20261113-qa2--panel--b05-t4.pdf",
+      "sha256": "3425c74c30f6931b46d36db1398cc33eadfe88908c28f4e48b09d99f02686804"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b5-t5",
+      "filename": "final-20261113-qa2--panel--b05-t5.pdf",
+      "sha256": "ab172b143335aac6c93dd9705553b8dedc9d3e1abb9b51476f2ea32a6aa1a0dd"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b6-t1",
+      "filename": "final-20261113-qa2--panel--b06-t1.pdf",
+      "sha256": "a603e1a1f5d63575f280906594d89b7fb411f62262872553f359932cf8221c7d"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b6-t2",
+      "filename": "final-20261113-qa2--panel--b06-t2.pdf",
+      "sha256": "890d4656d91719e556e7088dad63da5ddba68c2a4375e657a2487e8c430c1770"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b6-t3",
+      "filename": "final-20261113-qa2--panel--b06-t3.pdf",
+      "sha256": "fb67106fcf46b1a76a0cbe065b8267d6bc2005da9240a8a18090655364058a78"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b6-t4",
+      "filename": "final-20261113-qa2--panel--b06-t4.pdf",
+      "sha256": "47f3e2b07eb5d17d5ba46f3f96709767e15ca5f644253fe1f5684db1eab83a7f"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b6-t5",
+      "filename": "final-20261113-qa2--panel--b06-t5.pdf",
+      "sha256": "598353f33afbd5e2ae3341db43aa08c0a53ee26404cbb75f777c1f9f2267cfbf"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b7-t1",
+      "filename": "final-20261113-qa2--panel--b07-t1.pdf",
+      "sha256": "6ebf12f62f5b6deb324028da20efeb59fc8b29f61c40f6dffae761f68f652de4"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b7-t2",
+      "filename": "final-20261113-qa2--panel--b07-t2.pdf",
+      "sha256": "7c906ad40a8b0a995d089ef358b0e4263e5c663c16392886d03a706419017c86"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b7-t3",
+      "filename": "final-20261113-qa2--panel--b07-t3.pdf",
+      "sha256": "4a0440f7a39f7d1f70e63c1c1763756eb0db5a26e2e73a3046214d57a6bc2ce1"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b7-t4",
+      "filename": "final-20261113-qa2--panel--b07-t4.pdf",
+      "sha256": "27df6cefc467394bab5c654476055c7375309983c8a1b84ac29dbe305ac72f4f"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b7-t5",
+      "filename": "final-20261113-qa2--panel--b07-t5.pdf",
+      "sha256": "24e28c25a712357ef02da44bcea7693c4d8fbec9fb44d995b0330787ad87287d"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b8-t1",
+      "filename": "final-20261113-qa2--panel--b08-t1.pdf",
+      "sha256": "e3ead202c843037305adf2216f471c95aa91600c696e03c2d1c741940b569242"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b8-t2",
+      "filename": "final-20261113-qa2--panel--b08-t2.pdf",
+      "sha256": "73351618b885e3f2dcefa1443ec165749d79b76069829c050d314276c4eebb24"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b8-t3",
+      "filename": "final-20261113-qa2--panel--b08-t3.pdf",
+      "sha256": "827f4714579e00be7ee6355c9f67603e2df981adc492521a14413981d494901a"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b8-t4",
+      "filename": "final-20261113-qa2--panel--b08-t4.pdf",
+      "sha256": "444721f67117bd8b20bd10ca237d2cb6a03bd11ad556b31412f07eb2f1f30a2f"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b8-t5",
+      "filename": "final-20261113-qa2--panel--b08-t5.pdf",
+      "sha256": "93fae815b0c95ca522d2b212deb8b020f60b406d21b5804e861ad5af9552a973"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b9-t1",
+      "filename": "final-20261113-qa2--panel--b09-t1.pdf",
+      "sha256": "340f121ba273155880d1c2f8b0b4619a76cc55af4476422af5f83df454b4c1f9"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b9-t2",
+      "filename": "final-20261113-qa2--panel--b09-t2.pdf",
+      "sha256": "dd616fb562403b50413520a379420bad4606270c0b62c4ff78df658aec5c5045"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b9-t3",
+      "filename": "final-20261113-qa2--panel--b09-t3.pdf",
+      "sha256": "89984ed43d18309ebefa59f758b228badeff4d8044538cd5db09cc5ce13568a0"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b9-t4",
+      "filename": "final-20261113-qa2--panel--b09-t4.pdf",
+      "sha256": "4343c9026d6c1cb17405fa58b20bcc68da3c7a8d14ddf5bc0acfc1c59e38924e"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b9-t5",
+      "filename": "final-20261113-qa2--panel--b09-t5.pdf",
+      "sha256": "7a12e4bbfc869cec762f4046e90d39aa6447ab76dc52421548e3703b2f660d11"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b10-t1",
+      "filename": "final-20261113-qa2--panel--b10-t1.pdf",
+      "sha256": "b72271857978e84dcf0d0f72333e284d6a0d3479ae9341626129ad1930ab9974"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b10-t2",
+      "filename": "final-20261113-qa2--panel--b10-t2.pdf",
+      "sha256": "2fa967541fe2d93d30dc126151bc690e460e6c791e48415afc70760fd0af7e85"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b10-t3",
+      "filename": "final-20261113-qa2--panel--b10-t3.pdf",
+      "sha256": "2cc3289873d2d6e40eebf70a98678f966d0e4d9f8c1151ef1c67c301dc942dd0"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b10-t4",
+      "filename": "final-20261113-qa2--panel--b10-t4.pdf",
+      "sha256": "7fd41b16eb1fe61000d6c8460a361b1eee4aa0c64545719a7a2b6534ffe3d425"
+    },
+    {
+      "catalogue": "panel",
+      "reference": "panel-b10-t5",
+      "filename": "final-20261113-qa2--panel--b10-t5.pdf",
+      "sha256": "299f817cee8278dd5039438e109bf6ebfee0f9d4c29cfe26826d6487502996ff"
+    }
+  ],
+  "localReconciliation": [
+    "Retain Panel unassessed score/explanation rule from the original source.",
+    "Retain corrected final-release Autocare ADAS wording.",
+    "No saved task templates, dates, work or marking history rewritten."
+  ]
+}

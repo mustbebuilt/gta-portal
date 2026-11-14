@@ -176,9 +176,9 @@ class ExtraTrainingWorkflowTest extends TestCase
 
     public function test_optional_training_file_is_private_and_cannot_set_approval(): void
     {
-        Storage::fake('local');
+        Storage::fake(config('evidence.disk'));
         [$e,$a,$t,$l] = $this->fixture(['file' => UploadedFile::fake()->createWithContent('extra-proof.txt', 'Fictional training evidence')]);
-        Storage::disk('local')->assertExists($e->file['path']);
+        Storage::disk(config('evidence.disk'))->assertExists($e->file['path']);
         $this->assertNull($e->approval);
         $this->actingAs($l)->get('/extra-training/'.$e->id.'/file')->assertOk()->assertDownload();
         $this->actingAs($this->actor('employer'))->get('/extra-training/'.$e->id.'/file')->assertForbidden();
@@ -186,7 +186,7 @@ class ExtraTrainingWorkflowTest extends TestCase
 
     public function test_audit_failure_rolls_back_pending_training_and_cleans_uploaded_file(): void
     {
-        Storage::fake('local');
+        Storage::fake(config('evidence.disk'));
         $t = $this->actor();
         $a = Apprentice::factory()->create(['tutor_id' => $t->id, 'tutor_group_id' => TutorGroup::factory()->create()->id]);
         DB::listen(function (QueryExecuted $event): void {
@@ -196,6 +196,6 @@ class ExtraTrainingWorkflowTest extends TestCase
         });
         $this->actingAs($t)->post('/apprentices/'.$a->id.'/extra-training', $this->data(['file' => UploadedFile::fake()->createWithContent('proof.txt', 'Fictional only')]))->assertStatus(500);
         $this->assertDatabaseCount('extra_trainings', 0);
-        $this->assertSame([], Storage::disk('local')->allFiles());
+        $this->assertSame([], Storage::disk(config('evidence.disk'))->allFiles());
     }
 }

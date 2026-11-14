@@ -1,0 +1,117 @@
+{
+  "checkpoint": "v0.12.0",
+  "createdAt": "2026-11-13T09:23:19.393017+00:00",
+  "previousCheckpoint": "v0.11.0",
+  "sourceLibraryVersion": 11,
+  "changes": [
+    {
+      "path": "BATCH_QUEUE.json",
+      "change": "updated"
+    },
+    {
+      "path": "CHANGES_v0.12.0.md",
+      "change": "added"
+    },
+    {
+      "path": "DATA_REQUIREMENTS_AND_GAPS.md",
+      "change": "updated"
+    },
+    {
+      "path": "DEVELOPMENT_STATUS.txt",
+      "change": "updated"
+    },
+    {
+      "path": "GTA_Laravel_Portal_Test_Report.html",
+      "change": "updated"
+    },
+    {
+      "path": "MARTIN_AI_INTEGRATION_INSTRUCTIONS.md",
+      "change": "updated"
+    },
+    {
+      "path": "MARTIN_BATCH_v0.12.0.md",
+      "change": "added"
+    },
+    {
+      "path": "QUEUE_COMPLETION_REVIEW.md",
+      "change": "updated"
+    },
+    {
+      "path": "README.md",
+      "change": "updated"
+    },
+    {
+      "path": "START_HERE_MARTIN.txt",
+      "change": "updated"
+    },
+    {
+      "path": "TEST_RESULTS.json",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/HelpController.php",
+      "change": "updated"
+    },
+    {
+      "path": "app/Http/Controllers/MarkingQueueController.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Models/MarkingReminder.php",
+      "change": "added"
+    },
+    {
+      "path": "app/Support/MarkingReminders.php",
+      "change": "added"
+    },
+    {
+      "path": "database/migrations/2026_11_13_090000_create_marking_reminders.php",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.11.0-CHECKPOINT_CHANGE_RECORD.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.11.0-TEST_RESULTS.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.12.0-http-results.json",
+      "change": "added"
+    },
+    {
+      "path": "evidence/v0.12.0-static-results.json",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/layout.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "resources/views/marking/index.blade.php",
+      "change": "added"
+    },
+    {
+      "path": "resources/views/pdf/layout.blade.php",
+      "change": "updated"
+    },
+    {
+      "path": "routes/console.php",
+      "change": "updated"
+    },
+    {
+      "path": "routes/web.php",
+      "change": "updated"
+    },
+    {
+      "path": "tests/Feature/MarkingRemindersTest.php",
+      "change": "added"
+    },
+    {
+      "path": "tests/http_persistence.py",
+      "change": "updated"
+    }
+  ],
+  "scope": "Marking worklist and in-portal reminders; no email, automatic schedule or live release"
+}

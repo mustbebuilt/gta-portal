@@ -1,6 +1,8 @@
 @extends('layout')
 @section('title','Action Plan')
 @section('content')
+@if($manage)<p><a class="button" href="{{ route('actions.proposals',$apprentice) }}">Review source action proposals</a></p>@endif
+
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Action Plan</h1><p>See what needs doing, who is responsible and when it is due.</p></div><div class="toolbar"><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a>@if($manage)<a class="button primary" href="{{ route('actions.create',$apprentice) }}">Add SMART action</a>@endif</div></header>
 @include('learning.errors')
 <div class="dashboard-grid">@foreach(['To do','With tutor','Completed'] as $status)<section class="panel"><h2>{{ $status }}</h2><p class="big-number">{{ $all->filter(fn($a)=>$a->currentStatus()===$status)->count() }}</p></section>@endforeach</div>

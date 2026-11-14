@@ -1,0 +1,40 @@
+{
+  "passed": 7,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "Fresh composer install --no-dev succeeds from the supplied lock, including actual post-autoload package discovery",
+      "passed": true
+    },
+    {
+      "name": "Fresh runtime-only dependencies satisfy this PHP platform",
+      "passed": true
+    },
+    {
+      "name": "S3 runtime classes load while PHPUnit development classes are absent",
+      "passed": true
+    },
+    {
+      "name": "Fresh runtime-only config:cache succeeds",
+      "passed": true
+    },
+    {
+      "name": "Fresh runtime-only route:cache succeeds",
+      "passed": true
+    },
+    {
+      "name": "Fresh runtime-only view:cache succeeds",
+      "passed": true
+    },
+    {
+      "name": "Build creates no real .env, application database or administrator",
+      "passed": true
+    }
+  ],
+  "php": "8.4.27",
+  "actualCloudBuild": false,
+  "limits": [
+    "Clean local runtime-only build, not an actual Laravel Cloud deployment",
+    "No target database, private bucket, real secret configuration or user acceptance tested"
+  ]
+}

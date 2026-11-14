@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Apprentice;
 use App\Models\SupportConcern;
 use App\Models\SurveyReceipt;
-use App\Support\LearningAccess as Access;
+use App\Support\SupportAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,14 +17,14 @@ class SurveyReceiptController extends Controller
 {
     public const TYPES = ['induction' => 'Getting to know you', 'sixweek' => 'New Apprentice Wellbeing and Support Survey', 'ongoing' => 'Apprentice Wellbeing and Support Survey'];
 
-    private function authorised(Request $r): void
+    private function authorised(Request $r, Apprentice $a): void
     {
-        abort_unless(Access::manager($r->user()) || in_array($r->user()->role, ['inclusion_lead', 'inclusion_member'], true), 403);
+        abort_unless(SupportAccess::team($r->user(), $a), 403);
     }
 
     public function index(Request $r, Apprentice $apprentice): View
     {
-        $this->authorised($r);
+        $this->authorised($r, $apprentice);
         $rows = SurveyReceipt::where('apprentice_id', $apprentice->id)->orderByDesc('submitted_date')->get();
         $rows = $rows->filter(fn ($row) => match ($r->query('show')) {
             'unchecked' => ! $row->currentCheck(),'followup' => ($row->currentCheck()['followup'] ?? null) === 'Required',default => true
@@ -35,12 +35,13 @@ class SurveyReceiptController extends Controller
 
     public function save(Request $r, Apprentice $apprentice, ?SurveyReceipt $receipt = null): RedirectResponse
     {
-        $this->authorised($r);
+        $this->authorised($r, $apprentice);
         if ($receipt) {
             abort_unless($receipt->apprentice_id === $apprentice->id, 404);
         }$data = $r->validate(['kind' => ['required', Rule::in(array_keys(self::TYPES))], 'submitted_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'version' => $receipt ? ['required', 'integer'] : ['prohibited']]);
         DB::transaction(function () use ($r, $apprentice, $receipt, $data): void {
-            Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            $this->authorised($r, $fresh);
             $row = $receipt ? SurveyReceipt::whereKey($receipt->id)->lockForUpdate()->firstOrFail() : new SurveyReceipt(['apprentice_id' => $apprentice->id, 'recorded_by' => $r->user()->id]);
             if ($row->exists) {
                 $this->version($r, $row);
@@ -67,7 +68,7 @@ class SurveyReceiptController extends Controller
 
     public function check(Request $r, SurveyReceipt $receipt): RedirectResponse
     {
-        $this->authorised($r);
+        $this->authorised($r, Apprentice::findOrFail($receipt->apprentice_id));
         $data = $r->validate(['version' => ['required', 'integer'], 'checked_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'followup' => ['required', Rule::in(['Required', 'Not required'])], 'concern_id' => ['nullable', 'integer', Rule::exists('support_concerns', 'id')->where('apprentice_id', $receipt->apprentice_id)]]);
         DB::transaction(function () use ($r, $receipt, $data): void {
             $row = SurveyReceipt::whereKey($receipt->id)->lockForUpdate()->firstOrFail();
@@ -89,6 +90,7 @@ class SurveyReceiptController extends Controller
 
     private function version(Request $r, SurveyReceipt $row): void
     {
+        $this->authorised($r, Apprentice::findOrFail($row->apprentice_id));
         if ($row->version !== $r->integer('version')) {
             throw ValidationException::withMessages(['version' => 'This survey receipt changed. Reopen before saving.']);
         }
