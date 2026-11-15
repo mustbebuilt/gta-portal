@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-38",
+  "checkpoint": "development-pack-39",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -481,6 +481,11 @@
       "batch": "Centre timetable planning, checked availability/room setup and recurring publication/register linking",
       "status": "working_tested_reference",
       "remaining": "Actual target native concurrent resource booking, real browser/mobile/keyboard/print, room capacity/use/travel-time approval and restored Cloud staging acceptance required. Planned windows are not contracts or attendance; no automatic registers/OTJ created."
+    },
+    {
+      "batch": "Whole-day timetable group context, managed Flexible Duties Days and checked planning cover",
+      "status": "working_tested_reference",
+      "remaining": "Actual target native concurrency, browser/device/print/restore acceptance and approved actual-register authorisation arrangements for cover remain required. Cover changes planning only; no wider learner or register access is granted."
     }
   ],
   "queue_review": "Pack36 combines independently checked future date moves/cancellations, exact future roster additions/removals, scoped calendar/conflict/readiness/export and owned register follow-up with defer/resolve/recheck and lost-scope privacy. No automatic marks/hours/notifications or learner concern creation. Cumulative current source included for comparison; no blind overwrite/live deployment.",
@@ -561,6 +566,18 @@
     "new_tables": 6,
     "migration": "2026_11_15_380000_create_centre_planning",
     "external_messages_sent": false,
+    "production_approved": false
+  },
+  "pack_39": {
+    "workstreams": [
+      "Compact weekday day cards with current room/group/count/start/shared note and optional timeline",
+      "Exact dated Flexible Duties Days within verified working windows; normal4+1 pattern guide and named work categories",
+      "Manager checked whole-occurrence planning cover, original/group/room/flex conflict rechecks, stale reservations and future withdrawal"
+    ],
+    "normal_policy": "The normal weekly allocation is four teaching days and one Flexible Duties Day. Duties on this day are agreed or allocated by the centre manager according to operational priorities and may include teaching cover, marking, preparation, reviews, learner support and staff development. It is not a guaranteed non-teaching day.",
+    "new_tables": 4,
+    "migration": "2026_11_15_390000_create_flexible_duties",
+    "register_access_granted_by_cover": false,
     "production_approved": false
   }
 }

@@ -149,7 +149,7 @@ with tempfile.TemporaryDirectory(prefix='gta-centre-planning-') as temporary:
         assert req(planner,setup)[0]==403
         passed('Current planning-access revocation removes setup/write privileges on the next authenticated request')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
-        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_planner_access','timetable_rooms','timetable_staff_windows','timetable_plans','timetable_plan_entries','timetable_planning_events')").fetchone()[0]==0;assert c.execute('SELECT COUNT(*) FROM training_sessions').fetchone()[0]==1;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='review_appointments'").fetchone()[0]==1
+        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_group_briefs','timetable_flexible_days','timetable_cover_allocations','timetable_duty_events')").fetchone()[0]==0;assert c.execute('SELECT COUNT(*) FROM training_sessions').fetchone()[0]==1;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='review_appointments'").fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
         passed('Disposable latest down/up drops only six planning tables; the actual register and Pack37 review appointment schema remain')
         configure('production');start_backend();assert req(admin,root)[0]==503

@@ -52,6 +52,16 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
+    Route::get('/centre-planning/group-details', [\App\Http\Controllers\TimetableDutiesController::class,'groups'])->name('timetable-duties.groups');
+    Route::post('/centre-planning/group-details/{group}', [\App\Http\Controllers\TimetableDutiesController::class,'brief'])->whereNumber('group')->name('timetable-duties.brief');
+    Route::get('/centre-planning/flexible-duties', [\App\Http\Controllers\TimetableDutiesController::class,'flexible'])->name('timetable-duties.flexible');
+    Route::post('/centre-planning/flexible-duties', [\App\Http\Controllers\TimetableDutiesController::class,'saveDays'])->name('timetable-duties.days.save');
+    Route::post('/centre-planning/flexible-duties/{day}/withdraw', [\App\Http\Controllers\TimetableDutiesController::class,'withdrawDay'])->whereNumber('day')->name('timetable-duties.days.withdraw');
+    Route::get('/centre-planning/cover', [\App\Http\Controllers\TimetableDutiesController::class,'covers'])->name('timetable-duties.covers');
+    Route::post('/centre-planning/cover', [\App\Http\Controllers\TimetableDutiesController::class,'prepare'])->name('timetable-duties.prepare');
+    Route::get('/centre-planning/cover/{cover}', [\App\Http\Controllers\TimetableDutiesController::class,'cover'])->whereUuid('cover')->name('timetable-duties.cover');
+    Route::post('/centre-planning/cover/{cover}/decision', [\App\Http\Controllers\TimetableDutiesController::class,'decide'])->whereUuid('cover')->name('timetable-duties.decide');
+
     Route::post('/centre-planning/entries/{entry}/register', [\App\Http\Controllers\CentrePlanningController::class,'link'])->whereNumber('entry')->name('centre-planning.link');
     Route::post('/centre-planning/entries/{entry}/unlink', [\App\Http\Controllers\CentrePlanningController::class,'unlink'])->whereNumber('entry')->name('centre-planning.unlink');
     Route::get('/centre-planning', [\App\Http\Controllers\CentrePlanningController::class,'index'])->name('centre-planning.index');

@@ -28,7 +28,7 @@ class ApplicationSchemaTest extends TestCase
  }
  public function test_reference_migrations_match_all_required_names_and_recent_columns():void {
   $this->ready();$r=ApplicationSchema::inspectSchema(Schema::getFacadeRoot());
-  $this->assertSame('pass',$r['status']);$this->assertSame(132,$r['required_tables']);$this->assertSame(1423,$r['required_columns']);$this->assertSame(132,$r['tables_checked']);$this->assertSame([],$r['missing_tables']);$this->assertSame([],$r['missing_columns']);
+  $this->assertSame('pass',$r['status']);$this->assertSame(136,$r['required_tables']);$this->assertSame(1467,$r['required_columns']);$this->assertSame(136,$r['tables_checked']);$this->assertSame([],$r['missing_tables']);$this->assertSame([],$r['missing_columns']);
   $this->assertContains('maths_tutor',ApplicationSchema::TABLES['staff_duties']);$this->assertContains('english_tutor',ApplicationSchema::TABLES['staff_duties']);$this->assertArrayHasKey('account_second_factors',ApplicationSchema::TABLES);
  }
  public function test_missing_subject_columns_block_even_when_all_migration_names_are_recorded():void {
@@ -42,7 +42,7 @@ class ApplicationSchemaTest extends TestCase
  }
  public function test_extra_target_tables_and_columns_are_allowed():void {
   $this->ready();Schema::create('fictional_target_extra',fn(Blueprint $t)=>$t->id());Schema::table('users',fn(Blueprint $t)=>$t->string('fictional_extra')->nullable());
-  $r=ApplicationSchema::inspectSchema(Schema::getFacadeRoot());$this->assertSame('pass',$r['status']);$this->assertSame([],$r['missing_columns']);$this->assertSame(132,$r['required_tables']);
+  $r=ApplicationSchema::inspectSchema(Schema::getFacadeRoot());$this->assertSame('pass',$r['status']);$this->assertSame([],$r['missing_columns']);$this->assertSame(136,$r['required_tables']);
  }
  public function test_default_diagnostic_never_opens_database_and_marks_schema_not_checked():void {
   DB::shouldReceive('connection')->never();$r=CloudReadiness::inspect();$this->assertSame('not_checked',$r['schema_presence']['status']);$this->assertSame('not_requested',$r['schema_presence']['reason']);$this->assertSame(0,$r['schema_presence']['tables_checked']);

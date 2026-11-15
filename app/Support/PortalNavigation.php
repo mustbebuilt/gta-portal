@@ -34,7 +34,7 @@ class PortalNavigation
             $links[]=$item('Groups and sessions','attendance.index',[],['attendance.*']);$links[]=$item('Session operations','session-operations.index',[],['session-operations.*','session-changes.*','register-actions.*']);$links[]=$item('Marking worklist','marking.index',[],['marking.*']);
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)){$links[]=$item('Gateway preparation','gateway.index',[],['gateway.*']);}
-        if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'My timetable','centre-planning.index',[],['centre-planning.*']);}
+        if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'My timetable','centre-planning.index',[],['centre-planning.*','timetable-duties.*']);}
         $group('training','Apprentices & training',$links);
         $links=[];
         if(ReviewReminders::allowed($u)) {$links[]=$item('Reviews','reviews.index',[],['reviews.*']);}

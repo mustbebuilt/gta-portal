@@ -127,9 +127,9 @@ with tempfile.TemporaryDirectory(prefix='gta-employer-setup-') as temporary:
         employer=login('employer@example.test');status,text,_,_=req(employer,own);assert 'VISIBLE-FICTIONAL-APPRENTICE'in text and 'I have checked this step'in text
         passed('Fresh explicit named grant restores only its checked learner scope; old checklist confirmations do not count')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
-        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_planner_access','timetable_rooms','timetable_staff_windows','timetable_plans','timetable_plan_entries','timetable_planning_events')").fetchone()[0]==0;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='staging_acceptance_runs'").fetchone()[0]==1
+        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_group_briefs','timetable_flexible_days','timetable_cover_allocations','timetable_duty_events')").fetchone()[0]==0;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='staging_acceptance_runs'").fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest migration down/up removes only six Pack38 centre-planning tables and retains Pack32 acceptance schema')
+        passed('Disposable latest migration down/up removes only four Pack39 duty/group/cover tables and retains Pack32 acceptance schema')
         configure('production');start_backend();assert req(admin,index)[0]==503 and req(employer,own)[0]==503
         passed('Existing production access gate remains unchanged')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual client-verified local HTTPS; disposable SQLite/encrypted database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'productionApproved':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

@@ -135,11 +135,11 @@ with tempfile.TemporaryDirectory(prefix='gta-leaver-destination-') as temporary:
         passed('Incorrect contact is voided with audit retained; no contact or proposal history deletion')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_planner_access','timetable_rooms','timetable_staff_windows','timetable_plans','timetable_plan_entries','timetable_planning_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_group_briefs','timetable_flexible_days','timetable_cover_allocations','timetable_duty_events')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='workplace_support_shares'").fetchone()[0]==1
             assert c.execute('SELECT COUNT(*) FROM programme_outcomes').fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest down/up removes only Pack38 centre-planning schema; original outcome and prior support sharing remain')
+        passed('Disposable latest down/up removes only Pack39 duty/group/cover schema; original outcome and prior support sharing remain')
         configure('production');start_backend();assert req(manager,'/leaver-followup')[0]==503 and req(adviser,detail)[0]==503
         passed('Existing production gate still blocks new follow-up/report screens')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS; disposable SQLite and encrypted database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'actualMicrosoftExcelTested':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

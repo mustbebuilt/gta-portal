@@ -6,9 +6,14 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack38.
+    // Presence-only contract from the unchanged reference migrations through Pack39.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
+        'timetable_group_briefs'=>['created_at','details','details_hash','group_id','updated_at','updated_by','version'],
+        'timetable_flexible_days'=>['created_at','end_time','id','owner_id','source','source_hash','staff_id','start_time','state','updated_at','version','work_date'],
+        'timetable_cover_allocations'=>['active_entry_id','check_proof','closure','cover_staff_id','created_at','created_by','entry_id','flexible_day_id','id','original_staff_id','publication','request_token','source','source_hash','state','updated_at','version'],
+        'timetable_duty_events'=>['actor_id','created_at','event','id','payload','record_version','subject_key','subject_type'],
+
         'timetable_planner_access'=>['active','created_at','granted_by','history','updated_at','user_id','version'],
         'timetable_rooms'=>['active','capacity','created_at','created_by','history','id','name','site','updated_at','uses','version'],
         'timetable_staff_windows'=>['created_at','end_time','id','proof','start_time','updated_at','updated_by','user_id','version','work_date','working'],
