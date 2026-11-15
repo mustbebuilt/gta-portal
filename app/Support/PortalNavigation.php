@@ -62,6 +62,7 @@ class PortalNavigation
                 $links[]=$item($label,'directories.index',[$kind],[], $request->routeIs('directories.*')&&$request->route('kind')===$kind);
             }
             $links[]=$item('Employer accounts','employer-accounts.index',[],['employer-accounts.*','employer-grants.*','employer-setup.*']);
+            $links[]=$item('Apprentice intake','intakes.index',[],['intakes.*','cohort-setup.*','setup-cases.*']);
             $links[]=$item('Apprentice onboarding','apprentice-onboarding.index',[],['apprentice-onboarding.*']);
             $links[]=$item('Staff onboarding','onboarding.index',[],['onboarding.*']);
             $links[]=$item('Questionnaire link setup','questionnaires.configuration');

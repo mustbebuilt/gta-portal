@@ -115,6 +115,23 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
 
     Route::post('/employer-accounts/{user}/setup', [\App\Http\Controllers\EmployerSetupController::class,'update'])->whereNumber('user')->name('employer-setup.update');
 
+
+    Route::get('/apprentice-intakes', [\App\Http\Controllers\ApprenticeIntakeController::class,'index'])->name('intakes.index');
+
+    Route::get('/apprentice-intakes/readiness', [\App\Http\Controllers\CohortSetupController::class,'readiness'])->name('cohort-setup.index');
+    Route::get('/apprentice-intakes/readiness.json', [\App\Http\Controllers\CohortSetupController::class,'export'])->name('cohort-setup.export');
+    Route::get('/apprentice-intakes/actions', [\App\Http\Controllers\CohortSetupController::class,'queue'])->name('setup-cases.index');
+    Route::post('/apprentices/{apprentice}/setup-actions', [\App\Http\Controllers\CohortSetupController::class,'create'])->name('setup-cases.create');
+    Route::get('/apprentice-setup-actions/{setupCase}', [\App\Http\Controllers\CohortSetupController::class,'show'])->whereUuid('setupCase')->name('setup-cases.show');
+    Route::post('/apprentice-setup-actions/{setupCase}', [\App\Http\Controllers\CohortSetupController::class,'save'])->whereUuid('setupCase')->name('setup-cases.save');
+    Route::post('/apprentice-setup-actions/{setupCase}/decision', [\App\Http\Controllers\CohortSetupController::class,'decide'])->whereUuid('setupCase')->name('setup-cases.decide');
+    Route::get('/apprentice-intakes/new', [\App\Http\Controllers\ApprenticeIntakeController::class,'form'])->name('intakes.form');
+    Route::get('/apprentice-intakes/template.csv', [\App\Http\Controllers\ApprenticeIntakeController::class,'template'])->name('intakes.template');
+    Route::get('/apprentice-intakes/catalogue', [\App\Http\Controllers\ApprenticeIntakeController::class,'catalogue'])->name('intakes.catalogue');
+    Route::post('/apprentice-intakes', [\App\Http\Controllers\ApprenticeIntakeController::class,'preview'])->name('intakes.preview');
+    Route::get('/apprentice-intakes/{intake}', [\App\Http\Controllers\ApprenticeIntakeController::class,'show'])->whereUuid('intake')->name('intakes.show');
+    Route::post('/apprentice-intakes/{intake}', [\App\Http\Controllers\ApprenticeIntakeController::class,'decide'])->whereUuid('intake')->name('intakes.decide');
+    Route::get('/apprentice-intakes/{intake}/setup.json', [\App\Http\Controllers\ApprenticeIntakeController::class,'report'])->whereUuid('intake')->name('intakes.report');
     Route::get('/staff-handovers', [\App\Http\Controllers\StaffHandoverController::class,'index'])->name('staff-handovers.index');
     Route::get('/staff-handovers/workload', [\App\Http\Controllers\StaffHandoverController::class,'workload'])->name('staff-handovers.workload');
     Route::get('/staff-handovers/new', [\App\Http\Controllers\StaffHandoverController::class,'create'])->name('staff-handovers.create');

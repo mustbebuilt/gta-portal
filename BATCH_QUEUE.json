@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-34",
+  "checkpoint": "development-pack-35",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -461,14 +461,19 @@
       "batch": "Pack34 staff assignment overview, independently checked caseload handover and recipient acknowledgement",
       "status": "implemented_reference_code_target_acceptance_pending",
       "remaining": "Actual mapping/native locks/races/access/privacy/restore/browser/phone/Cloud acceptance. One selected assignment per checked batch; no group/role/support/HR or historic signer transfer. Yorkshire recordings excluded."
+    },
+    {
+      "batch": "Pack35 combined apprentice intake, existing-cohort readiness and tracked setup actions",
+      "status": "implemented_reference_code_target_acceptance_pending",
+      "remaining": "Actual source identities/catalogue mapping/native constraints/races/Cloud/browser/restore and provider acceptance. Create-only profiles; accounts/tasks/formal induction/eligibility remain separate. Yorkshire recordings excluded."
     }
   ],
-  "queue_review": "Pack34 consolidates five assignment roles, all-profile workload counts, exact 1\u2013100 record sealed previews, different-manager atomic apply/reject, expiry/source drift/withdrawal, canonical assignment history, minimal management handover and own scoped incoming acknowledgements. Actual capacity/authority/native/Cloud acceptance remain; no automatic messages or task/review completion.",
+  "queue_review": "Pack35 combines whole-intake profile creation, existing-cohort readiness across programme/group/start-date/issue filters, and source-bound owned setup follow-up with deferral/resolution/recheck. Consolidated full current application/source PDFs supplied as comparison reference. No automatic accounts/tasks/formal eligibility or external delivery. Yorkshire recordings excluded.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
   "next_priority": "Actual integrated staging gaps, content/cohort/source approval and acceptance; no Yorkshire recording work in the remaining scope.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "34",
+  "development_pack": "35",
   "questionnaire_update": {
     "pack": "25",
     "status": "Native questionnaire lifecycle implemented separately from retained external responder links and manual receipts.",
@@ -519,5 +524,6 @@
     "resume_only_when_requested": true,
     "existing_help_code_retained": true,
     "new_recordings_supplied": false
-  }
+  },
+  "release_size_preference": "Approximately three related functional workstreams per larger pack; no artificial file padding or copied earlier source counted as new development."
 }
