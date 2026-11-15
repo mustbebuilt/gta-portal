@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack32.
+    // Presence-only contract from the unchanged reference migrations through Pack33.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -46,6 +46,8 @@ class ApplicationSchema
         'electronic_review_signers'=>['attestation','attestation_hash','attested_at','auth_version','created_at','expected_name','id','identity_hash','packet_id','role','state','updated_at','user_id','version'],
         'employer_apprentice_grants'=>['active','apprentice_id','created_at','employer_id','employer_version','history','id','identity_hash','identity_reference','updated_at','user_id','verified_by','version'],
         'employer_portal_actions'=>['apprentice_id','created_at','created_by','detail','due_date','employer_apprentice_grant_id','history','id','kind','responded_at','responded_by','response','response_note','source','source_hash','source_id','state','title','updated_at','version'],
+        'employer_start_checks'=>['confirmed_at','created_at','id','item','scope_hash','updated_at','user_id','version'],
+        'employer_start_events'=>['actor_id','check_id','created_at','event','id','payload'],
         'employers'=>['active','contact_email','contact_name','contact_phone','created_at','id','name','record_version','reference','size_band','updated_at'],
         'evidence_copy_events'=>['created_at','event','id','origin','plan_id','summary'],
         'evidence_copy_plans'=>['created_at','finished_at','id','manifest','manifest_hash','reference','result','source_disk','started_at','state','target_disk','updated_at','version'],

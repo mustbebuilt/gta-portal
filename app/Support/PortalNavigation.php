@@ -12,7 +12,7 @@ class PortalNavigation
         $item=fn(string $label,string $route,array $parameters=[],array $patterns=[],?bool $current=null)=>[
             'label'=>$label,'href'=>route($route,$parameters),'current'=>$current??$request->routeIs(...($patterns?:[$route]))];
         $primary=[];$groups=[];
-        if($u->role==='employer') {$primary[]=$item('My employer actions','employer-actions.index',[],['employer-actions.index','employer-actions.show','employer-actions.respond']);}
+        if($u->role==='employer') {$primary[]=$item('Getting started','employer-start.index',[],['employer-start.*']);$primary[]=$item('My employer actions','employer-actions.index',[],['employer-actions.index','employer-actions.show','employer-actions.respond']);}
         if(StaffAttention::allowed($u)) {$primary[]=$item('Needs attention','attention.index');}
         if($u->role==='apprentice') {$primary[]=$item('My next step','experience.home');$primary[]=$item('Getting started','getting-started.index',[],['getting-started.*']);}
         $group=function(string $id,string $label,array $links)use(&$groups):void {
@@ -60,7 +60,7 @@ class PortalNavigation
             foreach(['staff'=>'Staff','employers'=>'Employers','groups'=>'Tutor groups','programmes'=>'Programmes']as$kind=>$label) {
                 $links[]=$item($label,'directories.index',[$kind],[], $request->routeIs('directories.*')&&$request->route('kind')===$kind);
             }
-            $links[]=$item('Employer accounts','employer-accounts.index',[],['employer-accounts.*','employer-grants.*']);
+            $links[]=$item('Employer accounts','employer-accounts.index',[],['employer-accounts.*','employer-grants.*','employer-setup.*']);
             $links[]=$item('Apprentice onboarding','apprentice-onboarding.index',[],['apprentice-onboarding.*']);
             $links[]=$item('Staff onboarding','onboarding.index',[],['onboarding.*']);
             $links[]=$item('Questionnaire link setup','questionnaires.configuration');

@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-32",
+  "checkpoint": "development-pack-33",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -424,8 +424,8 @@
     },
     {
       "batch": "Pack27 current help, onboarding and controlled Yorkshire recordings",
-      "status": "working_reference_code_real_recordings_and_target_acceptance_pending",
-      "remaining": "33 current general scripts supplied. Real approved recordings/permission/accent listening needed; no paid speech provider or actual voice created. Native/Cloud/browser/phone playback, storage concurrency/restore and prior packs/source applicability acceptance remain."
+      "status": "implemented_reference_code_recordings_removed_from_current_scope",
+      "remaining": "Existing optional narration capability retained; no recording work in current scope. Actual integration, private storage and browser/device acceptance remain."
     },
     {
       "batch": "Pack28 apprentice accounts and getting started",
@@ -440,22 +440,27 @@
     {
       "batch": "Pack30 consolidated leaver follow-up and destination review/reporting",
       "status": "working_reference_code_target_acceptance_pending",
-      "remaining": "Integrate after Pack29. Check actual historical leaver sources and assigned Careers duty, evidence basis and dates, independent manager review/correction, target native transactions/locks/indexes/encryption/restore, actual Cloud/browser/phone/CSV acceptance. No live ILR, automatic outreach or achievement updates. Yorkshire recording remains paused."
+      "remaining": "Integrate after Pack29. Check actual historical leaver sources and assigned Careers duty, evidence basis and dates, independent manager review/correction, target native transactions/locks/indexes/encryption/restore, actual Cloud/browser/phone/CSV acceptance. No live ILR, automatic outreach or achievement updates. Yorkshire recording work removed from current scope."
     },
     {
       "batch": "Pack31 messaging evidence import, conflict resolution and failure follow-up",
       "status": "working_reference_code_target_acceptance_pending",
-      "remaining": "Merge after Pack30. Map actual provider evidence to the supplied strict CSV, verify actual records/IDs/time semantics and email SMTP-ID hashing, then independent source checks. Native locking/uniqueness/large encryption/restore, actual Cloud/browser/CSV/participant acceptance and real provider service remain. No live callback/automatic fetch, messages, preference change or retry. Yorkshire recordings stay paused."
+      "remaining": "Merge after Pack30. Map actual provider evidence to the supplied strict CSV, verify actual records/IDs/time semantics and email SMTP-ID hashing, then independent source checks. Native locking/uniqueness/large encryption/restore, actual Cloud/browser/CSV/participant acceptance and real provider service remain. No live callback/automatic fetch, messages, preference change or retry. Yorkshire recording work removed from current scope."
     },
     {
       "batch": "Pack32 source-bound staging acceptance, findings and handover",
       "status": "working_reference_code_actual_acceptance_not_performed",
-      "remaining": "Merge after31. Capture actual target source/configuration, declare programme/cohort/service scope, record real native/browser/role/storage/provider evidence and independently verify findings/checks. This records manual staging evidence; no tests passed automatically, no deployment or production approval. Missing authoritative content and actual integration remain. Yorkshire recordings paused."
+      "remaining": "Merge after31. Capture actual target source/configuration, declare programme/cohort/service scope, record real native/browser/role/storage/provider evidence and independently verify findings/checks. This records manual staging evidence; no tests passed automatically, no deployment or production approval. Missing authoritative content and actual integration remain. Yorkshire recording work removed from current scope."
+    },
+    {
+      "batch": "Pack33 employer setup, invitation control and own getting-started",
+      "status": "implemented_reference_code_target_acceptance_pending",
+      "remaining": "Merge after32; accept actual identity/individual authority, native FK/lock/race/restore, browser/phone/Cloud/SMTP pilot. Checklist is informal, not signed review/induction/training evidence. Yorkshire recording work removed from current scope."
     }
   ],
-  "queue_review": "Pack32 adds read-only double-pass source inventory/configuration seal, source-bound declared acceptance runs, 18 core/manual scenarios plus optional live messaging, independent observation review, findings with verified resolution/Minor deferral, source drift holds, fresh-cycle carry-forward without old passes, reopen/retest, minimal handover JSON and audit. Actual source/config/native/browser/provider truth must be tested by Martin/GTA; no automatic acceptance or deployment.",
+  "queue_review": "Pack33 adds employer contact/search/setup, exact invitation revocation, versioned contact edits with session/token/grant invalidation and own scope-bound getting-started checklist. Actual integration and target acceptance remain; no automatic messages/signatures or learner completion. Yorkshire recording work removed from current scope.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Use actual integrated source and observed defects/content gaps to finish, not optional features to fill pack numbers. Workbench records actual scoped acceptance and what remains; it does not supply missing tasks/cohort/Gateway/questionnaire/HR criteria or perform native/Cloud/browser/service/restore acceptance from this chat. Yorkshire recordings paused; no reliable final pack count without real staging status.",
+  "next_priority": "Actual integrated staging gaps, content/cohort/source approval and acceptance; no Yorkshire recording work in the remaining scope.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
   "development_pack": "32",
@@ -467,7 +472,7 @@
   "requested_expansion_2026_11_14": {
     "status": "all_nine_functional_reference_workflows_implemented_target_content_acceptance_pending",
     "release_style": "Larger functional releases; existing pack numbers retained.",
-    "priority": "Integrate and accept implemented workflows; reconcile actual content/criteria/permissions before rollout. Pack28 apprentice accounts and Pack29 limited workplace support sharing are implemented reference code. Yorkshire recording paused.",
+    "priority": "Integrate and accept implemented workflows; reconcile actual content/criteria/permissions before rollout. Pack28 apprentice accounts and Pack29 limited workplace support sharing are implemented reference code. Yorkshire recording work removed from current scope.",
     "workstreams": [
       {
         "name": "Apprentice experience",
@@ -505,9 +510,9 @@
     ]
   },
   "yorkshire_recording_status": {
-    "state": "paused_by_user",
+    "state": "removed_from_current_scope_by_user",
     "resume_only_when_requested": true,
-    "pack27_code_retained": true,
+    "existing_help_code_retained": true,
     "new_recordings_supplied": false
   }
 }

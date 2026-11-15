@@ -142,7 +142,7 @@ with tempfile.TemporaryDirectory(prefix='gta-employer-gateway-') as temporary:
         passed('Changed recorded programme status invalidates published readiness basis instead of preserving a ready claim')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('staging_acceptance_runs','staging_acceptance_checks','staging_acceptance_issues','staging_acceptance_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('employer_start_checks','employer_start_events')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('review_preparation_briefs','apprentice_experience_entries','apprentice_mobile_challenges')").fetchone()[0]==3
             assert c.execute('SELECT status FROM smart_actions WHERE id=?',(ids['target'],)).fetchone()[0]=='To do'
         assert artisan('migrate','--force').returncode==0

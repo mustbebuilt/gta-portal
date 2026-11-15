@@ -131,7 +131,7 @@ with tempfile.TemporaryDirectory(prefix='gta-help-audio-') as temporary:
         with admin.open(origin+'/help-recordings/'+record[0]+'/preview',timeout=30)as response:assert response.read()==audio_bytes
         passed('Explicit withdrawal removes user playback while preserving private archived clip and history')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
-        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('staging_acceptance_runs','staging_acceptance_checks','staging_acceptance_issues','staging_acceptance_events')").fetchone()[0]==0;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='electronic_review_packets'").fetchone()[0]==1
+        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('employer_start_checks','employer_start_events')").fetchone()[0]==0;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='electronic_review_packets'").fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
         passed('Disposable latest down/up removes only Pack32 acceptance tables and retains Pack26 signing schema; real audio needs backup')
         configure('production');start_backend();assert req(learner,'/help')[0]==503

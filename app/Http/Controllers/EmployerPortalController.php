@@ -37,7 +37,7 @@ class EmployerPortalController extends Controller
     {
         $this->manager($r);
 
-        return $this->privateView('employer-portal.accounts', ['users' => User::where('role', 'employer')->orderBy('name')->paginate(20)]);
+        return app(EmployerSetupController::class)->index($r);
     }
 
     public function createAccount(Request $r)

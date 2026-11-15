@@ -112,6 +112,12 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/apprentice-onboarding/{apprentice}/revoke', [\App\Http\Controllers\ApprenticeOnboardingController::class,'revoke'])->name('apprentice-onboarding.revoke');
     Route::get('/getting-started', [\App\Http\Controllers\ApprenticeOnboardingController::class,'home'])->name('getting-started.index');
     Route::post('/getting-started/{item}', [\App\Http\Controllers\ApprenticeOnboardingController::class,'check'])->name('getting-started.check');
+
+    Route::post('/employer-accounts/{user}/setup', [\App\Http\Controllers\EmployerSetupController::class,'update'])->whereNumber('user')->name('employer-setup.update');
+    Route::get('/employer-accounts/{user}/setup', [\App\Http\Controllers\EmployerSetupController::class,'show'])->whereNumber('user')->name('employer-setup.show');
+    Route::post('/employer-accounts/{user}/revoke-invitation', [\App\Http\Controllers\EmployerSetupController::class,'revoke'])->whereNumber('user')->name('employer-setup.revoke');
+    Route::get('/employer-getting-started', [\App\Http\Controllers\EmployerSetupController::class,'start'])->name('employer-start.index');
+    Route::post('/employer-getting-started/{item}', [\App\Http\Controllers\EmployerSetupController::class,'check'])->name('employer-start.check');
     Route::get('/employer-accounts', [\App\Http\Controllers\EmployerPortalController::class,'accounts'])->name('employer-accounts.index');
     Route::post('/employer-accounts', [\App\Http\Controllers\EmployerPortalController::class,'createAccount'])->name('employer-accounts.create');
     Route::post('/employer-accounts/{user}/invite', [\App\Http\Controllers\EmployerPortalController::class,'invite'])->name('employer-accounts.invite');
