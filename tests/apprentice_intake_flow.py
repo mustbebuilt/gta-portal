@@ -163,10 +163,14 @@ with tempfile.TemporaryDirectory(prefix='gta-apprentice-intake-') as temporary:
         passed('Current cohort detects changed created-profile identity instead of silently relinking by name')
         post(admin,bad,bad,{'version':1,'decision':'withdraw','note':'Fictional corrected source needed','confirmed':1})
         passed('Invalid retained preview can be explicitly withdrawn without rewriting created learner data')
+        with sqlite3.connect(db) as c: before_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
-        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==0;assert c.execute('SELECT COUNT(*) FROM apprentices').fetchone()[0]==2;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='staff_handover_batches'").fetchone()[0]==1
+        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==6;assert c.execute('SELECT COUNT(*) FROM apprentices').fetchone()[0]==2;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='staff_handover_batches'").fetchone()[0]==1
+        with sqlite3.connect(db) as c:
+            after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            assert before_tables-after_tables=={'restriction_recovery_runs'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest down/up drops four Pack43 operations tables; existing created profiles and Pack34 schema remain')
+        passed('Latest Pack46 down/up removes only the restriction recovery run table while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,index)[0]==503
         passed('Existing production access gate remains unchanged')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual client-verified local HTTPS with multipart CSV uploads; disposable SQLite/encrypted sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualNativeEngine':False,'actualCloudAccess':False,'actualBrowserOrPhoneTested':False,'productionApproved':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

@@ -127,14 +127,18 @@ with tempfile.TemporaryDirectory(prefix='gta-staff-workflow-') as temporary:
         with sqlite3.connect(db)as c:c.execute('UPDATE apprentices SET tutor_id=NULL WHERE id=?',(ids['apprentice'],))
         assert req(tutor,stale_path)[0]==403 and 'WORKFLOW-FICTIONAL'not in req(tutor,'/needs-attention')[1]
         passed('Current tutor reassignment removes brief access and apprentice attention identity on the next request')
+        with sqlite3.connect(db) as c: before_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='account_lifecycle_states'").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='account_lifecycle_states'").fetchone()[0]==1
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('apprentice_experience_entries','apprentice_mobile_challenges')").fetchone()[0]==2
             assert 'description'in [r[1]for r in c.execute('PRAGMA table_info(task_evidence)')]
             assert c.execute('SELECT version FROM progress_review_drafts WHERE id=?',(ids['review'],)).fetchone()[0]==2
+        with sqlite3.connect(db) as c:
+            after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            assert before_tables-after_tables=={'restriction_recovery_runs'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest migration round-trip retains Pack22 briefs, Pack21 experience/photo, Pack20 mobile and saved review versions; employer/Gateway data needs backup for real rollback')
+        passed('Latest Pack46 down/up removes only the restriction recovery run table while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,'/needs-attention')[0]==503 and req(mentor,prepare)[0]==503
         passed('Production gate remains enforced for new attention/preparation routes')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS, cached staging config, disposable SQLite and encrypted database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'externalAIServiceUsed':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

@@ -6,9 +6,10 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack43.
+    // Presence-only contract from the unchanged reference migrations through Pack46.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
+        'restriction_recovery_runs'=>['id','request_token','created_by','state','version','source_hash','details_hash','details','approval','applied','created_at','updated_at'],
         'account_lifecycle_proposals'=>['action','applied','approval','created_at','created_by','details','id','request_token','source_hash','state','target_id','updated_at','version'],
         'account_lifecycle_states'=>['created_at','proof','review_on','status','updated_at','user_id','version'],
         'cohort_forecasts'=>['apprentice_id','created_at','details','source_hash','updated_at','version'],

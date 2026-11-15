@@ -69,10 +69,10 @@ return $result;
             return null;
         }
         $id = match (true) {
-            $r->routeIs('visual-reports.*','quick-actions.*','saved-work.*') => 'quick-actions',
+            $r->routeIs('calendar.*','visual-reports.*','quick-actions.*','saved-work.*') => 'quick-actions',
             $r->routeIs('record-checks.*') => 'record-checks',
             $r->routeIs('electronic-reviews.*', 'review-authority.*') => 'review-signing',
-            $r->routeIs('reviews.*', 'review-briefs.*') => 'review-preparation',
+            $r->routeIs('review-workspace.*','reviews.*', 'review-briefs.*') => 'review-preparation',
             $r->routeIs('portal-questionnaires.*') => $u->role === 'apprentice' ? 'native-questionnaires' : 'questionnaire-management',
             $r->routeIs('questionnaires.*') => 'external-questionnaires',$r->routeIs('alerts.*') => 'alerts',$r->routeIs('apprentice-notifications.*') => 'reminder-management',
             $r->routeIs('tasks.*', 'learning.*', 'blocks.*') => $u->role === 'apprentice' ? 'submit-work' : 'marking',

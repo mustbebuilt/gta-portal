@@ -279,10 +279,14 @@ with tempfile.TemporaryDirectory(prefix='gta-flexible-duties-') as temporary:
         assert req(ceo,'/account/password')[2].endswith('/account/password')
         with sqlite3.connect(db)as c:assert c.execute('SELECT COUNT(*) FROM portal_privacy_acknowledgements WHERE user_id=?',(ids['ceo'],)).fetchone()[0]==0
         passed('Privileged privacy recovery remains accessible and explicitly audited, with dated alternative access rather than a forged user acknowledgement')
+        with sqlite3.connect(db) as c: before_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
-        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==0;assert c.execute('SELECT COUNT(*) FROM timetable_plans').fetchone()[0]==2;assert c.execute('SELECT COUNT(*) FROM timetable_rooms').fetchone()[0]==18;assert c.execute('SELECT COUNT(*) FROM timetable_staff_windows').fetchone()[0]==4
+        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==6;assert c.execute('SELECT COUNT(*) FROM timetable_plans').fetchone()[0]==2;assert c.execute('SELECT COUNT(*) FROM timetable_rooms').fetchone()[0]==18;assert c.execute('SELECT COUNT(*) FROM timetable_staff_windows').fetchone()[0]==4
+        with sqlite3.connect(db) as c:
+            after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            assert before_tables-after_tables=={'restriction_recovery_runs'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest down/up removes only six Pack43 operations tables and retains rooms, windows, plans and earlier canonical schemas')
+        passed('Latest Pack46 down/up removes only the restriction recovery run table while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,root)[0]==503
         passed('Existing production-access gate remains enforced')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS with disposable SQLite/encrypted database sessions/cache','actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'realDataUsed':False,'externalMessagesSent':False,'productionApproved':False,'registerAccessGrantedByCover':False,'newGovernanceChecks':5,'newPack41Checks':6,'newPack42Checks':7};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

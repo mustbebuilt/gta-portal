@@ -38,12 +38,14 @@ class PortalNavigation
         if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'Timetable','centre-planning.index',[],['centre-planning.*','work-moves.*','timetable-duties.*','timetable-governance.*','timetable-management.*']);}
         if(LearningAccess::manager($u)){$links[]=$item('Apprentice progress','cohort-insights.index',[],['cohort-insights.*']);}
         if(\App\Support\ApprenticeRecordChecks::allowed($u)){$links[]=$item('Record checks','record-checks.index',[],['record-checks.*']);}
+        if($u->role==='apprentice'){$links[]=$item('My calendar','calendar.index',[],['calendar.*']);}
         $group('training','Apprentices & training',$links);
         $links=[];
         if(ReviewReminders::allowed($u)) {$links[]=$item('Reviews','reviews.index',[],['reviews.*']);}
         if(in_array($u->role,['admin','ceo','apprentice'],true)||StaffDuties::has($u,'careers_adviser')) {$links[]=$item('Careers','careers.worklist',[],['careers.*']);}
         if(in_array($u->role,['admin','ceo','tutor','apprentice','employer'],true)||StaffDuties::has($u,'mentor')){$links[]=$item('Review appointments','review-appointments.index',[],['review-appointments.*']);$links[]=$item('Review signing','electronic-reviews.index',[],['electronic-reviews.*','review-authority.*']);}
         if(LeaverDestinations::allowed($u)) {$links[]=$item('Leaver follow-up','destinations.index',[],['destinations.*']);}
+        if(ReviewReminders::allowed($u)){$links[]=$item('Prepare reviews','review-workspace.index',[],['review-workspace.*']);}
         $group('reviews-careers','Reviews & Careers',$links);
         $links=[];
         if(SupportAccess::team($u)) {
@@ -74,7 +76,7 @@ class PortalNavigation
             $links[]=$item('Questionnaire link setup','questionnaires.configuration');
         }
         if(in_array($u->role,['admin','ceo'],true)) {$links[]=$item('Support permissions','support.permissions');}
-        if(LearningAccess::manager($u)){$links[]=$item('Account access','account-operations.index',[],['account-operations.*']);}
+        if(LearningAccess::manager($u)){$links[]=$item('Account access','account-operations.index',[],['account-operations.*','restriction-recovery.*']);}
         $group('administration','Administration',$links);
         $links=[];
         if($manage) {
@@ -86,12 +88,14 @@ class PortalNavigation
             $links[]=$item('Reminder mail pilot','reminder-mail.index',[],['reminder-mail.*']);
         }
         if($u->role==='ceo') {$links[]=$item('CEO emergency access','executive.index',[],['executive.*']);}
+        if(LearningAccess::manager($u)){$links[]=$item('Communication checks','communications.index');}
         $group('system','System tools',$links);
         $links=[];
         if(SecondFactor::required($u)||SecondFactor::mayEnrol($u)) {$links[]=$item('Two-step sign-in','second-factor.settings',[],['second-factor.settings','second-factor.change']);}
         if($u->role==='apprentice') {$links[]=$item('My reminders','apprentice-reminders.index',[],['apprentice-reminders.*']);}
         if($u->role==='apprentice') {$links[]=$item('Alert preferences','alerts.index',[],['alerts.*']);}
         $links[]=$item('Confirm email','account.email',[],['account.email*']);$links[]=$item('Change password','account.password',[],['account.password*']);
+        if($u->role==='apprentice'){$links[]=$item('My reminder status','communications.own');}
         $group('account','My account',$links);
         return ['primary'=>$primary,'groups'=>$groups,'help'=>$item('Help and how to','help.index',[],['help.*'])];
     }

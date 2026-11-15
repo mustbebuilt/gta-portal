@@ -140,13 +140,17 @@ with tempfile.TemporaryDirectory(prefix='gta-employer-gateway-') as temporary:
         with sqlite3.connect(db)as c:c.execute('UPDATE programme_outcomes SET context=? WHERE apprentice_id=?',(json.dumps({'status':'Withdrawn','sourceRef':'Fictional withdrawal'}),ids['apprentice']))
         assert 'readiness not assessed'in req(learner,gateway)[1]
         passed('Changed recorded programme status invalidates published readiness basis instead of preserving a ready claim')
+        with sqlite3.connect(db) as c: before_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==6
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('review_preparation_briefs','apprentice_experience_entries','apprentice_mobile_challenges')").fetchone()[0]==3
             assert c.execute('SELECT status FROM smart_actions WHERE id=?',(ids['target'],)).fetchone()[0]=='To do'
+        with sqlite3.connect(db) as c:
+            after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            assert before_tables-after_tables=={'restriction_recovery_runs'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest reminder migration round-trip preserves employer/Gateway and earlier review/apprentice/mobile schema and original target state; real used data requires backup')
+        passed('Latest Pack46 down/up removes only the restriction recovery run table while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,'/employer-accounts')[0]==503 and req(employer,'/employer-actions')[0]==503 and req(learner,gateway)[0]==503
         passed('Existing production gate remains enforced on account, employer and Gateway routes')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS, cached staging config, disposable SQLite/encrypted database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'actualGatewayCriteriaSupplied':False,'actualParticipantSignatures':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

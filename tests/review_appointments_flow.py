@@ -126,10 +126,14 @@ with tempfile.TemporaryDirectory(prefix='gta-review-appointments-') as temporary
         assert 'Current replacement linked'in req(admin,historical)[1]
         post(admin,replacement,replacement+'/cancel',{'version':2,'note':'Synthetic changed replacement','confirmed':1});assert 'Rebooking/follow-up needs checking'in req(admin,historical)[1]
         passed('Exact current replacement links become actionable again when the replacement is cancelled; signatures and availability remain separate')
+        with sqlite3.connect(db) as c: before_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
-        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==0;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='signed_review_records'").fetchone()[0]==1;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='timetable_change_batches'").fetchone()[0]==1
+        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==6;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='signed_review_records'").fetchone()[0]==1;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='timetable_change_batches'").fetchone()[0]==1
+        with sqlite3.connect(db) as c:
+            after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            assert before_tables-after_tables=={'restriction_recovery_runs'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable down/up removes only the six Pack43 operations tables; formal review and Pack36 operations schemas remain')
+        passed('Latest Pack46 down/up removes only the restriction recovery run table while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,root)[0]==503
         passed('Existing production access gate remains enforced')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS; disposable SQLite/encrypted database sessions/cache; historical appointment set up with CLI-only synthetic clock','realDataUsed':False,'externalMessagesSent':False,'actualNativeEngine':False,'actualCloudAccess':False,'actualBrowserOrPhoneTested':False,'productionApproved':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

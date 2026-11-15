@@ -139,15 +139,19 @@ with tempfile.TemporaryDirectory(prefix='gta-staff-duties-') as temporary:
         status,text,_,_=req(tutor,'/help');assert 'Read-aloud voice'in text and 'Nothing is read automatically'in text
         stop_backend();start_backend();assert req(tutor,'/reviews')[0]==200
         passed('Pack11 optional voice interface is retained and correct database-session access survives PHP restart')
+        with sqlite3.connect(db) as c: before_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='account_lifecycle_states'").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='account_lifecycle_states'").fetchone()[0]==1
             assert 'alerts_enabled' in [r[1] for r in c.execute('PRAGMA table_info(apprentices)')]
             assert 'deadline_history' in [r[1] for r in c.execute('PRAGMA table_info(learning_tasks)')]
             assert c.execute('SELECT * FROM career_discussions WHERE apprentice_id=?',(target,)).fetchall()==discussion and c.execute('SELECT * FROM progress_review_drafts WHERE apprentice_id=?',(target,)).fetchall()==review
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_second_factors','support_plan_reminders')").fetchone()[0]==2
+        with sqlite3.connect(db) as c:
+            after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            assert before_tables-after_tables=={'restriction_recovery_runs'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Latest migration rolls back/reapplies only the latest apprentice reminder schema on disposable SQLite; previous business records, MFA and support-reminder schema remain')
+        passed('Latest Pack46 down/up removes only the restriction recovery run table while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,staff_path)[0]==503
         passed('Existing production gate remains enforced')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Local client-verified HTTPS, cached configuration and disposable SQLite database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualYorkshireVoiceTested':False,'limits':['No actual Martin repository/native locks/Cloud/browser/mobile acceptance','Only additional Careers and mentor duties; primary role, Maths/English, Inclusion and admin policies remain separate','Pack11 voice choice retained; no regional voice audio/service generated']};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps({'passed':len(checks),'failed':0}))

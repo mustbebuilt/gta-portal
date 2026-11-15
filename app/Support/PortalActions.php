@@ -122,6 +122,9 @@ class PortalActions
         if(in_array($u->role,['admin','ceo','tutor','apprentice'],true)){$add('report',$u->role==='apprentice'?'Open my report':'Open visual report','visual-reports.index','Charts, exact tables, current source context and a complete PDF.');}
         if($u->role==='employer'){$add('employer-actions','Respond to employer actions','employer-actions.index','See only requests currently shared with your employer account.');}
         if(in_array($u->role,['apprentice','employer'],true)){$add('signing','View review signing requests','electronic-reviews.index','Open only current requests available to your account.');}
+        if(ReviewReminders::allowed($u)){$add('review-workspace','Prepare progress reviews','review-workspace.index','Factual preparation, saved checklist items and links to the existing draft/signing workflows.');}
+        if(LearningAccess::manager($u)){$add('communications','Check communication status','communications.index','Read contact prerequisites and configuration without sending messages.');$add('restriction-recovery','Check restored account restrictions','restriction-recovery.index','Use a retained restriction file and a reviewed recovery request.');}
+        if($u->role==='apprentice'){$add('calendar','Open my calendar','calendar.index','Training sessions, current deadlines and published review appointments.');$add('reminder-status','Check my reminder status','communications.own','Current choices and provider outcomes without contact details.');}
         $add('guides','Find a how-to guide','help.index','Search the guides available to your role.');
         return $rows;
     }

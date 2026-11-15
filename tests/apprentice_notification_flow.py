@@ -159,13 +159,17 @@ with tempfile.TemporaryDirectory(prefix='gta-apprentice-alerts-') as temporary:
         passed('Management reconciliation adds an investigation record without resetting attempt or exposing private note in apprentice inbox')
         stop_backend();start_backend();assert 'Accepted'in req(learner,inbox)[1] and 'Uncertain'in req(second,inbox)[1] and artisan('gta:apprentice-alerts','--send').returncode==0 and len(captures)==2
         passed('Delivery states, read receipts, session binding and no-retry behavior persist across HTTP/CLI process restart')
+        with sqlite3.connect(db) as c: before_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==6
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('employer_portal_actions','gateway_readiness_plans','review_preparation_briefs','apprentice_mobile_challenges')").fetchone()[0]==4
             assert c.execute('SELECT status FROM learning_tasks ORDER BY id LIMIT 1').fetchone()[0]=='Draft'
+        with sqlite3.connect(db) as c:
+            after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            assert before_tables-after_tables=={'restriction_recovery_runs'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest migration round-trip removes only Pack43 operations tables; prior reminder/employer/Gateway/review/mobile/task work remains')
+        passed('Latest Pack46 down/up removes only the restriction recovery run table while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,ops)[0]==503 and req(learner,inbox)[0]==503 and len(captures)==2
         passed('Existing production gate remains enforced; all captured messages used fictional local SMTP only')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS and local SMTP DATA/accept/disconnect capture with disposable SQLite/database sessions/cache','localFictionalMessagesCaptured':len(captures),'independentReservationProofs':reservation_proof,'realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'actualRemoteSMTPTLS':False,'actualVonageOrHandset':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))
