@@ -135,11 +135,11 @@ with tempfile.TemporaryDirectory(prefix='gta-leaver-destination-') as temporary:
         passed('Incorrect contact is voided with audit retained; no contact or proposal history deletion')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('alert_receipt_batches','alert_receipt_records','alert_followup_cases','alert_receipt_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('staging_acceptance_runs','staging_acceptance_checks','staging_acceptance_issues','staging_acceptance_events')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='workplace_support_shares'").fetchone()[0]==1
             assert c.execute('SELECT COUNT(*) FROM programme_outcomes').fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest down/up removes only Pack31 receipt tracking schema; original outcome and prior support sharing remain')
+        passed('Disposable latest down/up removes only Pack32 acceptance tracking schema; original outcome and prior support sharing remain')
         configure('production');start_backend();assert req(manager,'/leaver-followup')[0]==503 and req(adviser,detail)[0]==503
         passed('Existing production gate still blocks new follow-up/report screens')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS; disposable SQLite and encrypted database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'actualMicrosoftExcelTested':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

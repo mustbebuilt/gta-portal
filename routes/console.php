@@ -285,3 +285,9 @@ Artisan::command('gta:help-check {--records : Read narration readiness in stagin
  try{$r=\App\Support\HelpNarration::inspect((bool)$this->option('records'),(bool)$this->option('verify-files'),(int)$this->option('limit'));$r['result']='report';$this->line(json_encode($r,JSON_THROW_ON_ERROR));return isset($r['counts'])&&($r['counts']['integrity_checks']||$r['counts']['file_checks'])?1:0;}
  catch(\Throwable){$this->line('{"result":"help_source_needs_checking","writes_performed":false,"private_error_printed":false}');return 1;}
 })->purpose('Read-only help catalogue and optional staging narration readiness; no speech provider request');
+
+Artisan::command('gta:acceptance-source-check', function () {
+    $source=app(\App\Support\AcceptanceSource::class)->capture();
+    $this->line(json_encode(\App\Support\AcceptanceSource::summary($source),JSON_THROW_ON_ERROR));
+    return $source['status']==='captured'?0:1;
+})->purpose('Read-only source/configuration fingerprint summary; no database probe, secret export or deployment approval');

@@ -138,11 +138,11 @@ with tempfile.TemporaryDirectory(prefix='gta-receipt-operations-') as temporary:
         passed('Whole import/review/conflict/closure/withdrawal lifecycle leaves original send ledger byte values unchanged')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('alert_receipt_batches','alert_receipt_records','alert_followup_cases','alert_receipt_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('staging_acceptance_runs','staging_acceptance_checks','staging_acceptance_issues','staging_acceptance_events')").fetchone()[0]==0
             assert c.execute('SELECT COUNT(*) FROM apprentice_alert_deliveries').fetchone()[0]==1
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='destination_proposals'").fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable down/up removes only four Pack31 tables; original attempt and earlier leaver schema remain')
+        passed('Disposable down/up removes only four Pack32 tables; original attempt and earlier leaver schema remain')
         configure('production');start_backend();assert req(admin,index)[0]==503 and req(ceo,detail)[0]==503
         passed('Existing production gate remains enforced on new messaging operations')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS; disposable SQLite/encrypted database sessions/cache','providerSource':'Fictional normalised records only, not actual provider DLRs','realDataUsed':False,'externalMessagesSent':False,'actualVonageAccountOrProviderAccess':False,'liveWebhookTested':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'actualMicrosoftExcelTested':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

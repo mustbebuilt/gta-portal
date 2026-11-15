@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-27",
+  "checkpoint": "development-pack-32",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -446,14 +446,19 @@
       "batch": "Pack31 messaging evidence import, conflict resolution and failure follow-up",
       "status": "working_reference_code_target_acceptance_pending",
       "remaining": "Merge after Pack30. Map actual provider evidence to the supplied strict CSV, verify actual records/IDs/time semantics and email SMTP-ID hashing, then independent source checks. Native locking/uniqueness/large encryption/restore, actual Cloud/browser/CSV/participant acceptance and real provider service remain. No live callback/automatic fetch, messages, preference change or retry. Yorkshire recordings stay paused."
+    },
+    {
+      "batch": "Pack32 source-bound staging acceptance, findings and handover",
+      "status": "working_reference_code_actual_acceptance_not_performed",
+      "remaining": "Merge after31. Capture actual target source/configuration, declare programme/cohort/service scope, record real native/browser/role/storage/provider evidence and independently verify findings/checks. This records manual staging evidence; no tests passed automatically, no deployment or production approval. Missing authoritative content and actual integration remain. Yorkshire recordings paused."
     }
   ],
-  "queue_review": "Pack31 adds private 1\u2013250-row normalised provider-outcome previews, independent atomic application/correction, sealed receipt evidence separate from unchanged transport attempts, missing-evidence views, conflict holds and independently checked source selection, case ownership/dates/notes/closure/reopening and minimal operations export. Actual provider-source mapping remains explicit; no webhook/fetch/automatic resend or consent change.",
+  "queue_review": "Pack32 adds read-only double-pass source inventory/configuration seal, source-bound declared acceptance runs, 18 core/manual scenarios plus optional live messaging, independent observation review, findings with verified resolution/Minor deferral, source drift holds, fresh-cycle carry-forward without old passes, reopen/retest, minimal handover JSON and audit. Actual source/config/native/browser/provider truth must be tested by Martin/GTA; no automatic acceptance or deployment.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Confirm and accept actual integrated source through31 with Martin. Reconcile actual content/criteria/historical/provider sources and live account mapping; run target native/Cloud/browser/service/restore acceptance. This pack processes checked normalised evidence, not raw provider exports or live callbacks. Yorkshire recording paused; no fixed remaining pack count or portal-complete claim.",
+  "next_priority": "Use actual integrated source and observed defects/content gaps to finish, not optional features to fill pack numbers. Workbench records actual scoped acceptance and what remains; it does not supply missing tasks/cohort/Gateway/questionnaire/HR criteria or perform native/Cloud/browser/service/restore acceptance from this chat. Yorkshire recordings paused; no reliable final pack count without real staging status.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "31",
+  "development_pack": "32",
   "questionnaire_update": {
     "pack": "25",
     "status": "Native questionnaire lifecycle implemented separately from retained external responder links and manual receipts.",
