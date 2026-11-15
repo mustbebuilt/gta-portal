@@ -147,11 +147,11 @@ with tempfile.TemporaryDirectory(prefix='gta-workplace-support-') as temporary:
         passed('Append-only action history remains; no electronic review or completion created')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('apprentice_intake_batches','apprentice_intake_events','apprentice_setup_cases','apprentice_setup_case_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_change_batches','timetable_change_events','register_followup_cases','register_followup_events')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='apprentice_start_checks'").fetchone()[0]==1
             assert c.execute('SELECT COUNT(*) FROM support_plans').fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable down/up removes only Pack32 acceptance tables and retains earlier support/onboarding schema; real history needs backup')
+        passed('Disposable down/up removes only Pack36 session-operations tables and retains earlier support/onboarding schema; real history needs backup')
         configure('production');start_backend();assert req(learner,'/workplace-support')[0]==503 and req(member,create)[0]==503
         passed('Existing production gate still blocks the new workflow')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Local client-verified HTTPS with disposable SQLite/database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

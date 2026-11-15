@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-35",
+  "checkpoint": "development-pack-36",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -466,14 +466,19 @@
       "batch": "Pack35 combined apprentice intake, existing-cohort readiness and tracked setup actions",
       "status": "implemented_reference_code_target_acceptance_pending",
       "remaining": "Actual source identities/catalogue mapping/native constraints/races/Cloud/browser/restore and provider acceptance. Create-only profiles; accounts/tasks/formal induction/eligibility remain separate. Yorkshire recordings excluded."
+    },
+    {
+      "batch": "Pack36 combined future timetable changes, saved-roster reconciliation and source-bound register follow-up",
+      "status": "implemented_reference_code_actual_target_acceptance_pending",
+      "remaining": "Actual native conflicts/concurrency/resource mapping/restore/browser/device and current authority acceptance. New tool never changes started/marked/delivered/historical session facts or infers actual attendance/OTJ. Existing correction/cancellation routes remain separately governed; Yorkshire recordings excluded."
     }
   ],
-  "queue_review": "Pack35 combines whole-intake profile creation, existing-cohort readiness across programme/group/start-date/issue filters, and source-bound owned setup follow-up with deferral/resolution/recheck. Consolidated full current application/source PDFs supplied as comparison reference. No automatic accounts/tasks/formal eligibility or external delivery. Yorkshire recordings excluded.",
+  "queue_review": "Pack36 combines independently checked future date moves/cancellations, exact future roster additions/removals, scoped calendar/conflict/readiness/export and owned register follow-up with defer/resolve/recheck and lost-scope privacy. No automatic marks/hours/notifications or learner concern creation. Cumulative current source included for comparison; no blind overwrite/live deployment.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
   "next_priority": "Actual integrated staging gaps, content/cohort/source approval and acceptance; no Yorkshire recording work in the remaining scope.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "35",
+  "development_pack": "36",
   "questionnaire_update": {
     "pack": "25",
     "status": "Native questionnaire lifecycle implemented separately from retained external responder links and manual receipts.",

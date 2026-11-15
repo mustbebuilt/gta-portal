@@ -289,6 +289,19 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/apprentices/{apprentice}/actions/{action}/edit', [SmartActionController::class, 'form'])->name('actions.edit');
     Route::put('/apprentices/{apprentice}/actions/{action}', [SmartActionController::class, 'save'])->name('actions.update');
     Route::post('/actions/{action}/progress', [SmartActionController::class, 'progress'])->name('actions.progress');
+
+    Route::get('/session-operations', [\App\Http\Controllers\SessionOperationsController::class,'calendar'])->name('session-operations.index');
+    Route::get('/session-operations/calendar.json', [\App\Http\Controllers\SessionOperationsController::class,'export'])->name('session-operations.export');
+    Route::get('/session-operations/changes', [\App\Http\Controllers\SessionOperationsController::class,'batches'])->name('session-changes.index');
+    Route::get('/session-operations/changes/new', [\App\Http\Controllers\SessionOperationsController::class,'form'])->name('session-changes.form');
+    Route::post('/session-operations/changes', [\App\Http\Controllers\SessionOperationsController::class,'prepare'])->name('session-changes.prepare');
+    Route::get('/session-operations/changes/{batch}', [\App\Http\Controllers\SessionOperationsController::class,'show'])->whereUuid('batch')->name('session-changes.show');
+    Route::post('/session-operations/changes/{batch}', [\App\Http\Controllers\SessionOperationsController::class,'decide'])->whereUuid('batch')->name('session-changes.decide');
+    Route::get('/session-operations/changes/{batch}/handover.json', [\App\Http\Controllers\SessionOperationsController::class,'report'])->whereUuid('batch')->name('session-changes.report');
+    Route::get('/session-operations/register-actions', [\App\Http\Controllers\SessionOperationsController::class,'cases'])->name('register-actions.index');
+    Route::get('/sessions/{session}/follow-up', [\App\Http\Controllers\SessionOperationsController::class,'caseForm'])->name('register-actions.show');
+    Route::post('/sessions/{session}/follow-up', [\App\Http\Controllers\SessionOperationsController::class,'caseSave'])->name('register-actions.save');
+    Route::post('/sessions/{session}/follow-up/decision', [\App\Http\Controllers\SessionOperationsController::class,'caseDecide'])->name('register-actions.decide');
     Route::get('/sessions', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::post('/sessions', [AttendanceController::class, 'create'])->name('attendance.create');
     Route::get('/sessions/{session}', [AttendanceController::class, 'show'])->name('attendance.show');

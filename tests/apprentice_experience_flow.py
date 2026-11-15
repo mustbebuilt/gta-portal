@@ -138,7 +138,7 @@ with tempfile.TemporaryDirectory(prefix='gta-apprentice-experience-') as tempora
         passed('Stale response form is rejected without overwriting the acknowledged request')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='apprentice_intake_batches'").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='timetable_change_batches'").fetchone()[0]==0
             assert 'description'in [r[1]for r in c.execute('PRAGMA table_info(task_evidence)')]
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='apprentice_mobile_challenges'").fetchone()[0]==1
             assert c.execute('SELECT COUNT(*) FROM task_evidence').fetchone()[0]==1

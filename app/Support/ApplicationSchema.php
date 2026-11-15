@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack35.
+    // Presence-only contract from the unchanged reference migrations through Pack36.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -127,6 +127,10 @@ class ApplicationSchema
         'apprentice_intake_events'=>['id','batch_id','actor_id','event','record_version','payload','created_at'],
         'apprentice_setup_cases'=>['id','apprentice_id','issue','state','version','owner_id','due_on','details','details_hash','source_hash','proof','decided_by','decided_at','created_at','updated_at'],
         'apprentice_setup_case_events'=>['id','case_id','actor_id','event','payload','created_at'],
+        'timetable_change_batches'=>['id','request_token','created_by','tutor_group_id','mode','state','version','source','source_hash','receipt','review_note','reviewed_by','reviewed_at','expires_at','created_at','updated_at'],
+        'timetable_change_events'=>['id','batch_id','actor_id','event','record_version','payload','created_at'],
+        'register_followup_cases'=>['id','training_session_id','owner_id','created_by','state','version','details','details_hash','source_hash','proof','decided_by','decided_at','due_on','created_at','updated_at'],
+        'register_followup_events'=>['id','case_id','actor_id','event','payload','created_at'],
     ];
 
     public static function inspect(Connection $connection): array
