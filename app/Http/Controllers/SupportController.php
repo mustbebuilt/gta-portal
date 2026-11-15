@@ -55,7 +55,7 @@ class SupportController extends Controller
     public function worklist(Request $r): View
     {
         abort_unless($this->team($r), 403);
-        $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'state' => ['nullable', Rule::in(SupportFollowup::CONCERN_VIEWS)], 'plan_state' => ['nullable', Rule::in(SupportFollowup::PLAN_VIEWS)], 'page' => ['nullable', 'integer', 'min:1'], 'plan_page' => ['nullable', 'integer', 'min:1']]);
+        $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'state' => ['nullable', Rule::in(SupportFollowup::CONCERN_VIEWS)], 'plan_state' => ['nullable', Rule::in(SupportFollowup::PLAN_VIEWS)], 'page' => ['nullable', 'integer', 'min:1'], 'plan_page' => ['nullable', 'integer', 'min:1'], 'apprentice_page' => ['nullable', 'integer', 'min:1']]);
         $search = trim($data['search'] ?? ''); $state = $data['state'] ?? 'open'; $planState = $data['plan_state'] ?? 'all';
         $people = Apprentice::whereIn('id', SupportAccess::ids($r->user()))->get();
         if ($search !== '') { $people = $people->filter(fn ($a) => Str::contains(Str::lower($a->first_name.' '.$a->last_name.' '.$a->reference), Str::lower($search))); }
@@ -63,7 +63,7 @@ class SupportController extends Controller
         $concernSummary = SupportFollowup::concerns($concerns);
         $plans = SupportPlan::whereIn('apprentice_id', $people->pluck('id'))->get(['id', 'apprentice_id', 'status', 'active_plan', 'reviews']);
         $planSummary = SupportFollowup::plans($plans, $people);
-        return view('support.worklist', ['concernRows' => SupportFollowup::paginate($concernSummary['rows']->filter(fn ($row) => $row['flags'][$state])->values(), $r, 'page'), 'concernCounts' => $concernSummary['counts'], 'planRows' => SupportFollowup::paginate($planSummary['rows']->filter(fn ($row) => $row['flags'][$planState])->values(), $r, 'plan_page'), 'planCounts' => $planSummary['counts'], 'search' => $search, 'state' => $state, 'planState' => $planState, 'codes' => $this->codes()]);
+        return view('support.worklist', ['supportPeople' => SupportFollowup::paginate($people->sortBy(fn ($a) => Str::lower($a->last_name.' '.$a->first_name.' '.$a->reference))->values(), $r, 'apprentice_page'), 'concernRows' => SupportFollowup::paginate($concernSummary['rows']->filter(fn ($row) => $row['flags'][$state])->values(), $r, 'page'), 'concernCounts' => $concernSummary['counts'], 'planRows' => SupportFollowup::paginate($planSummary['rows']->filter(fn ($row) => $row['flags'][$planState])->values(), $r, 'plan_page'), 'planCounts' => $planSummary['counts'], 'search' => $search, 'state' => $state, 'planState' => $planState, 'codes' => $this->codes()]);
     }
 
     public function index(Request $r, Apprentice $apprentice): View

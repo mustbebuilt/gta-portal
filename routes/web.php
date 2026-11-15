@@ -53,6 +53,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class, \App\Http\Middleware\RequirePrivacyAcknowledgement::class])->group(function () {
+    Route::get('/saved-work', [\App\Http\Controllers\SavedPortalWorkController::class,'index'])->name('saved-work.index');
+    Route::get('/quick-actions', [\App\Http\Controllers\PortalActionsController::class,'index'])->name('quick-actions.index');
+    Route::get('/apprentices/{apprentice}/work-area', [\App\Http\Controllers\PortalActionsController::class,'person'])->whereNumber('apprentice')->name('quick-actions.person');
+    Route::get('/record-checks', [\App\Http\Controllers\ApprenticeRecordChecksController::class,'index'])->name('record-checks.index');
+    Route::get('/apprentices/{apprentice}/record-checks', [\App\Http\Controllers\ApprenticeRecordChecksController::class,'show'])->whereNumber('apprentice')->name('record-checks.show');
+
     Route::get('/centre-planning/group-details', [\App\Http\Controllers\TimetableDutiesController::class,'groups'])->name('timetable-duties.groups');
     Route::post('/centre-planning/group-details/{group}', [\App\Http\Controllers\TimetableDutiesController::class,'brief'])->whereNumber('group')->name('timetable-duties.brief');
     Route::get('/centre-planning/flexible-duties', [\App\Http\Controllers\TimetableDutiesController::class,'flexible'])->name('timetable-duties.flexible');

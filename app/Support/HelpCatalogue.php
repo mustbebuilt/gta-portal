@@ -69,6 +69,8 @@ return $result;
             return null;
         }
         $id = match (true) {
+            $r->routeIs('quick-actions.*','saved-work.*') => 'quick-actions',
+            $r->routeIs('record-checks.*') => 'record-checks',
             $r->routeIs('electronic-reviews.*', 'review-authority.*') => 'review-signing',
             $r->routeIs('reviews.*', 'review-briefs.*') => 'review-preparation',
             $r->routeIs('portal-questionnaires.*') => $u->role === 'apprentice' ? 'native-questionnaires' : 'questionnaire-management',

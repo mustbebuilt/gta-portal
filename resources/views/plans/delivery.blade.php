@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title','Individual delivery plan')
 @section('content')
+@include('quick-actions.context')
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }} · {{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Individual delivery plan</h1><p>Actual block dates, planned occupational hours and controlled source references.</p></div><div class="toolbar"><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a><a class="button" href="{{ route('plans.show',$apprentice) }}">RPL and source preparation</a>@if($approved)<a class="button" href="{{ route('delivery.pdf',$apprentice) }}">Download approved delivery plan</a>@endif</div></header>
 @include('learning.errors')
 @include('learning.source-warnings')

@@ -12,8 +12,7 @@ class PortalNavigation
         $item=fn(string $label,string $route,array $parameters=[],array $patterns=[],?bool $current=null)=>[
             'label'=>$label,'href'=>route($route,$parameters),'current'=>$current??$request->routeIs(...($patterns?:[$route]))];
         $primary=[];$groups=[];
-        if(LearningAccess::manager($u)){$primary[]=$item('Account access','account-operations.index',[],['account-operations.*']);$primary[]=$item('Apprentice progress','cohort-insights.index',[],['cohort-insights.*']);}
-        if(StaffAttention::allowed($u)){$primary[]=$item('Staff follow-up','operations-desk.index',[],['operations-desk.*']);}
+        $primary[]=$item('Quick actions','quick-actions.index',[],['quick-actions.*']);
         if($u->role==='employer') {$primary[]=$item('Getting started','employer-start.index',[],['employer-start.*']);$primary[]=$item('My employer actions','employer-actions.index',[],['employer-actions.index','employer-actions.show','employer-actions.respond']);}
         if(StaffAttention::allowed($u)) {$primary[]=$item('Needs attention','attention.index');}
         if($u->role==='apprentice') {$primary[]=$item('My next step','experience.home');$primary[]=$item('Getting started','getting-started.index',[],['getting-started.*']);}
@@ -37,6 +36,8 @@ class PortalNavigation
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)){$links[]=$item('Gateway preparation','gateway.index',[],['gateway.*']);}
         if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'Timetable','centre-planning.index',[],['centre-planning.*','timetable-duties.*','timetable-governance.*','timetable-management.*']);}
+        if(LearningAccess::manager($u)){$links[]=$item('Apprentice progress','cohort-insights.index',[],['cohort-insights.*']);}
+        if(\App\Support\ApprenticeRecordChecks::allowed($u)){$links[]=$item('Record checks','record-checks.index',[],['record-checks.*']);}
         $group('training','Apprentices & training',$links);
         $links=[];
         if(ReviewReminders::allowed($u)) {$links[]=$item('Reviews','reviews.index',[],['reviews.*']);}
@@ -57,6 +58,8 @@ class PortalNavigation
         if(!in_array($u->role,['apprentice','employer'],true)) {$links[]=$item('Staff development','staff.index',[],['staff.*']);}
         if($u->role!=='apprentice') {$links[]=$item('Case studies','cases.index',[],['cases.*']);}
         if($manage) {$links[]=$item('Curriculum source checks','curriculum-sources.index',[],['curriculum-sources.*']);}
+        if(StaffAttention::allowed($u)){$links[]=$item('Staff follow-up','operations-desk.index',[],['operations-desk.*']);}
+        if(SavedPortalWork::allowed($u)){$links[]=$item('Saved work','saved-work.index',[],['saved-work.*']);}
         $group('staff-quality','Staff & quality',$links);
         $links=[];
         if($manage) {
@@ -71,6 +74,7 @@ class PortalNavigation
             $links[]=$item('Questionnaire link setup','questionnaires.configuration');
         }
         if(in_array($u->role,['admin','ceo'],true)) {$links[]=$item('Support permissions','support.permissions');}
+        if(LearningAccess::manager($u)){$links[]=$item('Account access','account-operations.index',[],['account-operations.*']);}
         $group('administration','Administration',$links);
         $links=[];
         if($manage) {

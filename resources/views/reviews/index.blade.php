@@ -3,6 +3,7 @@
 @section('content')
 <header class="page-heading"><div><h1>Progress reviews</h1><p>Prepare review content, check externally signed copies and follow the next tracked meeting date.</p></div></header>
 @include('learning.errors')
+<section class="panel"><h2>Start or continue a review</h2><p>Find the apprentice below. Open their review record to start a draft or continue saved work. Book the meeting through Review appointments. After checking and saving the content, prepare participant sign-off from a review marked Ready for signatures.</p><div class="toolbar"><a class="button" href="{{ route('review-appointments.index') }}">Review appointments</a><a class="button" href="{{ route('electronic-reviews.index') }}">Review signing</a></div><p>Booking an appointment or saving a draft does not complete a review.</p></section>
 <p class="test-notice">Tracked dates use independently checked actual meetings. Electronic signing, external sharing and whole-history compliance assurance remain separate. No review compliance percentage is calculated.</p>
 @include('reviews.followup-controls')
 <section class="panel"><h2>Apprentices in your scope</h2>
@@ -25,7 +26,7 @@
 @endforeach
 @endif
 @include('reviews.draft-status')
-</div><div class="toolbar"><a class="button" href="{{ route('reviews.create',$a) }}">Review history and drafts</a>@if($reviewRow['latest'])<a class="button" href="{{ route('reviews.edit',[$a,$reviewRow['latest']->id]) }}">Continue latest draft<span class="sr-only">: {{ $a->reference }}</span></a>@endif</div></article>
+</div><div class="toolbar"><a class="button" href="{{ route('reviews.create',$a) }}">Start review / View history</a>@if($reviewRow['latest'])<a class="button" href="{{ route('reviews.edit',[$a,$reviewRow['latest']->id]) }}">Continue latest draft<span class="sr-only">: {{ $a->reference }}</span></a>@endif</div></article>
 @empty<p>No apprentices match this review view. Clear the filters to see other records in your permitted scope.</p>@endforelse
 <nav class="pagination" aria-label="Review follow-up pages">@if($reviewRows->previousPageUrl())<a class="button" href="{{ $reviewRows->previousPageUrl() }}">Previous reviews</a>@endif @if($reviewRows->nextPageUrl())<a class="button" href="{{ $reviewRows->nextPageUrl() }}">Next reviews</a>@endif</nav></section>
 @if($manager)

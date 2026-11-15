@@ -145,7 +145,7 @@
     ],
     "category": "Teaching and assessment",
     "title": "Topics and qualifications",
-    "body": "Only assigned Maths and English topics contribute to the training-topic position. Some topics have zero planned hours because prior assessment identified secure knowledge. Evidence acceptance and tutor-confirmed topic completion are different steps. Record the qualification separately, with its actual result, chosen start date and target. Do not turn a topic percentage or uploaded certificate into an automatic qualification achievement.",
+    "body": "Open Maths and English, find the apprentice and open their subject record. Authorised subject staff can use Add qualification for the chosen start date and qualification details, Record / update a result to find an existing qualification, or Assign a training topic for assessed learning needs. Use zero planned hours only where knowledge is secure. Topic evidence acceptance, tutor-confirmed topic completion and qualification achievement are separate. Record the actual qualification result; a topic percentage or uploaded certificate does not automatically record a pass.",
     "links": [
       {
         "label": "Open Maths and English",
@@ -201,7 +201,7 @@
     ],
     "category": "Reviews and sign-off",
     "title": "Prepare a review draft",
-    "body": "Open Reviews and a saved editable draft. Choose the training period and generate factual preparation notes. The assistant uses attendance, task and block progress, dated feedback, actions, recorded OTJ, Maths and English, qualifications, sessions and approved blocks. Check and edit selected notes before applying them. Changed sources require fresh notes. Record the actual discussion, participation, judgement and agreed targets yourself. Save, complete preparation checks and freeze the review for signatures.",
+    "body": "Open Reviews, find the apprentice and choose Start review / View history, or Continue latest draft. Review appointments is for arranging the meeting; Review signing is for participant sign-off records. Save a draft before generating factual preparation notes. Check the selected source notes, complete the actual discussion, participation, judgement and targets, save again and complete preparation checks. Mark the checked saved content Ready for signatures, then prepare participant sign-off from that review. Booking a meeting or saving a draft does not complete a review or reset its deadline. Externally signed copies use their separate upload and independent-check process.",
     "links": [
       {
         "label": "Open reviews",
@@ -314,7 +314,7 @@
     ],
     "category": "Questionnaires and support",
     "title": "Follow up a concern",
-    "body": "Open Support and retention within your authorised Inclusion scope. A new concern, acknowledgement, classification and support plan are separate stages. Assign an owner, record chronological follow-ups and measurable targets, and check the next review date. Keep approved teaching instructions separate from restricted case notes. Do not enter safeguarding case details into a general support field. Questionnaire checks do not automatically create or close a concern.",
+    "body": "Open Support and retention. Search by apprentice name or reference, then choose Start / manage support; apprentices without a concern or plan are included. In the support record, check inclusion markers. An administrator or Inclusion Team lead can add or change them. Record the support need as a concern if no relevant concern exists. The lead or administrator selects its marker, owner and next action. Create a support-plan draft once a relevant concern is classified, or continue the current plan. Save the draft before requesting approval. Markers alone do not create or approve a plan. Record delivered support and reviews in the approved plan. Keep teaching instructions separate from private notes; do not record safeguarding case details here.",
     "links": [
       {
         "label": "Open Support and retention",
@@ -344,7 +344,7 @@
     ],
     "category": "Careers and employers",
     "title": "Record advice",
-    "body": "Open Careers for apprentices currently assigned to you. Choose career progression or employment support, record the actual discussion, goals, advice and outcome, then agreed measurable actions with an owner and deadline. Employers do not receive Careers-record access. A seen reminder or prompt does not create an advice session or prove that support was delivered.",
+    "body": "Open Careers, search for the apprentice, then use Find an apprentice / Open careers record to reach the apprentice list. Open their careers record even if there are no outstanding actions. The administrator or assigned authorised adviser can use Record a careers discussion, choose career progression or employment support, and record the actual date, goals, advice and outcome. Save the discussion, then add agreed measurable actions with an owner and deadline. Employers cannot access private careers records. A seen prompt does not prove advice was delivered.",
     "links": [
       {
         "label": "Open Careers",
@@ -475,6 +475,37 @@
       {
         "label": "Review emergency access",
         "route": "executive.index"
+      }
+    ]
+  },
+  {
+    "id": "quick-actions",
+    "audience": [
+      "all"
+    ],
+    "category": "Getting started",
+    "title": "Finding the right action",
+    "body": "Open Quick actions and search for what you want to do, such as a support plan, results or evidence. Choose a task, then find the apprentice by name or reference. Only records in your current access appear. Other actions for this apprentice keeps the same person while you choose a different section. Opening these pages does not create a record. If an apprentice is missing, check your search and ask an administrator to check the current assignment. Existing role, approval and save checks still apply.",
+    "links": [
+      {
+        "label": "Open Quick actions",
+        "route": "quick-actions.index"
+      }
+    ]
+  },
+  {
+    "id": "record-checks",
+    "audience": [
+      "manager",
+      "tutor"
+    ],
+    "category": "Getting started",
+    "title": "Checking an apprentice record",
+    "body": "Open Apprentice record checks to find missing programme, employer, group, tutor, account or learning-date links. Open the record to check current active accounts, matching duties, allocated tasks and the provider-approved delivery plan. Recorded means that the stated source check passed; it does not mean qualification achievement, Gateway readiness, funding approval or successful sign-in. Missing maths or English assignments require a check of the assessed training need, not an assumed exemption. An administrator can correct profile links; tutors can open the original training sources or ask for a correction.",
+    "links": [
+      {
+        "label": "Open record checks",
+        "route": "record-checks.index"
       }
     ]
   }
