@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack29.
+    // Presence-only contract from the unchanged reference migrations through Pack30.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -33,6 +33,9 @@ class ApplicationSchema
         'case_studies'=>['approved_copies','author_id','created_at','fields','history','id','privacy','status','updated_at','version'],
         'data_import_batches'=>['applied_at','applied_by','created_at','id','kind','prepared_by','preview_hash','rows','source_hash','source_name','source_reference','state','updated_at','version'],
         'data_import_events'=>['actor_id','created_at','data_import_batch_id','event','id'],
+        'destination_contacts'=>['apprentice_id','contacted_on','created_at','detail','id','method','next_followup_on','recorded_by','request_token','result','source','source_hash','updated_at','version','void_reason','voided_at','voided_by'],
+        'destination_events'=>['actor_id','apprentice_id','contact_id','created_at','event','id','proposal_id','record_version'],
+        'destination_proposals'=>['apprentice_id','checked_at','checked_by','created_at','id','outcome_id','payload','payload_hash','prepared_by','receipt','request_token','review_note','source','source_hash','state','updated_at','version','withdrawn_at'],
         'directory_events'=>['created_at','event','id','kind','record_id','user_id'],
         'electronic_review_events'=>['actor_id','authority_id','created_at','event','id','packet_id','private_note','record_version'],
         'electronic_review_packets'=>['active_review_id','apprentice_id','checked_at','checked_by','completion','completion_hash','created_at','expires_on','id','prepared_by','progress_review_draft_id','released_at','released_by','signed_review_record_id','snapshot','snapshot_hash','state','updated_at','version','withdrawn_at','withdrawn_by'],

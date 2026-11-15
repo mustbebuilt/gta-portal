@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title','Outcome and reporting context')
 @section('content')
+@if(\App\Support\LeaverDestinations::allowed(auth()->user()))<p><a href="{{ route('destinations.index') }}">Leaver follow-up and destination checks</a></p>@endif
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Outcome and reporting context</h1><p>Record only sourced facts. Keep unknown values as Unknown.</p></div><a class="button" href="{{ route('retention.report') }}">Back to retention report</a></header>
 @include('learning.errors')
 <p class="test-notice">Internal reporting context only. This does not change live ILR status, apprenticeship achievement, Functional Skills results or the training plan. No date of birth or additional personal identifiers are collected.</p>

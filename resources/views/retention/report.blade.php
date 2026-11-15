@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title','Retention and early-leaver report')
 @section('content')
+@if(\App\Support\LeaverDestinations::allowed(auth()->user()))<p><a href="{{ route('destinations.index') }}">Leaver follow-up and destination checks</a></p>@endif
 <header class="page-heading"><div><h1>Retention and early-leaver report</h1><p>Compare recorded outcomes and context. Identify themes to investigate.</p></div><button type="button" data-print>Print / Save PDF</button></header>
 @include('learning.errors')
 <p class="test-notice">Internal descriptive analysis, not official QAR, a risk prediction or evidence that a factor caused someone to leave. Completion is separate from achievement. Unknown data stays visible.</p>

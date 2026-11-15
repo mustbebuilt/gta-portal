@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title','Careers')
 @section('content')
+@if(\App\Support\LeaverDestinations::allowed(auth()->user()))<p><a href="{{ route('destinations.index') }}">Leaver follow-up and destination checks</a></p>@endif
 <header class="page-heading"><div><h1>Careers</h1><p>Assigned advisers and private careers discussions.</p></div><a class="button" href="{{ route('careers.resources') }}">Careers resources</a></header>
 @include('learning.errors')
 <section class="panel"><h2>Find Careers work</h2><form method="get" class="search"><div><label for="career-search">Apprentice name or reference</label><input id="career-search" name="search" maxlength="100" value="{{ $search }}"></div>@if(auth()->user()->role!=='apprentice')

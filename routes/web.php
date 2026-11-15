@@ -62,6 +62,15 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/my-reminders/{delivery}/seen', [\App\Http\Controllers\ApprenticeNotificationController::class,'seen'])->whereUuid('delivery')->name('apprentice-reminders.seen');
     Route::get('/gateway-preparation' , [\App\Http\Controllers\GatewayReadinessController::class,'index'])->name('gateway.index');
     Route::get('/apprentices/{apprentice}/gateway-preparation.pdf', [\App\Http\Controllers\GatewayReadinessController::class,'pdf'])->name('gateway.pdf');
+    Route::get('/leaver-followup', [\App\Http\Controllers\LeaverDestinationController::class,'index'])->name('destinations.index');
+    Route::get('/leaver-followup.csv', [\App\Http\Controllers\LeaverDestinationController::class,'csv'])->name('destinations.csv');
+    Route::get('/apprentices/{apprentice}/leaver-followup', [\App\Http\Controllers\LeaverDestinationController::class,'show'])->name('destinations.show');
+    Route::post('/apprentices/{apprentice}/destination-contacts', [\App\Http\Controllers\LeaverDestinationController::class,'contact'])->name('destinations.contact');
+    Route::post('/destination-contacts/{contact}/void', [\App\Http\Controllers\LeaverDestinationController::class,'voidContact'])->name('destinations.contact.void');
+    Route::post('/apprentices/{apprentice}/destination-proposals', [\App\Http\Controllers\LeaverDestinationController::class,'propose'])->name('destinations.propose');
+    Route::get('/destination-proposals/{proposal}', [\App\Http\Controllers\LeaverDestinationController::class,'proposal'])->whereUuid('proposal')->name('destinations.proposal');
+    Route::post('/destination-proposals/{proposal}/review', [\App\Http\Controllers\LeaverDestinationController::class,'review'])->whereUuid('proposal')->name('destinations.review');
+    Route::post('/destination-proposals/{proposal}/withdraw', [\App\Http\Controllers\LeaverDestinationController::class,'withdraw'])->whereUuid('proposal')->name('destinations.withdraw');
     Route::get('/workplace-support', [\App\Http\Controllers\WorkplaceSupportSharingController::class,'index'])->name('workplace-support.index');
     Route::get('/apprentices/{apprentice}/workplace-support', [\App\Http\Controllers\WorkplaceSupportSharingController::class,'create'])->name('workplace-support.create');
     Route::post('/apprentices/{apprentice}/workplace-support', [\App\Http\Controllers\WorkplaceSupportSharingController::class,'store'])->name('workplace-support.store');
