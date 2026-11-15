@@ -145,7 +145,7 @@ with tempfile.TemporaryDirectory(prefix='gta-apprentice-experience-') as tempora
         passed('Encrypted submissions, checks and database sessions persist across backend restart')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('employer_start_checks','employer_start_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('staff_handover_batches','staff_handover_acknowledgements','staff_handover_events')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('apprentice_alert_deliveries','apprentice_alert_controls')").fetchone()[0]==2
         assert artisan('migrate','--force').returncode==0
         passed('Disposable latest rollback/reapply removes only Pack32 acceptance tables and retains Pack24 reminder tables; real rollback needs data backup')

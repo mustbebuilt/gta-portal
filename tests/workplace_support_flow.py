@@ -147,7 +147,7 @@ with tempfile.TemporaryDirectory(prefix='gta-workplace-support-') as temporary:
         passed('Append-only action history remains; no electronic review or completion created')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('employer_start_checks','employer_start_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('staff_handover_batches','staff_handover_acknowledgements','staff_handover_events')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='apprentice_start_checks'").fetchone()[0]==1
             assert c.execute('SELECT COUNT(*) FROM support_plans').fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0

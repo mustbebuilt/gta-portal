@@ -114,6 +114,16 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/getting-started/{item}', [\App\Http\Controllers\ApprenticeOnboardingController::class,'check'])->name('getting-started.check');
 
     Route::post('/employer-accounts/{user}/setup', [\App\Http\Controllers\EmployerSetupController::class,'update'])->whereNumber('user')->name('employer-setup.update');
+
+    Route::get('/staff-handovers', [\App\Http\Controllers\StaffHandoverController::class,'index'])->name('staff-handovers.index');
+    Route::get('/staff-handovers/workload', [\App\Http\Controllers\StaffHandoverController::class,'workload'])->name('staff-handovers.workload');
+    Route::get('/staff-handovers/new', [\App\Http\Controllers\StaffHandoverController::class,'create'])->name('staff-handovers.create');
+    Route::post('/staff-handovers', [\App\Http\Controllers\StaffHandoverController::class,'prepare'])->name('staff-handovers.prepare');
+    Route::get('/staff-handovers/{handover}', [\App\Http\Controllers\StaffHandoverController::class,'show'])->whereUuid('handover')->name('staff-handovers.show');
+    Route::post('/staff-handovers/{handover}', [\App\Http\Controllers\StaffHandoverController::class,'decide'])->whereUuid('handover')->name('staff-handovers.decide');
+    Route::get('/staff-handovers/{handover}/handover.json', [\App\Http\Controllers\StaffHandoverController::class,'report'])->whereUuid('handover')->name('staff-handovers.report');
+    Route::get('/my-staff-handovers', [\App\Http\Controllers\StaffHandoverController::class,'incoming'])->name('incoming-handovers.index');
+    Route::post('/my-staff-handovers/{handover}', [\App\Http\Controllers\StaffHandoverController::class,'acknowledge'])->whereUuid('handover')->name('incoming-handovers.acknowledge');
     Route::get('/employer-accounts/{user}/setup', [\App\Http\Controllers\EmployerSetupController::class,'show'])->whereNumber('user')->name('employer-setup.show');
     Route::post('/employer-accounts/{user}/revoke-invitation', [\App\Http\Controllers\EmployerSetupController::class,'revoke'])->whereNumber('user')->name('employer-setup.revoke');
     Route::get('/employer-getting-started', [\App\Http\Controllers\EmployerSetupController::class,'start'])->name('employer-start.index');

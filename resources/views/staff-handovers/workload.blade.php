@@ -1,0 +1,6 @@
+@extends('layout')
+@section('title','Staff assignment overview')
+@section('content')
+<p><a href="{{ route('staff-handovers.index') }}">Back to staff handovers</a></p><h1>Staff assignment overview</h1><p>{{ $snapshot['meaning'] }}</p><form method="get"><label for="search">Staff name</label><input id="search" name="search" maxlength="100" value="{{ $search }}"><button>Find staff</button></form><section class="panel"><h2>Not assigned</h2>@foreach(\App\Support\StaffHandover::SLOTS as $slot=>$label)<p>{{ $label }}: {{ $snapshot['unassigned'][$slot] }} <a href="{{ route('staff-handovers.create',['slot'=>$slot,'from'=>0]) }}">Check unassigned records</a></p>@endforeach</section>
+@foreach($snapshot['rows'] as $row)<section class="panel"><h2>{{ $row['user']->name }}</h2><p>{{ $row['user']->active?'Active':'Inactive' }} · {{ $row['user']->role }} · {{ $row['total'] }} saved assignments across responsibilities.</p>@foreach($row['slots'] as $slot=>$value)<p>{{ \App\Support\StaffHandover::SLOTS[$slot] }}: {{ $value['count'] }} · {{ $value['eligible']?'Currently eligible for this assignment':'Not eligible for new assignments' }} @if($value['count'])<a href="{{ route('staff-handovers.create',['slot'=>$slot,'from'=>$row['user']->id]) }}">Review this caseload</a>@endif</p>@endforeach</section>@endforeach
+@endsection

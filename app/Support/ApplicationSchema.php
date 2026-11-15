@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack33.
+    // Presence-only contract from the unchanged reference migrations through Pack34.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -100,6 +100,9 @@ class ApplicationSchema
         'staff_development_events'=>['actor_id','created_at','event','id','reference','user_id'],
         'staff_development_profiles'=>['created_at','id','manager_id','payload','updated_at','user_id','version'],
         'staff_duties'=>['careers_adviser','created_at','english_tutor','history','maths_tutor','mentor','updated_at','user_id','version'],
+        'staff_handover_acknowledgements'=>['acknowledged_at','batch_id','created_at','id','proof','scope_hash','updated_at','user_id','version'],
+        'staff_handover_batches'=>['created_at','created_by','expires_at','from_user_id','id','receipt','review_note','reviewed_at','reviewed_by','slot','source','source_hash','state','target_user_id','updated_at','version'],
+        'staff_handover_events'=>['actor_id','batch_id','created_at','event','id','payload','record_version'],
         'staging_acceptance_checks'=>['created_at','details','details_hash','id','outcome','recorded_by','review_note','review_proof','review_state','reviewed_at','reviewed_by','run_id','scenario_id','tested_at','updated_at','version'],
         'staging_acceptance_events'=>['actor_id','created_at','event','id','payload','record_version','run_id'],
         'staging_acceptance_issues'=>['created_at','details','details_hash','due_on','id','owner_id','parent_id','proposal','recorded_by','review_proof','reviewed_at','reviewed_by','run_id','scenario_id','severity','state','updated_at','version'],

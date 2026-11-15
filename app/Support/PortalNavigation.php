@@ -19,6 +19,7 @@ class PortalNavigation
             if(!$links) {return;}
             $groups[]=['id'=>$id,'label'=>$label,'links'=>$links,'open'=>collect($links)->contains(fn($l)=>$l['current'])];
         };
+        if(StaffHandover::recipientAllowed($u)) {$primary[]=$item('Staff handovers','incoming-handovers.index',[],['incoming-handovers.*']);}
         if(MyResponsibilities::allowed($u)) {$primary[]=$item('My responsibilities','responsibilities.index',[],['responsibilities.*']);}
         if(in_array($u->role,['admin','ceo','tutor','apprentice'],true)) {$primary[]=$item('Dashboard','dashboard.index',[],['dashboard.*']);}
         $links=[];
@@ -70,6 +71,7 @@ class PortalNavigation
         $links=[];
         if($manage) {
             $links[]=$item('Evidence recovery rehearsals','evidence-restore.index',[],['evidence-restore.*']);
+            $links[]=$item('Staff caseload handovers','staff-handovers.index',[],['staff-handovers.*']);
             $links[]=$item('Staging acceptance','acceptance.index',[],['acceptance.*']);
             $links[]=$item('Reminder delivery outcomes','receipt-operations.index',[],['receipt-operations.*']);
             $links[]=$item('Apprentice reminder delivery','apprentice-notifications.index',[],['apprentice-notifications.*']);
