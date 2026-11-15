@@ -135,7 +135,7 @@ with tempfile.TemporaryDirectory(prefix='gta-leaver-destination-') as temporary:
         passed('Incorrect contact is voided with audit retained; no contact or proposal history deletion')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_delivery_records')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('portal_privacy_notices','portal_privacy_state','portal_privacy_acknowledgements','portal_privacy_cases','portal_privacy_events')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='workplace_support_shares'").fetchone()[0]==1
             assert c.execute('SELECT COUNT(*) FROM programme_outcomes').fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0

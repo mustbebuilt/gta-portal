@@ -6,9 +6,15 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack41.
+    // Presence-only contract from the unchanged reference migrations through Pack42.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
+        'portal_privacy_notices'=>['body','body_hash','created_at','created_by','id','label','publication','state','updated_at'],
+        'portal_privacy_state'=>['created_at','current_notice_id','enabled','id','proof','revision','updated_at'],
+        'portal_privacy_acknowledgements'=>['acknowledged_at','body_hash','id','notice_id','proof','user_id'],
+        'portal_privacy_cases'=>['created_at','details','id','notice_id','open_user_id','request_token','review_on','state','updated_at','user_id','version'],
+        'portal_privacy_events'=>['actor_id','created_at','event','id','payload','subject_key'],
+
         'timetable_delivery_records'=>['created_at','details','details_hash','staff_id','training_session_id','updated_at','version'],
 
         'timetable_governance_state'=>['created_at','details','editing_paused','id','revision','updated_at'],

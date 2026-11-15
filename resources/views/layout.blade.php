@@ -10,4 +10,4 @@
 @if(auth()->user()?->role==='ceo'&&\App\Support\ExecutiveAccess::enabled(request()))<div class="errors" role="status">CEO emergency override is on for this session. Uses are recorded. <a href="{{ route('executive.index') }}" @if(request()->routeIs('executive.*'))aria-current="page"@endif>Review or end override</a></div>@endif
 @if(app()->environment('staging'))<p class="test-notice">Staging portal — use fictional test records. Live release, real-data migration and target-environment acceptance remain separate.</p>@endif
 @if(auth()->check()) @php($helpContext=\App\Support\HelpCatalogue::context(auth()->user(),request())) @if($helpContext)<p><a href="{{ route('help.index',['guide'=>$helpContext['id']]) }}#help-{{ $helpContext['id'] }}">Help with this page: {{ $helpContext['title'] }}</a></p>@endif @endif
-@yield('content')</main></div></div></body></html>
+@yield('content')<footer><p><a href="{{ route('privacy.public') }}">Privacy information and contact</a></p></footer></main></div></div></body></html>

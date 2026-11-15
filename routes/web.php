@@ -33,6 +33,7 @@ use App\Http\Controllers\SignedReviewController;
 use App\Http\Middleware\ActiveAccount;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/privacy-information',[\App\Http\Controllers\PortalPrivacyController::class,'public'])->name('privacy.public');
 Route::get('/', fn () => redirect()->route('apprentices.index'));
 Route::middleware('guest')->group(function () {
     Route::get('/apprentice-invitation/{user}/{token}', [\App\Http\Controllers\ApprenticeOnboardingController::class,'acceptForm'])->whereNumber('user')->where('token','[A-Za-z0-9]{64}')->name('apprentice-invitation.accept');
@@ -51,7 +52,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [SessionController::class, 'create'])->name('login');
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
-Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
+Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class, \App\Http\Middleware\RequirePrivacyAcknowledgement::class])->group(function () {
     Route::get('/centre-planning/group-details', [\App\Http\Controllers\TimetableDutiesController::class,'groups'])->name('timetable-duties.groups');
     Route::post('/centre-planning/group-details/{group}', [\App\Http\Controllers\TimetableDutiesController::class,'brief'])->whereNumber('group')->name('timetable-duties.brief');
     Route::get('/centre-planning/flexible-duties', [\App\Http\Controllers\TimetableDutiesController::class,'flexible'])->name('timetable-duties.flexible');
@@ -468,6 +469,16 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/centre-planning/governance/allocation/{plan}',[\App\Http\Controllers\TimetableGovernanceController::class,'allocation'])->name('timetable-governance.allocation');
     Route::get('/centre-planning/management',[\App\Http\Controllers\TimetableManagementController::class,'index'])->name('timetable-management.index');
     Route::post('/centre-planning/management/{session}/confirm',[\App\Http\Controllers\TimetableManagementController::class,'confirm'])->name('timetable-management.confirm');
+    Route::post('/centre-planning/entries/{entry}/create-register',[\App\Http\Controllers\OccurrenceRegisterController::class,'create'])->whereNumber('entry')->name('occurrence-register.create');
+    Route::post('/centre-planning/entries/{entry}/reconcile-delivery',[\App\Http\Controllers\OccurrenceRegisterController::class,'reconcile'])->whereNumber('entry')->name('occurrence-register.reconcile');
+    Route::get('/privacy',[\App\Http\Controllers\PortalPrivacyController::class,'form'])->name('portal-privacy.form');
+    Route::post('/privacy/acknowledge',[\App\Http\Controllers\PortalPrivacyController::class,'acknowledge'])->name('portal-privacy.acknowledge');
+    Route::post('/privacy/concern',[\App\Http\Controllers\PortalPrivacyController::class,'concern'])->name('portal-privacy.concern');
+    Route::get('/privacy-administration',[\App\Http\Controllers\PortalPrivacyController::class,'adminIndex'])->name('portal-privacy-admin.index');
+    Route::post('/privacy-administration/draft',[\App\Http\Controllers\PortalPrivacyController::class,'draft'])->name('portal-privacy-admin.draft');
+    Route::post('/privacy-administration/{notice}/publish',[\App\Http\Controllers\PortalPrivacyController::class,'publish'])->whereUuid('notice')->name('portal-privacy-admin.publish');
+    Route::post('/privacy-administration/rollout',[\App\Http\Controllers\PortalPrivacyController::class,'enable'])->name('portal-privacy-admin.enable');
+    Route::post('/privacy-administration/review/{review}',[\App\Http\Controllers\PortalPrivacyController::class,'decide'])->whereUuid('review')->name('portal-privacy-admin.decide');
     Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
     Route::resource('apprentices', ApprenticeController::class)->except('destroy');
     Route::prefix('directories')->name('directories.')->whereIn('kind', ['employers', 'programmes', 'groups', 'staff'])->group(function () {

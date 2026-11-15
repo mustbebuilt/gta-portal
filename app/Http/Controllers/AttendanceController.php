@@ -62,6 +62,8 @@ class AttendanceController extends Controller
             }
         }
         $s = DB::transaction(function () use ($r, $data, $breaks, $group) {
+            $currentActor = \App\Models\User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();
+            abort_unless($currentActor->active && $currentActor->auth_version === (int)$r->session()->get('auth_version'), 403);
             $locked = TutorGroup::whereKey($group->id)->lockForUpdate()->firstOrFail();
             abort_unless($locked->active && $this->groupAllowed($r, $locked), 403);
             $current = Apprentice::where('tutor_group_id', $group->id)->orderBy('id')->lockForUpdate()->get();
@@ -74,8 +76,7 @@ class AttendanceController extends Controller
                 if (TrainingSession::where('tutor_group_id', $group->id)->whereDate('session_date', $date)->where('state', '!=', 'Cancelled')->where('start_time', '<', $data['end_time'])->where('end_time', '>', $data['start_time'])->exists()) {
                     throw ValidationException::withMessages(['session_date' => 'A planned session already overlaps this group on '.$date.'. No sessions in this request were saved.']);
                 }
-                $s = TrainingSession::create(collect($data)->only('tutor_group_id', 'name', 'start_time', 'end_time', 'planned_learning')->all() + ['session_date' => $date, 'created_by' => $r->user()->id, 'members' => $current->pluck('id')->all(), 'breaks' => $breaks]);
-                $this->audit($r, $s, 'session_planned');
+                $s = \App\Support\RegisterCreation::store($r->user(), (int)$r->session()->get('auth_version'), $locked, array_merge($data, ['session_date'=>$date]), $breaks);
                 $first ??= $s;
             }
 
