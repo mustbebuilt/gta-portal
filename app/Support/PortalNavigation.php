@@ -70,6 +70,7 @@ class PortalNavigation
         $links=[];
         if($manage) {
             $links[]=$item('Evidence recovery rehearsals','evidence-restore.index',[],['evidence-restore.*']);
+            $links[]=$item('Reminder delivery outcomes','receipt-operations.index',[],['receipt-operations.*']);
             $links[]=$item('Apprentice reminder delivery','apprentice-notifications.index',[],['apprentice-notifications.*']);
             $links[]=$item('Reminder mail pilot','reminder-mail.index',[],['reminder-mail.*']);
         }

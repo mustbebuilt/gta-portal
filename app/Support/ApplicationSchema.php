@@ -6,12 +6,16 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack30.
+    // Presence-only contract from the unchanged reference migrations through Pack31.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
         'account_onboarding_tokens'=>['auth_version','created_at','expires_at','issuer_auth_version','issuer_id','purpose','token_hash','user_id'],
         'account_second_factors'=>['confirmed_at','created_at','last_step','recovery_hashes','secret','setup_binding','setup_expires_at','updated_at','user_id'],
+        'alert_followup_cases'=>['checked_by','closed_at','created_at','delivery_id','due_on','id','owner_id','proposal','resolution','state','updated_at','version'],
+        'alert_receipt_batches'=>['checked_at','checked_by','created_at','id','prepared_by','request_token','review_note','rows','rows_hash','source_reference','state','updated_at','version','withdrawn_at'],
+        'alert_receipt_events'=>['actor_id','batch_id','case_id','created_at','delivery_id','event','id','private_note','record_version'],
+        'alert_receipt_records'=>['attempt_hash','batch_id','created_at','delivery_id','evidence_kind','fingerprint','id','occurred_at','outcome','slot_key','source_reference','withdrawn_at'],
         'apprentice_alert_controls'=>['created_at','history','id','paused','updated_at','updated_by','version'],
         'apprentice_alert_deliveries'=>['apprentice_id','auth_version','channel','completed_at','config_hash','created_at','cycle_date','history','id','preference_revision','provider_id','reason','recipient_hash','recipient_id','reconciliation','reserved_at','seen_at','source','source_hash','state','updated_at'],
         'apprentice_experience_entries'=>['apprentice_id','created_at','detail','happened_on','history','id','kind','request_token','requester_id','response','reviewer_id','state','title','updated_at','version'],

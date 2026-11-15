@@ -145,10 +145,10 @@ with tempfile.TemporaryDirectory(prefix='gta-apprentice-experience-') as tempora
         passed('Encrypted submissions, checks and database sessions persist across backend restart')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('destination_contacts','destination_proposals','destination_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('alert_receipt_batches','alert_receipt_records','alert_followup_cases','alert_receipt_events')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('apprentice_alert_deliveries','apprentice_alert_controls')").fetchone()[0]==2
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest rollback/reapply removes only Pack30 destination tables and retains Pack24 reminder tables; real rollback needs data backup')
+        passed('Disposable latest rollback/reapply removes only Pack31 receipt operations tables and retains Pack24 reminder tables; real rollback needs data backup')
         configure('production');start_backend();assert req(learner,'/portal-questionnaires')[0]==503 and req(inclusion,'/portal-questionnaires/forms')[0]==503
         passed('Existing production gate remains enforced on all new questionnaire screens')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Local client-verified HTTPS, cached staging configuration and disposable SQLite database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

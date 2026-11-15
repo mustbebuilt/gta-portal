@@ -62,6 +62,17 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/my-reminders/{delivery}/seen', [\App\Http\Controllers\ApprenticeNotificationController::class,'seen'])->whereUuid('delivery')->name('apprentice-reminders.seen');
     Route::get('/gateway-preparation' , [\App\Http\Controllers\GatewayReadinessController::class,'index'])->name('gateway.index');
     Route::get('/apprentices/{apprentice}/gateway-preparation.pdf', [\App\Http\Controllers\GatewayReadinessController::class,'pdf'])->name('gateway.pdf');
+    Route::get('/receipt-operations', [\App\Http\Controllers\AlertReceiptOperationsController::class,'index'])->name('receipt-operations.index');
+    Route::get('/receipt-operations/template.csv', [\App\Http\Controllers\AlertReceiptOperationsController::class,'template'])->name('receipt-operations.template');
+    Route::get('/receipt-operations/report.csv', [\App\Http\Controllers\AlertReceiptOperationsController::class,'csv'])->name('receipt-operations.csv');
+    Route::post('/receipt-operations', [\App\Http\Controllers\AlertReceiptOperationsController::class,'preview'])->name('receipt-operations.preview');
+    Route::get('/receipt-batches/{batch}', [\App\Http\Controllers\AlertReceiptOperationsController::class,'batch'])->whereUuid('batch')->name('receipt-operations.batch');
+    Route::post('/receipt-batches/{batch}/review', [\App\Http\Controllers\AlertReceiptOperationsController::class,'review'])->whereUuid('batch')->name('receipt-operations.review');
+    Route::post('/receipt-batches/{batch}/withdraw', [\App\Http\Controllers\AlertReceiptOperationsController::class,'withdraw'])->whereUuid('batch')->name('receipt-operations.withdraw');
+    Route::get('/receipt-deliveries/{delivery}', [\App\Http\Controllers\AlertReceiptOperationsController::class,'delivery'])->whereUuid('delivery')->name('receipt-operations.delivery');
+    Route::post('/receipt-deliveries/{delivery}/case', [\App\Http\Controllers\AlertReceiptOperationsController::class,'saveCase'])->whereUuid('delivery')->name('receipt-operations.case.save');
+    Route::post('/receipt-cases/{case}/propose', [\App\Http\Controllers\AlertReceiptOperationsController::class,'proposeClose'])->whereNumber('case')->name('receipt-operations.case.propose');
+    Route::post('/receipt-cases/{case}/check', [\App\Http\Controllers\AlertReceiptOperationsController::class,'checkClose'])->whereNumber('case')->name('receipt-operations.case.check');
     Route::get('/leaver-followup', [\App\Http\Controllers\LeaverDestinationController::class,'index'])->name('destinations.index');
     Route::get('/leaver-followup.csv', [\App\Http\Controllers\LeaverDestinationController::class,'csv'])->name('destinations.csv');
     Route::get('/apprentices/{apprentice}/leaver-followup', [\App\Http\Controllers\LeaverDestinationController::class,'show'])->name('destinations.show');
