@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title','Apprentice Support Plan')
 @section('content')
+@if($plan->exists&&$plan->active_plan)<p><a class="button" href="{{ route('workplace-support.create',$apprentice) }}">Workplace support sharing</a></p>@endif
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Apprentice Support Plan</h1><p>{{ $plan->exists?'Plan '.$plan->id.' · '.$plan->status:'New private draft' }}</p></div><a class="button" href="{{ route('support.index',$apprentice) }}">Back to support and concerns</a></header>
 @include('learning.errors')
 @include('support.review-coordinator')

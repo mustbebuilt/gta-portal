@@ -62,6 +62,14 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/my-reminders/{delivery}/seen', [\App\Http\Controllers\ApprenticeNotificationController::class,'seen'])->whereUuid('delivery')->name('apprentice-reminders.seen');
     Route::get('/gateway-preparation' , [\App\Http\Controllers\GatewayReadinessController::class,'index'])->name('gateway.index');
     Route::get('/apprentices/{apprentice}/gateway-preparation.pdf', [\App\Http\Controllers\GatewayReadinessController::class,'pdf'])->name('gateway.pdf');
+    Route::get('/workplace-support', [\App\Http\Controllers\WorkplaceSupportSharingController::class,'index'])->name('workplace-support.index');
+    Route::get('/apprentices/{apprentice}/workplace-support', [\App\Http\Controllers\WorkplaceSupportSharingController::class,'create'])->name('workplace-support.create');
+    Route::post('/apprentices/{apprentice}/workplace-support', [\App\Http\Controllers\WorkplaceSupportSharingController::class,'store'])->name('workplace-support.store');
+    Route::get('/workplace-support/{share}', [\App\Http\Controllers\WorkplaceSupportSharingController::class,'show'])->whereUuid('share')->name('workplace-support.show');
+    Route::post('/workplace-support/{share}/check', [\App\Http\Controllers\WorkplaceSupportSharingController::class,'check'])->whereUuid('share')->name('workplace-support.check');
+    Route::post('/workplace-support/{share}/decide', [\App\Http\Controllers\WorkplaceSupportSharingController::class,'decide'])->whereUuid('share')->name('workplace-support.decide');
+    Route::post('/workplace-support/{share}/withdraw', [\App\Http\Controllers\WorkplaceSupportSharingController::class,'withdraw'])->whereUuid('share')->name('workplace-support.withdraw');
+    Route::post('/workplace-support/{share}/acknowledge', [\App\Http\Controllers\WorkplaceSupportSharingController::class,'acknowledge'])->whereUuid('share')->name('workplace-support.acknowledge');
     Route::get('/apprentice-onboarding', [\App\Http\Controllers\ApprenticeOnboardingController::class,'index'])->name('apprentice-onboarding.index');
     Route::get('/apprentice-onboarding/{apprentice}', [\App\Http\Controllers\ApprenticeOnboardingController::class,'show'])->name('apprentice-onboarding.show');
     Route::post('/apprentice-onboarding/{apprentice}/link', [\App\Http\Controllers\ApprenticeOnboardingController::class,'link'])->name('apprentice-onboarding.link');

@@ -85,7 +85,7 @@
     {
       "batch": "Private Apprentice Support Plans",
       "status": "working_tested_core",
-      "remaining": "Scoped private evidence/activity and native approved-plan PDF now work. Export uses the last approved snapshot and excludes draft replacements. Consent-controlled employer sharing requires agreed recipient mapping/consent workflow and is not enabled."
+      "remaining": "Scoped private evidence/activity and native approved-plan PDF now work. Export uses the last approved snapshot and excludes draft replacements. Limited practical workplace-summary sharing is implemented separately in Pack29 with checked named authority and apprentice allow/decline/withdrawal; full private-plan access remains unavailable. Actual target/provider wording acceptance remains separate."
     },
     {
       "batch": "Approved tutor instructions",
@@ -431,14 +431,19 @@
       "batch": "Pack28 apprentice accounts and getting started",
       "status": "working_reference_code_target_acceptance_pending",
       "remaining": "Apply after Pack27. Reconcile actual user/profile identities and existing unique constraints, accept native locks/collation/transactions and encrypted database/APP_KEY backup; perform actual staged browser/phone/mail acceptance. Mail remains a named-recipient staging pilot, default OFF. Formal induction evidence is separate."
+    },
+    {
+      "batch": "Pack29 apprentice-controlled workplace support sharing",
+      "status": "working_reference_code_target_acceptance_pending",
+      "remaining": "Apply after Pack28. Reconcile actual approved plan and Inclusion duties, named employer authority and individual learner identities. Accept provider wording/workplace purpose, native FKs/locks/concurrency/encryption/restore and actual Cloud/browser/phone/accessibility. No production enablement or messages; recordings remain paused."
     }
   ],
-  "queue_review": "Pack28 closes the ordinary apprentice login-provisioning gap with explicit manager identity checks, create/link/correct-account flows, controlled source-bound invitations, private link audit, basic setup readiness and six apprentice-owned reversible getting-started acknowledgements. Latest pack entries supersede older reference backlog claims for implemented functions; actual integration/content/host acceptance remains separate.",
+  "queue_review": "Pack29 adds a separate minimal workplace support-summary workflow: scoped Inclusion writer draft and lead check, exact named-recipient apprentice allow/decline, encrypted source/content/permission binding, expiry/current-source authority checks, withdrawal and employer receipt. Existing private plans/notes/codes/files are not automatically copied or opened. Actual target/content/acceptance remains separate.",
   "hosting_target": "Laravel Cloud, confirmed by Jon 13 November 2026",
-  "next_priority": "Integrate and accept current packs in Martin's actual source and staged Laravel Cloud environment. Reconcile source/standards/content and identity/authority before real use. Yorkshire recordings are paused at Jon's request; no recordings or voice-provider work in Pack28.",
+  "next_priority": "Integrate/accept sequential packs in actual Martin source/native/Cloud/browser environment; reconcile authoritative curriculum/cohort/Gateway/questionnaire sources and approved workplace-sharing wording/identity/authority. Yorkshire recording remains paused. No whole-portal completion or fixed remaining pack count claim.",
   "handover_status": "Jon reports catch-up v0.33 through Pack 07 sent to Martin; actual target integration unverified.",
   "source_baseline": "v0.35.0",
-  "development_pack": "28",
+  "development_pack": "29",
   "questionnaire_update": {
     "pack": "25",
     "status": "Native questionnaire lifecycle implemented separately from retained external responder links and manual receipts.",
@@ -447,7 +452,7 @@
   "requested_expansion_2026_11_14": {
     "status": "all_nine_functional_reference_workflows_implemented_target_content_acceptance_pending",
     "release_style": "Larger functional releases; existing pack numbers retained.",
-    "priority": "Accept implemented workflows in actual source/native/Cloud/browser environment and reconcile approved content and criteria. Apprentice account onboarding added in Pack28. Yorkshire recording work paused by Jon; no new optional voice development.",
+    "priority": "Integrate and accept implemented workflows; reconcile actual content/criteria/permissions before rollout. Pack28 apprentice accounts and Pack29 limited workplace support sharing are implemented reference code. Yorkshire recording paused.",
     "workstreams": [
       {
         "name": "Apprentice experience",

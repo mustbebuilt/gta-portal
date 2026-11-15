@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack28.
+    // Presence-only contract from the unchanged reference migrations through Pack29.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
@@ -105,6 +105,8 @@ class ApplicationSchema
         'training_topics'=>['apprentice_id','area','completion_date','created_at','draft','evidence_stage','files','history','id','level','planned_hours','status','subject','submissions','topic','updated_at','version'],
         'tutor_groups'=>['active','created_at','id','name','programme_id','record_version','reference','tutor_id','updated_at'],
         'users'=>['active','auth_version','created_at','email','email_verified_at','id','name','password','record_version','remember_token','role','subject_scope','updated_at'],
+        'workplace_support_share_events'=>['actor_id','created_at','event','id','share_id','share_version'],
+        'workplace_support_shares'=>['acknowledged_at','apprentice_id','checked_at','checked_by','created_at','decided_at','expires_at','grant_id','id','learner_id','payload','payload_hash','permission','plan_id','prepared_by','recipient_id','request_token','source','source_hash','state','updated_at','version','withdrawn_at'],
     ];
 
     public static function inspect(Connection $connection): array
