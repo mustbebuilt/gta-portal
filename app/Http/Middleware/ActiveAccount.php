@@ -13,7 +13,7 @@ class ActiveAccount
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user() ? User::find($request->user()->id) : null;
-        abort_unless($user?->active, 403);
+        abort_unless($user?->active && !\App\Support\AccountLifecycle::blocked($user), 403);
         if ($request->session()->get('auth_version') !== $user->auth_version) {
             Auth::logout();
             $request->session()->invalidate();

@@ -12,6 +12,8 @@ class PortalNavigation
         $item=fn(string $label,string $route,array $parameters=[],array $patterns=[],?bool $current=null)=>[
             'label'=>$label,'href'=>route($route,$parameters),'current'=>$current??$request->routeIs(...($patterns?:[$route]))];
         $primary=[];$groups=[];
+        if(LearningAccess::manager($u)){$primary[]=$item('Account access','account-operations.index',[],['account-operations.*']);$primary[]=$item('Apprentice progress','cohort-insights.index',[],['cohort-insights.*']);}
+        if(StaffAttention::allowed($u)){$primary[]=$item('Staff follow-up','operations-desk.index',[],['operations-desk.*']);}
         if($u->role==='employer') {$primary[]=$item('Getting started','employer-start.index',[],['employer-start.*']);$primary[]=$item('My employer actions','employer-actions.index',[],['employer-actions.index','employer-actions.show','employer-actions.respond']);}
         if(StaffAttention::allowed($u)) {$primary[]=$item('Needs attention','attention.index');}
         if($u->role==='apprentice') {$primary[]=$item('My next step','experience.home');$primary[]=$item('Getting started','getting-started.index',[],['getting-started.*']);}

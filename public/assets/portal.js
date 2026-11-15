@@ -40,9 +40,7 @@ for(const form of document.querySelectorAll('[data-staff-entry]')){const kind=fo
       voices.forEach(voice => { const option = document.createElement('option'); option.value = voiceId(voice); option.textContent = `${voice.name} — ${voice.lang}`; select.append(option); });
       select.value = voices.some(voice => voiceId(voice) === preferred) ? preferred : voiceId(voices[0]);
     }
-    if (accent) accent.textContent = voices.some(voice => /yorkshire/i.test(voice.name))
-      ? 'A Yorkshire-labelled voice is available on this device. Select it to try it.'
-      : 'No Yorkshire-labelled voice is listed on this device. The exact accent depends on the voice you choose.';
+    if (accent) { accent.textContent = ''; accent.hidden = true; }
   };
   populate();
   if (controls) controls.hidden = false;

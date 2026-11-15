@@ -149,7 +149,7 @@ with tempfile.TemporaryDirectory(prefix='gta-centre-planning-') as temporary:
         assert req(planner,setup)[0]==403
         passed('Current planning-access revocation removes setup/write privileges on the next authenticated request')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
-        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('portal_privacy_notices','portal_privacy_state','portal_privacy_acknowledgements','portal_privacy_cases','portal_privacy_events')").fetchone()[0]==0;assert c.execute('SELECT COUNT(*) FROM training_sessions').fetchone()[0]==1;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='review_appointments'").fetchone()[0]==1
+        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==0;assert c.execute('SELECT COUNT(*) FROM training_sessions').fetchone()[0]==1;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='review_appointments'").fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
         passed('Disposable latest down/up drops only six planning tables; the actual register and Pack37 review appointment schema remain')
         configure('production');start_backend();assert req(admin,root)[0]==503

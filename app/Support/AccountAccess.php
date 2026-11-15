@@ -32,7 +32,7 @@ class AccountAccess
         $users = User::whereRaw('LOWER(email) = ?', [strtolower(trim($email))])->limit(2)->get();
         $u = $users->count() === 1 ? $users->first() : null;
 
-        return $u && $u->active && $u->email_verified_at && RecoveryDelivery::recipientAllowed($u->email) ? $u : null;
+        return $u && $u->active && !AccountLifecycle::blocked($u) && $u->email_verified_at && RecoveryDelivery::recipientAllowed($u->email) ? $u : null;
     }
 
     public static function invalidate(User $user, ?int $actor, string $event, string $origin): void

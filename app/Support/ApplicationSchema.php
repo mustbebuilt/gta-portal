@@ -6,9 +6,16 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack42.
+    // Presence-only contract from the unchanged reference migrations through Pack43.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
+        'account_lifecycle_proposals'=>['action','applied','approval','created_at','created_by','details','id','request_token','source_hash','state','target_id','updated_at','version'],
+        'account_lifecycle_states'=>['created_at','proof','review_on','status','updated_at','user_id','version'],
+        'cohort_forecasts'=>['apprentice_id','created_at','details','source_hash','updated_at','version'],
+        'cohort_snapshots'=>['body','body_hash','created_at','created_by','id','updated_at'],
+        'operational_followups'=>['apprentice_id','created_at','details','id','open_key','owner_id','request_token','source_key','source_kind','status','updated_at','version'],
+        'portal_operations_events'=>['actor_id','created_at','event','id','payload','subject_key','subject_type'],
+
         'portal_privacy_notices'=>['body','body_hash','created_at','created_by','id','label','publication','state','updated_at'],
         'portal_privacy_state'=>['created_at','current_notice_id','enabled','id','proof','revision','updated_at'],
         'portal_privacy_acknowledgements'=>['acknowledged_at','body_hash','id','notice_id','proof','user_id'],

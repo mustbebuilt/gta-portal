@@ -1,0 +1,3 @@
+@extends('layout')
+@section('title','Restriction ledger inspection')
+@section('content')<h1>Restriction ledger inspection</h1><p>Captured {{ $report['captured_at'] }} · read-only inspection. No login state was changed and no account was automatically reactivated.</p>@foreach($report['rows'] as $row)<section class="panel"><p>User {{ $row['user_id'] }} · {{ $row['recorded_restriction'] }} · {{ $row['identity_matches']?'Identity matches':'Identity needs recovery' }} · {{ $row['login_still_blocked']?'Currently blocked':'Needs restriction review' }}</p><p>{{ $row['action'] }}</p></section>@endforeach<a href="{{ route('account-operations.index') }}">Account access and retention</a>@endsection

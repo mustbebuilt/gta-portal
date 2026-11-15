@@ -1,0 +1,3 @@
+@extends('layout')
+@section('title','Saved report comparison')
+@section('content')@include('learning.errors')<h1>Saved report comparison</h1><p>{{ $comparison['earlier_capture'] }} to {{ $comparison['later_capture'] }}</p><p>{{ $comparison['interpretation'] }}</p><table><thead><tr><th>Recorded measure</th><th>Change</th></tr></thead><tbody>@foreach($comparison['changes'] as $key=>$change)<tr><th>{{ \App\Support\PortalLanguage::measure($key) }}</th><td>{{ $change>0?'+':'' }}{{ $change }}</td></tr>@endforeach</tbody></table>@endsection

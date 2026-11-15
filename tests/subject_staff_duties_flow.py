@@ -166,7 +166,7 @@ with tempfile.TemporaryDirectory(prefix='gta-staff-duties-') as temporary:
         passed('Subject revocation invalidates the old database session and removes access while preserving qualification and assignment history')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='portal_privacy_cases'").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='account_lifecycle_states'").fetchone()[0]==0
             assert 'alerts_enabled' in [r[1] for r in c.execute('PRAGMA table_info(apprentices)')]
             assert 'deadline_history' in [r[1] for r in c.execute('PRAGMA table_info(learning_tasks)')]
             assert c.execute('SELECT COUNT(*) FROM staff_duties WHERE user_id=?',(staff,)).fetchone()[0]==1

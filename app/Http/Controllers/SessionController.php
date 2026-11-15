@@ -32,7 +32,7 @@ class SessionController extends Controller
         $attempted = Auth::guard()->getLastAttempted();
         return \Illuminate\Support\Facades\DB::transaction(function () use ($request, $attempted, $key) {
             $user = \App\Models\User::whereKey($attempted->id)->lockForUpdate()->firstOrFail();
-            if (! $user->active || ! hash_equals($user->password, $attempted->password) || $user->auth_version !== $attempted->auth_version) {
+            if (! $user->active || \App\Support\AccountLifecycle::blocked($user) || ! hash_equals($user->password, $attempted->password) || $user->auth_version !== $attempted->auth_version) {
                 throw ValidationException::withMessages(['email' => 'The sign-in details were not recognised.']);
             }
             RateLimiter::clear($key);

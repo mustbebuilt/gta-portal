@@ -89,7 +89,9 @@ class DirectoryController extends Controller
             $row = DirectoryCatalog::query($kind)->whereKey($record)->lockForUpdate()->firstOrFail();
             if ($row->record_version !== (int) $request->validated('record_version')) {
                 throw ValidationException::withMessages(['record_version' => 'This record changed while you were editing. Reopen it before saving.']);
-            }$this->fillRecord($row, $kind, $request->safe()->except('record_version'));
+            }
+            if ($kind === 'staff' && \App\Support\AccountLifecycle::blocked($row) && (bool)$request->validated('active')) {throw ValidationException::withMessages(['active'=>'Use reviewed Account operations to restore this managed account.']);}
+            $this->fillRecord($row, $kind, $request->safe()->except('record_version'));
             if ($kind === 'programmes' && $row->isDirty(['standard_code', 'version']) && LearningTask::whereIn('apprentice_id', Apprentice::where('programme_id', $row->id)->select('id'))->exists()) {
                 throw ValidationException::withMessages(['standard_code' => 'This programme has assigned task history. Create a separate programme/version instead of relabelling its source.']);
             }

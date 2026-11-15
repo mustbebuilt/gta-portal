@@ -479,6 +479,24 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/privacy-administration/{notice}/publish',[\App\Http\Controllers\PortalPrivacyController::class,'publish'])->whereUuid('notice')->name('portal-privacy-admin.publish');
     Route::post('/privacy-administration/rollout',[\App\Http\Controllers\PortalPrivacyController::class,'enable'])->name('portal-privacy-admin.enable');
     Route::post('/privacy-administration/review/{review}',[\App\Http\Controllers\PortalPrivacyController::class,'decide'])->whereUuid('review')->name('portal-privacy-admin.decide');
+    Route::get('/account-operations',[\App\Http\Controllers\AccountLifecycleController::class,'index'])->name('account-operations.index');
+    Route::post('/account-operations/user/{user}/prepare',[\App\Http\Controllers\AccountLifecycleController::class,'prepare'])->name('account-operations.prepare');
+    Route::post('/account-operations/user/{user}/retention',[\App\Http\Controllers\AccountLifecycleController::class,'retain'])->name('account-operations.retain');
+    Route::get('/account-operations/restrictions.gta',[\App\Http\Controllers\AccountLifecycleController::class,'ledger'])->name('account-operations.ledger');
+    Route::post('/account-operations/restriction-inspection',[\App\Http\Controllers\AccountLifecycleController::class,'inspect'])->name('account-operations.inspect');
+    Route::get('/account-operations/proposals/{proposal}',[\App\Http\Controllers\AccountLifecycleController::class,'show'])->whereUuid('proposal')->name('account-operations.show');
+    Route::post('/account-operations/proposals/{proposal}/review',[\App\Http\Controllers\AccountLifecycleController::class,'review'])->whereUuid('proposal')->name('account-operations.review');
+    Route::post('/account-operations/proposals/{proposal}/apply',[\App\Http\Controllers\AccountLifecycleController::class,'apply'])->whereUuid('proposal')->name('account-operations.apply');
+    Route::get('/reports/cohort-context',[\App\Http\Controllers\CohortInsightsController::class,'index'])->name('cohort-insights.index');
+    Route::post('/reports/cohort-context/snapshots',[\App\Http\Controllers\CohortInsightsController::class,'snapshot'])->name('cohort-insights.save');
+    Route::get('/reports/cohort-context/compare',[\App\Http\Controllers\CohortInsightsController::class,'compare'])->name('cohort-insights.compare');
+    Route::get('/cohort-snapshots/{snapshot}',[\App\Http\Controllers\CohortInsightsController::class,'show'])->whereUuid('snapshot')->name('cohort-insights.snapshot');
+    Route::get('/cohort-snapshots/{snapshot}/aggregate.json',[\App\Http\Controllers\CohortInsightsController::class,'download'])->whereUuid('snapshot')->name('cohort-insights.download');
+    Route::get('/apprentices/{apprentice}/checked-estimate',[\App\Http\Controllers\CohortInsightsController::class,'forecast'])->name('cohort-insights.forecast');
+    Route::post('/apprentices/{apprentice}/checked-estimate',[\App\Http\Controllers\CohortInsightsController::class,'saveForecast'])->name('cohort-insights.forecast.save');
+    Route::get('/staff-follow-up',[\App\Http\Controllers\OperationalFollowupController::class,'index'])->name('operations-desk.index');
+    Route::post('/staff-follow-up/apprentice/{apprentice}',[\App\Http\Controllers\OperationalFollowupController::class,'start'])->name('operations-desk.start');
+    Route::post('/staff-follow-up/{followup}',[\App\Http\Controllers\OperationalFollowupController::class,'update'])->whereUuid('followup')->name('operations-desk.update');
     Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
     Route::resource('apprentices', ApprenticeController::class)->except('destroy');
     Route::prefix('directories')->name('directories.')->whereIn('kind', ['employers', 'programmes', 'groups', 'staff'])->group(function () {

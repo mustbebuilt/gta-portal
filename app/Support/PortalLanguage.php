@@ -1,0 +1,8 @@
+<?php
+namespace App\Support;
+class PortalLanguage {
+ public const ROLES=['ceo'=>'Chief Executive (CEO)','admin'=>'Administrator','tutor'=>'Tutor','functional_skills_tutor'=>'Functional Skills tutor','mentor'=>'Learning and Progress Mentor','careers_adviser'=>'Careers adviser','inclusion_lead'=>'Inclusion lead','inclusion_member'=>'Inclusion team member','manager'=>'Manager','staff'=>'Member of staff','apprentice'=>'Apprentice','employer'=>'Employer','unassigned'=>'Role not assigned'];
+ public const MEASURES=['cohort'=>'Apprentices in this start-date group','active'=>'Recorded as active','break'=>'On a break in learning','completed'=>'Recorded as completed','withdrawn'=>'Recorded as withdrawn','transferred'=>'Recorded as transferred','unknown'=>'Programme status needs checking','achieved'=>'Achievement confirmed','not_achieved'=>'Confirmed as not achieved','awaiting_result'=>'Awaiting result','result_unknown'=>'Completion result needs checking','past_recorded_end'=>'Active and past the recorded planned end date','planned_end_unknown'=>'Planned end date needs checking','source_checks'=>'Programme outcome records to check','current_forecasts'=>'Current staff estimates','forecasts_needing_review'=>'Estimates due for review','forecast_missing'=>'No recorded estimate','assigned_tasks'=>'Allocated tasks','approved_tasks'=>'Known tasks approved','source_pending_tasks'=>'Tasks awaiting confirmed content'];
+ public static function role(string $role):string {return self::ROLES[$role]??'Role needs checking';}
+ public static function measure(string $key):string {return self::MEASURES[$key]??str_replace('_',' ',$key);}
+}

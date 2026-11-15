@@ -151,9 +151,9 @@ with tempfile.TemporaryDirectory(prefix='gta-electronic-review-') as temporary:
         with sqlite3.connect(db)as c:assert c.execute('SELECT state FROM progress_review_drafts').fetchone()[0]=='Draft';assert c.execute("SELECT COUNT(*) FROM electronic_review_signers WHERE state='Signed'").fetchone()[0]==3
         passed('Controlled source reopening after withdrawal preserves all historical participant decisions')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
-        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('portal_privacy_notices','portal_privacy_state','portal_privacy_acknowledgements','portal_privacy_cases','portal_privacy_events')").fetchone()[0]==0;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='portal_questionnaire_forms'").fetchone()[0]==1
+        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==0;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='portal_questionnaire_forms'").fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest down/up removes only Pack42 privacy tables and retains Pack25 schema; real signed records must not use destructive rollback')
+        passed('Disposable latest down/up removes only Pack43 operations tables and retains Pack25 schema; real signed records must not use destructive rollback')
         configure('production');start_backend();assert req(learner,'/review-signing')[0]==503
         passed('Existing production access gate remains enforced')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS; disposable SQLite with encrypted database sessions/cache and private local PDF','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'certificateBasedPdfSignature':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))
