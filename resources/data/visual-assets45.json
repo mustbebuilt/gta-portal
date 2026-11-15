@@ -1,0 +1,14 @@
+{
+  "gta-login-scene.webp": {
+    "sha256": "5691b9c97adb609cdfbb8fc24ebcb518e75ff0df3843521c33fdce51f39163c8",
+    "bytes": 293844
+  },
+  "gta-login-scene-small.webp": {
+    "sha256": "8d671e99d7390ddb1498010b42aef1929ac864300e222830d8b9671923a16789",
+    "bytes": 104994
+  },
+  "gta-mark.svg": {
+    "sha256": "d8a8dce99d8a1e5da05fced8b371e9cfc4e534edf75d82a3a112eec05fada815",
+    "bytes": 550
+  }
+}

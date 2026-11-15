@@ -119,6 +119,7 @@ class PortalActions
             $add('alerts','Change my alert preferences','alerts.index','Choose email, text or both using your current verified details.');
             $add('careers-view','View my careers advice','careers.worklist','Open the advice and actions recorded for you.');
         }
+        if(in_array($u->role,['admin','ceo','tutor','apprentice'],true)){$add('report',$u->role==='apprentice'?'Open my report':'Open visual report','visual-reports.index','Charts, exact tables, current source context and a complete PDF.');}
         if($u->role==='employer'){$add('employer-actions','Respond to employer actions','employer-actions.index','See only requests currently shared with your employer account.');}
         if(in_array($u->role,['apprentice','employer'],true)){$add('signing','View review signing requests','electronic-reviews.index','Open only current requests available to your account.');}
         $add('guides','Find a how-to guide','help.index','Search the guides available to your role.');

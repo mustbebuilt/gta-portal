@@ -1,0 +1,5 @@
+@extends('layout')
+@section('title','Accessibility and help')
+@section('content')
+<h1>Accessibility and help</h1><section class="panel"><h2>Using the portal</h2><p>Use Tab to move between controls, Enter to follow links and Space to change a tick box. The Skip to main content link appears when focused. You can zoom in using your browser controls.</p><p>Charts include exact table values. Choose Table if that is easier to read. Read-aloud is optional in Help and how to when your device supports it.</p><h2>Getting help</h2><p>Speak to your usual GTA contact if you need another format, help signing in or support using a page. <a href="{{ route('privacy.public') }}#contact">Open GTA contact information</a>.</p><p>If a page or control does not work for you, tell GTA the page name and what you were trying to do. Do not include passwords or private apprentice information in an error report.</p></section><p>This page describes available help. It is not a claim that a formal accessibility audit has been completed.</p>
+@endsection

@@ -52,7 +52,13 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [SessionController::class, 'create'])->name('login');
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
+Route::get('/accessibility', fn()=>view('accessibility.index'))->name('accessibility.index');
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class, \App\Http\Middleware\RequirePrivacyAcknowledgement::class])->group(function () {
+    Route::get('/visual-reports', [\App\Http\Controllers\PortalVisualReportController::class,'index'])->name('visual-reports.index');
+    Route::get('/visual-reports.pdf', [\App\Http\Controllers\PortalVisualReportController::class,'pdf'])->name('visual-reports.pdf');
+    Route::get('/centre-planning/work-moves', [\App\Http\Controllers\TimetableWorkMovesController::class,'index'])->name('work-moves.index');
+    Route::get('/centre-planning/work-moves/{plan}', [\App\Http\Controllers\TimetableWorkMovesController::class,'show'])->whereUuid('plan')->name('work-moves.show');
+    Route::post('/centre-planning/work-moves/{plan}', [\App\Http\Controllers\TimetableWorkMovesController::class,'apply'])->whereUuid('plan')->name('work-moves.apply');
     Route::get('/saved-work', [\App\Http\Controllers\SavedPortalWorkController::class,'index'])->name('saved-work.index');
     Route::get('/quick-actions', [\App\Http\Controllers\PortalActionsController::class,'index'])->name('quick-actions.index');
     Route::get('/apprentices/{apprentice}/work-area', [\App\Http\Controllers\PortalActionsController::class,'person'])->whereNumber('apprentice')->name('quick-actions.person');

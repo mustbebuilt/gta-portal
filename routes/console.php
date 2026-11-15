@@ -291,3 +291,5 @@ Artisan::command('gta:acceptance-source-check', function () {
     $this->line(json_encode(\App\Support\AcceptanceSource::summary($source),JSON_THROW_ON_ERROR));
     return $source['status']==='captured'?0:1;
 })->purpose('Read-only source/configuration fingerprint summary; no database probe, secret export or deployment approval');
+
+Artisan::command('gta:release-check45 {--environment : Include staging configuration checks without printing values} {--database : Read actual MySQL schema names without writing}',function(){ $report=\App\Support\ReleaseSourceCheck::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($report,JSON_THROW_ON_ERROR));return $report['status']==='needs_attention'?1:0;})->purpose('Read-only Pack45 source and optional staging/schema-name readiness checks; never deployment approval');

@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title','Centre timetable')
 @section('content')
+@if(\App\Support\CentrePlanning::allowed(auth()->user()))<p><a class="button" href="{{ route('work-moves.index') }}">Reschedule planned work</a></p>@endif
 <link rel="stylesheet" href="{{ asset('assets/centre-planning.css') }}">
 @include('learning.errors')
 <h1>{{ $safe_shared?'Staff timetable':($planner?'Centre timetable':'My timetable') }}</h1><p class="notice">{{ \App\Support\TimetableDuties::POLICY }}</p>@include('centre-planning.links')
