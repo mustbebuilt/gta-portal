@@ -38,7 +38,7 @@ class PortalNavigation
         $links=[];
         if(ReviewReminders::allowed($u)) {$links[]=$item('Reviews','reviews.index',[],['reviews.*']);}
         if(in_array($u->role,['admin','ceo','apprentice'],true)||StaffDuties::has($u,'careers_adviser')) {$links[]=$item('Careers','careers.worklist',[],['careers.*']);}
-        if(in_array($u->role,['admin','ceo','tutor','apprentice','employer'],true)||StaffDuties::has($u,'mentor')){$links[]=$item('Review signing','electronic-reviews.index',[],['electronic-reviews.*','review-authority.*']);}
+        if(in_array($u->role,['admin','ceo','tutor','apprentice','employer'],true)||StaffDuties::has($u,'mentor')){$links[]=$item('Review appointments','review-appointments.index',[],['review-appointments.*']);$links[]=$item('Review signing','electronic-reviews.index',[],['electronic-reviews.*','review-authority.*']);}
         if(LeaverDestinations::allowed($u)) {$links[]=$item('Leaver follow-up','destinations.index',[],['destinations.*']);}
         $group('reviews-careers','Reviews & Careers',$links);
         $links=[];

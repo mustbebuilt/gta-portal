@@ -52,6 +52,20 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
+    Route::get('/review-appointments', [\App\Http\Controllers\ReviewAppointmentsController::class,'index'])->name('review-appointments.index');
+    Route::get('/review-appointments.json', [\App\Http\Controllers\ReviewAppointmentsController::class,'export'])->name('review-appointments.export');
+    Route::get('/apprentices/{apprentice}/review-appointments/new', [\App\Http\Controllers\ReviewAppointmentsController::class,'form'])->name('review-appointments.form');
+    Route::post('/apprentices/{apprentice}/review-appointments', [\App\Http\Controllers\ReviewAppointmentsController::class,'save'])->name('review-appointments.store');
+    Route::get('/apprentices/{apprentice}/review-appointments/{appointment}/edit', [\App\Http\Controllers\ReviewAppointmentsController::class,'form'])->whereUuid('appointment')->name('review-appointments.edit');
+    Route::post('/apprentices/{apprentice}/review-appointments/{appointment}', [\App\Http\Controllers\ReviewAppointmentsController::class,'save'])->whereUuid('appointment')->name('review-appointments.save');
+    Route::get('/review-appointments/{appointment}', [\App\Http\Controllers\ReviewAppointmentsController::class,'show'])->whereUuid('appointment')->name('review-appointments.show');
+    Route::get('/review-appointments/{appointment}/calendar.ics', [\App\Http\Controllers\ReviewAppointmentsController::class,'calendar'])->whereUuid('appointment')->name('review-appointments.calendar');
+    Route::post('/review-appointments/{appointment}/publish', [\App\Http\Controllers\ReviewAppointmentsController::class,'publish'])->whereUuid('appointment')->name('review-appointments.publish');
+    Route::post('/review-appointments/{appointment}/cancel', [\App\Http\Controllers\ReviewAppointmentsController::class,'cancel'])->whereUuid('appointment')->name('review-appointments.cancel');
+    Route::post('/review-appointments/{appointment}/availability', [\App\Http\Controllers\ReviewAppointmentsController::class,'respond'])->whereUuid('appointment')->middleware('throttle:10,1')->name('review-appointments.respond');
+    Route::post('/review-appointments/{appointment}/outcome', [\App\Http\Controllers\ReviewAppointmentsController::class,'outcome'])->whereUuid('appointment')->name('review-appointments.outcome');
+    Route::post('/review-appointments/{appointment}/replacement', [\App\Http\Controllers\ReviewAppointmentsController::class,'link'])->whereUuid('appointment')->name('review-appointments.link');
+
     Route::post('/apprentice-reminder-control', [\App\Http\Controllers\ApprenticeNotificationController::class,'pause'])->name('apprentice-notifications.pause');
     Route::get('/apprentice-reminder-delivery', [\App\Http\Controllers\ApprenticeNotificationController::class,'index'])->name('apprentice-notifications.index');
     Route::post('/apprentice-reminder-delivery', [\App\Http\Controllers\ApprenticeNotificationController::class,'prepare'])->name('apprentice-notifications.prepare');

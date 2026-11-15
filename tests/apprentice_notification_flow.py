@@ -161,11 +161,11 @@ with tempfile.TemporaryDirectory(prefix='gta-apprentice-alerts-') as temporary:
         passed('Delivery states, read receipts, session binding and no-retry behavior persist across HTTP/CLI process restart')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_change_batches','timetable_change_events','register_followup_cases','register_followup_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('review_appointments','review_appointment_events','review_appointment_parties','review_appointment_responses')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('employer_portal_actions','gateway_readiness_plans','review_preparation_briefs','apprentice_mobile_challenges')").fetchone()[0]==4
             assert c.execute('SELECT status FROM learning_tasks ORDER BY id LIMIT 1').fetchone()[0]=='Draft'
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest migration round-trip removes only Pack36 session-operations tables; prior reminder/employer/Gateway/review/mobile/task work remains')
+        passed('Disposable latest migration round-trip removes only Pack37 review-appointment tables; prior reminder/employer/Gateway/review/mobile/task work remains')
         configure('production');start_backend();assert req(admin,ops)[0]==503 and req(learner,inbox)[0]==503 and len(captures)==2
         passed('Existing production gate remains enforced; all captured messages used fictional local SMTP only')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS and local SMTP DATA/accept/disconnect capture with disposable SQLite/database sessions/cache','localFictionalMessagesCaptured':len(captures),'independentReservationProofs':reservation_proof,'realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'actualRemoteSMTPTLS':False,'actualVonageOrHandset':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

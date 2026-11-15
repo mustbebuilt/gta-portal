@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title', $apprentice->reference)
 @section('content')
+@if(\App\Support\ReviewAppointments::staff(auth()->user(),$apprentice))<p><a href="{{ route('review-appointments.form',$apprentice) }}">Book review appointment</a></p>@endif
 @if(\App\Support\GatewayReadiness::allowed(auth()->user(),$apprentice))<p><a class="button" href="{{ route('gateway.show',$apprentice) }}">Gateway preparation checks</a></p>@endif
 @if(\App\Support\EmployerActions::staff(auth()->user(),$apprentice))<p><a class="button" href="{{ route('employer-actions.staff',$apprentice) }}">Employer requests and replies</a>@if(\App\Support\LearningAccess::manager(auth()->user())) <a class="button" href="{{ route('employer-grants.index',$apprentice) }}">Verify employer access</a>@endif</p>@endif<p><a class="button" href="{{ route('delivery.show',$apprentice) }}">Individual delivery plan and block calendar</a></p>
 

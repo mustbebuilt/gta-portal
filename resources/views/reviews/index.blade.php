@@ -10,7 +10,7 @@
 @php($a=$reviewRow['apprentice'])
 @php($position=$positions[$a->id])
 @php($cycle=$position['cycle'])
-<article class="work-row" data-review-apprentice="{{ $a->id }}"><div><h3>{{ $a->first_name }} {{ $a->last_name }} · {{ $a->reference }}</h3><p>Mentor: {{ $a->mentor?->name??'Not assigned' }} · Tutor: {{ $a->tutor?->name??'Not assigned' }}</p>
+<article class="work-row" data-review-apprentice="{{ $a->id }}">@if(\App\Support\ReviewAppointments::staff(auth()->user(),$a))<p><a href="{{ route('review-appointments.form',$a) }}">Book review appointment</a></p>@endif<div><h3>{{ $a->first_name }} {{ $a->last_name }} · {{ $a->reference }}</h3><p>Mentor: {{ $a->mentor?->name??'Not assigned' }} · Tutor: {{ $a->tutor?->name??'Not assigned' }}</p>
 <p><strong>{{ ['overdue'=>'Overdue checked reference','today'=>'Due today','checks'=>'Status or history needs checking','upcoming'=>'Upcoming checked reference','paused'=>'Paused or non-active programme'][$reviewRow['bucket']] }}</strong> · Last checked meeting {{ $cycle['last_meeting']??'Unknown' }} · Next tracked review {{ $cycle['next_due']??'Unknown — history to check' }}.</p><p>{{ $cycle['confirmed_count'] }} independently checked copies · {{ $cycle['basis'] }}.</p>
 @if($position['programme_check'])<p>Programme status/source needs checking. No automatic reminder is generated.</p>@elseif($position['paused'])<p>Recorded programme status: {{ $position['programme_status'] }}. Automatic review reminders paused; existing review dates/history retained.</p>@endif
 @if(!$cycle['next_due'])<p>First-review reference: {{ $cycle['first_review_reference']??'Start date not recorded' }}. Check completed history before treating this as a current due date; no automatic reminder is generated.</p>@endif

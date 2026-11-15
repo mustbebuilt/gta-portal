@@ -1,0 +1,13 @@
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+return new class extends Migration {
+ public function up():void {
+  Schema::create('review_appointments',function(Blueprint $t):void {$t->uuid('id')->primary();$t->uuid('request_token')->unique();$t->foreignId('apprentice_id')->constrained('apprentices')->restrictOnDelete();$t->foreignId('created_by')->constrained('users')->restrictOnDelete();$t->string('state',16)->default('Draft');$t->unsignedInteger('version')->default(1);$t->unsignedTinyInteger('active_slot')->nullable();$t->longText('source');$t->char('source_hash',64);$t->timestamp('starts_at');$t->timestamp('ends_at');$t->timestamp('published_at')->nullable();$t->longText('publication')->nullable();$t->longText('closure')->nullable();$t->longText('outcome')->nullable();$t->longText('followup')->nullable();$t->unsignedInteger('followup_version')->default(0);$t->timestamps();$t->unique(['apprentice_id','active_slot']);});
+  Schema::create('review_appointment_parties',function(Blueprint $t):void {$t->id();$t->foreignUuid('appointment_id')->constrained('review_appointments')->restrictOnDelete();$t->foreignId('user_id')->constrained('users')->restrictOnDelete();$t->string('role',16);$t->unsignedInteger('appointment_version');$t->char('identity_hash',64);$t->longText('proof');$t->timestamp('created_at');$t->unique(['appointment_id','appointment_version','role'],'appointment_role_version');$t->unique(['appointment_id','appointment_version','user_id'],'appointment_user_version');});
+  Schema::create('review_appointment_responses',function(Blueprint $t):void {$t->id();$t->foreignUuid('appointment_id')->constrained('review_appointments')->restrictOnDelete();$t->foreignId('user_id')->constrained('users')->restrictOnDelete();$t->unsignedInteger('appointment_version');$t->unsignedInteger('response_version')->default(1);$t->string('choice',24);$t->char('source_hash',64);$t->longText('proof');$t->timestamp('responded_at');$t->timestamps();$t->unique(['appointment_id','appointment_version','user_id'],'appointment_response_user_version');});
+  Schema::create('review_appointment_events',function(Blueprint $t):void {$t->id();$t->foreignUuid('appointment_id')->constrained('review_appointments')->restrictOnDelete();$t->foreignId('actor_id')->constrained('users')->restrictOnDelete();$t->string('event',32);$t->unsignedInteger('record_version');$t->longText('payload');$t->timestamp('created_at');});
+ }
+ public function down():void {Schema::dropIfExists('review_appointment_events');Schema::dropIfExists('review_appointment_responses');Schema::dropIfExists('review_appointment_parties');Schema::dropIfExists('review_appointments');}
+};

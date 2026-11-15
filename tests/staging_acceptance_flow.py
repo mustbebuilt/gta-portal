@@ -146,10 +146,10 @@ with tempfile.TemporaryDirectory(prefix='gta-staging-acceptance-') as temporary:
         passed('New-source cycle links prior run but carries no old test passes or acceptance')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_change_batches','timetable_change_events','register_followup_cases','register_followup_events')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('review_appointments','review_appointment_events','review_appointment_parties','review_appointment_responses')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='alert_receipt_batches'").fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest down/up removes only four Pack36 tables, retaining earlier receipt/portal schema')
+        passed('Disposable latest down/up removes only four Pack37 appointment tables, retaining earlier receipt/portal schema')
         configure('production');start_backend();assert req(admin,index)[0]==503 and req(ceo,index)[0]==503
         passed('Existing production access gate remains unchanged')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS; real source/config capture and disposable SQLite/encrypted sessions/cache','syntheticAcceptanceRecordsOnly':True,'bulkSyntheticChecksUseOneCachedRealFixtureSnapshot':True,'realTestsImpliedBySyntheticResults':False,'sourceScanIncludesTaskPdfs':True,'realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'productionApproved':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

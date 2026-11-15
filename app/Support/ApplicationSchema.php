@@ -6,9 +6,14 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack36.
+    // Presence-only contract from the unchanged reference migrations through Pack37.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
+        'review_appointments'=>['active_slot','apprentice_id','closure','created_at','created_by','ends_at','followup','followup_version','id','outcome','publication','published_at','request_token','source','source_hash','starts_at','state','updated_at','version'],
+        'review_appointment_parties'=>['appointment_id','appointment_version','created_at','id','identity_hash','proof','role','user_id'],
+        'review_appointment_responses'=>['appointment_id','appointment_version','choice','created_at','id','proof','responded_at','response_version','source_hash','updated_at','user_id'],
+        'review_appointment_events'=>['actor_id','appointment_id','created_at','event','id','payload','record_version'],
+
         'account_access_events'=>['actor_id','created_at','event','id','origin','user_id'],
         'account_onboarding_tokens'=>['auth_version','created_at','expires_at','issuer_auth_version','issuer_id','purpose','token_hash','user_id'],
         'account_second_factors'=>['confirmed_at','created_at','last_step','recovery_hashes','secret','setup_binding','setup_expires_at','updated_at','user_id'],

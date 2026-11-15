@@ -127,9 +127,9 @@ with tempfile.TemporaryDirectory(prefix='gta-employer-setup-') as temporary:
         employer=login('employer@example.test');status,text,_,_=req(employer,own);assert 'VISIBLE-FICTIONAL-APPRENTICE'in text and 'I have checked this step'in text
         passed('Fresh explicit named grant restores only its checked learner scope; old checklist confirmations do not count')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
-        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_change_batches','timetable_change_events','register_followup_cases','register_followup_events')").fetchone()[0]==0;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='staging_acceptance_runs'").fetchone()[0]==1
+        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('review_appointments','review_appointment_events','review_appointment_parties','review_appointment_responses')").fetchone()[0]==0;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='staging_acceptance_runs'").fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest migration down/up removes only four Pack36 tables and retains Pack32 acceptance schema')
+        passed('Disposable latest migration down/up removes only four Pack37 appointment tables and retains Pack32 acceptance schema')
         configure('production');start_backend();assert req(admin,index)[0]==503 and req(employer,own)[0]==503
         passed('Existing production access gate remains unchanged')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual client-verified local HTTPS; disposable SQLite/encrypted database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'productionApproved':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))
