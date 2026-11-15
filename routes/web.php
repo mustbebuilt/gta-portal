@@ -466,6 +466,8 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/centre-planning/governance/section/{user}',[\App\Http\Controllers\TimetableGovernanceController::class,'section'])->name('timetable-governance.section');
     Route::post('/centre-planning/governance/pause',[\App\Http\Controllers\TimetableGovernanceController::class,'pause'])->name('timetable-governance.pause');
     Route::post('/centre-planning/governance/allocation/{plan}',[\App\Http\Controllers\TimetableGovernanceController::class,'allocation'])->name('timetable-governance.allocation');
+    Route::get('/centre-planning/management',[\App\Http\Controllers\TimetableManagementController::class,'index'])->name('timetable-management.index');
+    Route::post('/centre-planning/management/{session}/confirm',[\App\Http\Controllers\TimetableManagementController::class,'confirm'])->name('timetable-management.confirm');
     Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
     Route::resource('apprentices', ApprenticeController::class)->except('destroy');
     Route::prefix('directories')->name('directories.')->whereIn('kind', ['employers', 'programmes', 'groups', 'staff'])->group(function () {

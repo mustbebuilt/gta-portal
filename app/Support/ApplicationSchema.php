@@ -6,9 +6,11 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack40.
+    // Presence-only contract from the unchanged reference migrations through Pack41.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
+        'timetable_delivery_records'=>['created_at','details','details_hash','staff_id','training_session_id','updated_at','version'],
+
         'timetable_governance_state'=>['created_at','details','editing_paused','id','revision','updated_at'],
         'timetable_governance_roles'=>['ceo_locked','changed_by','created_at','history','restricted','role','updated_at','user_id','version'],
         'timetable_allocation_controls'=>['ceo_locked','changed_by','created_at','details','plan_id','restricted','updated_at','version'],
