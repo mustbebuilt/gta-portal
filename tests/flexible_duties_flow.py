@@ -135,9 +135,9 @@ with tempfile.TemporaryDirectory(prefix='gta-flexible-duties-') as temporary:
         assert req(planner,root+'/flexible-duties')[0]==403 and req(planner,detail)[0]==403
         passed('Current planning-access revocation removes new duty/group/cover planner routes on the next request')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
-        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_group_briefs','timetable_flexible_days','timetable_cover_allocations','timetable_duty_events')").fetchone()[0]==0;assert c.execute('SELECT COUNT(*) FROM timetable_plans').fetchone()[0]==2;assert c.execute('SELECT COUNT(*) FROM timetable_rooms').fetchone()[0]==18;assert c.execute('SELECT COUNT(*) FROM timetable_staff_windows').fetchone()[0]==4
+        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_governance_state','timetable_governance_roles','timetable_allocation_controls','timetable_governance_events','timetable_staff_sections')").fetchone()[0]==0;assert c.execute('SELECT COUNT(*) FROM timetable_plans').fetchone()[0]==2;assert c.execute('SELECT COUNT(*) FROM timetable_rooms').fetchone()[0]==18;assert c.execute('SELECT COUNT(*) FROM timetable_staff_windows').fetchone()[0]==4
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest down/up drops only four duty/brief/cover tables while retaining Pack38 rooms/windows/plans and real earlier schemas')
+        passed('Disposable latest down/up drops only five timetable governance tables while retaining Pack38 rooms/windows/plans and real earlier schemas')
         configure('production');start_backend();assert req(admin,root)[0]==503
         passed('Existing production-access gate remains enforced')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS with disposable SQLite/encrypted database sessions/cache','actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'realDataUsed':False,'externalMessagesSent':False,'productionApproved':False,'registerAccessGrantedByCover':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

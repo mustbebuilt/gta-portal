@@ -461,6 +461,11 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/apprentices/{apprentice}/outcome', [RetentionReportController::class, 'save'])->name('retention.save');
     Route::get('/apprentices/{apprentice}/monthly-snapshot', [MonthlyScorecardController::class, 'index'])->name('scorecards.index');
     Route::post('/apprentices/{apprentice}/monthly-snapshot', [MonthlyScorecardController::class, 'save'])->name('scorecards.save');
+    Route::get('/centre-planning/governance',[\App\Http\Controllers\TimetableGovernanceController::class,'index'])->name('timetable-governance.index');
+    Route::post('/centre-planning/governance/role/{user}',[\App\Http\Controllers\TimetableGovernanceController::class,'role'])->name('timetable-governance.role');
+    Route::post('/centre-planning/governance/section/{user}',[\App\Http\Controllers\TimetableGovernanceController::class,'section'])->name('timetable-governance.section');
+    Route::post('/centre-planning/governance/pause',[\App\Http\Controllers\TimetableGovernanceController::class,'pause'])->name('timetable-governance.pause');
+    Route::post('/centre-planning/governance/allocation/{plan}',[\App\Http\Controllers\TimetableGovernanceController::class,'allocation'])->name('timetable-governance.allocation');
     Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
     Route::resource('apprentices', ApprenticeController::class)->except('destroy');
     Route::prefix('directories')->name('directories.')->whereIn('kind', ['employers', 'programmes', 'groups', 'staff'])->group(function () {

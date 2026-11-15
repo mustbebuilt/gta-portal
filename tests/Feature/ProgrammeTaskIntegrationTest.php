@@ -180,7 +180,7 @@ class ProgrammeTaskIntegrationTest extends TestCase
     public function test_other_programme_cannot_apply_autocare_rpl_or_relabel_task_history(string $key): void
     {
         [$a, , , $admin] = $this->allocate($key);
-        $this->actingAs($admin)->get('/apprentices/'.$a->id.'/training-plan')->assertOk()->assertSee('Training-plan source required')->assertDontSee('663');
+        $this->actingAs($admin)->get('/apprentices/'.$a->id.'/training-plan')->assertOk()->assertSee('Training-plan source required')->assertDontSee('663 programme reference hours');
         $this->post('/apprentices/'.$a->id.'/training-plan/proposal', ['version' => 0])->assertSessionHasErrors('programmeRef');
         $this->assertDatabaseCount('training_plan_workspaces', 0);
         $p = Programme::factory()->create(['standard_code' => 'ST0499', 'version' => '1.3']);

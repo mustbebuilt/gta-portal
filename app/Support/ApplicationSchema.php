@@ -6,9 +6,15 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack39.
+    // Presence-only contract from the unchanged reference migrations through Pack40.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
+        'timetable_governance_state'=>['created_at','details','editing_paused','id','revision','updated_at'],
+        'timetable_governance_roles'=>['ceo_locked','changed_by','created_at','history','restricted','role','updated_at','user_id','version'],
+        'timetable_allocation_controls'=>['ceo_locked','changed_by','created_at','details','plan_id','restricted','updated_at','version'],
+        'timetable_governance_events'=>['actor_id','created_at','event','id','payload','record_version','subject_key','subject_type'],
+        'timetable_staff_sections'=>['changed_by','created_at','details','section','updated_at','user_id','version'],
+
         'timetable_group_briefs'=>['created_at','details','details_hash','group_id','updated_at','updated_by','version'],
         'timetable_flexible_days'=>['created_at','end_time','id','owner_id','source','source_hash','staff_id','start_time','state','updated_at','version','work_date'],
         'timetable_cover_allocations'=>['active_entry_id','check_proof','closure','cover_staff_id','created_at','created_by','entry_id','flexible_day_id','id','original_staff_id','publication','request_token','source','source_hash','state','updated_at','version'],

@@ -1,0 +1,14 @@
+<?php
+namespace App\Http\Controllers;
+use App\Models\{User,TimetableGovernanceState as State,TimetableGovernanceRole as Role,TimetableAllocationControl as Control,TimetableStaffSection as Section,TimetablePlan as Plan};
+use App\Support\{TimetableGovernance as G,CentrePlanning as P};
+use Illuminate\Http\Request;
+class TimetableGovernanceController extends Controller {
+ private function allowed(Request $r):void {abort_unless(G::manager($r->user()),403);}
+ private function data(Request $r):array {$this->allowed($r);return $r->validate(['version'=>['required','integer','min:0'],'revision'=>['required','integer','min:1'],'note'=>['required','string','max:2000'],'confirmed'=>['accepted']]);}
+ public function index(Request $r) {$this->allowed($r);$r->validate(['page'=>['nullable','integer','min:1']]);return response()->view('centre-planning.governance',['people'=>User::orderBy('name')->get()->filter(fn($u)=>P::staff($u)),'roles'=>Role::get()->keyBy('user_id'),'sections'=>Section::get()->keyBy('user_id'),'state'=>State::findOrFail(1),'plans'=>Plan::orderByDesc('updated_at')->paginate(15),'controls'=>Control::get()->keyBy('plan_id'),'canEdit'=>G::canEdit($r->user()),'ceo'=>G::ceo($r->user())])->header('Cache-Control','no-store, private')->header('Referrer-Policy','no-referrer');}
+ public function role(Request $r,User $user) {$d=$this->data($r);$v=$r->validate(['role'=>['required','in:inherit,viewer,centre_manager'],'restricted'=>['nullable','boolean'],'ceo_locked'=>['nullable','boolean']]);G::role($r->user(),(int)$r->session()->get('auth_version'),$user,(int)$d['version'],(int)$d['revision'],$v['role'],(bool)($v['restricted']??false),(bool)($v['ceo_locked']??false),$d['note']);return back()->with('status','Timetable access decision recorded. Portal-wide and private record permissions are unchanged.');}
+ public function section(Request $r,User $user) {$d=$this->data($r);$v=$r->validate(['section'=>['required','in:teaching,other']]);G::saveSection($r->user(),(int)$r->session()->get('auth_version'),$user,(int)$d['version'],(int)$d['revision'],$v['section'],$d['note']);return back()->with('status','Staff presentation section saved; access rights are unchanged.');}
+ public function pause(Request $r) {$d=$this->data($r);$v=$r->validate(['paused'=>['required','boolean']]);G::pause($r->user(),(int)$r->session()->get('auth_version'),(int)$d['revision'],(bool)$v['paused'],$d['note']);return back()->with('status','CEO editing control recorded.');}
+ public function allocation(Request $r,Plan $plan) {$d=$this->data($r);$v=$r->validate(['restricted'=>['nullable','boolean'],'ceo_locked'=>['nullable','boolean']]);G::allocation($r->user(),(int)$r->session()->get('auth_version'),$plan,(int)$d['version'],(int)$d['revision'],(bool)($v['restricted']??false),(bool)($v['ceo_locked']??false),$d['note']);return back()->with('status','Allocation control recorded. Published work and attendance remain intact.');}
+}
