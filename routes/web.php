@@ -52,6 +52,23 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
 });
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class])->group(function () {
+    Route::post('/centre-planning/entries/{entry}/register', [\App\Http\Controllers\CentrePlanningController::class,'link'])->whereNumber('entry')->name('centre-planning.link');
+    Route::post('/centre-planning/entries/{entry}/unlink', [\App\Http\Controllers\CentrePlanningController::class,'unlink'])->whereNumber('entry')->name('centre-planning.unlink');
+    Route::get('/centre-planning', [\App\Http\Controllers\CentrePlanningController::class,'index'])->name('centre-planning.index');
+    Route::get('/centre-planning.json', [\App\Http\Controllers\CentrePlanningController::class,'export'])->name('centre-planning.export');
+    Route::get('/centre-planning/setup', [\App\Http\Controllers\CentrePlanningController::class,'setup'])->name('centre-planning.setup');
+    Route::post('/centre-planning/rooms/{room}', [\App\Http\Controllers\CentrePlanningController::class,'room'])->whereNumber('room')->name('centre-planning.room');
+    Route::post('/centre-planning/access/{user}', [\App\Http\Controllers\CentrePlanningController::class,'grant'])->whereNumber('user')->name('centre-planning.grant');
+    Route::get('/centre-planning/working-time', [\App\Http\Controllers\CentrePlanningController::class,'windows'])->name('centre-planning.windows');
+    Route::post('/centre-planning/working-time', [\App\Http\Controllers\CentrePlanningController::class,'saveWindows'])->name('centre-planning.windows.save');
+    Route::get('/centre-planning/plans', [\App\Http\Controllers\CentrePlanningController::class,'plans'])->name('centre-planning.plans');
+    Route::get('/centre-planning/plans/new', [\App\Http\Controllers\CentrePlanningController::class,'form'])->name('centre-planning.form');
+    Route::post('/centre-planning/plans', [\App\Http\Controllers\CentrePlanningController::class,'save'])->name('centre-planning.save');
+    Route::get('/centre-planning/plans/{plan}/edit', [\App\Http\Controllers\CentrePlanningController::class,'form'])->whereUuid('plan')->name('centre-planning.edit');
+    Route::post('/centre-planning/plans/{plan}', [\App\Http\Controllers\CentrePlanningController::class,'save'])->whereUuid('plan')->name('centre-planning.update');
+    Route::get('/centre-planning/plans/{plan}', [\App\Http\Controllers\CentrePlanningController::class,'show'])->whereUuid('plan')->name('centre-planning.show');
+    Route::post('/centre-planning/plans/{plan}/decision', [\App\Http\Controllers\CentrePlanningController::class,'decide'])->whereUuid('plan')->name('centre-planning.decide');
+
     Route::get('/review-appointments', [\App\Http\Controllers\ReviewAppointmentsController::class,'index'])->name('review-appointments.index');
     Route::get('/review-appointments.json', [\App\Http\Controllers\ReviewAppointmentsController::class,'export'])->name('review-appointments.export');
     Route::get('/apprentices/{apprentice}/review-appointments/new', [\App\Http\Controllers\ReviewAppointmentsController::class,'form'])->name('review-appointments.form');

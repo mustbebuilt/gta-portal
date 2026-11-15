@@ -1,5 +1,5 @@
 {
-  "checkpoint": "development-pack-37",
+  "checkpoint": "development-pack-38",
   "meaning": "working_tested_core does not mean the entire original simulation area has been ported",
   "batches": [
     {
@@ -476,6 +476,11 @@
       "batch": "Review appointments, participant availability and meeting rebooking",
       "status": "working_tested_reference",
       "remaining": "Actual Laravel Cloud/native database concurrent booking and timezone/DST checks, device calendar import and target backup/restore acceptance pending. Booking, availability and staff-reported outcome never create formal review completion."
+    },
+    {
+      "batch": "Centre timetable planning, checked availability/room setup and recurring publication/register linking",
+      "status": "working_tested_reference",
+      "remaining": "Actual target native concurrent resource booking, real browser/mobile/keyboard/print, room capacity/use/travel-time approval and restored Cloud staging acceptance required. Planned windows are not contracts or attendance; no automatic registers/OTJ created."
     }
   ],
   "queue_review": "Pack36 combines independently checked future date moves/cancellations, exact future roster additions/removals, scoped calendar/conflict/readiness/export and owned register follow-up with defer/resolve/recheck and lost-scope privacy. No automatic marks/hours/notifications or learner concern creation. Cumulative current source included for comparison; no blind overwrite/live deployment.",
@@ -545,6 +550,17 @@
     "new_tables": 4,
     "migration": "2026_11_15_370000_create_review_appointments",
     "external_invites_sent": false,
+    "production_approved": false
+  },
+  "pack_38": {
+    "workstreams": [
+      "Visual weekly staff/room/group grid, actual-time cards/gaps and workload minutes",
+      "Dated working windows,18 named rooms with checked capacity/use and dedicated planner grants",
+      "Draft/check/publish weekly series, conflict/travel/source rechecks, future-only withdrawal and exact existing-register link/unlink"
+    ],
+    "new_tables": 6,
+    "migration": "2026_11_15_380000_create_centre_planning",
+    "external_messages_sent": false,
     "production_approved": false
   }
 }

@@ -170,11 +170,11 @@ with tempfile.TemporaryDirectory(prefix='gta-apprentice-onboarding-') as tempora
         passed('Wrong-link correction invalidates the old signed-in session immediately and retains historical checklist events')
         stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
         with sqlite3.connect(db)as c:
-            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('review_appointments','review_appointment_events','review_appointment_parties','review_appointment_responses')").fetchone()[0]==0
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('timetable_planner_access','timetable_rooms','timetable_staff_windows','timetable_plans','timetable_plan_entries','timetable_planning_events')").fetchone()[0]==0
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='help_narration_records'").fetchone()[0]==1
             assert c.execute('SELECT COUNT(*) FROM apprentices').fetchone()[0]==2
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest rollback/reapply removes only four Pack37 appointment tables and retains earlier schema/profile data; real new data requires backup')
+        passed('Disposable latest rollback/reapply removes only six Pack38 centre-planning tables and retains earlier schema/profile data; real new data requires backup')
         configure('production');start_backend();assert req(admin,'/apprentice-onboarding')[0]==503 and req(client(),invite)[0]==503
         passed('Production access gate still blocks both new account screens and invitation acceptance')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS and loopback SMTP capture; disposable SQLite/database sessions/cache','localFictionalMessagesCaptured':len(captures),'realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'actualRemoteSMTPTLS':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))
