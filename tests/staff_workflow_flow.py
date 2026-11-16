@@ -136,9 +136,9 @@ with tempfile.TemporaryDirectory(prefix='gta-staff-workflow-') as temporary:
             assert c.execute('SELECT version FROM progress_review_drafts WHERE id=?',(ids['review'],)).fetchone()[0]==2
         with sqlite3.connect(db) as c:
             after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-            assert before_tables-after_tables=={'restriction_recovery_runs'} and not(after_tables-before_tables)
+            assert before_tables-after_tables=={'timetable_optimisation_runs'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Latest Pack46 down/up removes only the restriction recovery run table while all prior schema and business-data checks are retained')
+        passed('Latest Pack47 down/up removes only the timetable optimisation run table while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,'/needs-attention')[0]==503 and req(mentor,prepare)[0]==503
         passed('Production gate remains enforced for new attention/preparation routes')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS, cached staging config, disposable SQLite and encrypted database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'externalAIServiceUsed':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

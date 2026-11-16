@@ -150,9 +150,9 @@ with tempfile.TemporaryDirectory(prefix='gta-apprentice-experience-') as tempora
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('apprentice_alert_deliveries','apprentice_alert_controls')").fetchone()[0]==2
         with sqlite3.connect(db) as c:
             after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-            assert before_tables-after_tables=={'restriction_recovery_runs'} and not(after_tables-before_tables)
+            assert before_tables-after_tables=={'timetable_optimisation_runs'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Latest Pack46 down/up removes only the restriction recovery run table while all prior schema and business-data checks are retained')
+        passed('Latest Pack47 down/up removes only the timetable optimisation run table while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(learner,'/portal-questionnaires')[0]==503 and req(inclusion,'/portal-questionnaires/forms')[0]==503
         passed('Existing production gate remains enforced on all new questionnaire screens')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Local client-verified HTTPS, cached staging configuration and disposable SQLite database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

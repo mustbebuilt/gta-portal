@@ -56,6 +56,12 @@ Route::get('/accessibility', fn()=>view('accessibility.index'))->name('accessibi
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class, \App\Http\Middleware\RequirePrivacyAcknowledgement::class])->group(function () {
     Route::get('/visual-reports', [\App\Http\Controllers\PortalVisualReportController::class,'index'])->name('visual-reports.index');
     Route::get('/visual-reports.pdf', [\App\Http\Controllers\PortalVisualReportController::class,'pdf'])->name('visual-reports.pdf');
+    Route::get('/centre-planning/optimiser',[\App\Http\Controllers\TimetableOptimiserController::class,'index'])->name('optimiser.index');
+    Route::post('/centre-planning/optimiser/preview',[\App\Http\Controllers\TimetableOptimiserController::class,'preview'])->name('optimiser.preview');
+    Route::post('/centre-planning/optimiser',[\App\Http\Controllers\TimetableOptimiserController::class,'prepare'])->name('optimiser.prepare');
+    Route::get('/centre-planning/optimiser/{run}',[\App\Http\Controllers\TimetableOptimiserController::class,'show'])->whereUuid('run')->name('optimiser.show');
+    Route::post('/centre-planning/optimiser/{run}/apply',[\App\Http\Controllers\TimetableOptimiserController::class,'apply'])->whereUuid('run')->name('optimiser.apply');
+    Route::post('/centre-planning/optimiser/{run}/cancel',[\App\Http\Controllers\TimetableOptimiserController::class,'cancel'])->whereUuid('run')->name('optimiser.cancel');
     Route::get('/centre-planning/work-moves', [\App\Http\Controllers\TimetableWorkMovesController::class,'index'])->name('work-moves.index');
     Route::get('/centre-planning/work-moves/{plan}', [\App\Http\Controllers\TimetableWorkMovesController::class,'show'])->whereUuid('plan')->name('work-moves.show');
     Route::post('/centre-planning/work-moves/{plan}', [\App\Http\Controllers\TimetableWorkMovesController::class,'apply'])->whereUuid('plan')->name('work-moves.apply');

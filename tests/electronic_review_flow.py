@@ -155,9 +155,9 @@ with tempfile.TemporaryDirectory(prefix='gta-electronic-review-') as temporary:
         with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==6;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='portal_questionnaire_forms'").fetchone()[0]==1
         with sqlite3.connect(db) as c:
             after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-            assert before_tables-after_tables=={'restriction_recovery_runs'} and not(after_tables-before_tables)
+            assert before_tables-after_tables=={'timetable_optimisation_runs'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Latest Pack46 down/up removes only the restriction recovery run table while all prior schema and business-data checks are retained')
+        passed('Latest Pack47 down/up removes only the timetable optimisation run table while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(learner,'/review-signing')[0]==503
         passed('Existing production access gate remains enforced')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS; disposable SQLite with encrypted database sessions/cache and private local PDF','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'certificateBasedPdfSignature':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))
