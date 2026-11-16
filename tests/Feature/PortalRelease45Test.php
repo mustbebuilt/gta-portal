@@ -8,7 +8,7 @@ class PortalRelease45Test extends TestCase
 {
  use LazilyRefreshDatabase;
  public function test_login_uses_real_fields_and_separate_decorative_artwork():void{
-  $this->get('/login')->assertOk()->assertSee('GTA Portal')->assertSee('gta-login-scene.webp',false)->assertSee('name="email"',false)->assertSee('autocomplete="current-password"',false)->assertSee('gta-mark.svg',false)->assertDontSee('01_APPROVED_GTA_Portal_Login.png',false)->assertDontSee('Visual concept');
+  $this->get('/login')->assertOk()->assertSee('GTA Portal')->assertSee('gta-login-scene.webp',false)->assertSee('name="email"',false)->assertSee('autocomplete="current-password"',false)->assertSee('gta-logo.jpg',false)->assertDontSee('01_APPROVED_GTA_Portal_Login.png',false)->assertDontSee('Visual concept');
  }
  public function test_guest_accessibility_and_contact_destinations_are_functional():void{
   $this->get('/accessibility')->assertOk()->assertSee('Accessibility and help')->assertSee('not a claim that a formal accessibility audit');$this->get('/privacy-information')->assertOk()->assertSee('id="contact"',false);

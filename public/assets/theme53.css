@@ -1,0 +1,40 @@
+/* Pack53: authoritative shared theme mapping from the approved v2 handover. */
+:root,html[data-theme="dark"]{color-scheme:dark;--gta-background:#0B1220;--gta-surface:#101927;--gta-sidebar:#0B1220;--gta-notice:#25282C;--gta-selected:#24383E;--gta-text-primary:#F3F4F6;--gta-text-secondary:#CBCBCB;--gta-text-placeholder:#A3ADB8;--gta-link:#9BC6CC;--gta-link-hover:#C3E0E4;--gta-control-border:#687989;--gta-focus:#9BC6CC;--gta-button-background:#F3F4F6;--gta-button-hover:#DDE3E8;--gta-button-text:#18212B;--gta-error-background:#3B1818;--gta-error-text:#FDA29B;--gta-header:#0B1220;--gta-menu-surface:#101927;--bg:var(--gta-background);--panel:var(--gta-surface);--text:var(--gta-text-primary);--muted:var(--gta-text-secondary);--line:var(--gta-control-border);--accent:var(--gta-link);--soft:var(--gta-notice);--button:var(--gta-button-background);--button-text:var(--gta-button-text);}
+html[data-theme="light"]{color-scheme:light;--gta-background:#DFE9F2;--gta-surface:#FFFFFF;--gta-sidebar:#EAF0F6;--gta-notice:#CFDCE7;--gta-selected:#CDDFE5;--gta-text-primary:#18212B;--gta-text-secondary:#475569;--gta-text-placeholder:#66717D;--gta-link:#285D67;--gta-link-hover:#194650;--gta-control-border:#657585;--gta-focus:#285D67;--gta-button-background:#242424;--gta-button-hover:#383838;--gta-button-text:#FFFFFF;--gta-error-background:#FEF3F2;--gta-error-text:#B42318;--gta-header:#EAF0F6;--gta-menu-surface:#F4F7FA;--bg:var(--gta-background);--panel:var(--gta-surface);--text:var(--gta-text-primary);--muted:var(--gta-text-secondary);--line:var(--gta-control-border);--accent:var(--gta-link);--soft:var(--gta-notice);--button:var(--gta-button-background);--button-text:var(--gta-button-text);}
+
+:root,html[data-theme="dark"]{--green:#79d99b;--red:#ff9299;--danger:#ff9299;--amber:#efbf62;--achieved:#6cb8f0}
+html[data-theme="light"]{--green:#146735;--red:#a51324;--danger:#a51324;--amber:#815100;--achieved:#005da8}
+body,.portal-signin{background:var(--gta-background);color:var(--gta-text-primary)}
+.sidebar{background:var(--gta-sidebar);color:var(--gta-text-primary)}.topbar{background:var(--gta-header);color:var(--gta-text-primary);border-color:var(--gta-control-border)}
+.panel,.signin-form{background:var(--gta-surface);color:var(--gta-text-primary);border-color:var(--gta-control-border)}
+h1,h2,h3,h4,legend,label,dt,dd,.big-number,.visual-stat,.visual-stat span,.visual-stat strong{color:var(--gta-text-primary)}
+.muted,small,.sidebar small,.sidebar .release,.brand small,.visual-unit,.visual-summary-note,.visual-stat p{color:var(--gta-text-secondary)}
+a,.signin-form a{color:var(--gta-link);text-decoration:underline;text-underline-offset:.2em}a:hover,.signin-form a:hover{color:var(--gta-link-hover)}
+nav a{background:transparent;color:var(--gta-link)}
+.signin-scene .signin-message,.signin-scene .signin-message h1,.signin-scene .signin-message p,.signin-scene .scene-note{color:#FFFFFF}
+.sidebar a,.sidebar .brand,.sidebar .brand span,.sidebar .navigation-group summary,.sidebar nav a,.sidebar .navigation-shortcuts a,.section-nav a{color:var(--gta-text-primary)}
+.sidebar .brand,.sidebar .brand:hover{background:transparent;text-decoration:none}.sidebar nav a,.section-nav a{background:transparent;text-decoration:none}
+.sidebar .navigation-group{background:var(--gta-menu-surface);border-color:var(--gta-control-border)}.sidebar .navigation-group summary{background:var(--gta-menu-surface)}
+.sidebar nav a:hover,.sidebar .navigation-shortcuts a:hover,.section-nav a:hover{background:var(--gta-selected);color:var(--gta-text-primary)}
+.sidebar nav a[aria-current=page],.sidebar a[aria-current=page],html[data-theme=light] .sidebar a[aria-current=page],.section-nav a[aria-current=page]{background:var(--gta-selected);color:var(--gta-text-primary);border-left:3px solid var(--gta-link)}
+.test-notice,.signin-form .test-notice,.notice{background:var(--gta-notice);color:var(--gta-text-secondary);border-color:var(--gta-control-border)}.test-notice a,.notice a{color:var(--gta-link)}
+.errors,.signin-page .errors{background:var(--gta-error-background);color:var(--gta-error-text);border-color:var(--gta-error-text)}.errors h2,.errors a,.errors li,.field-error{color:var(--gta-error-text)}
+input,select,textarea,.signin-form input{color:var(--gta-text-primary);background:var(--gta-surface);border-color:var(--gta-control-border);opacity:1}
+input::placeholder,textarea::placeholder{color:var(--gta-text-placeholder);opacity:1}
+input:disabled,select:disabled,textarea:disabled,input[readonly],textarea[readonly]{color:var(--gta-text-secondary);background:var(--gta-menu-surface);opacity:1}
+input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-text-fill-color:var(--gta-text-primary);box-shadow:0 0 0 1000px var(--gta-surface) inset}
+option,optgroup{color:var(--gta-text-primary);background:var(--gta-surface)}
+button,.button,.signin-theme button,.visual-mode-buttons button{color:var(--gta-text-primary);background:var(--gta-surface);border-color:var(--gta-control-border);text-decoration:none}
+button:hover,.button:hover{color:var(--gta-text-primary);background:var(--gta-menu-surface)}
+.primary,html[data-theme=light] .primary,.signin-page .signin-submit,html[data-theme=light] .signin-page .signin-submit,html[data-theme=dark] .signin-page .signin-submit,.visual-mode-buttons button[aria-pressed=true]{background:var(--gta-button-background);color:var(--gta-button-text);border-color:var(--gta-button-background)}
+.primary:hover,html[data-theme=light] .primary:hover,.signin-page .signin-submit:hover{background:var(--gta-button-hover);color:var(--gta-button-text)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,.signin-page a:focus-visible,.signin-page button:focus-visible,.signin-page input:focus-visible{outline:3px solid var(--gta-focus);outline-offset:3px}
+button:disabled,.primary:disabled{background:var(--gta-menu-surface);color:var(--gta-text-secondary);border-color:var(--gta-control-border);cursor:not-allowed;opacity:1}
+.sidebar nav a[aria-current=page],.sidebar a[aria-current=page]{box-shadow:none}
+::selection{background:var(--gta-selected);color:var(--gta-text-primary)}
+th,td,.visual-table th,.visual-table td{color:var(--gta-text-primary);border-color:var(--gta-control-border)}thead,.visual-table thead,.visual-task-list thead{background:var(--gta-menu-surface)}
+.visual-chart{background:transparent;color:var(--gta-text-primary)}.visual-chart svg text{fill:var(--gta-text-primary)}.visual-chart svg .chart-grid,.visual-chart svg .chart-axis{stroke:var(--gta-control-border)}
+.signin-form p,.signin-brand,.signin-brand span,.signin-form label{color:var(--gta-text-primary)}.signin-links,.signin-brand span{border-color:var(--gta-control-border)}.signin-page .skip-link{background:var(--gta-surface);color:var(--gta-link)}
+.brand img{width:48px;height:48px;padding:0;background:transparent;border-radius:0;object-fit:contain;flex:0 0 auto}.signin-brand img{width:68px;height:68px;padding:0;border-radius:0;object-fit:contain}
+@media(max-width:850px){.brand img{width:40px;height:40px}.signin-brand img{width:60px;height:60px}}
+@media print{body,.panel{background:white!important;color:#18212B!important}.sidebar,.topbar,.signin-theme{display:none!important}h1,h2,h3,h4,p,small,label,dt,dd,th,td,a,.muted,.visual-unit,.visual-summary-note{color:#18212B!important}.visual-chart svg text{fill:#18212B!important}.test-notice{display:none!important}.visual-chart{background:white!important}}

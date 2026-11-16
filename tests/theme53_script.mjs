@@ -1,0 +1,5 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
+const src=fs.readFileSync('public/assets/theme-boot53.js','utf8');let passed=0;
+for(const saved of ['light','dark','invalid',null,undefined]){const reads=[];const document={documentElement:{dataset:{}}};vm.runInNewContext(src,{document,localStorage:{getItem:k=>{reads.push(k);return saved;},setItem:()=>{throw Error('Boot must not overwrite preferences');}}});assert.equal(document.documentElement.dataset.theme,['light','dark'].includes(saved)?saved:'dark');assert.deepEqual(reads,['gta-local-theme']);passed++;}
+const document={documentElement:{dataset:{}}};vm.runInNewContext(src,{document,localStorage:{getItem:()=>{throw Error('Storage denied');}}});assert.equal(document.documentElement.dataset.theme,'dark');passed++;
+console.log(JSON.stringify({passed,failed:0,actualBrowserRendered:false,scope:'Early boot preference, corrupt/missing value and denied-storage fallback; existing toggle scripts tested separately'}));
