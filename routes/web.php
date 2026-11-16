@@ -72,6 +72,9 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/reports/historical-cohorts',[\App\Http\Controllers\HistoricalCohortsController::class,'index'])->name('historical-cohorts.index');
     Route::post('/reports/historical-cohorts/preview',[\App\Http\Controllers\HistoricalCohortsController::class,'preview'])->name('historical-cohorts.preview');
     Route::post('/reports/historical-cohorts',[\App\Http\Controllers\HistoricalCohortsController::class,'create'])->name('historical-cohorts.create');
+    Route::get('/reports/historical-cohorts/same-mix',[\App\Http\Controllers\HistoricalBenchmarkController::class,'show'])->name('historical-cohorts.benchmark.show');
+    Route::get('/reports/historical-cohorts/same-mix.json',[\App\Http\Controllers\HistoricalBenchmarkController::class,'download'])->name('historical-cohorts.benchmark.download');
+    Route::get('/reports/historical-cohorts/same-mix.pdf',[\App\Http\Controllers\HistoricalBenchmarkController::class,'pdf'])->name('historical-cohorts.benchmark.pdf');
     Route::get('/reports/historical-cohorts/compare',[\App\Http\Controllers\HistoricalCohortsController::class,'compare'])->name('historical-cohorts.compare');
     Route::get('/reports/historical-cohorts/{cohort}',[\App\Http\Controllers\HistoricalCohortsController::class,'show'])->whereUuid('cohort')->name('historical-cohorts.show');
     Route::post('/reports/historical-cohorts/{cohort}/batch',[\App\Http\Controllers\HistoricalCohortsController::class,'batch'])->whereUuid('cohort')->name('historical-cohorts.batch');

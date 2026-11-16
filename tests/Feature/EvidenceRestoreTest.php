@@ -87,7 +87,12 @@ class EvidenceRestoreTest extends TestCase
     }
     public function test_readonly_recheck_detects_changed_restored_file_without_rewriting_recorded_history(): void
     {
-        [$plan]=$this->fixture();$run=$this->execute($this->prepare($plan));$before=$run->getAttributes();$events=DB::table('evidence_restore_events')->count();Storage::disk('restore_target')->put($run->manifest['items'][0]['destination']['path'],'Changed restored bytes');$this->assertSame('needs_checks',EvidenceRestore::verify($run)['result']);$this->assertSame($before,$run->fresh()->getAttributes());$this->assertSame($events,DB::table('evidence_restore_events')->count());
+        [$plan]=$this->fixture();$run=$this->execute($this->prepare($plan));
+        // Compare persisted rows, not the execution model's cached timestamp casts.
+        $before=(array)DB::table('evidence_restore_runs')->where('id',$run->id)->first();$events=DB::table('evidence_restore_events')->count();Storage::disk('restore_target')->put($run->manifest['items'][0]['destination']['path'],'Changed restored bytes');
+        $this->travel(2)->seconds();$writes=[];$watch=true;DB::listen(function($query)use(&$writes,&$watch){if($watch&&preg_match('/^\\s*(insert|update|delete|replace|create|alter|drop|truncate)\\b/i',$query->sql))$writes[]=$query->sql;});
+        try{$this->assertSame('needs_checks',EvidenceRestore::verify($run)['result']);}finally{$watch=false;}
+        $this->assertSame($before,(array)DB::table('evidence_restore_runs')->where('id',$run->id)->first());$this->assertSame([],$writes);$this->assertSame($events,DB::table('evidence_restore_events')->count());
     }
     public function test_final_audit_failure_leaves_running_reservation_and_retained_files_without_retry(): void
     {
