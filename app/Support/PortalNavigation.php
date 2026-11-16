@@ -36,7 +36,7 @@ class PortalNavigation
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)){$links[]=$item('Gateway preparation','gateway.index',[],['gateway.*']);}
         if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'Timetable','centre-planning.index',[],['centre-planning.*','work-moves.*','optimiser.*','timetable-duties.*','timetable-governance.*','timetable-management.*']);}
-        if(LearningAccess::manager($u)){$links[]=$item('Apprentice progress','cohort-insights.index',[],['cohort-insights.*']);}
+        if(LearningAccess::manager($u)){$links[]=$item('Apprentice progress','cohort-insights.index',[],['cohort-insights.*','historical-cohorts.*']);}
         if(\App\Support\ApprenticeRecordChecks::allowed($u)){$links[]=$item('Record checks','record-checks.index',[],['record-checks.*']);}
         if($u->role==='apprentice'){$links[]=$item('My calendar','calendar.index',[],['calendar.*']);}
         $group('training','Apprentices & training',$links);

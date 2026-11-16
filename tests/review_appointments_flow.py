@@ -131,9 +131,9 @@ with tempfile.TemporaryDirectory(prefix='gta-review-appointments-') as temporary
         with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==6;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='signed_review_records'").fetchone()[0]==1;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='timetable_change_batches'").fetchone()[0]==1
         with sqlite3.connect(db) as c:
             after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-            assert before_tables-after_tables=={'timetable_optimisation_runs'} and not(after_tables-before_tables)
+            assert before_tables-after_tables=={'historical_cohorts','historical_cohort_rows'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Latest Pack47 down/up removes only the timetable optimisation run table while all prior schema and business-data checks are retained')
+        passed('Latest Pack48 down/up removes only the two historical cohort tables while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,root)[0]==503
         passed('Existing production access gate remains enforced')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS; disposable SQLite/encrypted database sessions/cache; historical appointment set up with CLI-only synthetic clock','realDataUsed':False,'externalMessagesSent':False,'actualNativeEngine':False,'actualCloudAccess':False,'actualBrowserOrPhoneTested':False,'productionApproved':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

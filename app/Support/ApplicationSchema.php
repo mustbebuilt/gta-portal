@@ -6,9 +6,11 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack47.
+    // Presence-only contract from the unchanged reference migrations through Pack48.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
+        'historical_cohorts'=>['id','request_token','created_by','state','version','source_hash','details_hash','details','proof','approved_at','created_at','updated_at'],
+        'historical_cohort_rows'=>['id','cohort_id','apprentice_id','historical_tutor_id','version','source_hash','details_hash','details','created_at','updated_at'],
         'timetable_optimisation_runs'=>['id','request_token','created_by','state','version','source_hash','details_hash','details','receipt','receipt_hash','created_at','updated_at'],
         'restriction_recovery_runs'=>['id','request_token','created_by','state','version','source_hash','details_hash','details','approval','applied','created_at','updated_at'],
         'account_lifecycle_proposals'=>['action','applied','approval','created_at','created_by','details','id','request_token','source_hash','state','target_id','updated_at','version'],

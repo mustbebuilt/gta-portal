@@ -56,6 +56,18 @@ Route::get('/accessibility', fn()=>view('accessibility.index'))->name('accessibi
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class, \App\Http\Middleware\RequirePrivacyAcknowledgement::class])->group(function () {
     Route::get('/visual-reports', [\App\Http\Controllers\PortalVisualReportController::class,'index'])->name('visual-reports.index');
     Route::get('/visual-reports.pdf', [\App\Http\Controllers\PortalVisualReportController::class,'pdf'])->name('visual-reports.pdf');
+    Route::get('/reports/historical-cohorts',[\App\Http\Controllers\HistoricalCohortsController::class,'index'])->name('historical-cohorts.index');
+    Route::post('/reports/historical-cohorts/preview',[\App\Http\Controllers\HistoricalCohortsController::class,'preview'])->name('historical-cohorts.preview');
+    Route::post('/reports/historical-cohorts',[\App\Http\Controllers\HistoricalCohortsController::class,'create'])->name('historical-cohorts.create');
+    Route::get('/reports/historical-cohorts/compare',[\App\Http\Controllers\HistoricalCohortsController::class,'compare'])->name('historical-cohorts.compare');
+    Route::get('/reports/historical-cohorts/{cohort}',[\App\Http\Controllers\HistoricalCohortsController::class,'show'])->whereUuid('cohort')->name('historical-cohorts.show');
+    Route::post('/reports/historical-cohorts/{cohort}/batch',[\App\Http\Controllers\HistoricalCohortsController::class,'batch'])->whereUuid('cohort')->name('historical-cohorts.batch');
+    Route::post('/reports/historical-cohorts/{cohort}/decision',[\App\Http\Controllers\HistoricalCohortsController::class,'decide'])->whereUuid('cohort')->name('historical-cohorts.decide');
+    Route::get('/reports/historical-cohorts/{cohort}/report',[\App\Http\Controllers\HistoricalCohortsController::class,'report'])->whereUuid('cohort')->name('historical-cohorts.report');
+    Route::get('/reports/historical-cohorts/{cohort}/aggregate.json',[\App\Http\Controllers\HistoricalCohortsController::class,'download'])->whereUuid('cohort')->name('historical-cohorts.download');
+    Route::get('/reports/historical-cohorts/{cohort}/report.pdf',[\App\Http\Controllers\HistoricalCohortsController::class,'pdf'])->whereUuid('cohort')->name('historical-cohorts.pdf');
+    Route::get('/reports/historical-cohorts/{cohort}/rows/{row}',[\App\Http\Controllers\HistoricalCohortsController::class,'row'])->whereUuid('cohort')->whereUuid('row')->name('historical-cohorts.row');
+    Route::post('/reports/historical-cohorts/{cohort}/rows/{row}',[\App\Http\Controllers\HistoricalCohortsController::class,'edit'])->whereUuid('cohort')->whereUuid('row')->name('historical-cohorts.edit');
     Route::get('/centre-planning/optimiser',[\App\Http\Controllers\TimetableOptimiserController::class,'index'])->name('optimiser.index');
     Route::post('/centre-planning/optimiser/preview',[\App\Http\Controllers\TimetableOptimiserController::class,'preview'])->name('optimiser.preview');
     Route::post('/centre-planning/optimiser',[\App\Http\Controllers\TimetableOptimiserController::class,'prepare'])->name('optimiser.prepare');

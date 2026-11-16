@@ -167,9 +167,9 @@ with tempfile.TemporaryDirectory(prefix='gta-apprentice-alerts-') as temporary:
             assert c.execute('SELECT status FROM learning_tasks ORDER BY id LIMIT 1').fetchone()[0]=='Draft'
         with sqlite3.connect(db) as c:
             after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-            assert before_tables-after_tables=={'timetable_optimisation_runs'} and not(after_tables-before_tables)
+            assert before_tables-after_tables=={'historical_cohorts','historical_cohort_rows'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Latest Pack47 down/up removes only the timetable optimisation run table while all prior schema and business-data checks are retained')
+        passed('Latest Pack48 down/up removes only the two historical cohort tables while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,ops)[0]==503 and req(learner,inbox)[0]==503 and len(captures)==2
         passed('Existing production gate remains enforced; all captured messages used fictional local SMTP only')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS and local SMTP DATA/accept/disconnect capture with disposable SQLite/database sessions/cache','localFictionalMessagesCaptured':len(captures),'independentReservationProofs':reservation_proof,'realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'actualRemoteSMTPTLS':False,'actualVonageOrHandset':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))
