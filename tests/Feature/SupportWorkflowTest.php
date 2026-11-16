@@ -156,9 +156,10 @@ class SupportWorkflowTest extends TestCase
         $updated['fields']['support'] = 'Proposed different support';
         $this->post('/apprentices/'.$a->id.'/support-plans/'.$p->id, [...$updated, 'version' => 2])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame($approved, $p->fresh()->active_plan);
-        $this->post('/support-plans/'.$p->id.'/review', ['version' => 3, 'date' => today()->toDateString(), 'baseline' => 'Attendance barrier', 'delivered' => 'Travel planning discussion', 'impact' => 'Next steps agreed', 'evidence' => 'Apprentice feedback', 'direction' => 'continue', 'next' => today()->addDays(28)->toDateString()])->assertRedirect()->assertSessionHasNoErrors();
+        $this->post('/support-plans/'.$p->id.'/review', ['version' => 3, 'date' => today()->toDateString(), 'baseline' => 'Attendance barrier', 'delivered' => 'Travel planning discussion', 'impact' => 'Next steps agreed', 'evidence' => 'Apprentice feedback', 'notes' => 'Tutor to check travel plan by 20/11/2026 <script>case59</script>', 'direction' => 'continue', 'next' => today()->addDays(28)->toDateString()])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertCount(1, $p->fresh()->reviews);
-        $this->get('/apprentices/'.$a->id.'/support-plans/'.$p->id)->assertOk()->assertSee('Travel planning discussion');
+        $this->get('/apprentices/'.$a->id.'/support-plans/'.$p->id)->assertOk()->assertSee('Travel planning discussion')->assertSee('Tutor to check travel plan by 20/11/2026')->assertSee('&lt;script&gt;case59&lt;/script&gt;',false)->assertDontSee('<script>case59</script>',false);
+        $this->assertSame($approved, $p->fresh()->active_plan);
     }
 
     public function test_unclassified_other_apprentice_and_disclosure_only_concerns_cannot_be_plan_sources(): void
