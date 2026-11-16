@@ -1,0 +1,4 @@
+@php($taskValues=collect($taskChart['rows'])->pluck('value','label'))
+<section aria-label="Allocated task summary"><div class="visual-summary" data-task-summary>
+@foreach([['Allocated tasks',$taskValues->sum(),'all'],['Approved',$taskValues->get('Approved',0),'approved'],['Awaiting marking',$taskValues->get('Awaiting marking',0),'awaiting'],['Referred',$taskValues->get('Referred',0),'referred']] as [$label,$value,$status])<article class="visual-stat" data-status="{{ $status }}"><span>{{ $label }}</span><strong>{{ $value }}</strong><p>{{ $status==='all'?'Current selected scope':'Allocated tasks only' }}</p></article>@endforeach
+</div><p class="visual-summary-note">Draft / other: {{ $taskValues->get('Draft / other',0) }} · Source needs checking: {{ $taskValues->get('Source needs checking',0) }}. Task approval is separate from overall apprenticeship progress.</p></section>

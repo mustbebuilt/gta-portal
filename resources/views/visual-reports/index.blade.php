@@ -5,8 +5,10 @@
 @include('learning.errors')
 <form class="panel search" method="get">@foreach(['group','apprentice'] as $key)@if($report['filters'][$key])<input type="hidden" name="{{ $key }}" value="{{ $report['filters'][$key] }}">@endif @endforeach<label>Attendance from <input type="date" name="from" value="{{ $report['attendance_from'] }}" required></label><label>Attendance to <input type="date" name="to" value="{{ $report['attendance_to'] }}" required></label><button>Update attendance period</button></form>
 <p>Charts use the same values as the supporting tables. Current tasks, training and plans are captured now; attendance covers {{ $report['attendance_from'] }} to {{ $report['attendance_to'] }}. Unknown values are shown explicitly.</p>
+@php($taskChart=collect($report['charts'])->firstWhere('key','tasks'))
+@if($taskChart)@include('visuals.task-summary')@endif
 @include('visuals.controls')
-@foreach($report['charts'] as $chart)@include('visuals.panel')@endforeach
+<div class="visual-grid">@foreach($report['charts'] as $chart)@include('visuals.panel')@endforeach</div>
 @include('visual-reports.tables')
 <section class="panel"><h2>Definitions and limits</h2><ul>@foreach($report['definitions'] as $text)<li>{{ $text }}</li>@endforeach</ul></section>
 @endsection
