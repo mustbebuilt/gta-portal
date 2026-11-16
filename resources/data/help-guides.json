@@ -26,7 +26,7 @@
     ],
     "category": "Administration",
     "title": "Set up your account, staff and assignments",
-    "body": "Use Portal setup for the order of work. Martin provisions the first named Admin or CEO account. Add staff once, using their work email and primary role, and use staff onboarding to arrange their own sign-in. Assign each apprentice a tutor, Learning and Progress Mentor, Careers adviser and required Maths and English tutors. Additional staff duties can be recorded separately. Inclusion access is controlled in Support permissions. A staff Manager role is not an administrator account.",
+    "body": "Use Portal setup for the order of work. Martin provisions the first named Admin or CEO account. Add staff once, using their work email and primary role, and use staff onboarding to arrange their own sign-in. Assign each apprentice a tutor, Learning and Progress Mentor, Careers adviser and required Maths and English tutors. Additional staff duties can be recorded separately. Inclusion access is controlled in Support permissions. A staff Manager role is not an administrator account. Directory buttons now name the record: Add employer, Add programme, Add tutor group or Add staff member. Check existing records and clear search/status filters before creating another. On each saved directory record, What to do next links to the relevant assignments or account setup. A staff role does not itself create a caseload or invitation.",
     "links": [
       {
         "label": "Open Portal setup",
@@ -41,7 +41,7 @@
     ],
     "category": "Administration",
     "title": "Add and reopen an apprentice",
-    "body": "Create the employer, programme, tutor group and staff records first where needed. Add the apprentice using their learner reference and known details. Check programme version, dates and named staff, then reopen the saved profile. Link the correct individual apprentice login. Choose alert preferences and verify contacts before any sending. Assign training tasks explicitly. Saving a profile does not approve a training plan, RPL assessment or qualification result.",
+    "body": "Create the employer, programme, tutor group and staff records first where needed. Add the apprentice using their learner reference and known details. Check programme version, dates and named staff, then reopen the saved profile. Link the correct individual apprentice login. Choose alert preferences and verify contacts before any sending. Assign training tasks explicitly. Saving a profile does not approve a training plan, RPL assessment or qualification result. If a choice is missing, open Missing employer, programme, group or staff choices for the setup links. You can save known apprentice details and reopen Edit apprentice for remaining optional assignments. The saved profile has What to do next links for details, training tasks and the separate apprentice sign-in setup. Do not create a second apprentice profile because tasks or a login are missing.",
     "links": [
       {
         "label": "Open apprentices",
@@ -72,7 +72,7 @@
     ],
     "category": "Apprentice training",
     "title": "Submit work",
-    "body": "Open your tasks from My next step or your training page. Save a draft while working. Add the required evidence and a short explanation, then confirm the work is your own and submit. Submitted work is locked for checking. If referred, read the tutor feedback, correct the original task and resubmit. Extra uploads do not approve the task. A whole-task approval, topic completion and qualification result remain separate.",
+    "body": "Open your tasks from My next step or your training page. Save a draft while working. Add the required evidence and a short explanation, then confirm the work is your own and submit. Submitted work is locked for checking. If referred, read the tutor feedback, correct the original task and resubmit. Extra uploads do not approve the task. A whole-task approval, topic completion and qualification result remain separate. If a status filter shows no results, choose Show all assigned tasks before assuming your tasks are missing. Save your answers before adding evidence because these are separate forms. What happens next explains the recorded task state. Referred tasks show the most recent recorded referral feedback near the top; read the history or ask the Tutor if feedback is missing.",
     "links": [
       {
         "label": "Open My next step",
@@ -118,7 +118,7 @@
     ],
     "category": "Teaching and assessment",
     "title": "Mark work and register attendance",
-    "body": "Use the marking worklist to open current submitted tasks. Check the whole task and record your decision and useful feedback in the original task. Marking is overdue after more than seven calendar days; missing or future submission dates need checking. A reminder marked seen does not approve work. For registers, record actual attendance, delivered subjects and time rather than expected learning.",
+    "body": "Use the marking worklist to open current submitted tasks. Check the whole task and record your decision and useful feedback in the original task. Marking is overdue after more than seven calendar days; missing or future submission dates need checking. A reminder marked seen does not approve work. For registers, record actual attendance, delivered subjects and time rather than expected learning. An empty task status filter does not mean no tasks are assigned. Clear the filter to see the existing allocation; the unfiltered approval summary is labelled separately. Paper assessment results are recorded through the paper test fields, not inferred from an upload. The task page explains whether the work is awaiting a decision or already approved.",
     "links": [
       {
         "label": "Open marking worklist",
@@ -201,7 +201,7 @@
     ],
     "category": "Reviews and sign-off",
     "title": "Prepare a review draft",
-    "body": "Open Reviews, find the apprentice and choose Start review / View history, or Continue latest draft. Review appointments is for arranging the meeting; Review signing is for participant sign-off records. Save a draft before generating factual preparation notes. Check the selected source notes, complete the actual discussion, participation, judgement and targets, save again and complete preparation checks. Mark the checked saved content Ready for signatures, then prepare participant sign-off from that review. Booking a meeting or saving a draft does not complete a review or reset its deadline. Externally signed copies use their separate upload and independent-check process.",
+    "body": "Open Reviews, find the apprentice and choose Start review / View history, or Continue latest draft. Review appointments is for arranging the meeting; Review signing is for participant sign-off records. Save a draft before generating factual preparation notes. Check the selected source notes, complete the actual discussion, participation, judgement and targets, save again and complete preparation checks. Mark the checked saved content Ready for signatures, then prepare participant sign-off from that review. Booking a meeting or saving a draft does not complete a review or reset its deadline. Externally signed copies use their separate upload and independent-check process. The Review stages panel summarises the draft, saved preparation, frozen source and participant sign-off steps. Read the saved-version preparation checklist; typed changes are not included until saved. A PDF download or Ready for signatures status does not complete a review.",
     "links": [
       {
         "label": "Open reviews",
@@ -251,7 +251,7 @@
     ],
     "category": "Reviews and sign-off",
     "title": "Verify employer signing authority",
-    "body": "First verify the named employer account and its apprentice access. Record separate review-signing authority using actual identity and workplace-authority evidence and an expiry date. Ordinary employer reply access is not signing authority. Renewal, revocation, changed account or expiry can block pending review packets. Reconcile them explicitly rather than reusing another person or silently resetting signatures.",
+    "body": "First verify the named employer account and its apprentice access. Record separate review-signing authority using actual identity and workplace-authority evidence and an expiry date. Ordinary employer reply access is not signing authority. Renewal, revocation, changed account or expiry can block pending review packets. Reconcile them explicitly rather than reusing another person or silently resetting signatures. Use the Employer setup guide to distinguish an employer organisation record, a named contact login, an invitation and per-apprentice workplace authority. An organisation email does not automatically create any of those account permissions.",
     "links": [
       {
         "label": "Open employer accounts",
@@ -571,6 +571,42 @@
       {
         "label": "Saved proposals",
         "route": "optimiser.index"
+      }
+    ]
+  },
+  {
+    "id": "employer-setup",
+    "audience": [
+      "manager"
+    ],
+    "category": "Getting started",
+    "title": "Set up an employer organisation and named contact",
+    "body": "First check the Employers directory for the organisation, including inactive records or search filters, before using Add employer. That record is used on apprentice profiles. Its workplace contact email does not create a portal account. Open Employer accounts to create the individual named contact login if needed. Creating it sends no invitation and grants no apprentice access. Review the contact record, arrange the controlled invitation only when the configured service is ready, and verify workplace authority for each relevant apprentice. Mailbox confirmation alone is not employer authority. Review-signing authority is a separate checked step. Use the saved organisation record What to do next links to apprentice assignments or named employer contacts. If a person or organisation is missing from a filtered list, clear the filters before adding a duplicate. Never use another person’s login or assume one employer contact can see all apprentices.",
+    "links": [
+      {
+        "label": "Employer accounts",
+        "route": "employer-accounts.index"
+      },
+      {
+        "label": "Portal setup",
+        "route": "setup.index"
+      }
+    ]
+  },
+  {
+    "id": "journey-progress",
+    "audience": [
+      "manager",
+      "tutor",
+      "learner"
+    ],
+    "category": "Learning and progress",
+    "title": "Follow the apprenticeship road map",
+    "body": "Open the apprentice record and Apprenticeship journey to see dated recorded milestones. The GTA lorry is selected for a linked active Heavy Vehicle programme. The GTA car is selected for linked active Light Vehicle, Autocare, Panel and Paint programmes. Other, unlinked or inactive programmes use a neutral marker; no programme or training source is guessed. The marker identifies the latest valid recorded milestone date already included in this road map. Future dates do not advance it. It is not a percentage complete, elapsed-time measure, Gateway decision or EPA result. Several milestones may share a date. With motion enabled, the vehicle travels briefly from the preceding displayed point and rests at the current point with a gentle pulse. Use Pause marker animation to stop it; resuming restarts the pulse without replaying travel. Reduced-motion preferences keep it still. Without scripting the marker remains static at the recorded point. Printed records retain the latest-point text without animation. Private support and Careers records remain excluded, and source links retain their usual permissions.",
+    "links": [
+      {
+        "label": "Open apprentice records",
+        "route": "apprentices.index"
       }
     ]
   }

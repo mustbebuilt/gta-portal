@@ -121,7 +121,7 @@ with tempfile.TemporaryDirectory(prefix='gta-help-audio-') as temporary:
         except HTTPError as error:assert error.code==416 and error.read()==b''
         assert req(learner,'/help-recordings/'+record[0]+'/preview')[0]==403 and req(learner,'/help/guides/submit-work/recordings/'+record[0])[0]==404
         passed('Multiple ranges, forged guide/record association and non-manager preview access are refused')
-        report=artisan('gta:help-check','--records','--verify-files');assert report.returncode==0;data=json.loads(report.stdout);assert data['counts']['files_verified']==1 and data['counts']['approved_current']==1 and data['accent_automatically_verified']is False and 'PRIVATE-HELP-RECORDING-REFERENCE'not in report.stdout and data['guides']==38 and data['guides_without_current_recording']==37
+        report=artisan('gta:help-check','--records','--verify-files');assert report.returncode==0;data=json.loads(report.stdout);assert data['counts']['files_verified']==1 and data['counts']['approved_current']==1 and data['accent_automatically_verified']is False and 'PRIVATE-HELP-RECORDING-REFERENCE'not in report.stdout and data['guides']==40 and data['guides_without_current_recording']==39
         passed('Actual read-only staging readiness/file check reports one current clip and remaining gaps without claiming automatic accent verification')
         stop_backend();start_backend()
         with learner.open(origin+media,timeout=30)as response:assert hashlib.sha256(response.read()).digest()==hashlib.sha256(audio_bytes).digest()

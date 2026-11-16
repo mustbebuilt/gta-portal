@@ -69,7 +69,14 @@ return $result;
             return null;
         }
         $id = match (true) {
-            $r->routeIs('annual.*','optimiser.*') => 'timetable-year',
+            $r->routeIs('journey.*') => 'journey-progress',
+            $r->routeIs('employer-accounts.*','employer-setup.*','employer-grants.*') => 'employer-setup',
+            $r->routeIs('apprentice-onboarding.*') => 'add-apprentice',
+            $r->routeIs('onboarding.*') => 'setup',
+            $r->routeIs('apprentices.*') => $u->role==='apprentice'?'apprentice-home':(LearningAccess::manager($u)?'add-apprentice':'marking'),
+            $r->routeIs('marking.*') => 'marking',
+            $r->routeIs('directories.*')&&$r->route('kind')==='employers' => 'employer-setup',
+            $r->routeIs('annual.*' ,'optimiser.*') => 'timetable-year',
             $r->routeIs('centre-planning.form','centre-planning.save','centre-planning.edit','centre-planning.update','centre-planning.show') => 'timetable-add',
             $r->routeIs('centre-planning.*','timetable-duties.*','timetable-management.*','timetable-governance.*','work-moves.*','occurrence-register.*') => 'timetable-move',
             $r->routeIs('calendar.*','visual-reports.*','quick-actions.*','saved-work.*') => 'quick-actions',

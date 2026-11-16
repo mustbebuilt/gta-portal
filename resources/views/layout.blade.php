@@ -3,7 +3,7 @@
 <body class="{{ request()->routeIs('login')?'signin-page':'portal-page' }}"><a class="skip-link" href="#main-content">Skip to main content</a><div class="shell">
 <aside class="sidebar"><a class="brand" href="{{ url('/') }}"><img src="{{ asset('assets/gta-logo.jpg') }}?v=53" width="48" height="48" alt="GTA"><span>GTA Portal<br><small>Learning and progress</small></span></a>
 @auth @include('navigation.menu') @endauth
-<p class="release">Local development checkpoint<br>Development Pack 54 · Fictional data only</p></aside>
+<p class="release">Local development checkpoint<br>Development Pack 55 · Fictional data only</p></aside>
 <div class="workspace"><header class="topbar"><span>{{ auth()->user()?->name ?? 'GTA sign in' }} @auth<small>{{ \App\Support\PortalLanguage::role(auth()->user()->role) }}</small>@endauth</span><div class="toolbar"><button type="button" id="theme-toggle">Dark mode</button>@auth<form action="{{ route('logout') }}" method="post">@csrf<button>Sign out</button></form>@endauth</div></header>
 <main id="main-content" tabindex="-1"><div class="test-notice">Fictional local test application · Working modules are linked below. Formal plan approval, completed reviews/signatures, complete reporting and live deployment remain in development.</div>
 @if(session('status'))<div class="notice" role="status">{{ session('status') }}</div>@endif

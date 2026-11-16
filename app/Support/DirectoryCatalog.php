@@ -13,6 +13,11 @@ class DirectoryCatalog
 {
     public const STAFF_ROLES = ['tutor', 'functional_skills_tutor', 'mentor', 'careers_adviser', 'inclusion_lead', 'inclusion_member', 'manager', 'staff'];
 
+    public static function singular(string $kind): string
+    {
+        return ['employers'=>'employer','programmes'=>'programme','groups'=>'tutor group','staff'=>'staff member'][$kind] ?? abort(404);
+    }
+
     public static function title(string $kind): string
     {
         return ['employers' => 'Employers', 'programmes' => 'Apprenticeship programmes', 'groups' => 'Tutor groups', 'staff' => 'Staff'][$kind] ?? abort(404);
