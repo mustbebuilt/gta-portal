@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>@yield('title', 'Home') · GTA Portal</title><link rel="stylesheet" href="{{ asset('assets/portal.css') }}?v=50"><script src="{{ asset('assets/portal.js') }}?v=46" defer></script><script src="{{ asset('assets/signin-theme50.js') }}?v=50" defer></script></head>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>@yield('title', 'Home') · GTA Portal</title><link rel="stylesheet" href="{{ asset('assets/portal.css') }}?v=51"><script src="{{ asset('assets/portal.js') }}?v=46" defer></script><script src="{{ asset('assets/signin-theme50.js') }}?v=51" defer></script></head>
 <body class="{{ request()->routeIs('login')?'signin-page':'portal-page' }}"><a class="skip-link" href="#main-content">Skip to main content</a><div class="shell">
-<aside class="sidebar"><a class="brand" href="{{ url('/') }}"><img src="{{ asset('assets/gta-mark.svg') }}?v=50" width="43" height="40" alt="GTA"><span>GTA Portal<br><small>Learning and progress</small></span></a>
+<aside class="sidebar"><a class="brand" href="{{ url('/') }}"><img src="{{ asset('assets/gta-mark.svg') }}?v=51" width="43" height="40" alt="GTA"><span>GTA Portal<br><small>Learning and progress</small></span></a>
 @auth @include('navigation.menu') @endauth
-<p class="release">Local development checkpoint<br>Development Pack 50 · Fictional data only</p></aside>
+<p class="release">Local development checkpoint<br>Development Pack 51 · Fictional data only</p></aside>
 <div class="workspace"><header class="topbar"><span>{{ auth()->user()?->name ?? 'GTA sign in' }} @auth<small>{{ \App\Support\PortalLanguage::role(auth()->user()->role) }}</small>@endauth</span><div class="toolbar"><button type="button" id="theme-toggle">Dark mode</button>@auth<form action="{{ route('logout') }}" method="post">@csrf<button>Sign out</button></form>@endauth</div></header>
 <main id="main-content" tabindex="-1"><div class="test-notice">Fictional local test application · Working modules are linked below. Formal plan approval, completed reviews/signatures, complete reporting and live deployment remain in development.</div>
 @if(session('status'))<div class="notice" role="status">{{ session('status') }}</div>@endif

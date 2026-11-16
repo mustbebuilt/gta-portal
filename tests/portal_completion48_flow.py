@@ -477,7 +477,7 @@ with tempfile.TemporaryDirectory(prefix='gta-flexible-duties-') as temporary:
         with sqlite3.connect(db)as c:assert before_opt==(c.execute('SELECT COUNT(*) FROM timetable_plans').fetchone()[0],c.execute('SELECT COUNT(*) FROM timetable_planning_events').fetchone()[0],c.execute('SELECT COUNT(*) FROM training_sessions').fetchone()[0])
         passed('Read-only multi-plan preview checks repeated Teaching and shows an exact480-to-zero minute gap proposal with real staff/group/date context')
         saved_values=[('_token',csrf(preview)),('from',optimise['from']),('to',optimise['to']),*[('plans[]',x)for x in optimise['plans']],('source_hash',hidden(preview,'source_hash')),('request_token',hidden(preview,'request_token')),('reason','Fictional agreed people and times47'),('confirmed',1)]
-        status,prepared,url,_=req(admin,opt,saved_values);assert status==200 and 'Apply reviewed time changes'in prepared;run47=url[len(origin):]
+        status,prepared,url,_=req(admin,opt,saved_values);assert status==200 and 'Apply reviewed timetable changes'in prepared;run47=url[len(origin):]
         with sqlite3.connect(db)as c:
             assert all(c.execute('SELECT state FROM timetable_plans WHERE id=?',(x,)).fetchone()[0]=='Published'for x in optimise['plans'])
             assert c.execute('SELECT state FROM timetable_optimisation_runs WHERE id=?',(run47.rsplit('/',1)[-1],)).fetchone()[0]=='Prepared'
