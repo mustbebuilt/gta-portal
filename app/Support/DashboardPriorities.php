@@ -9,9 +9,9 @@ class DashboardPriorities
     // A read-only view of existing training deadlines, not a new risk/approval policy.
     public static function for(User $user,Collection $people,Collection $tasks,Collection $actions): array
     {
-        $people=$people->filter(fn($a)=>LearningAccess::training($user,$a))->keyBy('id');$rows=[];
-        $add=function(string $key,string $bucket,string $title,string $owner,$date,string $url,$person,string $kind)use(&$rows): void {
-            $rows[]=['key'=>$key,'bucket'=>$bucket,'title'=>$title,'owner'=>$owner,'date'=>$date?->format($kind==='marking'?'d M Y H:i':'d M Y'),'sort'=>$date?->format('Y-m-d H:i:s')??'','url'=>$url,'apprentice'=>$person->first_name.' '.$person->last_name,'reference'=>$person->reference,'kind'=>$kind];
+        $people=$people->filter(fn($a)=>LearningAccess::training($user,$a))->keyBy('id');$rows=[];$availability=[];
+        $add=function(string $key,string $bucket,string $title,string $owner,$date,string $url,$person,string $kind,?string $reason=null)use(&$rows): void {
+            $rows[]=['key'=>$key,'bucket'=>$bucket,'title'=>$title,'owner'=>$owner,'date'=>$date?->format($kind==='marking'?'d M Y H:i':'d M Y'),'sort'=>$date?->format('Y-m-d H:i:s')??'','url'=>$url,'apprentice'=>$person->first_name.' '.$person->last_name,'reference'=>$person->reference,'kind'=>$kind,'reason'=>$reason];
         };
         foreach($tasks as $task){
             $person=$people->get($task->apprentice_id);if(!$person){continue;}
@@ -23,7 +23,11 @@ class DashboardPriorities
                 elseif($task->submitted_at->copy()->addDays(7)->isToday()){$add('task-'.$task->id,'today',$title,'Main tutor',$task->submitted_at->copy()->addDays(7),$url,$person,'marking');}
                 continue;
             }
-            if(!$task->editable()){continue;}
+            if(!$task->editable()&&$task->status!=='Source required'){continue;}
+            if($task->due_date&&$task->due_date->gt(today())){continue;}
+            $key=implode(':',[$task->apprentice_id,$task->block,$task->status,$task->template['kind']??'source-pending',TaskCatalogue::savedKey($task)]);
+            $state=$availability[$key]??=TaskAvailability::for($task);
+            if(!$state['available']){$add('task-'.$task->id,'checks',$state['label'].' · '.$title,$state['owner'],$task->due_date,$url,$person,'task',$state['detail']);continue;}
             if(!$task->due_date){$add('task-'.$task->id,'checks',$title,'Main tutor',null,$url,$person,'task');}
             elseif($task->due_date->lt(today())){$add('task-'.$task->id,'overdue',$title,'Apprentice',$task->due_date,$url,$person,'task');}
             elseif($task->due_date->isToday()){$add('task-'.$task->id,'today',$title,'Apprentice',$task->due_date,$url,$person,'task');}

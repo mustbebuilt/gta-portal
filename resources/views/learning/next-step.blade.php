@@ -1,5 +1,7 @@
+@php($availability=\App\Support\TaskAvailability::for($task,$release))
 <section class="panel" aria-labelledby="task-next-step"><h2 id="task-next-step">What happens next?</h2>
 @if($task->template['kind']==='source-pending')<p>The programme source must be checked before answers, evidence or a decision can be recorded. Ask an administrator to investigate this source.</p>
+@elseif($availability['state']==='locked')<h3>Training block not released</h3><p>{{ $availability['detail'] }}</p><p>The recorded deadline is not changed by this message. Saved work remains available to read; check the plan with the Tutor.</p>
 @elseif($task->template['kind']==='knowledge')<p>This is a paper assessment. The authorised Tutor records the test title, marks, outcome and feedback; uploading evidence does not record a test result.</p>
 @elseif($task->status==='Approved')<p>This task has a recorded approval. It is separate from a qualification result or completion of the apprenticeship.</p>
 @elseif($task->status==='Awaiting marking')<p>The work has been submitted and is awaiting a Tutor decision. Saving or uploading again is not needed to submit this same version.</p>@if($tutor)<p>Read the answers and evidence below, then use GTA tutor decision to approve the whole task or refer it with clear corrections.</p>@endif

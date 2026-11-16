@@ -88,7 +88,7 @@ class StaffAttention
 
                         continue;
                     }
-                    if (! $task->editable()) {
+                    if (! $task->editable() && $task->status !== 'Source required') {
                         continue;
                     }
                     if (($task->template['kind'] ?? 'source-pending') === 'source-pending') {
@@ -102,8 +102,8 @@ class StaffAttention
                         continue;
                     }
                     if ($task->due_date->lte(today())) {
-                        $open = BlockRelease::state($task)['open'];
-                        $add('task', ! $open ? 'checks' : ($task->due_date->lt(today()) ? 'overdue' : 'today'), (! $open ? 'Past/due date on an unreleased task; check the plan: ' : 'Task due: ').$task->reference, $task->due_date->toDateString(), $url);
+                        $state=TaskAvailability::for($task);
+                        $add('task', !$state['available'] ? 'checks' : ($task->due_date->lt(today()) ? 'overdue' : 'today'), (!$state['available'] ? $state['label'].'; check the plan: ' : 'Task due: ').$task->reference, $task->due_date->toDateString(), $url);
                     }
                 }
                 foreach ($actions->get($a->id, collect()) as $x) {
