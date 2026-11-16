@@ -34,6 +34,7 @@ use App\Support\TaskCatalogue;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -47,7 +48,7 @@ class PortalCohort100Test extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    private array $report = ['cohort' => 100, 'non_apprentice_users' => 20, 'total_accounts' => 120, 'permission_matrix' => [], 'http_checks' => [], 'interaction_checks' => [], 'login_checks' => [], 'real_data_used' => false, 'actual_cloud' => false, 'actual_native_database' => false, 'browser_or_phone_tested' => false, 'concurrent_load_test' => false, 'external_delivery_enabled' => false];
+    private array $report = ['cohort' => 100, 'non_apprentice_users' => 22, 'total_accounts' => 122, 'permission_matrix' => [], 'http_checks' => [], 'interaction_checks' => [], 'login_checks' => [], 'real_data_used' => false, 'actual_cloud' => false, 'actual_native_database' => false, 'browser_or_phone_tested' => false, 'concurrent_load_test' => false, 'external_delivery_enabled' => false];
 
     private string $password = 'Fictional-Isolated-Cohort60-Only!';
 
@@ -103,7 +104,7 @@ class PortalCohort100Test extends TestCase
         try {
             $hash = Hash::make($this->password);
             $staff = [];
-            $definitions = ['admin-a' => 'admin', 'admin-b' => 'admin', 'ceo' => 'ceo', 'tutor-1' => 'tutor', 'tutor-2' => 'tutor', 'tutor-3' => 'tutor', 'tutor-4' => 'tutor', 'tutor-5' => 'tutor', 'mentor-1' => 'mentor', 'mentor-2' => 'mentor', 'inclusion-lead' => 'inclusion_lead', 'inclusion-member' => 'inclusion_member', 'careers-1' => 'careers_adviser', 'careers-2' => 'careers_adviser', 'maths' => 'functional_skills_tutor', 'english' => 'functional_skills_tutor', 'employer-1' => 'employer', 'employer-2' => 'employer', 'centre-manager-1' => 'manager', 'centre-manager-2' => 'manager'];
+            $definitions = ['admin-a' => 'admin', 'admin-b' => 'admin', 'ceo' => 'ceo', 'tutor-1' => 'tutor', 'tutor-2' => 'tutor', 'tutor-3' => 'tutor', 'tutor-4' => 'tutor', 'tutor-5' => 'tutor', 'mentor-1' => 'mentor', 'mentor-2' => 'mentor', 'inclusion-lead' => 'inclusion_lead', 'inclusion-member' => 'inclusion_member', 'careers-1' => 'careers_adviser', 'careers-2' => 'careers_adviser', 'maths' => 'functional_skills_tutor', 'english' => 'functional_skills_tutor', 'employer-1' => 'employer', 'employer-2' => 'employer', 'centre-manager-1' => 'manager', 'centre-manager-2' => 'manager', 'generic-staff' => 'staff', 'unassigned' => 'unassigned'];
             foreach ($definitions as $key => $role) {
                 $staff[$key] = User::factory()->create(['name' => 'Fictional60 '.$key, 'email' => $key.'@cohort60.example.test', 'role' => $role, 'password' => $hash, 'subject_scope' => $key === 'maths' ? 'maths' : ($key === 'english' ? 'english' : null)]);
             }
@@ -137,8 +138,8 @@ class PortalCohort100Test extends TestCase
                 $grants[$a->id] = EmployerActions::grant($staff['admin-a'], 1, $a, ['user_id' => $staff['employer-'.($side + 1)]->id, 'version' => 0, 'identity_reference' => 'Fictional individual workplace authority60']);
             }
             $this->assertDatabaseCount('apprentices', 100);
-            $this->assertDatabaseCount('users', 120);
-            $this->assertCount(20, $staff);
+            $this->assertDatabaseCount('users', 122);
+            $this->assertCount(22, $staff);
             $this->act($staff['admin-a'])->post('/staff-support-permissions/'.$staff['inclusion-member']->id, ['version' => 0, 'duty' => 'member', 'scope' => 'assigned', 'apprentice_ids' => array_map(fn ($a) => $a->id, array_slice($people, 0, 50)), 'group_ids' => [], 'reason' => 'Fictional scoped inclusion60'])->assertSessionHasNoErrors();
             $manager = $staff['centre-manager-1'];
             $scope = [$people[0]->tutor_group_id, $people[1]->tutor_group_id];
@@ -156,6 +157,16 @@ class PortalCohort100Test extends TestCase
             $this->post(route('learning.allocate', $people[0]), ['confirmed' => 1])->assertSessionHasErrors('confirmed');
             $this->assertDatabaseCount('learning_tasks', 5000);
             $this->step('100 explicit supported programme allocations create exactly5000 source tasks; duplicate allocation refused', ['programmes' => 4, 'groups' => 20, 'tasks' => 5000]);
+            foreach (['admin_dashboard'=>[$staff['admin-a'],'dashboard.index',null], 'tutor_dashboard'=>[$staff['tutor-1'],'dashboard.index',null], 'apprentice_list'=>[$staff['admin-a'],'apprentices.index',null], 'learner_home'=>[$learners[0],'experience.home',null], 'learner_journey'=>[$learners[0],'journey.show',$people[0]]] as $label=>$spec) {
+                foreach (range(1,3) as $repeat) {
+                    DB::flushQueryLog();DB::enableQueryLog();$start=microtime(true);
+                    $response=$this->act($spec[0])->get(route($spec[1],$spec[2]));$response->assertOk();
+                    $queries=DB::getQueryLog();DB::disableQueryLog();
+                    $counts=[];foreach($queries as $q){$counts[$q['query']]=($counts[$q['query']]??0)+1;}arsort($counts);
+                    $this->report['performance'][]=['page'=>$label,'repeat'=>$repeat,'milliseconds'=>round((microtime(true)-$start)*1000,2),'queries'=>count($queries),'database_milliseconds'=>round(array_sum(array_column($queries,'time')),2),'response_bytes'=>strlen($response->getContent()),'repeated_queries'=>array_slice($counts,0,8,true)];
+                    $this->saveReport(false);
+                }
+            }
             foreach ($staff as $u) {
                 $this->loginAccount($u);
                 $eligible = [];
@@ -179,7 +190,7 @@ class PortalCohort100Test extends TestCase
                     }
                 }
             }
-            $this->step('20 staff/employer accounts have real password logins and16000 independent role/apprentice/module predicate assertions', ['staff_users' => 20, 'apprentices' => 100, 'modules' => 8, 'predicate_assertions' => 16000]);
+            $this->step('22 staff/employer accounts have real password logins and17600 independent role/apprentice/module predicate assertions', ['staff_users' => 22, 'apprentices' => 100, 'modules' => 8, 'predicate_assertions' => 17600]);
             foreach ($people as $i => $a) {
                 $this->loginAccount($learners[$i]);
                 $this->get(route('learning.index', $a))->assertOk()->assertSee($a->first_name);
@@ -307,12 +318,16 @@ class PortalCohort100Test extends TestCase
             $this->post('/login',['email' => $disabled->email, 'password' => $this->password])->assertSessionHasErrors();
             $this->assertGuest();
             $this->step('Inactive account cannot authenticate');
-            $this->assertDatabaseCount('users',120);
+            $this->assertDatabaseCount('users',122);
             $this->assertDatabaseCount('apprentices',100);
             $this->assertDatabaseCount('learning_tasks',5000);
             Mail::assertNothingSent();
             Notification::assertNothingSent();
             Http::assertNothingSent();
+            $expected=['Active'=>0,'Break in learning'=>0,'Completed'=>0,'Withdrawn'=>0,'Transferred'=>0];
+            foreach($people as $i=>$profile){$status=array_keys($expected)[$i%5];$age=['Unknown','16–18','19–24','25+'][$i%4];$context=['status'=>$status,'sourceRef'=>'Fictional independently checked status61','age'=>$age,'contextRef'=>'Fictional reported age-band source61'];if($i>0){$profile->update(['start_date'=>['2025-01-06','2026-03-02','2026-09-01'][$i%3],'planned_end_date'=>$i%4===0?'2026-10-01':'2029-09-01']);}if(in_array($status,['Completed','Withdrawn','Transferred'],true)){$context['endDate']='2026-11-01';}if($status==='Completed'){$context['achievement']='Achieved';$context['achievementDate']='2026-11-02';}$row=ProgrammeOutcome::where('apprentice_id',$profile->id)->firstOrFail();$row->update(['context'=>$context]);$o=\App\Support\CohortInsights::outcome($profile,$context);$this->assertFalse($o['needs_check']);$this->assertSame($status,$o['status']);$expected[$status]++;$position=\App\Support\ReviewReminders::position($profile);$this->assertSame($status!=='Active',$position['paused']);}
+            $this->report['status_distribution']=$expected;$this->report['age_band_distribution']=['Unknown'=>25,'16–18'=>25,'19–24'=>25,'25+'=>25];$this->assertSame($this->report['age_band_distribution'],ProgrammeOutcome::all()->countBy(fn($row)=>$row->context['age'])->all());
+            $this->step('100 profiles cover20 each Active, Break in learning, Completed, Withdrawn and Transferred; approved source dates are classified and review reminders pause for non-active cases; four reported age bands and varied known start/end dates are retained without inventing dates of birth');
             $this->report['elapsed_seconds'] = round(microtime(true) - $started,2);
             $this->saveReport(true);
         } catch (\Throwable $e) {

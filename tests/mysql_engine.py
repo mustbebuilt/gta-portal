@@ -67,7 +67,10 @@ with tempfile.TemporaryDirectory(prefix='gta-mariadb-') as temporary:
         marker['race_database']=race_db;marker_file.write_text(json.dumps(marker));marker_file.chmod(0o600)
         race_env=run_env.copy();race_env.update(DB_DATABASE=race_db,APP_ENV='staging',APP_DEBUG='false',APP_URL='https://staging.example.test',SESSION_DRIVER='database',SESSION_ENCRYPT='true',SESSION_SECURE_COOKIE='true',CACHE_STORE='database',GTA_ENABLE_STAGING_PORTAL='true',GTA_ALLOW_INITIAL_ADMIN='true',GTA_RACE_DIRECTORY=str(temp),BCRYPT_ROUNDS='10')
         migrate=subprocess.run([a.php,'artisan','migrate','--force','--no-interaction'],cwd=project,env=race_env,capture_output=True,text=True,timeout=60)
-        if migrate.returncode:raise RuntimeError('Disposable race schema migration failed')
+        if migrate.returncode:
+            diagnostic=(migrate.stdout+migrate.stderr).replace(password,'[redacted]').replace(token,'[redacted]')
+            Path(a.output).write_text(json.dumps({'engine':version,'suite':suite,'status':'blocked_after_suite','failed_stage':'separate_initial_admin_race_schema_migration','diagnostic':diagnostic,'actualCloudAccess':False,'actualOracleMySqlAccess':False},indent=2)+'\n')
+            raise RuntimeError('Disposable race schema migration failed; redacted stage evidence retained')
         credentials=json.dumps({'password':'Fictional-private-race-passphrase-30!','password_confirmation':'Fictional-private-race-passphrase-30!'})
         workers=[]
         try:

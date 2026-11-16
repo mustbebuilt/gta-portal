@@ -41,8 +41,7 @@ return new class extends Migration
             $t->unsignedInteger('version')->default(1);
             $t->timestamps();
             $t->unique(['form_id', 'apprentice_id', 'cycle_code'], 'pq_assignment_cycle_unique');
-            // Explicit name: the default (72 chars) exceeds MySQL/MariaDB's 64-character identifier limit.
-            $t->index(['apprentice_id', 'recipient_id', 'state'], 'pq_assignment_recipient_state_index');
+            $t->index(['apprentice_id', 'recipient_id', 'state'], 'pq_assignment_person_state_idx');
             $t->index(['state', 'due_date']);
         });
         Schema::create('portal_questionnaire_submissions', function (Blueprint $t): void {

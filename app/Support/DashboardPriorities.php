@@ -13,6 +13,7 @@ class DashboardPriorities
         $add=function(string $key,string $bucket,string $title,string $owner,$date,string $url,$person,string $kind,?string $reason=null)use(&$rows): void {
             $rows[]=['key'=>$key,'bucket'=>$bucket,'title'=>$title,'owner'=>$owner,'date'=>$date?->format($kind==='marking'?'d M Y H:i':'d M Y'),'sort'=>$date?->format('Y-m-d H:i:s')??'','url'=>$url,'apprentice'=>$person->first_name.' '.$person->last_name,'reference'=>$person->reference,'kind'=>$kind,'reason'=>$reason];
         };
+        $releaseStates=BlockRelease::states($tasks->filter(fn($task)=>$people->has($task->apprentice_id) && $task->editable() && ($task->template['kind']??'source-pending')!=='source-pending' && (!$task->due_date || !$task->due_date->gt(today()))));
         foreach($tasks as $task){
             $person=$people->get($task->apprentice_id);if(!$person){continue;}
             $url=route('tasks.show',$task);$title=$task->reference.': '.$task->title;
@@ -26,7 +27,7 @@ class DashboardPriorities
             if(!$task->editable()&&$task->status!=='Source required'){continue;}
             if($task->due_date&&$task->due_date->gt(today())){continue;}
             $key=implode(':',[$task->apprentice_id,$task->block,$task->status,$task->template['kind']??'source-pending',TaskCatalogue::savedKey($task)]);
-            $state=$availability[$key]??=TaskAvailability::for($task);
+            $state=$availability[$key]??=TaskAvailability::for($task,$releaseStates[$task->id]??null);
             if(!$state['available']){$add('task-'.$task->id,'checks',$state['label'].' · '.$title,$state['owner'],$task->due_date,$url,$person,'task',$state['detail']);continue;}
             if(!$task->due_date){$add('task-'.$task->id,'checks',$title,'Main tutor',null,$url,$person,'task');}
             elseif($task->due_date->lt(today())){$add('task-'.$task->id,'overdue',$title,'Apprentice',$task->due_date,$url,$person,'task');}

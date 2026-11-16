@@ -85,7 +85,20 @@ class DashboardController extends Controller
             $scope = collect([$a]);
         }
         $ids = $scope->pluck('id');
-        $tasks = LearningTask::with('apprentice')->whereIn('apprentice_id', $ids)->get();
+        $taskQuery = LearningTask::with('apprentice')->whereIn('apprentice_id', $ids);
+        if ($includeAttendance) {
+            $tasks = $taskQuery->get();
+        } else {
+            // The dashboard needs decision metadata, not complete task instructions, answers or evidence history.
+            // This projection is used only for this read response; task forms and writes fetch their original records.
+            $tasks = $taskQuery->get(['id','apprentice_id','reference','block','title','theme','status','due_date','submitted_at','template->kind as summary_kind','template->catalogueId as summary_catalogue']);
+            foreach ($tasks as $task) {
+                $attributes = $task->getAttributes();
+                $attributes['template'] = json_encode(['kind'=>$task->summary_kind??'source-pending','catalogueId'=>$task->summary_catalogue??'autocare'], JSON_THROW_ON_ERROR);
+                unset($attributes['summary_kind'],$attributes['summary_catalogue']);
+                $task->setRawAttributes($attributes, true);
+            }
+        }
         $topics = TrainingTopic::whereIn('apprentice_id', $ids)->get();
         $qualifications = Qualification::whereIn('apprentice_id', $ids)->get();
         $actions = SmartAction::with(['task', 'apprentice'])->whereIn('apprentice_id', $ids)->get();
