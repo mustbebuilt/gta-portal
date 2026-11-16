@@ -508,5 +508,70 @@
         "route": "record-checks.index"
       }
     ]
+  },
+  {
+    "id": "timetable-add",
+    "audience": [
+      "planner"
+    ],
+    "category": "Timetable",
+    "title": "Adding a workload to the timetable",
+    "body": "As an authorised planner or administrator, open Centre timetable in the Manage view and choose Add workload, either at the top or in a staff/date cell. Choose staff, activity type, a generic title, dates, times and site. Teaching also needs the assigned group Tutor, a suitable room and expected headcount. For a year-long pattern choose up to53 weekly dates within the coming year; enter holiday or excluded dates where needed. Save draft. On the next page review every date and any errors or warnings, check the exact draft, then publish it. Saving a draft does not place a published card on the timetable. Before publication, use Working time to record checked staff availability and Rooms to confirm room use/capacity. Unknown time is not free time. If the card is missing, check Manage versus My timetable or Staff timetable, the selected week/staff/site and whether the plan is still a draft. Workload plans do not record attendance, off-the-job training or completed work. Keep personal support and medical details out of shared activity titles.",
+    "links": [
+      {
+        "label": "Add workload",
+        "route": "centre-planning.form"
+      },
+      {
+        "label": "Working time",
+        "route": "centre-planning.windows"
+      },
+      {
+        "label": "Drafts and published plans",
+        "route": "centre-planning.plans"
+      }
+    ]
+  },
+  {
+    "id": "timetable-move",
+    "audience": [
+      "planner"
+    ],
+    "category": "Timetable",
+    "title": "Changing workloads and using optional drag-and-drop",
+    "body": "Open Centre timetable in Manage view. Use Add workload in a staff/date cell or Move workload in the accessible item list. Optionally tick Enable optional drag-and-drop shortcuts. Drag a work type into a staff/date cell to open a prefilled new draft. Drag an existing planned card into a staff/date cell to open a requested move; the current start time is retained until you edit it on the form. Dropping never saves or moves work automatically. Check the exact proposed date, person and time, save the checked proposal for review, then confirm arrangements and apply. If you decide against it, cancel the saved proposal and the original workload stays reserved. Use full-year planning for repeated activities. Registered, protected, partly delivered or cover-linked activities can be held and need their original plan/register/cover workflow. Recorded delivery and attendance are never rewritten by dragging. Teaching keeps the primary group Tutor; use reviewed teaching cover rather than changing apprentice responsibility. The normal buttons and forms remain available for keyboard, touch and users who do not wish to drag.",
+    "links": [
+      {
+        "label": "Open centre timetable",
+        "route": "centre-planning.index"
+      },
+      {
+        "label": "Plan the full year",
+        "route": "annual.index"
+      },
+      {
+        "label": "Teaching cover",
+        "route": "timetable-duties.covers"
+      }
+    ]
+  },
+  {
+    "id": "timetable-year",
+    "audience": [
+      "planner"
+    ],
+    "category": "Timetable",
+    "title": "Planning the full year and reviewing an automated proposal",
+    "body": "Open Plan the full year from the centre timetable. Choose a period within the next year, optionally filter staff and select the future published plans to consider together. Create recurring activities and confirm their dated working windows first. You can nominate alternative rooms at the original site. For Admin, Preparation and Staff development you can nominate suitable alternative staff; marking and private apprentice responsibilities remain with their existing owners. Choose original dates, dates within seven days or any checked start date in the selected year. Teaching dates change only when you explicitly allow it, and the assigned Tutor/group remain fixed. Review every original/proposed date, person and room, and the warnings. Confirm nominated staff suitability and record agreed arrangements, then save for final review. Nothing has moved. Apply the exact reviewed proposal within30 minutes; a changed source or authority blocks it and requires a new preview. All changes apply together or none apply. You can cancel before application. The bounded search suggests a complete checked schedule but does not prove a globally best timetable. It never assumes unknown working time is available, changes attendance/OTJ or sends messages automatically. Up to128 plans/5000 occurrences can be reviewed per batch; all other current work remains a constraint.",
+    "links": [
+      {
+        "label": "Plan the full year",
+        "route": "annual.index"
+      },
+      {
+        "label": "Saved proposals",
+        "route": "optimiser.index"
+      }
+    ]
   }
 ]

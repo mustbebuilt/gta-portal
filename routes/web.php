@@ -84,6 +84,10 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/reports/historical-cohorts/{cohort}/report.pdf',[\App\Http\Controllers\HistoricalCohortsController::class,'pdf'])->whereUuid('cohort')->name('historical-cohorts.pdf');
     Route::get('/reports/historical-cohorts/{cohort}/rows/{row}',[\App\Http\Controllers\HistoricalCohortsController::class,'row'])->whereUuid('cohort')->whereUuid('row')->name('historical-cohorts.row');
     Route::post('/reports/historical-cohorts/{cohort}/rows/{row}',[\App\Http\Controllers\HistoricalCohortsController::class,'edit'])->whereUuid('cohort')->whereUuid('row')->name('historical-cohorts.edit');
+    Route::get('/centre-planning/year/move/{plan}',[\App\Http\Controllers\AnnualTimetableController::class,'move'])->whereUuid('plan')->name('annual.move');
+    Route::get('/centre-planning/year',[\App\Http\Controllers\AnnualTimetableController::class,'index'])->name('annual.index');
+    Route::post('/centre-planning/year/preview',[\App\Http\Controllers\AnnualTimetableController::class,'preview'])->name('annual.preview');
+    Route::post('/centre-planning/year/prepare',[\App\Http\Controllers\AnnualTimetableController::class,'prepare'])->name('annual.prepare');
     Route::get('/centre-planning/optimiser',[\App\Http\Controllers\TimetableOptimiserController::class,'index'])->name('optimiser.index');
     Route::post('/centre-planning/optimiser/preview',[\App\Http\Controllers\TimetableOptimiserController::class,'preview'])->name('optimiser.preview');
     Route::post('/centre-planning/optimiser',[\App\Http\Controllers\TimetableOptimiserController::class,'prepare'])->name('optimiser.prepare');

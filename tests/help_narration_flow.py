@@ -89,7 +89,7 @@ with tempfile.TemporaryDirectory(prefix='gta-help-audio-') as temporary:
         status,text,_,headers=req(learner,'/help?q=review');assert status==200 and 'Read and sign your review'in text and 'Prepare a review draft'not in text and 'PRIVATE-LEARNER-HELP-SENTINEL'not in text and headers['Referrer-Policy']=='no-referrer'and 'no-store'in headers['Cache-Control']
         assert req(learner,'/help?guide=setup')[0]==404 and req(tutor,'/help-recordings')[0]==403
         passed('Actual role-scoped help search finds current signing guidance, hides staff setup and never loads apprentice record text')
-        text=req(learner,'/help?guide=start')[1];assert 'A GTA Yorkshire recording is not yet available'in text and 'data-recording-url'not in text
+        text=req(learner,'/help?guide=start')[1];assert 'Read the guide below'in text and 'data-recording-url'not in text
         passed('Text-first help and device option remain available while no approved regional recording exists')
         assert req(admin,'/help-recordings',{'guide_id':'start'})[0]==419
         source='/help-recordings?guide=start';status,text,_,_=req(admin,source);assert status==200;guide_hash=re.search(r'name="guide_hash" value="([a-f0-9]{64})"',text).group(1)
@@ -121,7 +121,7 @@ with tempfile.TemporaryDirectory(prefix='gta-help-audio-') as temporary:
         except HTTPError as error:assert error.code==416 and error.read()==b''
         assert req(learner,'/help-recordings/'+record[0]+'/preview')[0]==403 and req(learner,'/help/guides/submit-work/recordings/'+record[0])[0]==404
         passed('Multiple ranges, forged guide/record association and non-manager preview access are refused')
-        report=artisan('gta:help-check','--records','--verify-files');assert report.returncode==0;data=json.loads(report.stdout);assert data['counts']['files_verified']==1 and data['counts']['approved_current']==1 and data['accent_automatically_verified']is False and 'PRIVATE-HELP-RECORDING-REFERENCE'not in report.stdout and data['guides_without_current_recording']==32
+        report=artisan('gta:help-check','--records','--verify-files');assert report.returncode==0;data=json.loads(report.stdout);assert data['counts']['files_verified']==1 and data['counts']['approved_current']==1 and data['accent_automatically_verified']is False and 'PRIVATE-HELP-RECORDING-REFERENCE'not in report.stdout and data['guides']==38 and data['guides_without_current_recording']==37
         passed('Actual read-only staging readiness/file check reports one current clip and remaining gaps without claiming automatic accent verification')
         stop_backend();start_backend()
         with learner.open(origin+media,timeout=30)as response:assert hashlib.sha256(response.read()).digest()==hashlib.sha256(audio_bytes).digest()
@@ -130,10 +130,17 @@ with tempfile.TemporaryDirectory(prefix='gta-help-audio-') as temporary:
         assert req(learner,media)[0]==409 and 'data-recording-url'not in req(learner,'/help?guide=start')[1]
         with admin.open(origin+'/help-recordings/'+record[0]+'/preview',timeout=30)as response:assert response.read()==audio_bytes
         passed('Explicit withdrawal removes user playback while preserving private archived clip and history')
-        stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
-        with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==0;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='electronic_review_packets'").fetchone()[0]==1
+        stop_backend()
+        with sqlite3.connect(db)as c:before_schema={x[0]for x in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        assert artisan('migrate:rollback','--step=1','--force').returncode==0
+        with sqlite3.connect(db)as c:
+            after_schema={x[0]for x in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            assert before_schema-after_schema=={'centre_manager_grants','centre_manager_access_requests','centre_manager_followups'} and not(after_schema-before_schema)
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==6
+            assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='electronic_review_packets'").fetchone()[0]==1
         assert artisan('migrate','--force').returncode==0
-        passed('Disposable latest down/up removes only Pack43 operations tables and retains Pack26 signing schema; real audio needs backup')
+        with sqlite3.connect(db)as c:assert before_schema=={x[0]for x in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        passed('Disposable current latest down/up removes only the three Pack49 access tables and preserves earlier operations/signing schema; real audio needs backup')
         configure('production');start_backend();assert req(learner,'/help')[0]==503
         passed('Existing production access gate remains enforced')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual client-verified local HTTPS, encrypted database sessions/cache and private silent WAV byte/range/HEAD transport','realDataUsed':False,'externalMessagesSent':False,'speechProviderCalled':False,'actualYorkshireRecordingProvidedOrHeard':False,'actualBrowserOrPhoneTested':False,'actualCloudAccess':False,'actualNativeEngine':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

@@ -1,7 +1,7 @@
 @extends('layout')
 @section('title','Improve the timetable')
 @section('content')
-<h1>Improve the timetable</h1>@include('learning.errors')
+<h1>Improve the timetable</h1><p><a class="button" href="{{ route('annual.index') }}">Plan the full year with staff and room choices</a></p>@include('learning.errors')
 <p>Check several future plans together to reduce gaps between activities. Teaching and repeated plans can be included when every occurrence is future, current and unlinked. By default dates stay the same. You can also allow nearby dates for non-teaching work; staff, duration, weekly pattern, room and site are preserved. Teaching dates stay fixed. You review a proposal before anything moves.</p>
 <p><a href="{{ route('centre-planning.index') }}">Back to centre timetable</a> · <a href="{{ route('work-moves.index') }}">Move one non-teaching activity to another date</a></p>
 <form method="get" class="panel"><label for="from">From</label><input id="from" type="date" name="from" value="{{ $from }}" required><label for="to">To</label><input id="to" type="date" name="to" value="{{ $to }}" required><button>Show plans</button></form>

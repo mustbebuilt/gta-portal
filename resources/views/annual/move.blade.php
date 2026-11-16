@@ -1,0 +1,9 @@
+@extends('layout')
+@section('title','Move a workload')
+@section('content')
+<h1>Move a workload</h1>@include('learning.errors')<p>{{ $args['title'] }} · {{ $args['kind'] }}. Original {{ $args['date'] }} {{ $args['start'] }}–{{ $args['end'] }}. Dragging only opens this form; the timetable has not changed.</p>
+@if(!$single)<p class="notice">This activity repeats. Use full-year planning to review every date together.</p><a class="button" href="{{ route('annual.index') }}">Review the full series</a>
+@else<form method="get" class="panel"><label>Proposed date<input type="date" name="date" value="{{ $date }}" required></label><label>Proposed staff<select name="staff_id">@foreach($staff as $u)<option value="{{ $u->id }}" @selected($staffId===$u->id)>{{ $u->name }}</option>@endforeach</select></label><label>Proposed start<input type="time" name="start" value="{{ $start }}" required></label><button>Update requested move</button></form>
+<form method="post" action="{{ route('annual.preview') }}" class="panel">@csrf @foreach(['from','to','date_mode','teaching_dates'] as $key)<input type="hidden" name="{{ $key }}" value="{{ $request[$key] }}">@endforeach<input type="hidden" name="plans[]" value="{{ $plan->id }}">@foreach($request['pins'][$plan->id] as $key=>$value)<input type="hidden" name="pins[{{ $plan->id }}][{{ $key }}]" value="{{ $value }}">@endforeach @foreach($request['staff_options'][$plan->id]??[] as $id)<input type="hidden" name="staff_options[{{ $plan->id }}][]" value="{{ $id }}">@endforeach<p>Requested {{ $date }} at {{ $start }}. The full duration and site stay the same. The next step checks working time, clashes, travel, room use and current authority.</p><button class="primary">Check this exact move</button></form>@endif
+<p><a href="{{ route('centre-planning.index') }}">Back to timetable</a></p>
+@endsection

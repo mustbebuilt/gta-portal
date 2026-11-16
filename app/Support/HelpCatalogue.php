@@ -17,7 +17,7 @@ class HelpCatalogue
                 throw new \RuntimeException('Help catalogue needs checking.');
             }
             foreach ($row['audience'] as $audience) {
-                if (! in_array($audience, ['all', 'manager', 'learner', 'staff', 'tutor', 'mentor', 'topic', 'training', 'review-staff', 'signer', 'inclusion', 'careers', 'employer', 'ceo'], true)) {
+                if (! in_array($audience, ['all', 'manager', 'learner', 'staff', 'tutor', 'mentor', 'topic', 'training', 'review-staff', 'signer', 'inclusion', 'careers', 'employer', 'ceo', 'planner'], true)) {
                     throw new \RuntimeException('Unknown help audience.');
                 }
             }
@@ -41,7 +41,7 @@ return $result;
         }$roles = $u->role;
         $manager = LearningAccess::manager($u);
         $mentor = StaffDuties::has($u, 'mentor');
-        $permissions = ['all' => true, 'manager' => $manager, 'learner' => $roles === 'apprentice', 'tutor' => $roles === 'tutor', 'employer' => $roles === 'employer', 'ceo' => $roles === 'ceo', 'staff' => in_array($roles, [...DirectoryCatalog::STAFF_ROLES, 'admin', 'ceo'], true), 'mentor' => $mentor, 'training' => in_array($roles, ['admin', 'ceo', 'tutor', 'apprentice'], true), 'topic' => in_array($roles, ['admin', 'ceo', 'functional_skills_tutor'], true) || StaffDuties::has($u, 'maths_tutor') || StaffDuties::has($u, 'english_tutor'), 'review-staff' => ReviewReminders::allowed($u), 'signer' => in_array($roles, ['apprentice', 'employer'], true) || $mentor, 'inclusion' => SupportAccess::team($u), 'careers' => $manager || StaffDuties::has($u, 'careers_adviser')];
+        $permissions = ['planner'=>CentrePlanning::allowed($u),'all' => true, 'manager' => $manager, 'learner' => $roles === 'apprentice', 'tutor' => $roles === 'tutor', 'employer' => $roles === 'employer', 'ceo' => $roles === 'ceo', 'staff' => in_array($roles, [...DirectoryCatalog::STAFF_ROLES, 'admin', 'ceo'], true), 'mentor' => $mentor, 'training' => in_array($roles, ['admin', 'ceo', 'tutor', 'apprentice'], true), 'topic' => in_array($roles, ['admin', 'ceo', 'functional_skills_tutor'], true) || StaffDuties::has($u, 'maths_tutor') || StaffDuties::has($u, 'english_tutor'), 'review-staff' => ReviewReminders::allowed($u), 'signer' => in_array($roles, ['apprentice', 'employer'], true) || $mentor, 'inclusion' => SupportAccess::team($u), 'careers' => $manager || StaffDuties::has($u, 'careers_adviser')];
 
         return array_keys(array_filter($permissions));
     }
@@ -69,6 +69,9 @@ return $result;
             return null;
         }
         $id = match (true) {
+            $r->routeIs('annual.*','optimiser.*') => 'timetable-year',
+            $r->routeIs('centre-planning.form','centre-planning.save','centre-planning.edit','centre-planning.update','centre-planning.show') => 'timetable-add',
+            $r->routeIs('centre-planning.*','timetable-duties.*','timetable-management.*','timetable-governance.*','work-moves.*','occurrence-register.*') => 'timetable-move',
             $r->routeIs('calendar.*','visual-reports.*','quick-actions.*','saved-work.*') => 'quick-actions',
             $r->routeIs('record-checks.*') => 'record-checks',
             $r->routeIs('electronic-reviews.*', 'review-authority.*') => 'review-signing',

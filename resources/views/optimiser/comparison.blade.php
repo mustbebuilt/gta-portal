@@ -1,3 +1,4 @@
+@if(($preview['mode']??null)==='annual54') @include('annual.comparison') @else
 <p><strong>{{ $preview['result'] }}</strong></p>
 @if($preview['after'])<dl><dt>Gaps between activities for affected staff, in this period</dt><dd>{{ $preview['before'][0] }} minutes before · {{ $preview['after'][0] }} minutes proposed</dd><dt>Plans with proposed changes</dt><dd>{{ $preview['after'][1] }}</dd></dl>@endif
 <p>This compares the span between first and last activity with occupied time, for the affected staff on each date. It is not staff productivity, available paid time or a performance target. A clash-free proposal can require a larger gap. All unchanged reservations, registers, appointments, room/group/learner clashes, working windows and travel checks remain constraints.</p>
@@ -7,3 +8,5 @@
 
 @if(($preview['date_flex']??0)>0)<p><strong>Nearby-date mode:</strong> up to {{ $preview['date_flex'] }} day(s) either side, within this period. Only non-teaching plans can change date. Weekly cadence, staff and minutes remain fixed. The search compares gaps, number of changed plans, total occurrence-day movement and start-time movement, in that order. This can spread work across more days; check the practical arrangements. It does not transfer apprentice responsibilities or generate attendance/OTJ.</p>@endif
 @if($preview['search']['issues']??[])<details><summary>Candidate dates or times withheld ({{ count($preview['search']['issues']) }})</summary><ul>@foreach($preview['search']['issues'] as $issue)<li>{{ $issue }}</li>@endforeach</ul></details>@endif
+
+@endif

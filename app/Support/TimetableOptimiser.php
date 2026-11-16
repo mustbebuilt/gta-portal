@@ -50,7 +50,7 @@ class TimetableOptimiser
    $radius=$args['kind']==='Teaching'?0:$dateFlex;
    for($day=-$radius;$day<=$radius;$day++){
     $first=Carbon::parse($args['date'])->addDays($day)->toDateString();
-    try{$candidateDates=CentrePlanning::dates($first,(int)$args['weeks']);}catch(\Illuminate\Validation\ValidationException){continue;}
+    try{$candidateDates=CentrePlanning::dates($first,(int)$args['weeks'],true,$args['excluded_dates']??[]);}catch(\Illuminate\Validation\ValidationException){continue;}
     if(min($candidateDates)<$from||max($candidateDates)>$to){continue;}
     $windows=CentrePlanning::windowSource(User::findOrFail($args['staff_id']),$candidateDates,$lock);$dateSources[$id][$first]=$windows;
     $start=0;$end=1439;$checked=count($windows['rows'])===count($candidateDates);
@@ -96,6 +96,7 @@ class TimetableOptimiser
   },3);
  }
  public static function apply(User $actor,int $auth,Run $record,int $version,string $expected,bool $warningsAccepted):Run {
+  if(($record->details['preview']['mode']??null)==='annual54'){return AnnualTimetable::apply($actor,$auth,$record,$version,$expected,$warningsAccepted);}
   return DB::transaction(function()use($actor,$auth,$record,$version,$expected,$warningsAccepted){$u=PortalActions::actor(CentrePlanning::actor($actor,$auth));$r=Run::whereKey($record->id)->lockForUpdate()->firstOrFail();abort_unless($r->created_by===$u->id,403);
    if(!self::intact($r)||$r->details['auth']!==$auth||$r->details_hash!==$expected||$version!==1){CentrePlanning::fail('The prepared request or current account changed.');}
    if($r->state==='Applied'){foreach($r->receipt['replacements']as$id){$p=Plan::findOrFail($id);TimetableGovernance::guardPlan($u,$p);if($p->state!=='Published'||!CentrePlanning::published($p)){CentrePlanning::fail('A previous replacement changed; inspect the recorded outcome.');}}return $r;}
