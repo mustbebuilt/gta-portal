@@ -10,6 +10,11 @@ use App\Models\TrainingTopic;
 
 class JourneyEvents
 {
+    public static function recordedDate(mixed $date):bool
+    {
+        return is_string($date)&&preg_match('/^(\d{4})-(\d{2})-(\d{2})$/D',$date,$m)===1&&checkdate((int)$m[2],(int)$m[3],(int)$m[1])&&$date<=today()->toDateString();
+    }
+
     public static function for(Apprentice $a): array
     {
         $events = [];
@@ -39,6 +44,8 @@ class JourneyEvents
         foreach(\App\Models\ApprenticeExperienceEntry::where('apprentice_id',$a->id)->where('kind','achievement')->where('state','Approved')->whereNotNull('happened_on')->get() as $e) {
             $events[]=['date'=>$e->happened_on->toDateString(),'type'=>'Checked workplace achievement','title'=>$e->title,'detail'=>$e->detail.' — Tutor response: '.$e->response,'url'=>route('experience.index',['filter'=>'achievement'])];
         }
+        // Malformed legacy dates must not become milestones or break date rendering.
+        $events=array_values(array_filter($events,fn($e)=>self::recordedDate($e['date']??null)));
         usort($events, fn ($x, $y) => strcmp($x['date'], $y['date']) ?: strcmp($x['title'], $y['title']));
 
         return array_values(array_filter($events, fn ($e) => $e['date'] <= today()->toDateString()));

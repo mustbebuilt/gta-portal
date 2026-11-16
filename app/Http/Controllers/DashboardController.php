@@ -63,11 +63,11 @@ class DashboardController extends Controller
         return view('dashboard.inspection', ['apprentices' => Apprentice::count(), 'concerns' => SupportConcern::where('status', '!=', 'Closed')->count(), 'plans' => SupportPlan::where('status', 'Active')->count(), 'tasks' => LearningTask::count(), 'topics' => TrainingTopic::count(), 'qualifications' => Qualification::count(), 'outcomeRecords' => ProgrammeOutcome::count(), 'achieved' => Qualification::whereIn('status', ['Achieved', 'Already held'])->count(), 'cases' => CaseStudy::where('status', 'Approved')->get()->filter(fn ($c) => $c->currentApprovedCopy())]);
     }
 
-    public function journey(Request $r, Apprentice $apprentice): View
+    public function journey(Request $r, Apprentice $apprentice): Response
     {
         abort_unless(Access::training($r->user(), $apprentice), 403);
 
-        return view('dashboard.journey', ['apprentice' => $apprentice, 'events'=>JourneyEvents::for($apprentice),'blocks'=>\App\Support\ApprenticeExperience::blocks($apprentice)]);
+        return response()->view('dashboard.journey', ['apprentice' => $apprentice]+\App\Support\JourneyOverview::for($r->user(),$apprentice))->header('Cache-Control','no-store, private')->header('Referrer-Policy','no-referrer');
     }
 
     private function data(Request $r,bool $includeAttendance=true): array
