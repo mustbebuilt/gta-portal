@@ -174,9 +174,9 @@ with tempfile.TemporaryDirectory(prefix='gta-flexible-duties-') as temporary:
         with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==6;assert c.execute('SELECT COUNT(*) FROM timetable_plans').fetchone()[0]==2;assert c.execute('SELECT COUNT(*) FROM timetable_rooms').fetchone()[0]==18;assert c.execute('SELECT COUNT(*) FROM timetable_staff_windows').fetchone()[0]==4
         with sqlite3.connect(db) as c:
             after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-            assert before_tables-after_tables=={'historical_cohorts','historical_cohort_rows'} and not(after_tables-before_tables)
+            assert before_tables-after_tables=={'centre_manager_grants','centre_manager_access_requests','centre_manager_followups'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Latest Pack48 down/up removes only the two historical cohort tables while all prior schema and business-data checks are retained')
+        passed('Latest Pack49 down/up removes only the three Centre Manager access/follow-up tables while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,root)[0]==503
         passed('Existing production-access gate remains enforced')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS with disposable SQLite/encrypted database sessions/cache','actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'realDataUsed':False,'externalMessagesSent':False,'productionApproved':False,'registerAccessGrantedByCover':False,'newGovernanceChecks':5};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

@@ -34,7 +34,7 @@ use App\Http\Middleware\ActiveAccount;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/privacy-information',[\App\Http\Controllers\PortalPrivacyController::class,'public'])->name('privacy.public');
-Route::get('/', fn () => redirect()->route('apprentices.index'));
+Route::get('/', fn (\Illuminate\Http\Request $r) => $r->user() ? \App\Http\Controllers\SessionController::destination($r,$r->user()) : redirect()->route('apprentices.index'));
 Route::middleware('guest')->group(function () {
     Route::get('/apprentice-invitation/{user}/{token}', [\App\Http\Controllers\ApprenticeOnboardingController::class,'acceptForm'])->whereNumber('user')->where('token','[A-Za-z0-9]{64}')->name('apprentice-invitation.accept');
     Route::post('/apprentice-invitation/{user}/{token}', [\App\Http\Controllers\ApprenticeOnboardingController::class,'accept'])->whereNumber('user')->where('token','[A-Za-z0-9]{64}')->name('apprentice-invitation.activate');
@@ -56,6 +56,19 @@ Route::get('/accessibility', fn()=>view('accessibility.index'))->name('accessibi
 Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSecondFactor::class, \App\Http\Middleware\RequirePrivacyAcknowledgement::class])->group(function () {
     Route::get('/visual-reports', [\App\Http\Controllers\PortalVisualReportController::class,'index'])->name('visual-reports.index');
     Route::get('/visual-reports.pdf', [\App\Http\Controllers\PortalVisualReportController::class,'pdf'])->name('visual-reports.pdf');
+    Route::get('/centre-access',[\App\Http\Controllers\CentreManagerAccessController::class,'index'])->name('centre-access.index');
+    Route::post('/centre-access/preview',[\App\Http\Controllers\CentreManagerAccessController::class,'preview'])->name('centre-access.preview');
+    Route::post('/centre-access/requests',[\App\Http\Controllers\CentreManagerAccessController::class,'prepare'])->name('centre-access.prepare');
+    Route::get('/centre-access/requests/{accessRequest}',[\App\Http\Controllers\CentreManagerAccessController::class,'show'])->whereUuid('accessRequest')->name('centre-access.show');
+    Route::post('/centre-access/requests/{accessRequest}/review',[\App\Http\Controllers\CentreManagerAccessController::class,'review'])->whereUuid('accessRequest')->name('centre-access.review');
+    Route::post('/centre-access/requests/{accessRequest}/apply',[\App\Http\Controllers\CentreManagerAccessController::class,'apply'])->whereUuid('accessRequest')->name('centre-access.apply');
+    Route::post('/centre-access/staff/{target}/revoke',[\App\Http\Controllers\CentreManagerAccessController::class,'revoke'])->whereNumber('target')->name('centre-access.revoke');
+    Route::get('/centre-oversight',[\App\Http\Controllers\CentreOversightController::class,'index'])->name('centre-oversight.index');
+    Route::get('/centre-oversight/apprentices/{apprentice}/{area}',[\App\Http\Controllers\CentreOversightController::class,'show'])->whereNumber('apprentice')->whereIn('area',['training','attendance','reviews','functional_skills'])->name('centre-oversight.show');
+    Route::post('/centre-oversight/apprentices/{apprentice}/{area}/follow-up',[\App\Http\Controllers\CentreOversightController::class,'followup'])->whereNumber('apprentice')->whereIn('area',['training','attendance','reviews','functional_skills'])->name('centre-oversight.followup');
+    Route::get('/centre-followups',[\App\Http\Controllers\CentreFollowupsController::class,'index'])->name('centre-followups.index');
+    Route::get('/centre-followups/{work}',[\App\Http\Controllers\CentreFollowupsController::class,'show'])->whereUuid('work')->name('centre-followups.show');
+    Route::post('/centre-followups/{work}',[\App\Http\Controllers\CentreFollowupsController::class,'update'])->whereUuid('work')->name('centre-followups.update');
     Route::get('/reports/historical-cohorts',[\App\Http\Controllers\HistoricalCohortsController::class,'index'])->name('historical-cohorts.index');
     Route::post('/reports/historical-cohorts/preview',[\App\Http\Controllers\HistoricalCohortsController::class,'preview'])->name('historical-cohorts.preview');
     Route::post('/reports/historical-cohorts',[\App\Http\Controllers\HistoricalCohortsController::class,'create'])->name('historical-cohorts.create');

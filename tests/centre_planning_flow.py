@@ -153,9 +153,9 @@ with tempfile.TemporaryDirectory(prefix='gta-centre-planning-') as temporary:
         with sqlite3.connect(db)as c:assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('account_lifecycle_proposals','account_lifecycle_states','cohort_forecasts','cohort_snapshots','operational_followups','portal_operations_events')").fetchone()[0]==6;assert c.execute('SELECT COUNT(*) FROM training_sessions').fetchone()[0]==1;assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='review_appointments'").fetchone()[0]==1
         with sqlite3.connect(db) as c:
             after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-            assert before_tables-after_tables=={'historical_cohorts','historical_cohort_rows'} and not(after_tables-before_tables)
+            assert before_tables-after_tables=={'centre_manager_grants','centre_manager_access_requests','centre_manager_followups'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Latest Pack48 down/up removes only the two historical cohort tables while all prior schema and business-data checks are retained')
+        passed('Latest Pack49 down/up removes only the three Centre Manager access/follow-up tables while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,root)[0]==503
         passed('Existing production-access gate remains unchanged')
         result={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS with disposable SQLite/encrypted database sessions/cache','actualChromiumTested':args.browser,'browserFixtureAcceptsLocalSelfSignedCertificate':args.browser,'physicalPhoneTested':False,'actualNativeEngine':False,'actualCloudAccess':False,'realDataUsed':False,'externalMessagesSent':False,'productionApproved':False};Path(args.output).write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))

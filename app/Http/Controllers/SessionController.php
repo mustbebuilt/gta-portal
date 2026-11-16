@@ -47,9 +47,14 @@ class SessionController extends Controller
 
     public static function destination(Request $request, \App\Models\User $user): RedirectResponse
     {
-        return redirect()->intended(route(match ($user->role) {
+        $route=match ($user->role) {
             'employer' => 'employer-actions.index','apprentice' => 'experience.home','manager','staff' => 'staff.index','mentor' => 'reviews.index','functional_skills_tutor' => 'em.caseload','careers_adviser' => 'careers.worklist', 'inclusion_lead','inclusion_member' => SupportAccess::team($user) ? 'support.worklist' : 'help.index',default => 'apprentices.index'
-        }));
+        };
+        if(!\App\Support\LearningAccess::manager($user)&&\App\Support\CentreManagerAccess::workspace($user)){$route='centre-oversight.index';}
+        // The public home historically pointed guests at the apprentice list.
+        // Discard that one unavailable default for roles which cannot open that list.
+        if(!in_array($user->role,['admin','ceo','tutor','apprentice'],true)&&$request->session()->get('url.intended')===route('apprentices.index')){$request->session()->forget('url.intended');}
+        return redirect()->intended(route($route));
     }
 
     public function destroy(Request $request): RedirectResponse

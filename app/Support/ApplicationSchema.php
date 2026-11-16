@@ -6,9 +6,12 @@ use Illuminate\Database\Schema\Builder;
 
 class ApplicationSchema
 {
-    // Presence-only contract from the unchanged reference migrations through Pack48.
+    // Presence-only contract from the unchanged reference migrations through Pack49.
     // Extra target tables/columns are allowed. Types, indexes, FKs and data are not certified.
     public const TABLES = [
+        'centre_manager_grants'=>['user_id','version','active','expires_on','ceo_locked','details_hash','details','updated_by','created_at','updated_at'],
+        'centre_manager_access_requests'=>['id','request_token','created_by','target_user_id','state','version','source_hash','details_hash','details','approval','applied','created_at','updated_at'],
+        'centre_manager_followups'=>['id','request_token','apprentice_id','created_by','owner_id','owner_slot','area','flag','status','version','open_key','due_on','grant_version','source_hash','details_hash','details','created_at','updated_at'],
         'historical_cohorts'=>['id','request_token','created_by','state','version','source_hash','details_hash','details','proof','approved_at','created_at','updated_at'],
         'historical_cohort_rows'=>['id','cohort_id','apprentice_id','historical_tutor_id','version','source_hash','details_hash','details','created_at','updated_at'],
         'timetable_optimisation_runs'=>['id','request_token','created_by','state','version','source_hash','details_hash','details','receipt','receipt_hash','created_at','updated_at'],

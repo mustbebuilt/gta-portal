@@ -1,0 +1,6 @@
+@extends('layout')
+@section('title','Preview Centre Manager access')
+@section('content')
+<h1>Preview Centre Manager access</h1>@include('learning.errors')<section class="panel">@include('centre-access.scope')</section>
+<form method="post" action="{{ route('centre-access.prepare') }}" class="panel">@csrf<input type="hidden" name="target" value="{{ $preview['target']['id'] }}">@foreach($preview['policy']['groups'] as $id)<input type="hidden" name="groups[]" value="{{ $id }}">@endforeach @foreach($preview['areas'] as $area)<input type="hidden" name="areas[]" value="{{ $area }}">@endforeach<input type="hidden" name="expires" value="{{ $preview['expires'] }}"><input type="hidden" name="ceo_locked" value="{{ (int)$preview['ceo_locked'] }}"><input type="hidden" name="source_hash" value="{{ $preview['source_hash'] }}"><input type="hidden" name="request_token" value="{{ $token }}"><label for="reference">Purpose and scope reference</label><textarea id="reference" name="reference" minlength="5" maxlength="1000" required></textarea><label class="check"><input type="checkbox" name="confirmed" value="1" required>I checked the scope. Prepare it for review; do not grant access yet.</label><button class="primary">Prepare access proposal</button></form><p><a href="{{ route('centre-access.index') }}">Back to access controls</a></p>
+@endsection

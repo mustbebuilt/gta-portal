@@ -39,6 +39,8 @@ class PortalNavigation
         if(LearningAccess::manager($u)){$links[]=$item('Apprentice progress','cohort-insights.index',[],['cohort-insights.*','historical-cohorts.*']);}
         if(\App\Support\ApprenticeRecordChecks::allowed($u)){$links[]=$item('Record checks','record-checks.index',[],['record-checks.*']);}
         if($u->role==='apprentice'){$links[]=$item('My calendar','calendar.index',[],['calendar.*']);}
+        if(CentreManagerAccess::workspace($u)){$links[]=$item('Centre oversight','centre-oversight.index',[],['centre-oversight.*']);}
+        if(CentreFollowups::inbox($u)){$links[]=$item('Centre follow-ups','centre-followups.index',[],['centre-followups.*']);}
         $group('training','Apprentices & training',$links);
         $links=[];
         if(ReviewReminders::allowed($u)) {$links[]=$item('Reviews','reviews.index',[],['reviews.*']);}
@@ -77,6 +79,7 @@ class PortalNavigation
         }
         if(in_array($u->role,['admin','ceo'],true)) {$links[]=$item('Support permissions','support.permissions');}
         if(LearningAccess::manager($u)){$links[]=$item('Account access','account-operations.index',[],['account-operations.*','restriction-recovery.*']);}
+        if(LearningAccess::manager($u)){$links[]=$item('Centre Manager access','centre-access.index',[],['centre-access.*']);}
         $group('administration','Administration',$links);
         $links=[];
         if($manage) {

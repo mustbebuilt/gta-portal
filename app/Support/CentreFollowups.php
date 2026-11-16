@@ -1,0 +1,35 @@
+<?php
+namespace App\Support;
+use App\Models\{User,Apprentice,CentreManagerFollowup as Work};
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+class CentreFollowups {
+ public const STATES=['In progress','Waiting','Resolved'];
+ private static function fields(Work $w):array{return $w->only(['id','request_token','apprentice_id','created_by','owner_id','owner_slot','area','flag','status','version','open_key','grant_version','source_hash'])+['due_on'=>$w->due_on->toDateString()];}
+ public static function intact(Work $w):bool {try{return ReviewedImports::hash($w->details)===$w->details_hash&&$w->details['fields']===self::fields($w);}catch(\Throwable){return false;}}
+ public static function manager(User $u,Apprentice $a,string $area):bool{return CentreManagerAccess::allows($u,$a,'coordination')&&CentreManagerAccess::allows($u,$a,$area);}
+ public static function owner(User $u,Work $w,Apprentice $a):bool{return $w->owner_id===$u->id&&in_array($w->owner_slot,CentreOversight::ownerSlots($u,$a,$w->area),true);}
+ public static function visible(User $u,Work $w):bool {$u=User::find($u->id);if(!$u||!$u->active||AccountLifecycle::blocked($u)){return false;}$a=Apprentice::find($w->apprentice_id);return $a&&(self::manager($u,$a,$w->area)||self::owner($u,$w,$a));}
+ public static function query(User $actor){$u=PortalActions::actor($actor);$p=CentreManagerAccess::policy($u);$q=Work::query();if($p&&$p['administrator']){return $q;}
+  return $q->where(function($q)use($u,$p){$q->where(function($own)use($u){$own->where('owner_id',$u->id)->where(function($slots)use($u){$slots->whereRaw('1=0');if($u->role==='tutor'){$slots->orWhere(fn($s)=>$s->where('owner_slot','tutor')->whereIn('area',['training','attendance','reviews'])->whereIn('apprentice_id',Apprentice::where('tutor_id',$u->id)->select('id')));}foreach(['mentor','maths_tutor','english_tutor']as$slot){if(StaffDuties::has($u,$slot)){$slots->orWhere(fn($s)=>$s->where('owner_slot',$slot)->where('area',$slot==='mentor'?'reviews':'functional_skills')->whereIn('apprentice_id',Apprentice::where($slot.'_id',$u->id)->select('id')));}}});});if($p&&in_array('coordination',$p['areas'],true)){$q->orWhere(fn($q)=>$q->whereIn('area',array_diff($p['areas'],['coordination']))->whereIn('apprentice_id',Apprentice::whereIn('tutor_group_id',$p['groups'])->select('id')));}});
+ }
+ public static function inbox(User $u):bool {if(CentreManagerAccess::workspace($u)){return true;}if(!$u->active||AccountLifecycle::blocked($u)){return false;}return self::query($u)->exists();}
+ public static function create(User $actor,int $auth,Apprentice $person,string $area,string $flag,string $from,string $to,string $expected,User $owner,string $slot,string $token,string $due,string $reference):Work {
+  if(!Str::isUuid($token)||!CentreManagerAccess::reference($reference)){CentrePlanning::fail('Use a fresh follow-up and a clear operational reference.');}
+  return DB::transaction(function()use($actor,$auth,$person,$area,$flag,$from,$to,$expected,$owner,$slot,$token,$due,$reference){$u=PortalOperations::actor($actor,$auth);$a=Apprentice::whereKey($person->id)->lockForUpdate()->firstOrFail();abort_unless(self::manager($u,$a,$area),403);$o=User::whereKey($owner->id)->lockForUpdate()->firstOrFail();$options=CentreOversight::owners($a,$area,$flag);if(!collect($options)->contains(fn($v)=>$v['id']===$o->id&&$v['slot']===$slot)){CentrePlanning::fail('Choose a current responsible staff member; changed or missing assignments need their original workflow.');}
+   validator(['due'=>$due],['due'=>'required|date_format:Y-m-d|after_or_equal:today|before_or_equal:'.today()->addYear()->toDateString()])->validate();$binding=['by'=>$u->id,'auth'=>$auth,'area'=>$area,'flag'=>$flag,'period'=>[$from,$to],'source_hash'=>$expected,'owner'=>$o->id,'slot'=>$slot,'due'=>$due,'reference'=>$reference];
+   if($old=Work::where('request_token',$token)->lockForUpdate()->first()){if(self::intact($old)&&$old->apprentice_id===$a->id&&$old->details['initial']===$binding){return $old;}CentrePlanning::fail('This request belongs to different follow-up work.');}
+   $position=CentreOversight::position($u,$a,$area,$from,$to);if($position['source_hash']!==$expected||!isset($position['flags'][$flag])){CentrePlanning::fail('The source flag changed; check a fresh operational view.');}
+   $key=ReviewedImports::hash([$a->id,$area,$flag]);if(Work::where('open_key',$key)->lockForUpdate()->exists()){CentrePlanning::fail('An open Centre follow-up already exists for this source flag.');}$p=CentreManagerAccess::policy($u);
+   $w=new Work(['id'=>(string)Str::uuid(),'request_token'=>$token,'apprentice_id'=>$a->id,'created_by'=>$u->id,'owner_id'=>$o->id,'owner_slot'=>$slot,'area'=>$area,'flag'=>$flag,'status'=>'Open','version'=>1,'open_key'=>$key,'due_on'=>$due,'grant_version'=>$p['grant_version'],'source_hash'=>$expected]);$w->details=['fields'=>self::fields($w),'initial'=>$binding,'source_flag'=>$position['flags'][$flag],'history'=>[['by'=>$u->id,'at'=>now()->toIso8601String(),'status'=>'Open','reference'=>$reference]]];$w->details_hash=ReviewedImports::hash($w->details);$w->save();PortalOperations::event($u,'centre_followup',$w->id,'centre_followup_created',['area'=>$area,'flag'=>$flag,'owner'=>$o->id,'no_external_message_sent'=>true]);return $w;
+  },3);
+ }
+ public static function update(User $actor,int $auth,Work $record,int $version,string $status,string $expected,string $reference):void {
+  if(!in_array($status,[...self::STATES,'Cancelled'],true)||!CentreManagerAccess::reference($reference)){CentrePlanning::fail('Choose a current follow-up decision and a clear reference.');}
+  DB::transaction(function()use($actor,$auth,$record,$version,$status,$expected,$reference){$u=PortalOperations::actor($actor,$auth);$w=Work::whereKey($record->id)->lockForUpdate()->firstOrFail();$a=Apprentice::whereKey($w->apprentice_id)->lockForUpdate()->firstOrFail();abort_unless($status==='Cancelled'?self::manager($u,$a,$w->area):self::owner($u,$w,$a),403);
+   if(!self::intact($w)||$w->version!==$version||in_array($w->status,['Resolved','Cancelled'],true)){CentrePlanning::fail('The follow-up changed or already closed.');}
+   if($status!=='Cancelled'){$p=CentreOversight::position($u,$a,$w->area,$w->details['initial']['period'][0],$w->details['initial']['period'][1]);if($p['source_hash']!==$expected){CentrePlanning::fail('The current source changed; reopen before updating the follow-up.');}}
+   $d=$w->details;$before=self::fields($w);$w->status=$status;$w->version++;if(in_array($status,['Resolved','Cancelled'],true)){$w->open_key=null;}$d['fields']=self::fields($w);$d['history'][]=['before'=>$before,'by'=>$u->id,'at'=>now()->toIso8601String(),'status'=>$status,'reference'=>$reference,'checked_source_hash'=>$expected];$w->details=$d;$w->details_hash=ReviewedImports::hash($d);$w->save();PortalOperations::event($u,'centre_followup',$w->id,'centre_followup_updated',['status'=>$status,'version'=>$w->version,'source_record_completion_changed'=>false]);
+  },3);
+ }
+}

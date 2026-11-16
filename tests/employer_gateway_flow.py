@@ -148,9 +148,9 @@ with tempfile.TemporaryDirectory(prefix='gta-employer-gateway-') as temporary:
             assert c.execute('SELECT status FROM smart_actions WHERE id=?',(ids['target'],)).fetchone()[0]=='To do'
         with sqlite3.connect(db) as c:
             after_tables={row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-            assert before_tables-after_tables=={'historical_cohorts','historical_cohort_rows'} and not(after_tables-before_tables)
+            assert before_tables-after_tables=={'centre_manager_grants','centre_manager_access_requests','centre_manager_followups'} and not(after_tables-before_tables)
         assert artisan('migrate','--force').returncode==0
-        passed('Latest Pack48 down/up removes only the two historical cohort tables while all prior schema and business-data checks are retained')
+        passed('Latest Pack49 down/up removes only the three Centre Manager access/follow-up tables while all prior schema and business-data checks are retained')
         configure('production');start_backend();assert req(admin,'/employer-accounts')[0]==503 and req(employer,'/employer-actions')[0]==503 and req(learner,gateway)[0]==503
         passed('Existing production gate remains enforced on account, employer and Gateway routes')
         output={'passed':len(checks),'failed':0,'checks':checks,'transport':'Actual local client-verified HTTPS, cached staging config, disposable SQLite/encrypted database sessions/cache','realDataUsed':False,'externalMessagesSent':False,'actualCloudAccess':False,'actualNativeEngine':False,'actualBrowserOrPhoneTested':False,'actualGatewayCriteriaSupplied':False,'actualParticipantSignatures':False};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps(output))

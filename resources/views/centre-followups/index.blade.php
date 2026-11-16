@@ -1,0 +1,6 @@
+@extends('layout')
+@section('title','Centre follow-ups')
+@section('content')
+<h1>Centre follow-ups</h1>@include('learning.errors')<p>Your current responsibility or reviewed group/area scope controls this list. A follow-up coordinates work; the source task, register, qualification or review retains its own completion workflow.</p><form method="get"><label>Status <select name="state"><option value="">All</option>@foreach(['Open','In progress','Waiting','Resolved','Cancelled'] as $state)<option @selected(request('state')===$state)>{{ $state }}</option>@endforeach</select></label><button>Filter</button></form>
+<section class="panel">@forelse($work as $w)<article class="work-row"><div><h2>{{ $w->status }} · {{ \App\Support\CentreManagerAccess::AREAS[$w->area] }}</h2><p>{{ $w->apprentice->reference }} · {{ $w->apprentice->first_name }} {{ $w->apprentice->last_name }} · {{ $w->owner->name }} · due {{ $w->due_on->format('d/m/Y') }}</p></div><a href="{{ route('centre-followups.show',$w) }}">Open follow-up</a></article>@empty<p>No follow-ups match your current authorised responsibility and filter.</p>@endforelse{{ $work->links() }}</section>@if(\App\Support\CentreManagerAccess::workspace($u))<p><a href="{{ route('centre-oversight.index') }}">Centre oversight</a></p>@endif
+@endsection
