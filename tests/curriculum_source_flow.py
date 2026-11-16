@@ -114,7 +114,10 @@ with tempfile.TemporaryDirectory(prefix='gta-curriculum-source-') as temporary:
         passed('Changed task-source content stales the snapshot and withdrawal retains history without rewriting any tasks')
         stop_backend();start_backend();status,text,_,_=req(reviewer,record_path);assert status==200 and 'Withdrawn'in text and 'Source changed; record withdrawn for follow-up'in text
         passed('Database sessions and reviewed/withdrawn source history survive a PHP restart')
-        stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
+        stop_backend()
+        migration='2026_11_14_030000_create_source_reconciliations'
+        with sqlite3.connect(db)as c:rollback_count=c.execute('SELECT COUNT(*) FROM migrations WHERE id >= (SELECT id FROM migrations WHERE migration=?)',(migration,)).fetchone()[0]
+        assert rollback_count>0 and artisan('migrate:rollback','--step='+str(rollback_count),'--path=database/migrations/'+migration+'.php','--force').returncode==0
         with sqlite3.connect(db)as c:assert c.execute('SELECT * FROM learning_tasks ORDER BY id').fetchall()==after_fixture and c.execute('SELECT COUNT(*) FROM users').fetchone()[0]==5 and c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('source_reconciliations','source_reconciliation_events')").fetchone()[0]==0
         assert artisan('migrate','--force').returncode==0
         passed('New source-review migration rolls back/reapplies on disposable SQLite without changing task or account records')

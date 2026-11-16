@@ -107,7 +107,9 @@ with tempfile.TemporaryDirectory(prefix='gta-second-factor-') as temporary:
         with sqlite3.connect(db)as c:
             row=c.execute('SELECT secret,confirmed_at,setup_binding,recovery_hashes FROM account_second_factors').fetchone();assert row[1] and row[2]is None and recovery[0]not in row[3] and len(json.loads(row[3]))==10
         assert not codes(req(admin,'/account/two-step')[1])
-        assert artisan('migrate:rollback','--step=1','--force').returncode!=0
+        migration='2026_11_14_110000_create_account_second_factors'
+        with sqlite3.connect(db)as c:rollback_count=c.execute('SELECT COUNT(*) FROM migrations WHERE id >= (SELECT id FROM migrations WHERE migration=?)',(migration,)).fetchone()[0]
+        assert rollback_count>0 and artisan('migrate:rollback','--step='+str(rollback_count),'--path=database/migrations/'+migration+'.php','--force').returncode!=0
         with sqlite3.connect(db)as c:assert c.execute('SELECT COUNT(*) FROM account_second_factors WHERE confirmed_at IS NOT NULL').fetchone()[0]==1
         passed('Migration rollback refuses to drop an enrolled factor even with an explicit force flag')
         passed('Independent authenticator code confirms enrolment; ten recovery codes are hashed and displayed once')
@@ -140,7 +142,7 @@ with tempfile.TemporaryDirectory(prefix='gta-second-factor-') as temporary:
             assert c.execute('SELECT id,password FROM users ORDER BY id').fetchall()==original_passwords and c.execute('SELECT * FROM apprentices').fetchall()==original_people
             events=json.dumps(c.execute('SELECT * FROM account_access_events').fetchall());assert secret not in events and private_password not in events and all(code not in events for code in recovery+replacement)
         passed('Password-plus-factor disable preserves accounts, passwords and apprentice records; audit events contain no setup key or recovery codes')
-        stop_backend();assert artisan('migrate:rollback','--step=1','--force').returncode==0
+        stop_backend();assert artisan('migrate:rollback','--step='+str(rollback_count),'--path=database/migrations/'+migration+'.php','--force').returncode==0
         with sqlite3.connect(db)as c:
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='account_second_factors'").fetchone()[0]==0
             assert c.execute('SELECT id,password FROM users ORDER BY id').fetchall()==original_passwords and c.execute('SELECT * FROM apprentices').fetchall()==original_people

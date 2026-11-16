@@ -62,9 +62,9 @@ with tempfile.TemporaryDirectory(prefix='gta-evidence-restore-')as temporary:
         passed('A pre-existing destination is retained and never adopted, overwritten or deleted')
         with sqlite3.connect(db)as c:assert c.execute('SELECT COUNT(*) FROM evidence_restore_runs').fetchone()[0]==2
         with sqlite3.connect(db)as c:rollback_count=c.execute("SELECT COUNT(*) FROM migrations WHERE id >= (SELECT id FROM migrations WHERE migration=?)",('2026_11_14_020000_create_evidence_restore_runs',)).fetchone()[0]
-        assert rollback_count>0 and artisan('migrate:rollback','--step='+str(rollback_count),'--force').returncode==0 and snapshot()==before and backup.read_bytes()==expected_bytes
+        assert rollback_count>0 and artisan('migrate:rollback','--step='+str(rollback_count),'--path=database/migrations/2026_11_14_020000_create_evidence_restore_runs.php','--force').returncode==0 and snapshot()==before and backup.read_bytes()==expected_bytes
         assert artisan('migrate','--force').returncode==0
-        passed('Restore and any later fixture migrations roll back/reapply on the disposable fixture while source records and retained backup bytes remain unchanged')
+        passed('The specific restore migration rolls back/reapplies while later fixture migrations are retained on the disposable fixture while source records and retained backup bytes remain unchanged')
         output={'passed':len(checks),'failed':0,'checks':checks,'engine':'Disposable SQLite and real local private filesystem across separate PHP/Artisan processes','applicationLinksChanged':False,'sourceRecordsChanged':False,'originalLossSimulatedInFixtureOnly':True,'cutoverApproved':False,'actualCloudAccess':False,'actualNativeEngine':False,'remoteStorageVerified':False,'limits':['Not a database/application backup or live restore/cutover','Native engine/concurrency, remote bucket/privacy/provider, browser and actual hosted acceptance remain separate']};Path(args.output).write_text(json.dumps(output,indent=2)+'\n');print(json.dumps({'passed':len(checks),'failed':0,'cutoverApproved':False}))
     except Exception:
         Path(args.output).write_text(json.dumps({'passed':len(checks),'failed':1,'checks':checks,'cutoverApproved':False},indent=2)+'\n');raise

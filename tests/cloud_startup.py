@@ -92,7 +92,7 @@ with tempfile.TemporaryDirectory(prefix='gta-staging-startup-') as temporary:
         proxy=http.server.ThreadingHTTPServer(('127.0.0.1',tls_port),Proxy);tls=ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER);tls.load_cert_chain(cert,key);proxy.socket=tls.wrap_socket(proxy.socket,server_side=True)
         thread=threading.Thread(target=proxy.serve_forever,daemon=True);thread.start();start_backend()
         jar=http.cookiejar.CookieJar();client=build_opener(HTTPCookieProcessor(jar),HTTPSHandler(context=ssl.create_default_context(cafile=str(cert))))
-        status,text,_,headers=req(client,'/login');assert status==200 and 'GTA staging portal' in text and 'authorised staging account' in text
+        status,text,_,headers=req(client,'/login');assert status==200 and 'Staging portal' in text and 'authorised test account' in text
         assert 'no-store' in headers.get('Cache-Control','') and headers.get('X-Frame-Options')=='DENY'
         session_cookies=[c for c in jar if 'session' in c.name];assert session_cookies and all(c.secure for c in session_cookies)
         assert 'httponly' in str(headers.get_all('Set-Cookie')).lower()

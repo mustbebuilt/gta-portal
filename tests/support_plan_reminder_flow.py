@@ -179,7 +179,9 @@ with tempfile.TemporaryDirectory(prefix='gta-support-review-wire-') as temporary
         stop_backend()
         with sqlite3.connect(db)as c:
             cols=[row[1]for row in c.execute('PRAGMA table_info(support_plans)')if row[1]not in ['review_owner_id','review_owner_revision']];select_cols=','.join(cols);before=c.execute('SELECT '+select_cols+' FROM support_plans').fetchall();accounts=c.execute('SELECT * FROM users ORDER BY id').fetchall()
-        assert artisan('migrate:rollback','--step=1','--force').returncode==0
+        migration='2026_11_14_120000_create_support_plan_reminders'
+        with sqlite3.connect(db)as c:rollback_count=c.execute('SELECT COUNT(*) FROM migrations WHERE id >= (SELECT id FROM migrations WHERE migration=?)',(migration,)).fetchone()[0]
+        assert rollback_count>0 and artisan('migrate:rollback','--step='+str(rollback_count),'--path=database/migrations/'+migration+'.php','--force').returncode==0
         with sqlite3.connect(db)as c:
             assert c.execute('SELECT '+select_cols+' FROM support_plans').fetchall()==before and c.execute('SELECT * FROM users ORDER BY id').fetchall()==accounts
             assert c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('support_plan_reminders','support_plan_reminder_events')").fetchone()[0]==0
