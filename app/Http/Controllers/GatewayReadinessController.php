@@ -49,7 +49,8 @@ class GatewayReadinessController extends Controller
         abort_unless(GatewayReadiness::allowed($r->user(), $apprentice), 403);
         $staff = GatewayReadiness::staff($r->user(), $apprentice);
 
-        return response()->view('gateway.show', ['apprentice' => $apprentice, 'staff' => $staff, 'position' => GatewayReadiness::position($apprentice), 'plans' => $staff ? GatewayReadinessPlan::where('apprentice_id', $apprentice->id)->orderByDesc('id')->get() : collect(), 'qualifications' => $staff ? Qualification::where('apprentice_id', $apprentice->id)->orderBy('id')->get(['id', 'title']) : collect()])->header('Cache-Control', 'no-store, private');
+        $position=GatewayReadiness::position($apprentice);
+        return response()->view('gateway.show', ['apprentice' => $apprentice, 'staff' => $staff, 'position' => $position,'gatewaySummary'=>\App\Support\GatewaySummary::for($r->user(),$apprentice,$position), 'plans' => $staff ? GatewayReadinessPlan::where('apprentice_id', $apprentice->id)->orderByDesc('id')->get() : collect(), 'qualifications' => $staff ? Qualification::where('apprentice_id', $apprentice->id)->orderBy('id')->get(['id', 'title']) : collect()])->header('Cache-Control', 'no-store, private');
     }
 
     public function prepare(Request $r, Apprentice $apprentice)

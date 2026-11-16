@@ -69,6 +69,7 @@ return $result;
             return null;
         }
         $id = match (true) {
+            $r->routeIs('gateway.*') => 'gateway-preparation',
             $r->routeIs('journey.*') => 'journey-progress',
             $r->routeIs('employer-accounts.*','employer-setup.*','employer-grants.*') => 'employer-setup',
             $r->routeIs('apprentice-onboarding.*') => 'add-apprentice',

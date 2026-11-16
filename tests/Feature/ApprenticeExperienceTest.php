@@ -37,7 +37,7 @@ class ApprenticeExperienceTest extends TestCase {
  }
  public function test_session_uses_saved_members_future_time_and_cancelled_filter():void {
   [$u,$t,$a]=$this->fixture();TrainingSession::factory()->create(['session_date'=>today()->addDay(),'state'=>'Cancelled','members'=>[$a->id],'name'=>'CANCELLED SECRET']);TrainingSession::factory()->create(['session_date'=>today()->addDay(),'members'=>[],'name'=>'OTHER ROSTER SECRET']);$s=TrainingSession::factory()->create(['session_date'=>today()->addDays(2),'members'=>[$a->id],'name'=>'YOUR NEXT SESSION']);
-  $this->assertSame($s->id,ApprenticeExperience::home($a)['session']->id);$this->actingAs($u)->get('/my-next-step')->assertSee('YOUR NEXT SESSION')->assertDontSee('CANCELLED SECRET')->assertDontSee('OTHER ROSTER SECRET')->assertSee('needs confirming with your tutor');
+  $this->assertSame($s->id,ApprenticeExperience::home($a)['session']->id);$this->actingAs($u)->get('/my-next-step')->assertSee('YOUR NEXT SESSION')->assertDontSee('CANCELLED SECRET')->assertDontSee('OTHER ROSTER SECRET')->assertSee('tracked next-review reference needs checking');
  }
  public function test_empty_and_partial_blocks_never_claim_completion():void {
   [$u,$t,$a]=$this->fixture();$b=ApprenticeExperience::blocks($a);$this->assertCount(12,$b);$this->assertSame('Tasks not allocated',$b[0]['status']);LearningTask::factory()->create(['apprentice_id'=>$a->id,'status'=>'Approved']);$b=ApprenticeExperience::blocks($a);$this->assertSame(1,$b[0]['approved']);$this->assertFalse($b[0]['complete']);$this->assertFalse($b[10]['complete']);$this->assertNull($b[11]['approved']);

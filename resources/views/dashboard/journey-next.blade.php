@@ -21,18 +21,7 @@
 @endif
 </section>
 <section><h3>Next review</h3>
-@if($appointment)
-<p><strong>Booked review appointment</strong></p><p>{{ $appointment->starts_at->copy()->timezone(config('app.timezone'))->format('d/m/Y H:i') }}–{{ $appointment->ends_at->copy()->timezone(config('app.timezone'))->format('H:i') }} ({{ config('app.timezone') }})</p><a class="button" href="{{ route('review-appointments.show',$appointment) }}">Open review appointment</a><p>Publication is not confirmation that everyone can attend, that the meeting happened or that the review is signed.</p>
-@else
-<p>No current published review appointment is available here. Confirm the booking with the Tutor.</p>
-@endif
-@if($appointmentLimited)<p>There are more than 50 upcoming published appointment records. Ask GTA to reconcile the appointment list.</p>@endif
-@if($nextStep['review']['next_due'])
-<p>Review due reference: <strong>{{ \Carbon\Carbon::parse($nextStep['review']['next_due'])->format('d/m/Y') }}</strong> · {{ $nextStep['review']['status'] }}</p><p>This reference is 10 weeks after the latest reliable checked review meeting. It is separate from the booked appointment.</p>
-@else
-<p>The tracked next-review reference needs checking with the Tutor. A missing reference does not mean a review is unnecessary.</p>
-@endif
-@if($nextStep['review']['integrity_checks']||$reviewChecks)<p class="test-notice">A checked review record needs source checking. It does not add a milestone or establish a reliable next-review reference here.</p>@endif
+@include('reviews.next-step')
 </section>
 </div>
 @if(\App\Support\LearningAccess::learner(auth()->user(),$apprentice))<p><a href="{{ route('experience.home') }}">Open My next step and all outstanding actions</a></p>@endif

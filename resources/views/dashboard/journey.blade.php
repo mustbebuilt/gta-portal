@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="{{ asset('assets/journey-marker55.css') }}?v=55"><script src="{{ asset('assets/journey-marker55.js') }}?v=55" defer></script>
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Your apprenticeship journey</h1><p>A simple road map of dated, recorded milestones.</p></div><div class="toolbar"><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a><button type="button" data-print>Print / Save PDF</button></div></header>
 @include('dashboard.journey-next')
+@include('gateway.summary')
 @include('experience.blocks')
 <section class="panel"><h2>Personal achievement timeline</h2><p>Recorded task approvals, qualifications, completed targets, checked workplace achievements and checked review meetings.</p>@if(\App\Support\LearningAccess::learner(auth()->user(),$apprentice))<a class="button" href="{{ route('experience.index',['filter'=>'achievement']) }}#new-achievement">Add a workplace achievement</a>@endif</section>
 <p class="muted">Milestones are ordered by date; spacing does not measure duration or achievement. Checked review meeting dates are included; draft reviews, bookings, employer changes and full individual-plan achievement are separate. Private support and Careers records are excluded from this road map.</p>
