@@ -2,9 +2,9 @@
 @section('title', 'Training blocks and tasks')
 @section('content')
 @include('quick-actions.context')
-<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->full_name ?? ($apprentice->first_name.' '.$apprentice->last_name) }}</p><h1>Training blocks and tasks</h1><p class="muted">{{ auth()->user()->role==='apprentice'?'Open the task, complete the work, then send it to your tutor.':'Review assigned tasks, submitted work and recorded tutor decisions.' }}</p></div><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a><a class="button" href="{{ route('curriculum.show',$apprentice) }}">Blocks and KSB reference</a></header>
-<p><a class="button" href="{{ route('delivery.show',$apprentice) }}">Individual delivery plan and block calendar</a></p>
-@if(\App\Support\CurriculumSources::allowed(auth()->user(),$apprentice))<p><a class="button" href="{{ route('curriculum-sources.show',$apprentice) }}">Task source comparison</a></p>@endif
+<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Training blocks and tasks</h1><p class="muted">{{ auth()->user()->role==='apprentice'?'Open the task, complete the work, then send it to your tutor.':'Review assigned tasks, submitted work and recorded tutor decisions.' }}</p></div></header>
+<nav class="page-actions64" aria-label="Training page actions"><div class="toolbar"><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a><a class="button" href="{{ route('delivery.show',$apprentice) }}">Delivery plan and block calendar</a></div>
+<details class="action-disclosure64"><summary>Reference and source details</summary><ul><li><a href="{{ route('curriculum.show',$apprentice) }}">Blocks and KSB reference</a></li>@if(\App\Support\CurriculumSources::allowed(auth()->user(),$apprentice))<li><a href="{{ route('curriculum-sources.show',$apprentice) }}">Task source comparison</a></li>@endif</ul></details></nav>
 @include('learning.errors')
 @include('learning.source-warnings')
 @if($manage)@include('learning.block-controls')@endif

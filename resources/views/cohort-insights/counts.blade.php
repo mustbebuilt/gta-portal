@@ -1,1 +1,1 @@
-<table><thead><tr><th>Measure</th><th>Count</th></tr></thead><tbody>@foreach($counts as $key=>$value)<tr><th>{{ \App\Support\PortalLanguage::measure($key) }}</th><td>{{ $value }}</td></tr>@endforeach</tbody></table>
+<div class="table-scroll" role="region" aria-label="Report counts" tabindex="0"><table><thead><tr><th>Measure</th><th>Count</th></tr></thead><tbody>@foreach($counts as $key=>$value)<tr><th>{{ \App\Support\PortalLanguage::measure($key) }}</th><td>{{ $value }}</td></tr>@endforeach</tbody></table></div>
