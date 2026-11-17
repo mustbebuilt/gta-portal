@@ -23,6 +23,7 @@ class PortalNavigation
         if(StaffHandover::recipientAllowed($u)) {$primary[]=$item('Staff handovers','incoming-handovers.index',[],['incoming-handovers.*']);}
         if(MyResponsibilities::allowed($u)) {$primary[]=$item('My responsibilities','responsibilities.index',[],['responsibilities.*']);}
         if(in_array($u->role,['admin','ceo','tutor','apprentice'],true)) {$primary[]=$item('Dashboard','dashboard.index',[],['dashboard.*']);}
+        if(in_array($u->role,['admin','ceo','tutor','apprentice','employer','mentor'],true)||StaffDuties::has($u,'mentor')||($u->role==='manager'&&CentreManagerAccess::workspace($u))) {$primary[]=$item($u->role==='apprentice'?'My progress':'Progress reporting','progress66.index',[],['progress66.*']);}
         $links=[];
         if(Gate::forUser($u)->allows('viewAny',Apprentice::class)) {
             $links[]=$item('Apprentices','apprentices.index',[],['apprentices.*','learning.*','tasks.*','blocks.*','plans.*','delivery.*','actions.*','otj.*','extra.*','scorecards.*']);

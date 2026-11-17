@@ -1,0 +1,1132 @@
+{
+  "banner": "Demonstration \u2014 fictional data",
+  "as_of": "2026-11-17",
+  "people": [
+    {
+      "id": "DEMO-01",
+      "name": "Fictional Rowan Taylor",
+      "reference": "FICTIONAL-001",
+      "programme": "Autocare Technician Level 2",
+      "group": "Fictional Group A",
+      "tutor": "Fictional Tutor A",
+      "employer": "Fictional Workshop A",
+      "mentor": "Fictional Mentor A",
+      "scenario": "On plan",
+      "task_status": {
+        "Approved": 20,
+        "Awaiting marking": 5,
+        "Referred": 2,
+        "Draft / other": 23,
+        "Source needs checking": 0
+      },
+      "expected_tasks": 20,
+      "attendance_rows": [
+        {
+          "date": "2026-09-13",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-20",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-27",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-04",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-11",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-18",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-25",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-01",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-08",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        },
+        {
+          "date": "2026-11-15",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        }
+      ],
+      "otj": {
+        "recorded_hours": 264,
+        "target_hours": 660,
+        "planned_due_hours": 264,
+        "pending_sources": 0,
+        "invalid_sources": 0,
+        "delivered_hours": null,
+        "approved_extra_hours": 0
+      },
+      "review_due": "2026-11-24",
+      "review_state": "Due reference",
+      "topics": {
+        "maths": {
+          "assigned": 8,
+          "completed": 2,
+          "qualification": "Working towards"
+        },
+        "english": {
+          "assigned": 6,
+          "completed": 1,
+          "qualification": "Working towards"
+        }
+      },
+      "actions": [
+        {
+          "title": "Review 5 submitted task(s)",
+          "owner": "Tutor",
+          "due": "2026-11-20",
+          "state": "Awaiting marking",
+          "kind": "marking"
+        },
+        {
+          "title": "Confirm the workplace learning target",
+          "owner": "Employer / workplace mentor",
+          "due": "2026-11-20",
+          "state": "To do",
+          "kind": "workplace"
+        }
+      ],
+      "checks": [],
+      "feedback": [
+        {
+          "date": "2026-11-16",
+          "text": "Your explanation links the workplace checks to the task clearly. Add the measured values to make the evidence more useful."
+        }
+      ],
+      "milestones": [
+        {
+          "date": "2026-11-14",
+          "title": "Training Block 4 approved"
+        }
+      ],
+      "outcome": "Active",
+      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+    },
+    {
+      "id": "DEMO-02",
+      "name": "Fictional Amira Taylor",
+      "reference": "FICTIONAL-002",
+      "programme": "Heavy Vehicle Technician Level 3",
+      "group": "Fictional Group A",
+      "tutor": "Fictional Tutor A",
+      "employer": "Fictional Workshop B",
+      "mentor": "Fictional Mentor B",
+      "scenario": "Ahead of plan",
+      "task_status": {
+        "Approved": 28,
+        "Awaiting marking": 4,
+        "Referred": 1,
+        "Draft / other": 17,
+        "Source needs checking": 0
+      },
+      "expected_tasks": 24,
+      "attendance_rows": [
+        {
+          "date": "2026-09-13",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-20",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-27",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-04",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-11",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-18",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-25",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-01",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-08",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-15",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        }
+      ],
+      "otj": {
+        "recorded_hours": 330,
+        "target_hours": 660,
+        "planned_due_hours": 300,
+        "pending_sources": 0,
+        "invalid_sources": 0,
+        "delivered_hours": null,
+        "approved_extra_hours": 12
+      },
+      "review_due": "2026-11-24",
+      "review_state": "Due reference",
+      "topics": {
+        "maths": {
+          "assigned": 8,
+          "completed": 2,
+          "qualification": "Working towards"
+        },
+        "english": {
+          "assigned": 6,
+          "completed": 1,
+          "qualification": "Working towards"
+        }
+      },
+      "actions": [
+        {
+          "title": "Review 4 submitted task(s)",
+          "owner": "Tutor",
+          "due": "2026-11-20",
+          "state": "Awaiting marking",
+          "kind": "marking"
+        }
+      ],
+      "checks": [],
+      "feedback": [
+        {
+          "date": "2026-11-16",
+          "text": "Your explanation links the workplace checks to the task clearly. Add the measured values to make the evidence more useful."
+        }
+      ],
+      "milestones": [
+        {
+          "date": "2026-11-14",
+          "title": "Training Block 4 approved"
+        }
+      ],
+      "outcome": "Active",
+      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+    },
+    {
+      "id": "DEMO-03",
+      "name": "Fictional Callum Taylor",
+      "reference": "FICTIONAL-003",
+      "programme": "Autocare Technician Level 2",
+      "group": "Fictional Group A",
+      "tutor": "Fictional Tutor A",
+      "employer": "Fictional Workshop A",
+      "mentor": "Fictional Mentor A",
+      "scenario": "Behind plan",
+      "task_status": {
+        "Approved": 12,
+        "Awaiting marking": 10,
+        "Referred": 4,
+        "Draft / other": 24,
+        "Source needs checking": 0
+      },
+      "expected_tasks": 20,
+      "attendance_rows": [
+        {
+          "date": "2026-09-13",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-20",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-27",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-04",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-11",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-18",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-25",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-01",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-08",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        },
+        {
+          "date": "2026-11-15",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        }
+      ],
+      "otj": {
+        "recorded_hours": 140,
+        "target_hours": 660,
+        "planned_due_hours": 264,
+        "pending_sources": 1,
+        "invalid_sources": 0,
+        "delivered_hours": null,
+        "approved_extra_hours": 0
+      },
+      "review_due": "2026-11-24",
+      "review_state": "Due reference",
+      "topics": {
+        "maths": {
+          "assigned": 8,
+          "completed": 2,
+          "qualification": "Working towards"
+        },
+        "english": {
+          "assigned": 6,
+          "completed": 1,
+          "qualification": "Working towards"
+        }
+      },
+      "actions": [
+        {
+          "title": "Complete the brake inspection task",
+          "owner": "Apprentice",
+          "due": "2026-11-16",
+          "state": "To do",
+          "kind": "action"
+        },
+        {
+          "title": "Review 10 submitted task(s)",
+          "owner": "Tutor",
+          "due": "2026-11-20",
+          "state": "Awaiting marking",
+          "kind": "marking"
+        },
+        {
+          "title": "Confirm the agreed job rotation",
+          "owner": "Employer / workplace mentor",
+          "due": "2026-11-16",
+          "state": "To do",
+          "kind": "workplace"
+        }
+      ],
+      "checks": [],
+      "feedback": [
+        {
+          "date": "2026-11-16",
+          "text": "Your explanation links the workplace checks to the task clearly. Add the measured values to make the evidence more useful."
+        }
+      ],
+      "milestones": [],
+      "outcome": "Active",
+      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+    },
+    {
+      "id": "DEMO-04",
+      "name": "Fictional Freya Taylor",
+      "reference": "FICTIONAL-004",
+      "programme": "Heavy Vehicle Technician Level 3",
+      "group": "Fictional Group A",
+      "tutor": "Fictional Tutor A",
+      "employer": "Fictional Workshop B",
+      "mentor": "Fictional Mentor B",
+      "scenario": "Awaiting marking",
+      "task_status": {
+        "Approved": 22,
+        "Awaiting marking": 15,
+        "Referred": 0,
+        "Draft / other": 13,
+        "Source needs checking": 0
+      },
+      "expected_tasks": 22,
+      "attendance_rows": [
+        {
+          "date": "2026-09-13",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-20",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-27",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-04",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-11",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-18",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-25",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-01",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-08",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-15",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        }
+      ],
+      "otj": {
+        "recorded_hours": 290,
+        "target_hours": 660,
+        "planned_due_hours": 290,
+        "pending_sources": 0,
+        "invalid_sources": 0,
+        "delivered_hours": null,
+        "approved_extra_hours": 0
+      },
+      "review_due": "2026-11-24",
+      "review_state": "Due reference",
+      "topics": {
+        "maths": {
+          "assigned": 8,
+          "completed": 2,
+          "qualification": "Working towards"
+        },
+        "english": {
+          "assigned": 6,
+          "completed": 1,
+          "qualification": "Working towards"
+        }
+      },
+      "actions": [
+        {
+          "title": "Review 15 submitted task(s)",
+          "owner": "Tutor",
+          "due": "2026-11-20",
+          "state": "Awaiting marking",
+          "kind": "marking"
+        }
+      ],
+      "checks": [],
+      "feedback": [
+        {
+          "date": "2026-11-16",
+          "text": "Your explanation links the workplace checks to the task clearly. Add the measured values to make the evidence more useful."
+        }
+      ],
+      "milestones": [
+        {
+          "date": "2026-11-14",
+          "title": "Training Block 4 approved"
+        }
+      ],
+      "outcome": "Active",
+      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+    },
+    {
+      "id": "DEMO-05",
+      "name": "Fictional Ellis Taylor",
+      "reference": "FICTIONAL-005",
+      "programme": "Autocare Technician Level 2",
+      "group": "Fictional Group A",
+      "tutor": "Fictional Tutor A",
+      "employer": "Fictional Workshop A",
+      "mentor": "Fictional Mentor A",
+      "scenario": "Attendance support",
+      "task_status": {
+        "Approved": 18,
+        "Awaiting marking": 3,
+        "Referred": 2,
+        "Draft / other": 27,
+        "Source needs checking": 0
+      },
+      "expected_tasks": 20,
+      "attendance_rows": [
+        {
+          "date": "2026-09-13",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-20",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-27",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-04",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-11",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-18",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-25",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        },
+        {
+          "date": "2026-11-01",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        },
+        {
+          "date": "2026-11-08",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        },
+        {
+          "date": "2026-11-15",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        }
+      ],
+      "otj": {
+        "recorded_hours": 180,
+        "target_hours": 660,
+        "planned_due_hours": 264,
+        "pending_sources": 0,
+        "invalid_sources": 0,
+        "delivered_hours": null,
+        "approved_extra_hours": 0
+      },
+      "review_due": "2026-11-24",
+      "review_state": "Due reference",
+      "topics": {
+        "maths": {
+          "assigned": 8,
+          "completed": 2,
+          "qualification": "Working towards"
+        },
+        "english": {
+          "assigned": 6,
+          "completed": 1,
+          "qualification": "Working towards"
+        }
+      },
+      "actions": [
+        {
+          "title": "Confirm the agreed workplace training slot",
+          "owner": "Employer / workplace mentor",
+          "due": "2026-11-20",
+          "state": "To do",
+          "kind": "workplace"
+        },
+        {
+          "title": "Review 3 submitted task(s)",
+          "owner": "Tutor",
+          "due": "2026-11-20",
+          "state": "Awaiting marking",
+          "kind": "marking"
+        }
+      ],
+      "checks": [],
+      "feedback": [
+        {
+          "date": "2026-11-16",
+          "text": "Your explanation links the workplace checks to the task clearly. Add the measured values to make the evidence more useful."
+        }
+      ],
+      "milestones": [],
+      "outcome": "Active",
+      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+    },
+    {
+      "id": "DEMO-06",
+      "name": "Fictional Priya Taylor",
+      "reference": "FICTIONAL-006",
+      "programme": "Heavy Vehicle Technician Level 3",
+      "group": "Fictional Group A",
+      "tutor": "Fictional Tutor A",
+      "employer": "Fictional Workshop B",
+      "mentor": "Fictional Mentor B",
+      "scenario": "Functional Skills in progress",
+      "task_status": {
+        "Approved": 24,
+        "Awaiting marking": 4,
+        "Referred": 2,
+        "Draft / other": 20,
+        "Source needs checking": 0
+      },
+      "expected_tasks": 24,
+      "attendance_rows": [
+        {
+          "date": "2026-09-13",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-20",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-27",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-04",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-11",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-18",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-25",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-01",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-08",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-15",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        }
+      ],
+      "otj": {
+        "recorded_hours": 316,
+        "target_hours": 660,
+        "planned_due_hours": 316,
+        "pending_sources": 0,
+        "invalid_sources": 0,
+        "delivered_hours": null,
+        "approved_extra_hours": 0
+      },
+      "review_due": "2026-11-24",
+      "review_state": "Due reference",
+      "topics": {
+        "maths": {
+          "assigned": 8,
+          "completed": 4,
+          "qualification": "Working towards"
+        },
+        "english": {
+          "assigned": 6,
+          "completed": 3,
+          "qualification": "Working towards"
+        }
+      },
+      "actions": [
+        {
+          "title": "Review 4 submitted task(s)",
+          "owner": "Tutor",
+          "due": "2026-11-20",
+          "state": "Awaiting marking",
+          "kind": "marking"
+        }
+      ],
+      "checks": [],
+      "feedback": [
+        {
+          "date": "2026-11-16",
+          "text": "Your explanation links the workplace checks to the task clearly. Add the measured values to make the evidence more useful."
+        }
+      ],
+      "milestones": [
+        {
+          "date": "2026-11-14",
+          "title": "Training Block 4 approved"
+        }
+      ],
+      "outcome": "Active",
+      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+    },
+    {
+      "id": "DEMO-07",
+      "name": "Fictional Noah Taylor",
+      "reference": "FICTIONAL-007",
+      "programme": "Autocare Technician Level 2",
+      "group": "Fictional Group B",
+      "tutor": "Fictional Tutor B",
+      "employer": "Fictional Workshop A",
+      "mentor": "Fictional Mentor B",
+      "scenario": "Overdue review",
+      "task_status": {
+        "Approved": 16,
+        "Awaiting marking": 6,
+        "Referred": 4,
+        "Draft / other": 24,
+        "Source needs checking": 0
+      },
+      "expected_tasks": 18,
+      "attendance_rows": [
+        {
+          "date": "2026-09-13",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-20",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-27",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-04",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-11",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-18",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-25",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-01",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-08",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        },
+        {
+          "date": "2026-11-15",
+          "code": "A",
+          "cancelled": false,
+          "minutes": 0
+        }
+      ],
+      "otj": {
+        "recorded_hours": 225,
+        "target_hours": 660,
+        "planned_due_hours": 240,
+        "pending_sources": 0,
+        "invalid_sources": 0,
+        "delivered_hours": null,
+        "approved_extra_hours": 0
+      },
+      "review_due": "2026-11-10",
+      "review_state": "Overdue",
+      "topics": {
+        "maths": {
+          "assigned": 8,
+          "completed": 2,
+          "qualification": "Working towards"
+        },
+        "english": {
+          "assigned": 6,
+          "completed": 1,
+          "qualification": "Working towards"
+        }
+      },
+      "actions": [
+        {
+          "title": "Arrange the overdue progress review",
+          "owner": "Tutor",
+          "due": "2026-11-16",
+          "state": "To do",
+          "kind": "action"
+        },
+        {
+          "title": "Review 6 submitted task(s)",
+          "owner": "Tutor",
+          "due": "2026-11-20",
+          "state": "Awaiting marking",
+          "kind": "marking"
+        },
+        {
+          "title": "Workplace target confirmed",
+          "owner": "Employer / workplace mentor",
+          "due": "2026-11-14",
+          "state": "Responded",
+          "kind": "workplace"
+        }
+      ],
+      "checks": [],
+      "feedback": [
+        {
+          "date": "2026-11-16",
+          "text": "Your explanation links the workplace checks to the task clearly. Add the measured values to make the evidence more useful."
+        }
+      ],
+      "milestones": [],
+      "outcome": "Active",
+      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+    },
+    {
+      "id": "DEMO-08",
+      "name": "Fictional Morgan Taylor",
+      "reference": "FICTIONAL-008",
+      "programme": "Heavy Vehicle Technician Level 3",
+      "group": "Fictional Group B",
+      "tutor": "Fictional Tutor B",
+      "employer": "Fictional Workshop B",
+      "mentor": "Fictional Mentor B",
+      "scenario": "Missing information",
+      "task_status": null,
+      "expected_tasks": null,
+      "attendance_rows": [
+        {
+          "date": "2026-11-15",
+          "code": null,
+          "cancelled": false,
+          "minutes": null,
+          "register_id": "FICTIONAL-REGISTER-01"
+        }
+      ],
+      "otj": {
+        "recorded_hours": null,
+        "target_hours": null,
+        "planned_due_hours": null,
+        "pending_sources": 0,
+        "invalid_sources": 0,
+        "delivered_hours": null,
+        "approved_extra_hours": null
+      },
+      "review_due": null,
+      "review_state": "Not recorded",
+      "topics": {},
+      "actions": [],
+      "checks": [
+        "Programme link not recorded",
+        "Review reference not recorded"
+      ],
+      "feedback": [],
+      "milestones": [],
+      "outcome": "Not recorded",
+      "forecast": "Not available"
+    },
+    {
+      "id": "DEMO-09",
+      "name": "Fictional Avery Taylor",
+      "reference": "FICTIONAL-009",
+      "programme": "Autocare Technician Level 2",
+      "group": "Fictional Group B",
+      "tutor": "Fictional Tutor B",
+      "employer": "Fictional Workshop B",
+      "mentor": "Fictional Mentor B",
+      "scenario": "New starter",
+      "task_status": {
+        "Approved": 0,
+        "Awaiting marking": 0,
+        "Referred": 0,
+        "Draft / other": 50,
+        "Source needs checking": 0
+      },
+      "expected_tasks": 0,
+      "attendance_rows": [],
+      "otj": {
+        "recorded_hours": null,
+        "target_hours": 660,
+        "planned_due_hours": 0,
+        "pending_sources": 0,
+        "invalid_sources": 0,
+        "delivered_hours": null,
+        "approved_extra_hours": null
+      },
+      "review_due": "2026-11-24",
+      "review_state": "Due reference",
+      "topics": {},
+      "actions": [],
+      "checks": [],
+      "feedback": [],
+      "milestones": [],
+      "outcome": "Active",
+      "forecast": "Not available"
+    },
+    {
+      "id": "DEMO-10",
+      "name": "Fictional Zara Taylor",
+      "reference": "FICTIONAL-010",
+      "programme": "Heavy Vehicle Technician Level 3",
+      "group": "Fictional Group B",
+      "tutor": "Fictional Tutor B",
+      "employer": "Fictional Workshop B",
+      "mentor": "Fictional Mentor B",
+      "scenario": "Completed programme",
+      "task_status": {
+        "Approved": 50,
+        "Awaiting marking": 0,
+        "Referred": 0,
+        "Draft / other": 0,
+        "Source needs checking": 0
+      },
+      "expected_tasks": 50,
+      "attendance_rows": [
+        {
+          "date": "2026-09-13",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-20",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-09-27",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-04",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-11",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-18",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-10-25",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-01",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-08",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        },
+        {
+          "date": "2026-11-15",
+          "code": "O",
+          "cancelled": false,
+          "minutes": 360
+        }
+      ],
+      "otj": {
+        "recorded_hours": 660,
+        "target_hours": 660,
+        "planned_due_hours": 660,
+        "pending_sources": 0,
+        "invalid_sources": 0,
+        "delivered_hours": null,
+        "approved_extra_hours": 0
+      },
+      "review_due": null,
+      "review_state": "Recorded final review",
+      "topics": {
+        "maths": {
+          "assigned": 8,
+          "completed": 8,
+          "qualification": "Achieved"
+        },
+        "english": {
+          "assigned": 6,
+          "completed": 6,
+          "qualification": "Achieved"
+        }
+      },
+      "actions": [],
+      "checks": [],
+      "feedback": [
+        {
+          "date": "2026-11-16",
+          "text": "Your explanation links the workplace checks to the task clearly. Add the measured values to make the evidence more useful."
+        }
+      ],
+      "milestones": [
+        {
+          "date": "2026-11-12",
+          "title": "EPA achievement recorded \u2014 demonstration only"
+        }
+      ],
+      "outcome": "Completed",
+      "forecast": "Recorded completion \u2014 demonstration only",
+      "gateway_recorded": true,
+      "epa_recorded": true
+    }
+  ]
+}
