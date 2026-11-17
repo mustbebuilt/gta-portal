@@ -1,0 +1,650 @@
+{
+  "version": "65.1",
+  "published": "2026-11-17",
+  "courses": [
+    {
+      "id": "employer",
+      "title": "Safe Apprenticeships",
+      "pages": [
+        {
+          "id": "00_00_landing",
+          "title": "Safe Apprenticeships",
+          "html": "<div class=\"card\">\n<h2>Welcome</h2>\n<p>At Doncaster GTA, safeguarding is everyone's responsibility. We work in partnership with employers to make sure apprentices are safe, supported and able to thrive both in training and in the workplace.</p>\n<p>This hub has been designed to give employers clear, practical information about their responsibilities when supporting an apprentice. It includes safeguarding, health and safety, safer recruitment, workplace culture, Prevent, wellbeing and how to report concerns.</p>\n</div>\n<div class=\"card\">\n<h2>What you will find in this hub</h2>\n<ul class=\"checklist\">\n<li>Employer safeguarding responsibilities</li>\n<li>Health and safety responsibilities</li>\n<li>Safer recruitment</li>\n<li>Professional boundaries and positive workplace culture</li>\n<li>Recognising safeguarding concerns</li>\n<li>Prevent duty</li>\n<li>Mental health and wellbeing</li>\n<li>Reporting a safeguarding concern</li>\n<li>Employer safeguarding commitment</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>Important links for this page</h2>\n<ul class=\"checklist\">\n<li>Doncaster GTA Safeguarding Policy</li>\n<li>Doncaster GTA Prevent Policy</li>\n<li>Online Safeguarding Referral Form</li>\n<li>Contact the Safeguarding Team</li>\n</ul>\n</div>\n<div class=\"remember\"><strong>Remember:</strong> Every apprentice deserves to feel safe, respected and supported. This hub helps us work together to make that happen.</div>\n",
+          "questions": [],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "01_01_employer_responsibilities",
+          "title": "Employer Safeguarding Responsibilities",
+          "html": "<div class=\"card\">\n<h2>What does safeguarding mean?</h2>\n<p>Safeguarding means protecting people from harm, abuse, neglect and exploitation. It also means creating an environment where apprentices feel safe, respected and able to speak up if something is wrong.</p>\n<p>Many apprentices are young people entering the workplace for the first time. Some apprentices may also have additional needs or personal circumstances that make them more vulnerable. Employers play a key role in helping apprentices feel safe and supported at work.</p>\n</div>\n<div class=\"card\">\n<h2>As an employer, you should:</h2>\n<ul class=\"checklist\">\n<li>Provide a safe and respectful workplace.</li>\n<li>Make sure apprentices are appropriately supervised.</li>\n<li>Treat apprentices fairly and with dignity.</li>\n<li>Promote equality, diversity and inclusion.</li>\n<li>Challenge inappropriate behaviour, bullying, harassment or discrimination.</li>\n<li>Support apprentice wellbeing and mental health.</li>\n<li>Know how to report safeguarding concerns to Doncaster GTA.</li>\n<li>Work with Doncaster GTA if concerns arise.</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>If something does not feel right</h2>\n<p>You are not expected to investigate safeguarding concerns yourself. If you notice a change in behaviour, hear something concerning or feel worried about an apprentice's welfare, report it.</p>\n<p>You do not need proof. You only need a concern.</p>\n</div>\n<div class=\"remember\"><strong>Remember:</strong> Safeguarding is about preventing harm before it happens, not just responding after something has gone wrong.</div>\n",
+          "questions": [
+            {
+              "text": "Q1. Who is responsible for safeguarding an apprentice in the workplace?",
+              "options": [
+                "Doncaster GTA only",
+                "The employer only",
+                "Both Doncaster GTA and the employer"
+              ],
+              "correct": 2
+            },
+            {
+              "text": "Q2. Do you need proof before reporting a safeguarding concern?",
+              "options": [
+                "Yes",
+                "No"
+              ],
+              "correct": 1
+            },
+            {
+              "text": "Q3. What should you do if something does not feel right?",
+              "options": [
+                "Wait and see if it improves",
+                "Report the concern to Doncaster GTA",
+                "Discuss it with lots of colleagues first"
+              ],
+              "correct": 1
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "02_02_health_safety",
+          "title": "Health and Safety Responsibilities",
+          "html": "<div class=\"card\">\n<h2>A safe working environment</h2>\n<p>Every apprentice has the right to work in an environment where risks are identified, managed and explained clearly.</p>\n<p>Young apprentices may have limited experience of the workplace and may not always recognise risks. Good induction, supervision and ongoing training are essential.</p>\n</div>\n<div class=\"card\">\n<h2>Employers should ensure:</h2>\n<ul class=\"checklist\">\n<li>Suitable workplace risk assessments are in place.</li>\n<li>Young person risk assessments are completed where required.</li>\n<li>Apprentices receive appropriate induction and training.</li>\n<li>Apprentices are shown safe systems of work.</li>\n<li>PPE is provided and used correctly.</li>\n<li>Equipment, tools and machinery are safe and maintained.</li>\n<li>COSHH controls are in place where chemicals or substances are used.</li>\n<li>Fire safety and first aid arrangements are clear.</li>\n<li>Accidents, incidents and near misses are reported and acted on.</li>\n<li>Apprentices are appropriately supervised until competent.</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>Young apprentices</h2>\n<p>Young people can be more at risk because they may be new to the workplace, less familiar with hazards and less confident asking questions.</p>\n<p>Employers should check understanding regularly and make sure apprentices know who to speak to if they are unsure.</p>\n</div>\n<div class=\"remember\"><strong>Remember:</strong> A safe apprentice is a confident apprentice. Clear expectations, supervision and training make a real difference.</div>\n",
+          "questions": [
+            {
+              "text": "Q1. What should be in place before an apprentice carries out workplace tasks?",
+              "options": [
+                "Clear supervision and safe systems of work",
+                "Nothing, they learn by watching",
+                "Only PPE"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Q2. Why might younger apprentices need extra support?",
+              "options": [
+                "They may be less experienced and less aware of workplace risks",
+                "They do not need support",
+                "They are not allowed to work"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Q3. Who should apprentices speak to if they are unsure about a task?",
+              "options": [
+                "No one",
+                "Their supervisor, mentor or manager",
+                "Another apprentice only"
+              ],
+              "correct": 1
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "03_03_safer_recruitment",
+          "title": "Safer Recruitment",
+          "html": "<div class=\"card\">\n<h2>Why safer recruitment matters</h2>\n<p>Creating a safe workplace begins before someone starts work. Employers should take reasonable steps to make sure staff who supervise, mentor or regularly work with apprentices are suitable for that responsibility.</p>\n<p>Not every role will require a DBS check. However, safer recruitment principles are good practice and help reduce risk.</p>\n</div>\n<div class=\"card\">\n<h2>Good practice includes:</h2>\n<ul class=\"checklist\">\n<li>Verifying identity.</li>\n<li>Obtaining references.</li>\n<li>Checking employment history.</li>\n<li>Exploring any unexplained gaps in employment.</li>\n<li>Confirming qualifications or licences where relevant.</li>\n<li>Providing a clear induction.</li>\n<li>Explaining safeguarding expectations.</li>\n<li>Making sure staff understand professional boundaries.</li>\n<li>Monitoring new staff during probation or early employment.</li>\n<li>Taking concerns about conduct seriously.</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>Choosing workplace mentors</h2>\n<p>A workplace mentor or supervisor should be someone who demonstrates the right behaviours as well as the right technical skills.</p>\n<p>They should be professional, patient, respectful and able to support an apprentice without misusing their position of trust.</p>\n</div>\n<div class=\"card\">\n<h2>A good mentor should:</h2>\n<ul class=\"checklist\">\n<li>Set a positive example.</li>\n<li>Treat apprentices with dignity and respect.</li>\n<li>Use appropriate language.</li>\n<li>Maintain professional boundaries.</li>\n<li>Avoid favouritism.</li>\n<li>Give constructive feedback.</li>\n<li>Encourage apprentices to ask questions.</li>\n<li>Know how to raise safeguarding concerns.</li>\n</ul>\n</div>\n<div class=\"remember\"><strong>Remember:</strong> Great technical skills do not automatically make someone a great mentor. The right behaviours matter too.</div>\n",
+          "questions": [
+            {
+              "text": "Q1. Does every person supervising an apprentice automatically need a DBS check?",
+              "options": [
+                "Yes",
+                "No, not automatically"
+              ],
+              "correct": 1
+            },
+            {
+              "text": "Q2. What should employers consider when choosing a mentor?",
+              "options": [
+                "Only technical skill",
+                "Technical skill, professionalism and suitability",
+                "Whoever is available"
+              ],
+              "correct": 1
+            },
+            {
+              "text": "Q3. Why are references and employment checks useful?",
+              "options": [
+                "They help employers make safer decisions",
+                "They are just paperwork",
+                "They replace supervision"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "04_04_boundaries_culture",
+          "title": "Professional Boundaries and Positive Workplace Culture",
+          "html": "<div class=\"card\">\n<h2>Why workplace culture matters</h2>\n<p>The workplace plays a major role in shaping an apprentice's confidence, wellbeing and professional development.</p>\n<p>Apprentices should be able to learn in an environment where they are treated fairly, spoken to respectfully and supported to succeed.</p>\n</div>\n<div class=\"card\">\n<h2>Employers can help by:</h2>\n<ul class=\"checklist\">\n<li>Leading by example.</li>\n<li>Setting clear expectations for behaviour.</li>\n<li>Challenging inappropriate language or conduct.</li>\n<li>Promoting equality and inclusion.</li>\n<li>Encouraging apprentices to speak up.</li>\n<li>Responding quickly to bullying, harassment or discrimination.</li>\n<li>Making sure apprentices know who they can talk to.</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>Professional boundaries</h2>\n<p>Mentors, supervisors and colleagues should maintain appropriate professional relationships with apprentices at all times.</p>\n<p>This includes using appropriate language, avoiding personal or inappropriate comments, not showing favouritism, and never using a position of authority to pressure, intimidate or exploit an apprentice.</p>\n</div>\n<div class=\"card\">\n<h2>Examples of positive workplace behaviour</h2>\n<ul class=\"checklist\">\n<li>Giving clear guidance and constructive feedback.</li>\n<li>Being approachable and respectful.</li>\n<li>Listening to concerns.</li>\n<li>Explaining tasks clearly.</li>\n<li>Checking understanding.</li>\n<li>Celebrating progress appropriately.</li>\n<li>Challenging banter that crosses the line.</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>Examples of behaviour that should be challenged</h2>\n<ul class=\"checklist\">\n<li>Bullying or intimidation.</li>\n<li>Sexual comments or inappropriate jokes.</li>\n<li>Discriminatory language.</li>\n<li>Humiliating an apprentice in front of others.</li>\n<li>Unwanted personal contact.</li>\n<li>Pressuring apprentices to keep secrets.</li>\n<li>Contacting apprentices in ways that are not professional or work-related.</li>\n</ul>\n</div>\n<div class=\"remember\"><strong>Remember:</strong> The culture you create has a lasting impact on an apprentice's confidence, wellbeing and success.</div>\n",
+          "questions": [
+            {
+              "text": "Q1. Which of these is part of positive workplace culture?",
+              "options": [
+                "Challenging inappropriate behaviour",
+                "Ignoring banter",
+                "Leaving apprentices to work it out themselves"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Q2. Why do professional boundaries matter?",
+              "options": [
+                "They help keep relationships safe, respectful and appropriate",
+                "They stop apprentices learning",
+                "They only matter in schools"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Q3. What should happen if workplace behaviour becomes inappropriate?",
+              "options": [
+                "It should be challenged and addressed",
+                "It should be ignored if it is a joke",
+                "The apprentice should handle it alone"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "05_05_recognising_concerns",
+          "title": "Recognising Safeguarding Concerns",
+          "html": "<div class=\"card\">\n<h2>What might a concern look like?</h2>\n<p>Safeguarding concerns do not always come with clear evidence. Sometimes the first sign is a change in behaviour, attendance, mood or confidence.</p>\n<p>Employers are not expected to diagnose problems or investigate concerns. The important thing is to notice, listen and report.</p>\n</div>\n<div class=\"card\">\n<h2>Things you might notice:</h2>\n<ul class=\"checklist\">\n<li>Sudden changes in behaviour.</li>\n<li>Increased absence or lateness.</li>\n<li>Withdrawal from colleagues.</li>\n<li>Low mood or anxiety.</li>\n<li>Unexplained injuries.</li>\n<li>Changes in appearance or hygiene.</li>\n<li>Signs of bullying or harassment.</li>\n<li>Concerns about online behaviour.</li>\n<li>Financial worries.</li>\n<li>Substance misuse.</li>\n<li>Domestic abuse concerns.</li>\n<li>Someone appearing frightened, controlled or under pressure.</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>What if an apprentice tells you something?</h2>\n<ul class=\"checklist\">\n<li>Listen calmly.</li>\n<li>Do not promise confidentiality.</li>\n<li>Reassure them they have done the right thing by speaking up.</li>\n<li>Do not ask leading questions.</li>\n<li>Write down what was said as soon as possible.</li>\n<li>Report the concern to Doncaster GTA.</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>What not to do</h2>\n<ul class=\"checklist\">\n<li>Do not investigate yourself.</li>\n<li>Do not confront the person involved.</li>\n<li>Do not share the information widely.</li>\n<li>Do not delay reporting because you are unsure.</li>\n</ul>\n</div>\n<div class=\"remember\"><strong>Remember:</strong> You do not need proof. You only need a concern.</div>\n",
+          "questions": [
+            {
+              "text": "Q1. Are employers expected to investigate safeguarding concerns?",
+              "options": [
+                "Yes",
+                "No"
+              ],
+              "correct": 1
+            },
+            {
+              "text": "Q2. What should you do if an apprentice tells you something worrying?",
+              "options": [
+                "Listen, reassure and report it",
+                "Promise to keep it secret",
+                "Tell everyone at work"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Q3. Which of these could be a sign of concern?",
+              "options": [
+                "Sudden withdrawal or change in behaviour",
+                "Being new to the job",
+                "Wearing PPE"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "06_06_prevent",
+          "title": "Prevent Duty",
+          "html": "<div class=\"card\">\n<h2>What is Prevent?</h2>\n<p>Prevent is about safeguarding people who may be at risk of being drawn into terrorism or extremist activity.</p>\n<p>It is not about criminalising people or stopping debate. It is about identifying concerns early and helping people access appropriate support.</p>\n</div>\n<div class=\"card\">\n<h2>Possible signs of concern</h2>\n<ul class=\"checklist\">\n<li>Expressing extremist views or intolerance towards others.</li>\n<li>Sudden changes in behaviour or friendship groups.</li>\n<li>Becoming increasingly secretive.</li>\n<li>Viewing or sharing extremist material online.</li>\n<li>Using language that promotes hate or violence.</li>\n<li>Showing support for terrorist activity.</li>\n<li>Isolating from friends, family or colleagues.</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>Online risk</h2>\n<p>Radicalisation can happen online as well as face to face. Apprentices may come across extremist content, conspiracy theories or misinformation through social media, gaming platforms, forums or messaging apps.</p>\n</div>\n<div class=\"card\">\n<h2>What should employers do?</h2>\n<ul class=\"checklist\">\n<li>Stay alert to changes in behaviour.</li>\n<li>Take concerns seriously.</li>\n<li>Do not investigate or challenge extremist material yourself.</li>\n<li>Report concerns to Doncaster GTA as soon as possible.</li>\n<li>Call 999 if there is an immediate risk of harm.</li>\n</ul>\n</div>\n<div class=\"remember\"><strong>Remember:</strong> Early reporting allows the right support to be put in place before concerns escalate.</div>\n<div class=\"callout\"><strong>Consider the context.</strong> There is no single profile or indicator of radicalisation. A change in behaviour alone is not proof. Share specific concerns about harm with GTA; do not make assumptions based on religion, ethnicity or lawful opinions.</div>",
+          "questions": [
+            {
+              "text": "Q1. Is Prevent part of safeguarding?",
+              "options": [
+                "Yes",
+                "No"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Q2. Where can radicalisation happen?",
+              "options": [
+                "Only face to face",
+                "Online and face to face",
+                "Only in education settings"
+              ],
+              "correct": 1
+            },
+            {
+              "text": "Q3. What should you do if you have a Prevent concern?",
+              "options": [
+                "Report it to Doncaster GTA",
+                "Investigate it yourself",
+                "Ignore it unless you have proof"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "07_07_mental_health",
+          "title": "Mental Health and Wellbeing",
+          "html": "<div class=\"card\">\n<h2>Why wellbeing matters</h2>\n<p>Apprentices may experience pressures at work, in training or in their personal lives. A supportive employer can make a significant difference to confidence, attendance, progress and retention.</p>\n<p>Employers are not expected to be counsellors. However, regular check-ins and early conversations can help apprentices feel supported.</p>\n</div>\n<div class=\"card\">\n<h2>Signs someone may be struggling</h2>\n<ul class=\"checklist\">\n<li>Persistent low mood.</li>\n<li>Anxiety or panic.</li>\n<li>Poor concentration.</li>\n<li>Fatigue or lack of motivation.</li>\n<li>Increased absence or lateness.</li>\n<li>Loss of confidence.</li>\n<li>Withdrawal from others.</li>\n<li>Changes in behaviour or appearance.</li>\n<li>Talking about feeling hopeless or overwhelmed.</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>How employers can help</h2>\n<ul class=\"checklist\">\n<li>Check in regularly.</li>\n<li>Listen without judgement.</li>\n<li>Take concerns seriously.</li>\n<li>Encourage the apprentice to access support.</li>\n<li>Make reasonable adjustments where appropriate.</li>\n<li>Inform Doncaster GTA if additional support may be needed.</li>\n<li>Report safeguarding concerns if someone may be at risk of harm.</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>When to report immediately</h2>\n<p>If an apprentice says they may hurt themselves or someone else.</p>\n<p>If they appear at immediate risk.</p>\n<p>If there are concerns about abuse, neglect, exploitation or domestic abuse.</p>\n<p>If their mental health is significantly affecting their safety or wellbeing.</p>\n</div>\n<div class=\"remember\"><strong>Remember:</strong> Asking someone if they are okay could make all the difference.</div>\n",
+          "questions": [
+            {
+              "text": "Q1. Are employers expected to be counsellors?",
+              "options": [
+                "Yes",
+                "No"
+              ],
+              "correct": 1
+            },
+            {
+              "text": "Q2. What can employers do to support wellbeing?",
+              "options": [
+                "Check in and listen without judgement",
+                "Ignore changes",
+                "Tell the apprentice to toughen up"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Q3. When should a concern be reported urgently?",
+              "options": [
+                "If someone may be at risk of harm",
+                "Only at the next review",
+                "Only if there is written proof"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "08_08_reporting",
+          "title": "Reporting a Safeguarding Concern",
+          "html": "<div class=\"card\">\n<h2>When should I report a concern?</h2>\n<p>Please report any concern about an apprentice's safety, welfare or wellbeing. It is always better to share a concern early than wait until the situation becomes more serious.</p>\n</div>\n<div class=\"card\">\n<h2>Report concerns linked to:</h2>\n<ul class=\"checklist\">\n<li>Abuse or neglect.</li>\n<li>Bullying or harassment.</li>\n<li>Sexual harassment or inappropriate behaviour.</li>\n<li>Mental health or self-harm concerns.</li>\n<li>Domestic abuse.</li>\n<li>Radicalisation or extremism.</li>\n<li>Online safety.</li>\n<li>Substance misuse.</li>\n<li>Financial exploitation or coercion.</li>\n<li>Any behaviour that makes you worried about an apprentice's safety or welfare.</li>\n</ul>\n</div>\n<div class=\"card\">\n<h2>How to report</h2>\n<p>Use the online Safeguarding Referral Form in the GTA Portal.</p>\n<p>Contact the Doncaster GTA Safeguarding Team.</p>\n<p>If there is immediate danger, call 999 first and then inform Doncaster GTA.</p>\n</div>\n<div class=\"card\">\n<h2>Safeguarding Team</h2>\n<p>Designated Safeguarding Lead: Nicola Mitchell</p>\n<p>Deputy Designated Safeguarding Leads: Anne-Marie Sanderson, Rebecca Harper and Benjamin Williams</p>\n</div>\n<div class=\"remember\"><strong>Remember:</strong> Do not delay because you are unsure. If you are worried, report it.</div>\n",
+          "questions": [
+            {
+              "text": "Q1. What should you do if someone is in immediate danger?",
+              "options": [
+                "Call 999, then inform Doncaster GTA",
+                "Email next week",
+                "Wait for more information"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Q2. What is the best time to report a concern?",
+              "options": [
+                "As soon as possible",
+                "At the end of the apprenticeship",
+                "Only after an investigation"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Q3. Can concerns about wellbeing be reported?",
+              "options": [
+                "Yes",
+                "No"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "09_09_commitment",
+          "title": "Employer Safeguarding Commitment",
+          "html": "<div class=\"card\">\n<h2>Employer declaration</h2>\n<p>At Doncaster GTA, safeguarding is a partnership. We ask all employers to commit to providing a safe, respectful and supportive workplace for every apprentice.</p>\n</div>\n<div class=\"card\">\n<h2>Please confirm:</h2>\n<ul class=\"checklist\">\n<li>We understand our safeguarding responsibilities.</li>\n<li>We know how to report safeguarding concerns to Doncaster GTA.</li>\n<li>We will provide appropriate supervision for apprentices.</li>\n<li>We will promote equality, dignity and respect.</li>\n<li>We will support apprentice wellbeing.</li>\n<li>We will follow safer recruitment principles when appointing workplace mentors or supervisors.</li>\n<li>We will maintain appropriate professional boundaries.</li>\n<li>We will challenge bullying, harassment and inappropriate behaviour.</li>\n<li>We will provide a safe working environment.</li>\n<li>We will work with Doncaster GTA if concerns arise.</li>\n</ul>\n</div>\n<div class=\"remember\"><strong>Remember:</strong> Completion should be recorded in the portal with employer name, user name, date completed and version number.</div>\n",
+          "questions": [],
+          "declarations": [
+            "We understand our safeguarding responsibilities.",
+            "We know how to report safeguarding concerns to Doncaster GTA.",
+            "We will provide appropriate supervision for apprentices.",
+            "We will promote equality, dignity and respect.",
+            "We will support apprentice wellbeing.",
+            "We will follow safer recruitment principles when appointing workplace mentors or supervisors.",
+            "We will maintain appropriate professional boundaries.",
+            "We will challenge bullying, harassment and inappropriate behaviour.",
+            "We will provide a safe working environment.",
+            "We will work with Doncaster GTA if concerns arise."
+          ],
+          "final": true
+        }
+      ]
+    },
+    {
+      "id": "mentor",
+      "title": "Mentoring Apprentices",
+      "pages": [
+        {
+          "id": "00_welcome",
+          "title": "Mentoring Apprentices",
+          "html": "<p>At Doncaster GTA, we know that a good workplace mentor can make a huge difference to an apprentice. Mentors help apprentices settle into work, build confidence, understand expectations and develop the behaviours they need for a successful career.</p>\n<h3>Welcome</h3><p>This resource has been created for workplace mentors who support Doncaster GTA apprentices. It gives clear, practical information about what good mentoring looks like, how to support safe working, and what to do if you are worried about an apprentice.</p>\n<h3>You do not need to be a teacher</h3><p>A workplace mentor is not expected to be a teacher, counsellor or safeguarding expert. Your role is to guide, encourage, model good practice, notice when something may not be right, and pass concerns on quickly.</p>\n<h3>What you will find in this resource</h3><p>This resource includes information on the mentor role, positive mentor behaviours, professional boundaries, safeguarding, Prevent, wellbeing, supporting apprentices with barriers to learning, feedback, and how to report concerns.</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>What being a mentor means</li>\n<li>The responsibilities of a good mentor</li>\n<li>Professional boundaries and positive workplace culture</li>\n<li>Safeguarding, Prevent and wellbeing</li>\n<li>How to use the Safeguarding Referral Form</li>\n<li>How to use the Apprentice Support Referral Form</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>Mentoring is about helping apprentices to feel safe, supported and able to succeed. Small actions, such as checking understanding, giving encouragement and noticing changes, can have a big impact.</div>\n",
+          "questions": [],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "01_mentor_meaning",
+          "title": "What Does Being a Mentor Mean?",
+          "html": "<p>A mentor is someone who helps an apprentice learn how to succeed in the workplace. This includes supporting their confidence, professional standards, communication, problem-solving and understanding of the job role.</p>\n<h3>A mentor helps the apprentice to develop</h3><p>Mentoring is more than showing someone how to complete a task. It is about helping the apprentice understand why the task matters, how to do it safely, what good practice looks like, and how to improve over time.</p>\n<h3>A mentor is a positive role model</h3><p>Apprentices learn a lot by watching the people around them. The way a mentor speaks, behaves, works safely, treats others and responds to challenges can shape the apprentice’s own professional habits.</p>\n<h3>A mentor knows when to ask for help</h3><p>A good mentor does not try to deal with everything alone. If the apprentice needs additional support, is struggling with learning, or there is a safeguarding concern, the mentor should pass this on quickly to the appropriate person or to Doncaster GTA.</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>Help the apprentice settle into the workplace</li>\n<li>Explain tasks and expectations clearly</li>\n<li>Model safe and professional behaviour</li>\n<li>Encourage questions and build confidence</li>\n<li>Support problem-solving and independence</li>\n<li>Notice when something may not be right</li>\n<li>Share concerns early</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>A mentor does not need to have all the answers. A good mentor listens, supports, guides and knows when to ask for help.</div>\n",
+          "questions": [
+            {
+              "text": "Question 1: Is a mentor expected to solve every problem alone?",
+              "options": [
+                "Yes",
+                "No",
+                "Only if the apprentice is under 18"
+              ],
+              "correct": 1
+            },
+            {
+              "text": "Question 2: Which of these best describes a good mentor?",
+              "options": [
+                "Someone who guides, supports and sets a positive example",
+                "Someone who leaves the apprentice to work everything out",
+                "Someone who only signs paperwork"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "02_responsibilities",
+          "title": "The Responsibilities of a Good Mentor",
+          "html": "<p>Mentors play an important part in helping apprentices understand what is expected of them in the workplace. Good mentoring helps apprentices develop technical skills, professional behaviours and confidence.</p>\n<h3>Setting clear expectations</h3><p>Apprentices should understand what they are being asked to do, why it matters, how to do it safely and what standard is expected. Clear instructions reduce mistakes and help apprentices feel more confident.</p>\n<h3>Supporting safe working</h3><p>Mentors should reinforce safe working practices, appropriate PPE, correct use of tools and equipment, and the importance of asking questions if something is unclear.</p>\n<h3>Encouraging progress</h3><p>Mentors should support apprentices to learn from mistakes, take pride in their work, develop independence and understand how their workplace learning links to their apprenticeship.</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>Make the apprentice feel welcome</li>\n<li>Explain tasks clearly</li>\n<li>Check understanding</li>\n<li>Encourage questions</li>\n<li>Support safe working</li>\n<li>Give constructive feedback</li>\n<li>Help the apprentice learn from mistakes</li>\n<li>Promote good attendance and punctuality</li>\n<li>Encourage professional standards</li>\n<li>Share concerns early</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>Apprentices are still developing their confidence, skills and professional identity. The way they are supported in the workplace can have a lasting impact on how they see themselves and their career.</div>\n",
+          "questions": [
+            {
+              "text": "Question 1: What should a mentor do after giving an apprentice an instruction?",
+              "options": [
+                "Assume they understood",
+                "Check understanding and give opportunity for questions",
+                "Tell them to ask someone else"
+              ],
+              "correct": 1
+            },
+            {
+              "text": "Question 2: Which of these is part of good mentoring?",
+              "options": [
+                "Supporting safe working and professional standards",
+                "Only focusing on speed",
+                "Letting the apprentice learn by making unsafe mistakes"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "03_positive_behaviours",
+          "title": "Positive Mentor Behaviours",
+          "html": "<p>The best mentors combine knowledge with the right behaviours. Apprentices need mentors who are approachable, fair, consistent and professional.</p>\n<h3>What good looks like</h3><p>A good mentor is patient, respectful and willing to explain things clearly. They challenge poor standards, but do this in a way that helps the apprentice learn rather than feel embarrassed or belittled.</p>\n<h3>Confidence grows through support</h3><p>Apprentices may not always say when they are unsure. Mentors should create an environment where apprentices feel able to ask questions, admit mistakes and try again.</p>\n<h3>Consistency matters</h3><p>Clear, consistent expectations help apprentices understand workplace standards. If the standard changes depending on who is supervising them, apprentices can become confused or lose confidence.</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>Be patient</li>\n<li>Be respectful</li>\n<li>Be fair and consistent</li>\n<li>Be encouraging</li>\n<li>Be approachable</li>\n<li>Be professional</li>\n<li>Be reliable</li>\n<li>Be inclusive</li>\n<li>Stay calm under pressure</li>\n<li>Challenge poor standards constructively</li>\n</ul>\n<h3>Behaviours to avoid</h3><ul class=\"tick avoid\">\n<li>Shouting or humiliating</li>\n<li>Inappropriate jokes or banter</li>\n<li>Favouritism</li>\n<li>Over-familiar behaviour</li>\n<li>Ignoring concerns</li>\n<li>Expecting apprentices to “just know”</li>\n<li>Using apprentices as cheap labour rather than developing them</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>A strong mentor challenges poor standards, but does so in a way that helps the apprentice understand what to improve and how to improve it.</div>\n",
+          "questions": [
+            {
+              "text": "Question 1: Which behaviour is most likely to build apprentice confidence?",
+              "options": [
+                "Explaining what went well and what to improve",
+                "Mocking mistakes in front of others",
+                "Ignoring questions"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Question 2: What should mentors avoid?",
+              "options": [
+                "Being clear and consistent",
+                "Inappropriate jokes, humiliation or favouritism",
+                "Encouraging questions"
+              ],
+              "correct": 1
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "04_professional_boundaries",
+          "title": "Professional Boundaries and Positive Workplace Culture",
+          "html": "<p>Mentors often build good working relationships with apprentices. Being friendly and supportive is important, but the relationship must remain professional and appropriate at all times.</p>\n<h3>Professional boundaries protect everyone</h3><p>Clear boundaries help protect the apprentice, the mentor and the employer. They reduce the risk of misunderstanding, inappropriate behaviour or abuse of trust.</p>\n<h3>Positive workplace culture</h3><p>Apprentices should be able to work in an environment where they feel safe, respected and included. Banter, jokes or behaviour that humiliates, sexualises, intimidates or excludes someone should be challenged.</p>\n<h3>Using influence responsibly</h3><p>Mentors are often in a position of influence. That position must never be used to pressure, manipulate, control, embarrass or take advantage of an apprentice.</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>Use appropriate language</li>\n<li>Keep communication professional</li>\n<li>Avoid personal or over-familiar relationships</li>\n<li>Avoid favouritism</li>\n<li>Avoid inappropriate personal discussions</li>\n<li>Never misuse a position of trust</li>\n<li>Challenge bullying, harassment or discrimination</li>\n<li>Report concerns about adult behaviour immediately</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>Being friendly and supportive is important. Being over-familiar is not. Professional boundaries protect both the apprentice and the mentor.</div>\n",
+          "questions": [
+            {
+              "text": "Question 1: Is it okay for a mentor to be friendly and approachable?",
+              "options": [
+                "Yes, as long as boundaries remain professional",
+                "No, mentors should avoid speaking to apprentices",
+                "Only outside work"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Question 2: What should a mentor do if they are concerned about another adult’s behaviour towards an apprentice?",
+              "options": [
+                "Ignore it unless the apprentice complains",
+                "Report it to the appropriate person or Doncaster GTA",
+                "Discuss it with lots of colleagues first"
+              ],
+              "correct": 1
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "05_safeguarding",
+          "title": "Safeguarding: What Mentors Need to Know",
+          "html": "<p>Safeguarding means protecting apprentices from harm and helping to create a safe environment where they can learn, work and develop. Safeguarding is everyone’s responsibility.</p>\n<h3>Your role as a mentor</h3><p>Mentors are not expected to investigate safeguarding concerns. Your role is to notice, listen, reassure, record the basic facts where appropriate, and report the concern.</p>\n<h3>Do not promise confidentiality</h3><p>If an apprentice tells you something that suggests they or someone else may be at risk, you must pass this on. You can reassure them that you will only share information with people who need to know.</p>\n<h3>Report early</h3><p>It is better to report a concern early and it turn out not to be safeguarding, than to ignore something that later becomes serious.</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>Notice concerns</li>\n<li>Listen calmly</li>\n<li>Reassure the apprentice</li>\n<li>Do not investigate</li>\n<li>Do not promise to keep secrets</li>\n<li>Write down key facts where needed</li>\n<li>Report the concern quickly</li>\n<li>Use the Safeguarding Referral Form where appropriate</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>You do not need proof to report a safeguarding concern. If something does not feel right, report it.</div>\n",
+          "questions": [
+            {
+              "text": "Question 1: Does a mentor need proof before reporting a safeguarding concern?",
+              "options": [
+                "Yes",
+                "No",
+                "Only if the apprentice confirms it in writing"
+              ],
+              "correct": 1
+            },
+            {
+              "text": "Question 2: What is the mentor’s role if a safeguarding concern is raised?",
+              "options": [
+                "Investigate fully",
+                "Notice, listen, reassure and report",
+                "Keep it confidential"
+              ],
+              "correct": 1
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "06_recognising_concerns",
+          "title": "Recognising When Something May Be Wrong",
+          "html": "<p>Sometimes the signs that an apprentice needs support are clear. Often they are small changes that build up over time. Mentors are well placed to notice these changes because they often work closely with apprentices.</p>\n<h3>Possible signs to look out for</h3><p>A change in behaviour does not always mean there is a safeguarding concern, but it may be a sign that the apprentice needs support.</p>\n<h3>Patterns matter</h3><p>One missed day or one quiet morning may not be unusual. Repeated absence, withdrawal, low mood, anxiety, unexplained injuries or changes in appearance should not be ignored.</p>\n<h3>Act on concerns</h3><p>You are not expected to decide what has happened. Your responsibility is to pass on concerns so the right support can be offered.</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>Sudden changes in behaviour</li>\n<li>Poor attendance or punctuality</li>\n<li>Becoming withdrawn</li>\n<li>Appearing anxious or unusually quiet</li>\n<li>Changes in appearance</li>\n<li>Unexplained injuries</li>\n<li>Being unusually tired</li>\n<li>Losing confidence</li>\n<li>Financial worries</li>\n<li>Signs of bullying or harassment</li>\n<li>Inappropriate online behaviour</li>\n<li>Substance misuse concerns</li>\n<li>Comments that suggest they do not feel safe</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>One sign on its own may not mean there is a safeguarding concern, but patterns or changes should never be ignored.</div>\n",
+          "questions": [
+            {
+              "text": "Question 1: If a mentor notices a pattern of worrying changes, what should they do?",
+              "options": [
+                "Wait until they are certain",
+                "Report the concern or ask for advice",
+                "Ask other apprentices what they know"
+              ],
+              "correct": 1
+            },
+            {
+              "text": "Question 2: Which of these could be a sign that an apprentice needs support?",
+              "options": [
+                "Sudden withdrawal or repeated absence",
+                "Asking a normal work question",
+                "Finishing a task on time"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "07_prevent",
+          "title": "Prevent: What Mentors Need to Know",
+          "html": "<p>Prevent is part of safeguarding. It is about supporting people who may be at risk of being drawn into terrorism or extremist activity.</p>\n<h3>A supportive approach</h3><p>Prevent is not about spying on apprentices or stopping people from having opinions. It is about recognising when someone may be vulnerable to harmful influence and making sure concerns are passed on.</p>\n<h3>Possible warning signs</h3><p>Concerns may include sudden changes in views or behaviour, expressing extremist views, intolerance towards others, isolation, sharing extremist material, or becoming secretive about online activity.</p>\n<h3>What mentors should do</h3><p>Mentors should not challenge or investigate possible radicalisation themselves. If you are concerned, report it to Doncaster GTA using the usual safeguarding route.</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>Sudden changes in behaviour or views</li>\n<li>Intolerance towards others</li>\n<li>Isolation from colleagues</li>\n<li>Repeated extremist comments</li>\n<li>Sharing extremist material</li>\n<li>A strong “us and them” attitude</li>\n<li>Increased secrecy around online activity</li>\n<li>Being influenced or controlled by others</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>Prevent concerns should be reported in the same way as other safeguarding concerns. Do not investigate yourself.</div>\n<div class=\"callout\"><strong>Consider the context.</strong> There is no single profile or indicator of radicalisation. A change in behaviour alone is not proof. Share specific concerns about harm with GTA; do not make assumptions based on religion, ethnicity or lawful opinions.</div>",
+          "questions": [
+            {
+              "text": "Question 1: Prevent is part of what wider responsibility?",
+              "options": [
+                "Safeguarding",
+                "Payroll",
+                "Vehicle maintenance"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Question 2: What should a mentor do if they are worried about possible radicalisation?",
+              "options": [
+                "Investigate online activity themselves",
+                "Report the concern to Doncaster GTA",
+                "Ignore it unless something criminal has happened"
+              ],
+              "correct": 1
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "08_wellbeing",
+          "title": "Supporting Wellbeing",
+          "html": "<p>Good wellbeing helps apprentices attend, learn, communicate and progress. Mentors can make a real difference by noticing changes, checking in and encouraging apprentices to access support.</p>\n<h3>You do not need to be a counsellor</h3><p>Mentors are not expected to diagnose problems or provide counselling. Sometimes the most helpful thing is to notice, listen calmly and pass concerns on.</p>\n<h3>Everyday support matters</h3><p>A short check-in, clear expectations, encouragement after a difficult task and a calm response to mistakes can all support an apprentice’s wellbeing.</p>\n<h3>When to refer</h3><p>If an apprentice appears to be struggling, has a barrier to learning, needs additional support, or you are unsure what help is needed, use the Apprentice Support Referral Form. If there is a safeguarding risk, use the Safeguarding Referral Form.</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>Check in regularly</li>\n<li>Listen without judgement</li>\n<li>Encourage apprentices to speak up</li>\n<li>Take concerns seriously</li>\n<li>Help apprentices understand expectations</li>\n<li>Encourage breaks and safe working</li>\n<li>Signpost to Doncaster GTA</li>\n<li>Use the Apprentice Support Referral Form for learning or support barriers</li>\n<li>Use the Safeguarding Referral Form where someone may be at risk</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>You do not need to be a counsellor to support wellbeing. Noticing, listening and passing concerns on can make a real difference.</div>\n",
+          "questions": [
+            {
+              "text": "Question 1: Which form should be used where an apprentice has a barrier to learning or needs inclusion support?",
+              "options": [
+                "Apprentice Support Referral Form",
+                "Holiday request form",
+                "Accident book only"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Question 2: If wellbeing concerns suggest someone may be at risk of harm, what should be used?",
+              "options": [
+                "Safeguarding Referral Form",
+                "No form is needed",
+                "Only an informal chat"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "09_barriers_to_learning",
+          "title": "Supporting Apprentices with Barriers to Learning",
+          "html": "<p>Some apprentices may face barriers that make learning, communication, attendance, confidence or progress more difficult. These barriers are not always visible, and apprentices may not always know how to ask for help.</p>\n<h3>What might a barrier look like?</h3><p>A barrier to learning could relate to confidence, literacy, numeracy, communication, SEND, wellbeing, personal circumstances, attendance, organisation, or understanding workplace expectations.</p>\n<h3>What mentors can do</h3><p>Mentors should be patient, clear and observant. They can support apprentices by breaking tasks down, checking understanding, giving written reminders where helpful, encouraging questions and sharing concerns early.</p>\n<h3>Using the Apprentice Support Referral Form</h3><p>The Apprentice Support Referral Form goes to the Apprentice Support Team. It should be used where the apprentice may benefit from inclusion support, learning support or additional guidance to help them progress.</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>The apprentice regularly struggles to understand instructions</li>\n<li>The apprentice appears anxious or lacks confidence</li>\n<li>The apprentice has difficulty organising tasks or remembering steps</li>\n<li>The apprentice may need help with communication, literacy or numeracy</li>\n<li>Attendance, punctuality or engagement is becoming a concern</li>\n<li>A personal circumstance is affecting progress</li>\n<li>You feel additional support may help the apprentice succeed</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>Support referrals are not about labelling apprentices. They are about making sure the right help is offered at the right time.</div>\n",
+          "questions": [
+            {
+              "text": "Question 1: What is the Apprentice Support Referral Form for?",
+              "options": [
+                "Reporting barriers to learning or support needs",
+                "Reporting only serious safeguarding incidents",
+                "Ordering PPE"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Question 2: Should mentors wait until an apprentice is failing before asking for support?",
+              "options": [
+                "Yes",
+                "No, early support is best",
+                "Only if the apprentice asks three times"
+              ],
+              "correct": 1
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "10_feedback",
+          "title": "Giving Feedback and Building Confidence",
+          "html": "<p>Feedback is one of the most important parts of mentoring. Good feedback helps apprentices understand what they did well, what needs to improve and what to do next.</p>\n<h3>Make feedback clear and specific</h3><p>Instead of saying “that was wrong”, explain what needs to improve and what the apprentice should do differently next time.</p>\n<h3>Balance challenge with encouragement</h3><p>Apprentices need honest feedback, but they also need to know that improvement is possible. Confidence grows when feedback is fair, calm and focused on learning.</p>\n<h3>Use a simple feedback model</h3><p>A useful structure is: What went well? What needs improving? What should happen next?</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>Give feedback as soon as practical</li>\n<li>Focus on the task, not the person</li>\n<li>Be specific</li>\n<li>Explain what good looks like</li>\n<li>Check understanding</li>\n<li>Agree what should happen next</li>\n<li>Recognise progress</li>\n<li>Encourage questions</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>Good feedback is not about catching apprentices out. It is about helping them improve.</div>\n",
+          "questions": [
+            {
+              "text": "Question 1: Which feedback is most helpful?",
+              "options": [
+                "“That was wrong.”",
+                "“The wheel nuts need tightening in the correct sequence. Let’s go through the sequence again.”",
+                "“You should already know this.”"
+              ],
+              "correct": 1
+            },
+            {
+              "text": "Question 2: What should feedback help the apprentice understand?",
+              "options": [
+                "What went well, what needs improving and what should happen next",
+                "Only what they did badly",
+                "How to avoid asking questions"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "11_reporting",
+          "title": "When and How to Report a Concern",
+          "html": "<p>If you are worried about an apprentice, please tell us. Reporting concerns early helps Doncaster GTA and the employer put the right support in place.</p>\n<h3>Use the right route</h3><p>Use the Safeguarding Referral Form if you are worried that an apprentice may be at risk of harm. Use the Apprentice Support Referral Form if the apprentice has a barrier to learning, needs inclusion support, or may benefit from additional help to progress.</p>\n<h3>Emergency action</h3><p>If someone is in immediate danger, call 999 first, then inform Doncaster GTA as soon as possible.</p>\n<h3>What to include</h3><p>Include what you have seen, heard or been told. Keep it factual. Do not investigate or try to gather evidence yourself.</p>\n<h3>Key points</h3><ul class=\"tick\">\n<li>Safeguarding concerns</li>\n<li>Mental health risk</li>\n<li>Bullying or harassment</li>\n<li>Professional boundary concerns</li>\n<li>Discrimination</li>\n<li>Radicalisation concerns</li>\n<li>Online safety concerns</li>\n<li>Domestic abuse concerns</li>\n<li>Substance misuse concerns</li>\n<li>Barriers to learning</li>\n<li>Inclusion or support needs</li>\n<li>Attendance or engagement concerns linked to support needs</li>\n</ul>\n<h3>Safeguarding team contact display</h3><ul class=\"tick\">\n<li>Nicola Mitchell - Designated Safeguarding Lead</li>\n<li>Anne-Marie Sanderson - Deputy Designated Safeguarding Lead</li>\n<li>Rebecca Harper - Deputy Designated Safeguarding Lead / Apprentice Support</li>\n<li>Benjamin Williams - Deputy Designated Safeguarding Lead</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>You do not need proof. You only need a concern. If you are unsure which form to use, contact Doncaster GTA for advice.</div>\n",
+          "questions": [
+            {
+              "text": "Question 1: If someone is in immediate danger, what should you do first?",
+              "options": [
+                "Call 999",
+                "Complete a quick check",
+                "Wait for the next review"
+              ],
+              "correct": 0
+            },
+            {
+              "text": "Question 2: Which form should be used for barriers to learning or inclusion support?",
+              "options": [
+                "Apprentice Support Referral Form",
+                "Safeguarding Referral Form only",
+                "No form is needed"
+              ],
+              "correct": 0
+            }
+          ],
+          "declarations": [],
+          "final": false
+        },
+        {
+          "id": "12_commitment",
+          "title": "Mentor Commitment",
+          "html": "<p>Please review the expectations below before recording your commitment.</p>\n<h3>Before completing this resource</h3><p>Please confirm that you understand the key expectations of a workplace mentor.</p>\n<h3>Mentor confirmation checklist</h3><ul class=\"tick\">\n<li>I understand the role of a workplace mentor.</li>\n<li>I will support apprentices professionally and respectfully.</li>\n<li>I will maintain appropriate professional boundaries.</li>\n<li>I will encourage safe working practices.</li>\n<li>I will promote equality, dignity and respect.</li>\n<li>I will listen and pass on concerns where needed.</li>\n<li>I understand that safeguarding is everyone’s responsibility.</li>\n<li>I know how to report a safeguarding concern to Doncaster GTA.</li>\n<li>I know how to make an Apprentice Support Referral where an apprentice has a barrier to learning or needs additional support.</li>\n</ul>\n<div class=\"callout\"><strong>Remember: </strong>Mentoring is a partnership. Doncaster GTA is here to support employers, mentors and apprentices throughout the apprenticeship journey.</div>\n",
+          "questions": [],
+          "declarations": [
+            "I understand the role of a workplace mentor.",
+            "I will support apprentices professionally and respectfully.",
+            "I will maintain appropriate professional boundaries.",
+            "I will encourage safe working practices.",
+            "I will promote equality, dignity and respect.",
+            "I will listen and pass on concerns where needed.",
+            "I understand that safeguarding is everyone’s responsibility.",
+            "I know how to report a safeguarding concern to Doncaster GTA.",
+            "I know how to make an Apprentice Support Referral where an apprentice has a barrier to learning or needs additional support."
+          ],
+          "final": true
+        }
+      ]
+    }
+  ]
+}

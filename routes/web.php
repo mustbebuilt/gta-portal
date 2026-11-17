@@ -569,6 +569,7 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/staff-follow-up',[\App\Http\Controllers\OperationalFollowupController::class,'index'])->name('operations-desk.index');
     Route::post('/staff-follow-up/apprentice/{apprentice}',[\App\Http\Controllers\OperationalFollowupController::class,'start'])->name('operations-desk.start');
     Route::post('/staff-follow-up/{followup}',[\App\Http\Controllers\OperationalFollowupController::class,'update'])->whereUuid('followup')->name('operations-desk.update');
+    require __DIR__.'/employer-resources65.php';
     Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
     Route::resource('apprentices', ApprenticeController::class)->except('destroy');
     Route::prefix('directories')->name('directories.')->whereIn('kind', ['employers', 'programmes', 'groups', 'staff'])->group(function () {

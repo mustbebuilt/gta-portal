@@ -640,5 +640,23 @@
         "route": "retention.report"
       }
     ]
+  },
+  {
+    "id": "employer-resources",
+    "audience": [
+      "employer",
+      "mentor",
+      "manager",
+      "inclusion"
+    ],
+    "category": "Careers and employers",
+    "title": "Use employer and mentor resources",
+    "body": "Use Employer & Mentor Resources for safeguarding contacts, reporting routes, practical mentoring guidance and your own topic progress across 23 topics and 46 quick checks. Reporting a concern or requesting apprentice support is never conditional on completing training. Named employer accounts and workplace mentors record their own reading, quick-check answers and explicit final commitments for their authorised organisation scope. Prior non-final topics must be recorded within the last 365 days before recording a commitment.",
+    "links": [
+      {
+        "label": "Open Employer & Mentor Resources",
+        "route": "employer-resources.index"
+      }
+    ]
   }
 ]

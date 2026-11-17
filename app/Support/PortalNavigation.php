@@ -57,6 +57,7 @@ class PortalNavigation
         if(QuestionnaireLinks::canView($u)) {$links[]=$item('Questionnaires','questionnaires.index',[],['questionnaires.index','portal-questionnaires.*']);}
         if($u->role==='apprentice'||ApprenticeExperience::queueAllowed($u)) {$links[]=$item($u->role==='apprentice'?'My help & achievements':'Help & achievement responses','experience.index',[],['experience.index','experience.create','experience.respond']);}
         if(in_array($u->role,['apprentice','employer'],true)||SupportAccess::team($u)) {$links[]=$item('Workplace support sharing','workplace-support.index',[],['workplace-support.*']);}
+        if(Gate::forUser($u)->allows('view-employer-resources')) {$links[]=$item('Employer & Mentor Resources','employer-resources.index',[],['employer-resources.*']);}
         $group('support','Support',$links);
         $manage=Gate::forUser($u)->allows('manage-directories');$links=[];
         if(!in_array($u->role,['apprentice','employer'],true)) {$links[]=$item('Staff development','staff.index',[],['staff.*']);}

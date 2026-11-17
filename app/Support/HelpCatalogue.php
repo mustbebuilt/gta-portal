@@ -73,6 +73,7 @@ return $result;
             $r->routeIs('dashboard.index','attention.index') => $u->role==='apprentice'?'submit-work':'marking',
             $r->routeIs('gateway.*') => 'gateway-preparation',
             $r->routeIs('journey.*') => 'journey-progress',
+            $r->routeIs('employer-resources.*') => 'employer-resources',
             $r->routeIs('employer-accounts.*','employer-setup.*','employer-grants.*') => 'employer-setup',
             $r->routeIs('apprentice-onboarding.*') => 'add-apprentice',
             $r->routeIs('onboarding.*') => 'setup',
