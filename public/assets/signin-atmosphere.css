@@ -1,0 +1,28 @@
+/* Sign-in only. Effects stay inside the artwork; the form is an opaque surface. */
+.signin-scene{isolation:isolate}
+.signin-scene .street-atmosphere{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;contain:strict}
+.signin-scene:after{pointer-events:none}
+.signin-message,.scene-note{pointer-events:none}
+.signin-atmosphere-controls{border-top:1px solid var(--gta-control-border);margin-top:24px;padding-top:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.signin-atmosphere-controls[hidden],.signin-atmosphere-controls [hidden]{display:none!important}
+.signin-atmosphere-controls button{font-size:.875rem;min-height:44px;padding:9px 12px;white-space:normal}
+@media(max-width:850px){
+ .portal-signin .signin-scene{display:block;min-height:0;height:180px}
+ .signin-scene picture,.signin-scene img{object-position:40% 57%}
+ .signin-message{padding:18px 24px}
+ .signin-message h1{font-size:1.7rem;margin:0;max-width:9ch}
+ .signin-message p,.scene-note{display:none}
+ .signin-scene:after{background:linear-gradient(90deg,#050d17b8,transparent 85%)}
+}
+@media(max-height:600px) and (max-width:850px){.portal-signin .signin-scene{display:none}}
+@media(prefers-reduced-motion:reduce){.street-atmosphere{display:none!important}}
+@media print{.signin-atmosphere-controls{display:none!important}}
+
+/* Explicit stacking keeps the effects above the photograph and below text. */
+.signin-scene picture{z-index:0}
+.signin-scene:after{z-index:1}
+.signin-scene .street-atmosphere{z-index:2}
+.signin-scene .signin-message,.signin-scene .scene-note{z-index:3}
+.signin-brand img{border-radius:9px}
+.signin-atmosphere-controls{margin:16px 0;padding:14px 0;border-bottom:1px solid var(--gta-control-border)}
+.signin-atmosphere-controls button{background:var(--gta-surface);color:var(--gta-text-primary);border:1px solid var(--gta-control-border)}
