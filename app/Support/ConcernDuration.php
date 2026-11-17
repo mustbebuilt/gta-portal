@@ -7,13 +7,13 @@ use Illuminate\Support\Collection;
 
 class ConcernDuration
 {
-    public static function summarise(Collection $cases): array
+    public static function summarise(Collection $cases, ?string $cutoff = null): array
     {
         $ranges = [];
         $missing = 0;
         $invalid = 0;
         $open = 0;
-        $asOf = today()->toDateString();
+        $asOf = $cutoff ?? today()->toDateString();
         foreach ($cases as $c) {
             if (! $c->acknowledged_at) {
                 $missing++;
@@ -21,12 +21,14 @@ class ConcernDuration
                 continue;
             }
             $from = $c->acknowledged_at->toDateString();
+            if($cutoff!==null && $from>$asOf){continue;}
             if ($c->status === 'Closed' && ! $c->closed_at) {
                 $invalid++;
 
                 continue;
             }
             $to = $c->status === 'Closed' ? $c->closed_at->toDateString() : $asOf;
+            if($cutoff!==null){$to=min($to,$asOf);}
             if ($from > $asOf || $to < $from || $to > $asOf) {
                 $invalid++;
 

@@ -321,3 +321,10 @@ Artisan::command('gta:release-check57 {--environment} {--database}',function(){$
 Artisan::command('gta:release-check58 {--environment} {--database}',function(){$r=\App\Support\Release58Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return$r['status']==='needs_attention'?1:0;})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
 
 Artisan::command('gta:release-check59 {--environment} {--database}',function(){$r=\App\Support\Release59Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return$r['status']==='needs_attention'?1:0;})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
+
+
+Artisan::command('gta:retention-followups',function(){
+ $count=0;\App\Models\Apprentice::query()->orderBy('id')->chunkById(200,function($people)use(&$count){foreach($people as $a){\App\Support\DestinationMilestones::sync($a);$count++;}});
+ $this->line(json_encode(['profiles_checked'=>$count,'messages_sent'=>0,'historical_facts_inferred'=>false]));
+})->purpose('Reconcile 3/6/12-month portal tasks with sourced exit dates; no messages');
+\Illuminate\Support\Facades\Schedule::command('gta:retention-followups')->dailyAt('07:00')->timezone('Europe/London')->withoutOverlapping();

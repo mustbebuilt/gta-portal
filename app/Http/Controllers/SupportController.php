@@ -509,6 +509,7 @@ class SupportController extends Controller
                 throw ValidationException::withMessages(['outcome' => 'Only an active plan can be closed.']);
             }$p->status = 'Closed';
             $p->closure_outcome = $r->input('outcome');
+            $p->closed_at = now();
             $p->version++;
             $p->save();
             $this->audit($r, $p->apprentice_id, $p->id, 'plan_closed');

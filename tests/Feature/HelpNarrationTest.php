@@ -92,8 +92,9 @@ class HelpNarrationTest extends TestCase
     public function test_catalogue_has_unique_stable_ids_valid_destinations_and_general_transcripts(): void
     {
         $all = Catalogue::all();
-        $this->assertCount(41, $all);
-        $this->assertCount(41, array_unique(array_keys($all)));
+        $this->assertCount(42, $all);
+        $this->assertArrayHasKey('retention-recruitment',$all);
+        $this->assertCount(42, array_unique(array_keys($all)));
         foreach ($all as $id => $g) {
             $this->assertSame($id, $g['id']);
             $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $g['hash']);
@@ -356,11 +357,11 @@ class HelpNarrationTest extends TestCase
     {
         DB::shouldReceive('connection')->never();
         $r = Narration::inspect();
-        $this->assertSame(41, $r['guides']);
+        $this->assertSame(42, $r['guides']);
         $this->assertFalse($r['records_checked']);
         $this->assertFalse($r['writes_performed']);
         $this->assertFalse($r['accent_automatically_verified']);
-        $this->artisan('gta:help-check')->expectsOutputToContain('"guides":41')->assertExitCode(0);
+        $this->artisan('gta:help-check')->expectsOutputToContain('"guides":42')->assertExitCode(0);
     }
 
     public function test_record_file_probe_requires_explicit_staging_options_before_database_access(): void
@@ -379,7 +380,7 @@ class HelpNarrationTest extends TestCase
         $report = Narration::inspect(true, true);
         $this->assertSame(1, $report['counts']['approved_current']);
         $this->assertSame(1, $report['counts']['files_verified']);
-        $this->assertSame(40, $report['guides_without_current_recording']);
+        $this->assertSame(41, $report['guides_without_current_recording']);
         $this->assertFalse($report['accent_automatically_verified']);
         $this->assertStringNotContainsString('PRIVATE-RECORDING-SOURCE', json_encode($report));
         $this->assertStringNotContainsString($r->file['path'], json_encode($report));

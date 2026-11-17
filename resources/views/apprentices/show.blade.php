@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title', $apprentice->reference)
 @section('content')
+@if(\App\Support\LearningAccess::manager(auth()->user()))<p><a class="button" href="{{ route('retention.entry',$apprentice) }}">Recruitment and starting circumstances</a> <a href="{{ route('retention.timeline',$apprentice) }}">Retention chronology</a></p>@endif
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }}</p><h1>{{ $apprentice->first_name }} {{ $apprentice->last_name }}</h1><p class="muted">{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }}</p></div><div class="toolbar"><a class="button" href="{{ route('apprentices.index') }}">Back to apprentices</a>@can('update', $apprentice)<a class="button primary" href="{{ route('apprentices.edit', $apprentice) }}">Edit apprentice</a>@endcan</div></header>
 @include('apprentices.next-steps')
 @include('quick-actions.context')

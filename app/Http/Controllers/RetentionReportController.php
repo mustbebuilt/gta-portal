@@ -28,14 +28,14 @@ class RetentionReportController extends Controller
     {
         abort_unless(Access::manager($r->user()), 403);
 
-        return view('retention.edit', ['apprentice' => $apprentice, 'outcome' => ProgrammeOutcome::where('apprentice_id', $apprentice->id)->first(), 'choices' => $this->choices(), 'employers' => Employer::orderBy('name')->get()]);
+        return view('retention.edit', ['apprentice' => $apprentice, 'outcome' => ProgrammeOutcome::where('apprentice_id', $apprentice->id)->first(), 'choices' => $this->choices(), 'employers' => Employer::orderBy('name')->get(), 'followupOwners'=>\App\Models\User::where('active',true)->whereIn('role',['admin','ceo'])->orderBy('name')->get(['id','name'])]);
     }
 
     public function save(Request $r, Apprentice $apprentice): RedirectResponse
     {
         abort_unless(Access::manager($r->user()), 403);
         $choices = $this->choices();
-        $rules = ['version' => ['required', 'integer']];
+        $rules = ['version' => ['required', 'integer'],'followup_owner_id'=>['nullable','integer',Rule::exists('users','id')->where('active',true)->whereIn('role',['admin','ceo'])]];
         foreach (['status', 'achievement', 'reason', 'reasonBasis', 'voice', 'destination', 'destinationBasis', 'age', 'size', 'maths', 'english', 'additional', 'ehcp'] as $key) {
             $list = in_array($key, ['maths', 'english', 'additional', 'ehcp'], true) ? $choices['flag'] : $choices[$key];
             $rules['context.'.$key] = ['sometimes', 'required', Rule::in($list)];
@@ -111,34 +111,54 @@ class RetentionReportController extends Controller
             DB::table('learning_events')->insert(['user_id' => $r->user()->id, 'apprentice_id' => $apprentice->id, 'kind' => 'outcome_context', 'record_id' => $row->id, 'event' => 'context_recorded', 'created_at' => now()]);
         });
 
+        \App\Support\DestinationMilestones::sync($apprentice);
+        if($r->filled('followup_owner_id')){foreach(\App\Models\DestinationMilestone::where('apprentice_id',$apprentice->id)->where('state','!=','Superseded')->get() as $task){\App\Support\DestinationMilestones::assign($r->user(),$task,$task->version,(int)$r->input('followup_owner_id'));}}
+
         return back()->with('status', 'Reporting context saved. The live ILR, qualification results and training plan were not changed.');
     }
 
-    public function report(Request $r): View
+
+    public function report(Request $r)
     {
-        abort_unless(Access::manager($r->user()), 403);
-        $r->validate(['from' => ['nullable', 'date_format:Y-m-d'], 'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'], 'factor' => ['nullable', Rule::in(['programme', 'age', 'size', 'maths', 'english', 'additional', 'ehcp', 'reason'])]]);
-        $apprentices = Apprentice::with(['programmeRecord', 'employerRecord'])->orderBy('last_name')->get();
-        $contexts = ProgrammeOutcome::all()->keyBy('apprentice_id');
-        $attendance = AttendanceLedger::forIds($apprentices->pluck('id')->all());
-        $factor = $r->query('factor', 'programme');
-        $cases = SupportConcern::all()->groupBy('apprentice_id');
-        $assignmentEvents = DB::table('assignment_change_events')->get()->groupBy('apprentice_id');
-        $rows = [];
-        $excluded = 0;
-        foreach ($apprentices as $a) {
-            if (($r->filled('from') || $r->filled('to')) && (! $a->start_date || ($r->filled('from') && $a->start_date->toDateString() < $r->query('from')) || ($r->filled('to') && $a->start_date->toDateString() > $r->query('to')))) {
-                $excluded++;
-
-                continue;
-            }$c = $contexts->get($a->id)?->context ?? [];
-            $status = $c['status'] ?? 'Unknown';
-            $history = AssignmentHistory::summary($a, $assignmentEvents->get($a->id, collect()));
-            $row = ['apprentice' => $a, 'status' => $status, 'achievement' => $c['achievement'] ?? 'Unknown', 'factor' => $factor === 'programme' ? ($a->programmeLabel() ?? 'Unknown') : ($c[$factor] ?? 'Unknown'), 'reason' => $status === 'Withdrawn' ? ($c['reason'] ?? 'Not established') : 'Not applicable', 'reason_basis' => $c['reasonBasis'] ?? 'Not confirmed', 'employers' => $history['employers'] === null ? 'Unknown' : $history['employers'].' distinct recorded linked employers; earlier history unknown', 'tutors' => $history['tutors'] === null ? 'Unknown' : $history['tutors'].' distinct recorded main tutors; earlier history unknown', 'recorded_attendance' => $attendance[$a->id]['report'], 'concern_cases' => $cases->get($a->id, collect())->count(), 'concern_duration' => ConcernDuration::summarise($cases->get($a->id, collect()))];
-            $rows[] = $row;
+        abort_unless(Access::manager($r->user()),403);
+        $entryFactors=array_keys(\App\Support\EntryContext::choices());
+        $factors=array_merge(['programme','age','size','maths','english','additional','ehcp','reason'],$entryFactors);
+        $d=$r->validate(['from'=>['nullable','date_format:Y-m-d'],'to'=>['nullable','date_format:Y-m-d','after_or_equal:from'],'factor'=>['nullable',Rule::in($factors)],'programme_id'=>['nullable','integer'],'entry_employer_id'=>['nullable','integer'],'age'=>['nullable',Rule::in($this->choices()['age'])],'prior'=>['nullable',Rule::in(['Yes','No','Unknown','Prefer not to say'])],'page'=>['nullable','integer','min:1'],'export'=>['nullable','in:csv']]);
+        $query=Apprentice::query();$all=$query->count();
+        if(!empty($d['from'])){$query->whereDate('start_date','>=',$d['from']);}if(!empty($d['to'])){$query->whereDate('start_date','<=',$d['to']);}if(!empty($d['programme_id'])){$query->where('programme_id',$d['programme_id']);}
+        if(!empty($d['entry_employer_id'])){$query->whereIn('id',\App\Models\ApprenticeEntryContext::where('entry_employer_id',$d['entry_employer_id'])->select('apprentice_id'));}
+        if(!empty($d['prior'])){$query->where(function($q)use($d){$q->whereIn('id',\App\Models\ApprenticeEntryContext::where('already_employed',$d['prior'])->select('apprentice_id'));if($d['prior']==='Unknown'){$q->orWhereNotExists(function($s){$s->selectRaw('1')->from('apprentice_entry_contexts')->whereColumn('apprentice_entry_contexts.apprentice_id','apprentices.id')->whereNotNull('already_employed');});}});}
+        if(!empty($d['age'])){$query->where(function($q)use($d){$q->whereIn('id',ProgrammeOutcome::where('context->age',$d['age'])->select('apprentice_id'));if($d['age']==='Unknown'){$q->orWhereIn('id',ProgrammeOutcome::whereNull('context->age')->select('apprentice_id'))->orWhereNotExists(function($s){$s->selectRaw('1')->from('programme_outcomes')->whereColumn('programme_outcomes.apprentice_id','apprentices.id');});}});}
+        $apprentices=$query->with(['programmeRecord','employerRecord'])->orderBy('last_name')->orderBy('id')->get();$ids=$apprentices->pluck('id')->all();$excluded=$all-count($ids);
+        $contexts=ProgrammeOutcome::whereIn('apprentice_id',$ids)->get()->keyBy('apprentice_id');
+        $entries=\App\Models\ApprenticeEntryContext::whereIn('apprentice_id',$ids)->get()->keyBy('apprentice_id');
+        $attendance=AttendanceLedger::forIds($ids,false);$factor=$d['factor']??'programme';
+        $cases=SupportConcern::whereIn('apprentice_id',$ids)->get(['id','apprentice_id','code','status','acknowledged_at','closed_at','created_at'])->groupBy('apprentice_id');
+        $assignmentEvents=DB::table('assignment_change_events')->whereIn('apprentice_id',$ids)->get()->groupBy('apprentice_id');
+        $plans=\App\Models\SupportPlan::whereIn('apprentice_id',$ids)->get(['id','apprentice_id','status','active_plan','activities','reviews','history','closed_at'])->groupBy('apprentice_id');
+        $tasks=DB::table('learning_tasks')->whereIn('apprentice_id',$ids)->selectRaw("apprentice_id, COUNT(*) as assigned, SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) as approved")->groupBy('apprentice_id')->get()->keyBy('apprentice_id');
+        $peopleById=$apprentices->keyBy('id');
+        $milestones=\App\Models\DestinationMilestone::whereIn('apprentice_id',$ids)->where('state','!=','Superseded')->get()->filter(fn($t)=>$t->exit_on->toDateString()===(\App\Support\LeaverDestinations::anchor($peopleById->get($t->apprentice_id),$contexts->get($t->apprentice_id))['end_date']??null));
+        $latest=DB::table('destination_milestone_checks')->whereIn('milestone_id',$milestones->pluck('id'))->selectRaw('MAX(id) as id')->groupBy('milestone_id');
+        $checks=\App\Models\DestinationMilestoneCheck::whereIn('id',$latest)->get()->keyBy('milestone_id');
+        $milestonesByPerson=$milestones->groupBy('apprentice_id');
+        $rows=[];
+        foreach($apprentices as $a){
+            $c=$contexts->get($a->id)?->context??[];$e=$entries->get($a->id);$status=$c['status']??'Unknown';$history=AssignmentHistory::summary($a,$assignmentEvents->get($a->id,collect()));
+            $days=null;$end=\App\Support\CareersFollowup::date($c['endDate']??null);if($end&&$a->start_date&&$end>=$a->start_date->toDateString()){$days=(int)$a->start_date->diffInDays(\Carbon\Carbon::parse($end));}
+            $cutoff=in_array($status,['Completed','Withdrawn','Transferred'],true)?$end:null;
+            $cs=$cases->get($a->id,collect())->filter(fn($c)=>!$cutoff||!$c->created_at||$c->created_at->toDateString()<=$cutoff);$ps=$plans->get($a->id,collect());$t=$tasks->get($a->id);
+            $codes=$cs->pluck('code')->map(fn($x)=>$x?:'Unclassified')->unique()->sort()->implode(' + ')?:'No recorded concerns';
+            $row=['apprentice'=>$a,'status'=>$status,'achievement'=>$c['achievement']??'Unknown','factor'=>in_array($factor,$entryFactors,true)?($e?->$factor??'Not recorded'):($factor==='programme'?($a->programmeLabel()??'Unknown'):($c[$factor]??'Unknown')),'reason'=>$status==='Withdrawn'?($c['reason']??'Not established'):'Not applicable','reason_basis'=>$c['reasonBasis']??'Not confirmed','employers'=>$history['employers']===null?'Unknown':$history['employers'].' distinct recorded linked employers; earlier history unknown','tutors'=>$history['tutors']===null?'Unknown':$history['tutors'].' distinct recorded main tutors; earlier history unknown','recorded_attendance'=>$attendance[$a->id]['report'],'concern_cases'=>$cs->count(),'concern_duration'=>ConcernDuration::summarise($cs,$cutoff),'concern_codes'=>$codes,'days_before_leaving'=>$days,'exit_destination'=>\App\Support\RetentionAnalysis::exitDestination($c),'entry_gaps'=>\App\Support\EntryContext::gaps($e,$a),'support_plans'=>$ps->count(),'support_approved'=>$ps->filter(fn($p)=>filled($p->active_plan['approved_at']??null))->count(),'support_activities'=>$ps->sum(fn($p)=>count($p->activities??[])),'support_exposure'=>\App\Support\SupportExposure::summary($ps,$cutoff),'assigned_tasks'=>(int)($t->assigned??0),'approved_tasks'=>(int)($t->approved??0)];$rows[]=$row;
         }
-        $groups = collect($rows)->groupBy('factor')->map(fn ($g) => ['total' => $g->count(), 'completed' => $g->where('status', 'Completed')->count(), 'withdrawn' => $g->where('status', 'Withdrawn')->count(), 'achieved' => $g->where('achievement', 'Achieved')->count(), 'unknown' => $g->where('status', 'Unknown')->count()]);
-
-        return view('retention.report', ['rows' => $rows, 'groups' => $groups, 'factor' => $factor, 'excluded' => $excluded]);
+        $groups=\App\Support\RetentionAnalysis::groups($rows);
+        $unscheduled=$apprentices->filter(fn($a)=>\App\Support\LeaverDestinations::anchor($a,$contexts->get($a->id))&&!$milestonesByPerson->has($a->id))->count();
+        $milestoneGroups=[];foreach(collect($rows)->groupBy('factor') as $label=>$group){$milestoneGroups[$label]=\App\Support\DestinationMilestones::summary($milestones->whereIn('apprentice_id',$group->pluck('apprentice.id')),$checks);}
+        if(($d['export']??null)==='csv'){
+            DB::table('retention_report_exports')->insert(['actor_id'=>$r->user()->id,'cohort_count'=>count($rows),'filters'=>json_encode(collect($d)->except(['page','export'])->all()),'created_at'=>now()]);
+            return response()->streamDownload(function()use($groups){$f=fopen('php://output','w');fputcsv($f,['Factor','Included','Completed','Withdrawn','Completed or withdrawn denominator','Withdrawal rate %','Achieved','Known completed results denominator','Achievement rate %','Missing completed results','Unknown status','Median recorded leaving days','Leaving dates denominator','Exploratory below 10'],',','"','');foreach($groups as $label=>$g){fputcsv($f,array_map([\App\Support\LeaverDestinations::class,'csvCell'],[$label,$g['total'],$g['completed'],$g['withdrawn'],$g['terminal'],$g['withdrawal_rate'],$g['achieved'],$g['known_results'],$g['achievement_rate'],$g['missing_results'],$g['unknown'],$g['median_leaving_days'],$g['leaving_dates_known'],$g['small']?'Yes':'No']),',','"','');}fclose($f);},'GTA-Retention-Comparison.csv',['Content-Type'=>'text/csv','Cache-Control'=>'no-store, private']);
+        }
+        $rowPage=new \Illuminate\Pagination\LengthAwarePaginator(collect($rows)->forPage((int)($d['page']??1),25)->values(),count($rows),25,(int)($d['page']??1),['path'=>$r->url(),'query'=>$r->except('page')]);
+        return response()->view('retention.report',['rows'=>$rowPage,'unscheduled'=>$unscheduled,'cohortCount'=>count($rows),'groups'=>$groups,'factor'=>$factor,'excluded'=>$excluded,'milestoneGroups'=>$milestoneGroups,'entryFactors'=>$entryFactors,'programmes'=>\App\Models\Programme::orderBy('name')->get(['id','name']),'entryEmployers'=>Employer::orderBy('name')->get(['id','name']),'ageChoices'=>$this->choices()['age']])->header('Cache-Control','no-store, private');
     }
 }

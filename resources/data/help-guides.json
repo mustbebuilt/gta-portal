@@ -621,5 +621,24 @@
     ],
     "body": "Open Gateway preparation from My next step, the journey or the apprentice profile. Start with What is left before Gateway. Missing means a configured requirement is not met; To check means its position is unknown or its source needs checking. Follow a named check to its exact section. The small summary shows up to three outstanding checks; the preparation page contains the full list. Only current independently approved programme/cohort criteria are used. If no current criteria are available, ask the Tutor to check the actual applicable standard, EPA plan and programme sources, prepare the six-category criteria and arrange a different Admin or CEO to approve them. Saved draft criteria are not approved criteria. A staff check must use the original source and the existing shareable note/reference confirmation. Changing source records can require manual checks to be repeated. Task approval, qualification achievement, evidence, KSB coverage, off-the-job training and agreements remain separate requirements. All configured checks met does not approve Gateway, establish funding compliance or book EPA. The provider and EPAO decisions remain separate. Never add or mark a criterion just to remove a warning. The summary shares check labels and status, not private review notes, signatures or hidden evidence. Use Help with this page if unsure.",
     "links": []
+  },
+  {
+    "id": "retention-recruitment",
+    "audience": [
+      "manager"
+    ],
+    "category": "Administration",
+    "title": "Recruitment, entry and destination checks",
+    "body": "From an apprentice profile choose Recruitment and starting circumstances. Record how they heard about GTA separately from how they obtained the job. At enrolment answer each question; Unknown and Prefer not to say remain honest responses. Family ownership alone does not mean the apprentice has relatives at work. Entry corrections require a brief reason; later employer or supervisor changes use the separate dated action. Never infer relationships from names. Use Retention administration for missing-data actions and 3, 6 and 12-month follow-up reminders. These administrative actions stay separate from urgent support. Confirm a sourced exit, then assign one administrator to all three checks from Outcome and reporting context or assign them separately in the follow-up list. Record actual contact result, destination, evidence basis and continuity in the existing leaver follow-up workspace. No reply needs a retry date and cannot establish employment. A later check retains earlier entries. A changed exit date supersedes old tasks without deleting their evidence. Compare recruitment factors in Retention analysis using programme, age, entry employer, prior employment and intake dates. Read counts, denominators and missingness together. Small samples are exploratory; a snapshot is not proof of sustained employment. Portal reminders do not send email or text.",
+    "links": [
+      {
+        "label": "Retention administration",
+        "route": "retention.admin"
+      },
+      {
+        "label": "Retention analysis",
+        "route": "retention.report"
+      }
+    ]
   }
 ]

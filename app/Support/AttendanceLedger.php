@@ -7,8 +7,9 @@ use App\Models\TrainingSession;
 
 class AttendanceLedger
 {
-    public static function forIds(array $ids): array
+    public static function forIds(array $ids, bool $includeOtj = true): array
     {
+        if(!$ids){return [];}
         $rows = array_fill_keys($ids, []);
         $allowed = array_flip($ids);
         $sessions = TrainingSession::with(['marks' => fn ($q) => $q->whereIn('apprentice_id', $ids)])->whereDate('session_date', '<=', today())->get();
@@ -31,7 +32,7 @@ class AttendanceLedger
         foreach ($rows as $id => $v) {
             usort($v, fn ($a, $b) => strcmp($a['date'], $b['date']));
             $report = AttendanceMath::report($v);
-            $out[$id] = ['rows' => $v, 'report' => $report, 'extraMinutes' => $extras->get($id, collect())->sum('minutes'), 'historicalMinutes'=>array_sum(array_column(HistoricalOtj::ledger(\App\Models\Apprentice::findOrFail($id)),'minutes'))];
+            $out[$id] = ['rows' => $v, 'report' => $report, 'extraMinutes' => $extras->get($id, collect())->sum('minutes'), 'historicalMinutes'=>$includeOtj?array_sum(array_column(HistoricalOtj::ledger(\App\Models\Apprentice::findOrFail($id)),'minutes')):null];
         }
 
         return $out;

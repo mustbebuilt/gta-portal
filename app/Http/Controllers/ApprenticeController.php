@@ -90,6 +90,7 @@ class ApprenticeController extends Controller
             $this->audit($request, $locked, 'updated');
         });
 
+        \App\Support\DestinationMilestones::sync($apprentice);
         return to_route('apprentices.show', $apprentice)->with('status', 'Changes saved.');
     }
 

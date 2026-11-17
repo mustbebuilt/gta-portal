@@ -80,6 +80,7 @@ class PortalNavigation
         if(in_array($u->role,['admin','ceo'],true)) {$links[]=$item('Support permissions','support.permissions');}
         if(LearningAccess::manager($u)){$links[]=$item('Account access','account-operations.index',[],['account-operations.*','restriction-recovery.*']);}
         if(LearningAccess::manager($u)){$links[]=$item('Centre Manager access','centre-access.index',[],['centre-access.*']);}
+        if(LearningAccess::manager($u)){$links[]=$item('Retention administration','retention.admin',[],['retention.admin','retention.entry*','retention.timeline','retention.milestone.*']);}
         $group('administration','Administration',$links);
         $links=[];
         if($manage) {

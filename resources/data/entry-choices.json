@@ -1,0 +1,78 @@
+{
+  "recruitment_route": [
+    "School or careers adviser",
+    "GTA website or direct enquiry",
+    "Social media",
+    "Employer referral",
+    "Family or friend",
+    "Recruitment event or outreach",
+    "Another training provider or agency",
+    "Other",
+    "Unknown"
+  ],
+  "employment_route": [
+    "GTA matched them to an employer",
+    "Employer recruited them directly",
+    "Already employed by the employer",
+    "Family introduction",
+    "Friend or personal contact",
+    "Advertised vacancy or recruitment service",
+    "Transfer from another apprenticeship/provider",
+    "Other",
+    "Unknown"
+  ],
+  "family_owned": [
+    "Yes",
+    "No",
+    "Unknown",
+    "Prefer not to say"
+  ],
+  "family_owner_manager": [
+    "Yes",
+    "No",
+    "Unknown",
+    "Prefer not to say"
+  ],
+  "family_supervisor": [
+    "Yes",
+    "No",
+    "Unknown",
+    "Prefer not to say"
+  ],
+  "relationship": [
+    "Parent or guardian",
+    "Sibling",
+    "Partner",
+    "Other relative",
+    "Not applicable",
+    "Unknown",
+    "Prefer not to say"
+  ],
+  "already_employed": [
+    "Yes",
+    "No",
+    "Unknown",
+    "Prefer not to say"
+  ],
+  "work_experience": [
+    "Relevant paid work",
+    "Relevant unpaid work or placement",
+    "No relevant experience",
+    "Unknown",
+    "Prefer not to say"
+  ],
+  "prior_apprenticeship": [
+    "Completed",
+    "Started but not completed",
+    "None",
+    "Unknown",
+    "Prefer not to say"
+  ],
+  "career_match": [
+    "Yes",
+    "Partly",
+    "No",
+    "Unknown",
+    "Prefer not to say"
+  ]
+}

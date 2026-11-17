@@ -520,6 +520,15 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/apprentices/{apprentice}/surveys', [SurveyReceiptController::class, 'save'])->name('surveys.save');
     Route::post('/apprentices/{apprentice}/surveys/{receipt}', [SurveyReceiptController::class, 'save'])->name('surveys.update');
     Route::post('/survey-receipts/{receipt}/check', [SurveyReceiptController::class, 'check'])->name('surveys.check');
+
+    Route::get('/retention-admin', [\App\Http\Controllers\RecruitmentRetentionController::class,'queue'])->name('retention.admin');
+    Route::get('/apprentices/{apprentice}/entry-context', [\App\Http\Controllers\RecruitmentRetentionController::class,'entry'])->name('retention.entry');
+    Route::post('/apprentices/{apprentice}/entry-context', [\App\Http\Controllers\RecruitmentRetentionController::class,'save'])->name('retention.entry.save');
+    Route::post('/apprentices/{apprentice}/employment-context', [\App\Http\Controllers\RecruitmentRetentionController::class,'employment'])->name('retention.employment');
+    Route::post('/apprentices/{apprentice}/retention-quality-owner', [\App\Http\Controllers\RecruitmentRetentionController::class,'qualityAssign'])->name('retention.quality.assign');
+    Route::get('/apprentices/{apprentice}/retention-timeline', [\App\Http\Controllers\RecruitmentRetentionController::class,'timeline'])->name('retention.timeline');
+    Route::post('/destination-milestones/{milestone}/owner', [\App\Http\Controllers\RecruitmentRetentionController::class,'assign'])->name('retention.milestone.assign');
+    Route::post('/destination-milestones/{milestone}/checks', [\App\Http\Controllers\RecruitmentRetentionController::class,'check'])->name('retention.milestone.check');
     Route::get('/reports/retention', [RetentionReportController::class, 'report'])->name('retention.report');
     Route::get('/apprentices/{apprentice}/outcome', [RetentionReportController::class, 'edit'])->name('retention.edit');
     Route::post('/apprentices/{apprentice}/outcome', [RetentionReportController::class, 'save'])->name('retention.save');
