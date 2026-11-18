@@ -15,13 +15,17 @@ class AccountOnboarding
     }
     public static function errors(): array
     {
+        if (app()->environment('production')) {
+            return RecoveryDelivery::configurationErrors(config('onboarding.production_enabled') === true, [], 'production_onboarding_disabled', false);
+        }
+
         return RecoveryDelivery::configurationErrors(config('onboarding.enabled') === true, self::recipients(), 'staging_onboarding_disabled');
     }
-    public static function available(): bool { return app()->environment('staging') && self::errors() === []; }
+    public static function available(): bool { return app()->environment(['staging', 'production']) && self::errors() === []; }
     public static function eligible(User $user, string $purpose): bool
     {
         return self::available() && $user->active && ! $user->email_verified_at
-            && in_array(strtolower(trim($user->email)), self::recipients(), true)
+            && (! app()->environment('staging') || in_array(strtolower(trim($user->email)), self::recipients(), true))
             && User::whereRaw('LOWER(email) = ?', [strtolower(trim($user->email))])->count() === 1
             && (($purpose === 'learner_invite' && $user->role === 'apprentice' && ApprenticeOnboarding::inviteProfile($user)) || $purpose === 'verify' || ($purpose === 'invite' && in_array($user->role, DirectoryCatalog::STAFF_ROLES, true)) || ($purpose === 'employer_invite' && $user->role === 'employer'));
     }

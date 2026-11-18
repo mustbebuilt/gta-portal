@@ -11,8 +11,13 @@ class StagingAccess
     public static function errors(): array
     {
         $errors=[];
-        if(!app()->environment('staging')){$errors[]='staging_environment_required';}
-        if(config('deployment.staging_enabled')!==true){$errors[]='staging_access_disabled';}
+        if (app()->environment('staging')) {
+            if (config('deployment.staging_enabled') !== true) { $errors[] = 'staging_access_disabled'; }
+        } elseif (app()->environment('production')) {
+            if (config('deployment.production_enabled') !== true) { $errors[] = 'production_access_disabled'; }
+        } else {
+            $errors[] = 'staging_environment_required';
+        }
         if(config('app.debug')!==false){$errors[]='debug_must_be_disabled';}
         $key=(string)config('app.key');
         $raw=str_starts_with($key,'base64:') ? base64_decode(substr($key,7),true) : $key;

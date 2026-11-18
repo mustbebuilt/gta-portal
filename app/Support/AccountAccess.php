@@ -15,7 +15,7 @@ class AccountAccess
     public static function recoveryAvailable(): bool
     {
         return (config('account_access.recovery_enabled') === true && app()->environment(['local', 'testing']) && config('mail.default') === 'array')
-            || (app()->environment('staging') && RecoveryDelivery::errors() === []);
+            || (app()->environment(['staging', 'production']) && RecoveryDelivery::errors() === []);
     }
 
     public static function passwordRules(): array

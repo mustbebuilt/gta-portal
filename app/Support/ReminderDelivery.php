@@ -15,9 +15,13 @@ class ReminderDelivery
     }
     public static function errors(): array
     {
-        return RecoveryDelivery::configurationErrors(config('reminder_delivery.enabled')===true,self::recipients(),'staging_reminder_mail_disabled');
+        if (app()->environment('production')) {
+            return RecoveryDelivery::configurationErrors(config('reminder_delivery.production_enabled') === true, [], 'production_reminder_mail_disabled', false);
+        }
+
+        return RecoveryDelivery::configurationErrors(config('reminder_delivery.enabled') === true, self::recipients(), 'staging_reminder_mail_disabled');
     }
-    public static function available(): bool { return app()->environment('staging') && self::errors()===[]; }
+    public static function available(): bool { return app()->environment(['staging', 'production']) && self::errors()===[]; }
     public static function administrator(User $user): bool
     {
         return $user->active && $user->email_verified_at && in_array($user->role,['admin','ceo'],true);
@@ -26,7 +30,7 @@ class ReminderDelivery
     {
         $inclusion = SupportAccess::team($user) && in_array(SupportAccess::settings($user)['duty'], ['member','lead'], true);
         return self::available() && $user->active && $user->email_verified_at && ($user->role==='tutor' || StaffDuties::has($user,'mentor') || $inclusion)
-            && in_array(strtolower(trim($user->email)),self::recipients(),true)
+            && (! app()->environment('staging') || in_array(strtolower(trim($user->email)),self::recipients(),true))
             && User::whereRaw('LOWER(email) = ?',[strtolower(trim($user->email))])->count()===1;
     }
     public static function hash(array $snapshot): string { return ReviewedImports::hash($snapshot); }

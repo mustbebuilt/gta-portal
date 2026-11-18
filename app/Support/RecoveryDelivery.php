@@ -18,14 +18,18 @@ class RecoveryDelivery
 
     public static function errors(): array
     {
+        if (app()->environment('production')) {
+            return self::configurationErrors(config('account_access.production_recovery_enabled') === true, [], 'production_recovery_disabled', false);
+        }
+
         return self::configurationErrors(config('account_access.staging_recovery_enabled') === true, self::recipients(), 'staging_recovery_disabled');
     }
 
-    public static function configurationErrors(bool $enabled, array $recipients, string $disabledCode): array
+    public static function configurationErrors(bool $enabled, array $recipients, string $disabledCode, bool $requirePilotList = true): array
     {
         $errors = StagingAccess::errors();
         if (! $enabled) { $errors[] = $disabledCode; }
-        if (! $recipients || count($recipients) > 10 || count(array_filter($recipients, fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL))) !== count($recipients)) { $errors[] = 'one_to_ten_valid_pilot_recipients_required'; }
+        if ($requirePilotList && (! $recipients || count($recipients) > 10 || count(array_filter($recipients, fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL))) !== count($recipients))) { $errors[] = 'one_to_ten_valid_pilot_recipients_required'; }
         if (config('mail.driver')) { $errors[] = 'legacy_mail_driver_override_not_allowed'; }
         $mailer = config('mail.default');
         if ($mailer === 'resend') {
