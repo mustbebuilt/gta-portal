@@ -15,7 +15,20 @@ class ProgressDashboard66Controller extends Controller {
  public function export(Request $r,string $format){return $this->download($r,$format);}
  public function demoExport(Request $r,string $role,string $format){return $this->download($r,$format,$role);}
  private function download(Request $r,string $format,?string $role=null){
-  $report=$this->report($r,$role);$safe=$report;unset($safe['selected']);$selectedIds=array_column($report['details'],'id');$safe['rows']=$report['details'];unset($safe['details']);$safe['actions']=array_values(array_filter($safe['actions'],fn($a)=>in_array($a['person_id'],$selectedIds,true)));$safe['export_scope']='Headlines/charts cover the filtered cohort; rows cover the chosen record metric. Source fields and internal histories are never exported.';
+  $r->validate(['section'=>'nullable|in:progress,journey']);
+  $report=$this->report($r,$role);
+  if($r->query('section')==='journey'){
+   abort_unless(count($report['details'])===1&&!empty($report['details'][0]['roadmap']),404);
+   $person=$report['details'][0];$label=$report['demo']?'Demonstration — fictional data':'GTA authorised journey report';
+   if($format==='json'){$body=json_encode(['label'=>$label,'captured_at'=>$report['captured_at'],'reference'=>$person['reference'],'roadmap'=>$person['roadmap']],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR);$type='application/json';}
+   else{$stream=fopen('php://temp','w+');$safeCell=fn($v)=>is_string($v)&&preg_match('/^(?:\s*[=+@\-]|[\t\r\n])/u',$v)?"'".$v:$v;
+    fputcsv($stream,array_map($safeCell,[$label,$person['reference'],'Captured '.$report['captured_at']]),',','"','');
+    fputcsv($stream,['Date','Event','Category','Recorded or planned'],',','"','');
+    foreach($person['roadmap']['events'] as $event)fputcsv($stream,[$event['date'],$event['title'],$event['category'],$event['status']],',','"','');
+    rewind($stream);$body=stream_get_contents($stream);fclose($stream);$type='text/csv; charset=UTF-8';}
+   return response($body)->header('Content-Type',$type)->header('Content-Disposition','attachment; filename="GTA-'.($report['demo']?'Demonstration-':'').'Journey-67.'.$format.'"')->header('Cache-Control','private, no-store')->header('Referrer-Policy','no-referrer')->header('X-Content-Type-Options','nosniff');
+  }
+  $safe=$report;unset($safe['selected']);$selectedIds=array_column($report['details'],'id');$safe['rows']=$report['details'];unset($safe['details']);$safe['actions']=array_values(array_filter($safe['actions'],fn($a)=>in_array($a['person_id'],$selectedIds,true)));$safe['export_scope']='Headlines/charts cover the filtered cohort; rows cover the chosen record metric. Source fields and internal histories are never exported.';
   $label=$report['demo']?'Demonstration — fictional data':'GTA authorised progress report';
   if($format==='json'){$body=json_encode($safe,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR);$type='application/json';}
   else{$stream=fopen('php://temp','w+');$cell=fn($v)=>is_string($v)&&preg_match('/^(?:\s*[=+@\-]|[\t\r\n])/u',$v)?"'".$v:$v;

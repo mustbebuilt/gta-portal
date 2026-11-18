@@ -1,5 +1,5 @@
 {
-  "banner": "Demonstration \u2014 fictional data",
+  "banner": "Demonstration — fictional data",
   "as_of": "2026-11-17",
   "people": [
     {
@@ -89,7 +89,7 @@
         "pending_sources": 0,
         "invalid_sources": 0,
         "delivered_hours": null,
-        "approved_extra_hours": 0
+        "approved_extra_hours": 6
       },
       "review_due": "2026-11-24",
       "review_state": "Due reference",
@@ -135,7 +135,73 @@
         }
       ],
       "outcome": "Active",
-      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+      "forecast": "Checked staff estimate: August 2027 — demonstration only",
+      "roadmap_events": [
+        {
+          "type": "start",
+          "date": "2025-09-08"
+        },
+        {
+          "type": "review",
+          "date": "2026-09-15"
+        },
+        {
+          "type": "review",
+          "date": "2026-11-03"
+        },
+        {
+          "type": "achievement",
+          "date": "2026-11-05"
+        },
+        {
+          "type": "employer",
+          "date": "2026-08-03"
+        },
+        {
+          "type": "tutor",
+          "date": "2026-08-10"
+        },
+        {
+          "type": "maths",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "english",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "planned_end",
+          "date": "2027-08-31"
+        },
+        {
+          "type": "block",
+          "block": 1,
+          "date": "2026-10-20"
+        },
+        {
+          "type": "block",
+          "block": 2,
+          "date": "2026-10-27"
+        },
+        {
+          "type": "block",
+          "block": 3,
+          "date": "2026-11-10"
+        },
+        {
+          "type": "block",
+          "block": 4,
+          "date": "2026-11-17"
+        },
+        {
+          "type": "extra",
+          "date": "2026-10-15"
+        },
+        {
+          "type": "review_booking",
+          "date": "2026-11-24"
+        }
+      ]
     },
     {
       "id": "DEMO-02",
@@ -263,7 +329,66 @@
         }
       ],
       "outcome": "Active",
-      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+      "forecast": "Checked staff estimate: August 2027 — demonstration only",
+      "roadmap_events": [
+        {
+          "type": "start",
+          "date": "2025-09-08"
+        },
+        {
+          "type": "review",
+          "date": "2026-09-15"
+        },
+        {
+          "type": "review",
+          "date": "2026-11-03"
+        },
+        {
+          "type": "achievement",
+          "date": "2026-11-05"
+        },
+        {
+          "type": "maths",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "english",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "planned_end",
+          "date": "2027-08-31"
+        },
+        {
+          "type": "block",
+          "block": 1,
+          "date": "2026-10-20"
+        },
+        {
+          "type": "block",
+          "block": 2,
+          "date": "2026-10-27"
+        },
+        {
+          "type": "block",
+          "block": 3,
+          "date": "2026-11-03"
+        },
+        {
+          "type": "block",
+          "block": 4,
+          "date": "2026-11-10"
+        },
+        {
+          "type": "block",
+          "block": 5,
+          "date": "2026-11-17"
+        },
+        {
+          "type": "review_booking",
+          "date": "2026-11-24"
+        }
+      ]
     },
     {
       "id": "DEMO-03",
@@ -400,7 +525,59 @@
       ],
       "milestones": [],
       "outcome": "Active",
-      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+      "forecast": "Checked staff estimate: August 2027 — demonstration only",
+      "roadmap_events": [
+        {
+          "type": "start",
+          "date": "2025-09-08"
+        },
+        {
+          "type": "review",
+          "date": "2026-09-15"
+        },
+        {
+          "type": "review",
+          "date": "2026-11-03"
+        },
+        {
+          "type": "achievement",
+          "date": "2026-11-05"
+        },
+        {
+          "type": "employer",
+          "date": "2026-08-03"
+        },
+        {
+          "type": "tutor",
+          "date": "2026-08-10"
+        },
+        {
+          "type": "maths",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "english",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "planned_end",
+          "date": "2027-08-31"
+        },
+        {
+          "type": "block",
+          "block": 1,
+          "date": "2026-10-27"
+        },
+        {
+          "type": "block",
+          "block": 2,
+          "date": "2026-11-10"
+        },
+        {
+          "type": "review_booking",
+          "date": "2026-11-24"
+        }
+      ]
     },
     {
       "id": "DEMO-04",
@@ -528,7 +705,61 @@
         }
       ],
       "outcome": "Active",
-      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+      "forecast": "Checked staff estimate: August 2027 — demonstration only",
+      "roadmap_events": [
+        {
+          "type": "start",
+          "date": "2025-09-08"
+        },
+        {
+          "type": "review",
+          "date": "2026-09-15"
+        },
+        {
+          "type": "review",
+          "date": "2026-11-03"
+        },
+        {
+          "type": "achievement",
+          "date": "2026-11-05"
+        },
+        {
+          "type": "maths",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "english",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "planned_end",
+          "date": "2027-08-31"
+        },
+        {
+          "type": "block",
+          "block": 1,
+          "date": "2026-10-20"
+        },
+        {
+          "type": "block",
+          "block": 2,
+          "date": "2026-10-27"
+        },
+        {
+          "type": "block",
+          "block": 3,
+          "date": "2026-11-10"
+        },
+        {
+          "type": "block",
+          "block": 4,
+          "date": "2026-11-17"
+        },
+        {
+          "type": "review_booking",
+          "date": "2026-11-24"
+        }
+      ]
     },
     {
       "id": "DEMO-05",
@@ -658,7 +889,56 @@
       ],
       "milestones": [],
       "outcome": "Active",
-      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+      "forecast": "Checked staff estimate: August 2027 — demonstration only",
+      "roadmap_events": [
+        {
+          "type": "start",
+          "date": "2025-09-08"
+        },
+        {
+          "type": "review",
+          "date": "2026-09-15"
+        },
+        {
+          "type": "review",
+          "date": "2026-11-03"
+        },
+        {
+          "type": "achievement",
+          "date": "2026-11-05"
+        },
+        {
+          "type": "maths",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "english",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "planned_end",
+          "date": "2027-08-31"
+        },
+        {
+          "type": "block",
+          "block": 1,
+          "date": "2026-10-20"
+        },
+        {
+          "type": "block",
+          "block": 2,
+          "date": "2026-11-03"
+        },
+        {
+          "type": "block",
+          "block": 3,
+          "date": "2026-11-10"
+        },
+        {
+          "type": "review_booking",
+          "date": "2026-11-24"
+        }
+      ]
     },
     {
       "id": "DEMO-06",
@@ -786,7 +1066,69 @@
         }
       ],
       "outcome": "Active",
-      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+      "forecast": "Checked staff estimate: August 2027 — demonstration only",
+      "roadmap_events": [
+        {
+          "type": "start",
+          "date": "2025-09-08"
+        },
+        {
+          "type": "review",
+          "date": "2026-09-15"
+        },
+        {
+          "type": "review",
+          "date": "2026-11-03"
+        },
+        {
+          "type": "achievement",
+          "date": "2026-11-05"
+        },
+        {
+          "type": "employer",
+          "date": "2026-08-03"
+        },
+        {
+          "type": "tutor",
+          "date": "2026-08-10"
+        },
+        {
+          "type": "maths",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "english",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "planned_end",
+          "date": "2027-08-31"
+        },
+        {
+          "type": "block",
+          "block": 1,
+          "date": "2026-10-20"
+        },
+        {
+          "type": "block",
+          "block": 2,
+          "date": "2026-10-27"
+        },
+        {
+          "type": "block",
+          "block": 3,
+          "date": "2026-11-03"
+        },
+        {
+          "type": "block",
+          "block": 4,
+          "date": "2026-11-10"
+        },
+        {
+          "type": "review_booking",
+          "date": "2026-11-24"
+        }
+      ]
     },
     {
       "id": "DEMO-07",
@@ -923,7 +1265,56 @@
       ],
       "milestones": [],
       "outcome": "Active",
-      "forecast": "Checked staff estimate: August 2027 \u2014 demonstration only"
+      "forecast": "Checked staff estimate: August 2027 — demonstration only",
+      "roadmap_events": [
+        {
+          "type": "start",
+          "date": "2025-09-08"
+        },
+        {
+          "type": "review",
+          "date": "2026-09-15"
+        },
+        {
+          "type": "review",
+          "date": "2026-11-03"
+        },
+        {
+          "type": "achievement",
+          "date": "2026-11-05"
+        },
+        {
+          "type": "maths",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "english",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "planned_end",
+          "date": "2027-08-31"
+        },
+        {
+          "type": "block",
+          "block": 1,
+          "date": "2026-10-20"
+        },
+        {
+          "type": "block",
+          "block": 2,
+          "date": "2026-11-03"
+        },
+        {
+          "type": "block",
+          "block": 3,
+          "date": "2026-11-17"
+        },
+        {
+          "type": "review_booking",
+          "date": "2026-11-24"
+        }
+      ]
     },
     {
       "id": "DEMO-08",
@@ -966,7 +1357,8 @@
       "feedback": [],
       "milestones": [],
       "outcome": "Not recorded",
-      "forecast": "Not available"
+      "forecast": "Not available",
+      "roadmap_events": []
     },
     {
       "id": "DEMO-09",
@@ -1004,7 +1396,21 @@
       "feedback": [],
       "milestones": [],
       "outcome": "Active",
-      "forecast": "Not available"
+      "forecast": "Not available",
+      "roadmap_events": [
+        {
+          "type": "start",
+          "date": "2026-11-16"
+        },
+        {
+          "type": "planned_end",
+          "date": "2027-08-31"
+        },
+        {
+          "type": "review_booking",
+          "date": "2026-11-24"
+        }
+      ]
     },
     {
       "id": "DEMO-10",
@@ -1120,13 +1526,105 @@
       "milestones": [
         {
           "date": "2026-11-12",
-          "title": "EPA achievement recorded \u2014 demonstration only"
+          "title": "EPA achievement recorded — demonstration only"
         }
       ],
       "outcome": "Completed",
-      "forecast": "Recorded completion \u2014 demonstration only",
+      "forecast": "Recorded completion — demonstration only",
       "gateway_recorded": true,
-      "epa_recorded": true
+      "epa_recorded": true,
+      "roadmap_events": [
+        {
+          "type": "start",
+          "date": "2025-09-08"
+        },
+        {
+          "type": "review",
+          "date": "2026-09-15"
+        },
+        {
+          "type": "review",
+          "date": "2026-11-03"
+        },
+        {
+          "type": "achievement",
+          "date": "2026-11-05"
+        },
+        {
+          "type": "maths",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "maths_result",
+          "date": "2026-10-23"
+        },
+        {
+          "type": "english",
+          "date": "2026-10-09"
+        },
+        {
+          "type": "english_result",
+          "date": "2026-10-23"
+        },
+        {
+          "type": "block",
+          "block": 1,
+          "date": "2026-10-13"
+        },
+        {
+          "type": "block",
+          "block": 2,
+          "date": "2026-10-20"
+        },
+        {
+          "type": "block",
+          "block": 3,
+          "date": "2026-10-20"
+        },
+        {
+          "type": "block",
+          "block": 4,
+          "date": "2026-10-27"
+        },
+        {
+          "type": "block",
+          "block": 5,
+          "date": "2026-10-27"
+        },
+        {
+          "type": "block",
+          "block": 6,
+          "date": "2026-11-03"
+        },
+        {
+          "type": "block",
+          "block": 7,
+          "date": "2026-11-10"
+        },
+        {
+          "type": "block",
+          "block": 8,
+          "date": "2026-11-10"
+        },
+        {
+          "type": "block",
+          "block": 9,
+          "date": "2026-11-17"
+        },
+        {
+          "type": "block",
+          "block": 10,
+          "date": "2026-11-17"
+        },
+        {
+          "type": "gateway",
+          "date": "2026-11-17"
+        },
+        {
+          "type": "completion",
+          "date": "2026-11-17"
+        }
+      ]
     }
   ]
 }
