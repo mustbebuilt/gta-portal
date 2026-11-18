@@ -24,13 +24,14 @@ class ApprenticeAlertTransport
         try {
             if ($channel === 'email') {
                 $text = "Please sign in to check your recorded training, tasks, agreed actions or review reference.\n\n".rtrim(config('app.url'), '/')."/my-next-step\n\nManage alert preferences in your portal account. This reminder does not confirm a booked review, task approval or programme achievement.";
-                Mail::purge('smtp');
-                $sent = Mail::mailer('smtp')->raw($text, function (Message $message) use ($destination, $id): void {
+                $mailer = config('mail.default') === 'resend' ? 'resend' : 'smtp';
+                Mail::purge($mailer);
+                $sent = Mail::mailer($mailer)->raw($text, function (Message $message) use ($destination, $id): void {
                     $message->to($destination)->subject('GTA portal reminder');
                     $message->getSymfonyMessage()->getHeaders()->addTextHeader('X-GTA-Delivery-ID', $id);
                 });
 
-                return $sent instanceof SentMessage ? ['state' => 'Accepted', 'reason' => 'smtp_accepted_inbox_unconfirmed', 'provider_id' => hash('sha256', (string) $sent->getMessageId())] : ['state' => 'Uncertain', 'reason' => 'smtp_no_acceptance_proof', 'provider_id' => null];
+                return $sent instanceof SentMessage ? ['state' => 'Accepted', 'reason' => $mailer.'_accepted_inbox_unconfirmed', 'provider_id' => hash('sha256', (string) $sent->getMessageId())] : ['state' => 'Uncertain', 'reason' => $mailer.'_no_acceptance_proof', 'provider_id' => null];
             }
             $r = Http::asForm()->withBasicAuth(config('apprentice_notifications.key'), config('apprentice_notifications.secret'))->withOptions(['verify' => true, 'allow_redirects' => false])->connectTimeout(5)->timeout(10)->post(MobileVerification::ENDPOINT, ['from' => config('apprentice_notifications.from'), 'to' => ltrim($destination, '+'), 'text' => self::smsText(), 'client-ref' => $id]);
             $body = $r->json();

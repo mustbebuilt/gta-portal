@@ -65,7 +65,14 @@ class ApprenticeNotificationDelivery
 
     public static function configHash(): string
     {
-        return self::digest(json_encode(['settings' => config('apprentice_notifications'), 'origin' => config('app.url'), 'smtp' => config('mail.mailers.smtp'), 'mailer' => config('mail.default'), 'sender' => config('mail.from')], JSON_THROW_ON_ERROR));
+        return self::digest(json_encode([
+            'settings' => config('apprentice_notifications'),
+            'origin' => config('app.url'),
+            'smtp' => config('mail.mailers.smtp'),
+            'resend' => ['transport' => config('mail.mailers.resend.transport'), 'key_hash' => is_string(config('services.resend.key')) ? hash('sha256', config('services.resend.key')) : null],
+            'mailer' => config('mail.default'),
+            'sender' => config('mail.from'),
+        ], JSON_THROW_ON_ERROR));
     }
 
     public static function errors(?string $channel = null): array
@@ -92,7 +99,7 @@ class ApprenticeNotificationDelivery
             if (! $valid) {
                 $e[] = 'one_to_250_unique_approved_emails_required';
             }$e = [...$e, ...RecoveryDelivery::configurationErrors(true, is_array($list) ? array_slice($list, 0, 10) : [], 'email_disabled')];
-            if ((float) config('mail.mailers.smtp.timeout', 0) > 10) {
+            if (config('mail.default') === 'smtp' && (float) config('mail.mailers.smtp.timeout', 0) > 10) {
                 $e[] = 'smtp_timeout_must_not_exceed_10_seconds';
             }
         }

@@ -27,16 +27,26 @@ class RecoveryDelivery
         if (! $enabled) { $errors[] = $disabledCode; }
         if (! $recipients || count($recipients) > 10 || count(array_filter($recipients, fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL))) !== count($recipients)) { $errors[] = 'one_to_ten_valid_pilot_recipients_required'; }
         if (config('mail.driver')) { $errors[] = 'legacy_mail_driver_override_not_allowed'; }
-        $mail = config('mail.mailers.smtp', []);
-        if (config('mail.default') !== 'smtp' || ! is_array($mail) || ($mail['transport'] ?? null) !== 'smtp') { $errors[] = 'direct_smtp_mailer_required'; $mail = []; }
-        if (isset($mail['url'])) { $errors[] = 'smtp_url_override_not_allowed'; }
-        $host = $mail['host'] ?? null; $port = $mail['port'] ?? null;
-        if (! is_string($host) || trim($host) === '' || filter_var($port, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 65535]]) === false) { $errors[] = 'smtp_host_and_port_required'; }
-        if (! in_array($mail['scheme'] ?? null, [null, '', 'smtp', 'smtps'], true)) { $errors[] = 'smtp_scheme_invalid'; }
-        $loopback = in_array($host, ['127.0.0.1', '::1'], true);
-        if (! $loopback && ($mail['scheme'] ?? null) !== 'smtps') { $errors[] = 'remote_smtp_requires_smtps'; }
-        if (array_key_exists('verify_peer', $mail) && filter_var($mail['verify_peer'], FILTER_VALIDATE_BOOL) !== true) { $errors[] = 'smtp_peer_verification_required'; }
-        if (! is_numeric($mail['timeout'] ?? null) || (float) $mail['timeout'] <= 0 || (float) $mail['timeout'] > 30) { $errors[] = 'bounded_smtp_timeout_required'; }
+        $mailer = config('mail.default');
+        if ($mailer === 'resend') {
+            $resend = config('mail.mailers.resend', []);
+            if (! is_array($resend) || ($resend['transport'] ?? null) !== 'resend') { $errors[] = 'direct_smtp_mailer_required'; }
+            $key = config('services.resend.key');
+            if (! is_string($key) || strlen(trim($key)) < 8 || preg_match('/\s/', $key)) { $errors[] = 'resend_api_key_required'; }
+        } elseif ($mailer === 'smtp') {
+            $mail = config('mail.mailers.smtp', []);
+            if (! is_array($mail) || ($mail['transport'] ?? null) !== 'smtp') { $errors[] = 'direct_smtp_mailer_required'; $mail = []; }
+            if (isset($mail['url'])) { $errors[] = 'smtp_url_override_not_allowed'; }
+            $host = $mail['host'] ?? null; $port = $mail['port'] ?? null;
+            if (! is_string($host) || trim($host) === '' || filter_var($port, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 65535]]) === false) { $errors[] = 'smtp_host_and_port_required'; }
+            if (! in_array($mail['scheme'] ?? null, [null, '', 'smtp', 'smtps'], true)) { $errors[] = 'smtp_scheme_invalid'; }
+            $loopback = in_array($host, ['127.0.0.1', '::1'], true);
+            if (! $loopback && ($mail['scheme'] ?? null) !== 'smtps') { $errors[] = 'remote_smtp_requires_smtps'; }
+            if (array_key_exists('verify_peer', $mail) && filter_var($mail['verify_peer'], FILTER_VALIDATE_BOOL) !== true) { $errors[] = 'smtp_peer_verification_required'; }
+            if (! is_numeric($mail['timeout'] ?? null) || (float) $mail['timeout'] <= 0 || (float) $mail['timeout'] > 30) { $errors[] = 'bounded_smtp_timeout_required'; }
+        } else {
+            $errors[] = 'direct_smtp_mailer_required';
+        }
         if (! filter_var(config('mail.from.address'), FILTER_VALIDATE_EMAIL)) { $errors[] = 'valid_sender_address_required'; }
         return array_values(array_unique($errors));
     }
