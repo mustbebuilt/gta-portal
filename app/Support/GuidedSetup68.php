@@ -31,6 +31,38 @@ class GuidedSetup68 {
    $p['step']=$step;$p['authors']=array_values(array_unique([...($p['authors']??[]),$u->id]));$d->payload=$p;$d->version++;self::event($d,$u,'step_saved',['step'=>$step,...($step===4?['rpl_before'=>$before['rpl']??[],'rpl_after'=>$p['rpl']??[]]:[])]);$d->save();return $d;
   });
  }
+ public static function savePlanDates(User $u, int $auth, Draft $draft, int $version, array $input): Draft
+ {
+  return DB::transaction(function () use ($u, $auth, $draft, $version, $input) {
+   self::actor($u, $auth);
+   $d = self::lock($draft, $version);
+   abort_unless($d->state === 'Draft', 409);
+   $p = $d->payload;
+   $template = self::template($p);
+   $policy = $template ? RplPlanDates69::policy($template->template) : null;
+   if (!$policy || empty($p['programme']['start_date'])) Rpl68::fail('Choose the approved programme and start date first.');
+
+   $dates = Validator::make($input, [
+    'source' => ['required', 'string', 'max:250'],
+    'agreed_hours' => ['required', 'numeric', 'min:0.01', 'max:10000'],
+    'practical_end' => ['required', 'date_format:Y-m-d'],
+    'programme_end' => ['required', 'date_format:Y-m-d', 'after:practical_end'],
+    'pause_start' => ['nullable', 'required_with:pause_end', 'date_format:Y-m-d'],
+    'pause_end' => ['nullable', 'required_with:pause_start', 'date_format:Y-m-d'],
+    'schedule' => ['nullable', 'string', 'max:1000'],
+   ])->validate();
+   $dates['binding'] = RplPlanDates69::binding($p['programme'], $p['rpl'] ?? [], $policy);
+   $old = $p['plan_dates69'] ?? [];
+   $p['plan_dates69'] = $dates;
+   $p['authors'] = array_values(array_unique([...($p['authors'] ?? []), $u->id]));
+   $d->payload = $p;
+   $d->version++;
+   self::event($d, $u, 'training_plan_dates_saved', ['previous_dates' => $old, 'new_dates' => $dates]);
+   $d->save();
+
+   return $d;
+  });
+ }
  public static function review(Draft $d):array {
   $p=$d->payload;$issues=[];$add=function(int $step,string $text)use(&$issues){$issues[]=['step'=>$step,'message'=>$text];};$details=$p['details']??[];
   foreach(['reference','first_name','last_name'] as $k)if(!filled($details[$k]??null))$add(1,'Enter '.$k.'.');
@@ -51,14 +83,16 @@ class GuidedSetup68 {
   if(!empty($e['id'])){$employer=Employer::find($e['id']);if(!$employer?->active||$employer->record_version!==($e['record_version']??null))$add(5,'Employer changed or is inactive. Reselect and verify its agreement.');}
   else {if(!filled($e['reference']??null)||!filled($e['name']??null))$add(5,'Select an existing employer or enter the new employer reference and name.');else foreach(Employer::where(fn($q)=>$q->whereRaw('UPPER(reference)=?',[strtoupper($e['reference'])])->orWhereRaw('LOWER(name)=?',[mb_strtolower(trim($e['name']))]))->get() as $candidate){if(strtoupper($candidate->reference)===strtoupper($e['reference']))$add(5,'Employer reference already exists; select its existing record.');elseif(!filled($e['duplicate_reason']??null))$add(5,'Possible employer name match: '.$candidate->name.'. Select it or explain the separate organisation.');}}
   if(($r['mode']??null)==='applies'&&(!filled($e['agreement_ref']??null)||empty($e['agreement_verified'])||($e['agreement_binding']??null)!==Rpl68::hash([self::employerKey($e),$e['record_version']??null,$r,$e['agreement_ref']??null])))$add(5,'Verify the employer agreement reference against this linked employer and RPL revision.');
-  return ['issues'=>$issues,'calculation'=>$calc,'template'=>$t,'employer'=>$employer,'matches'=>$matches];
+  $dates = $t ? RplPlanDates69::review($t->template, $p['programme'], $r, $calc, $p['plan_dates69'] ?? []) : null;
+  if ($d->state !== 'Complete' && !empty($dates['issue'])) $add(4, $dates['issue']);
+  return ['issues'=>$issues,'calculation'=>$calc,'template'=>$t,'employer'=>$employer,'matches'=>$matches,'dates69'=>$dates];
  }
  public static function submit(User $u,int $auth,Draft $draft,int $version):Draft {return DB::transaction(function()use($u,$auth,$draft,$version){self::actor($u,$auth);$d=self::lock($draft,$version);abort_unless($d->state==='Draft',409);if(self::review($d)['issues'])Rpl68::fail('Complete the linked missing items before requesting plan approval.');$d->state='Ready';$d->version++;self::event($d,$u,'submitted_for_independent_review');$d->save();return $d;});}
  public static function reopen(User $u,int $auth,Draft $draft,int $version,string $reason):Draft {return DB::transaction(function()use($u,$auth,$draft,$version,$reason){self::actor($u,$auth);if(!filled(trim($reason)))Rpl68::fail('Record the reason for this correction.');$d=self::lock($draft,$version);abort_unless(in_array($d->state,['Ready','Complete'],true),409);$p=$d->payload;$p['authors']=[$u->id];$p['correction_reason']=trim($reason);$d->payload=$p;$d->state='Draft';$d->version++;self::event($d,$u,'reopened',['reason'=>trim($reason)]);$d->save();return $d;});}
  public static function confirm(User $u,int $auth,Draft $draft,int $version):Draft {
   return DB::transaction(function()use($u,$auth,$draft,$version){$u=self::actor($u,$auth);DB::table('setup68_locks')->where('key','commit')->lockForUpdate()->first();$d=Draft::whereKey($draft->id)->lockForUpdate()->firstOrFail();if($d->state==='Complete')return $d;$d=self::lock($d,$version);abort_unless($d->state==='Ready',409);$p=$d->payload;abort_if(in_array($u->id,$p['authors']??[],true),422,'The existing independent plan-review rule requires an administrator or CEO who did not prepare this draft.');$view=self::review($d);if($view['issues'])Rpl68::fail('Source or records changed; reopen and resolve the missing items.');$t=$view['template'];$calc=$view['calculation'];$e=$p['employer'];$employer=$view['employer'];
    if(!$employer){$employer=EmployerWorkflow68::create($u,$auth,$d->id,$e);}
-   $fields=collect($p['details'])->only(['reference','first_name','last_name','email'])->all();$fields=[...$fields,...collect($p['programme'])->only(['tutor_id','tutor_group_id','mentor_id','careers_adviser_id','maths_tutor_id','english_tutor_id'])->all(),'programme_id'=>$t->programme_id,'employer_id'=>$employer->id,'start_date'=>$p['programme']['start_date']];$end=CarbonImmutable::parse($fields['start_date'])->addDays(collect($t->template['blocks'])->max('end_day'))->toDateString();$fields['planned_end_date']=$end;
+   $fields=collect($p['details'])->only(['reference','first_name','last_name','email'])->all();$fields=[...$fields,...collect($p['programme'])->only(['tutor_id','tutor_group_id','mentor_id','careers_adviser_id','maths_tutor_id','english_tutor_id'])->all(),'programme_id'=>$t->programme_id,'employer_id'=>$employer->id,'start_date'=>$p['programme']['start_date']];$end=CarbonImmutable::parse($fields['start_date'])->addDays(collect($t->template['blocks'])->max('end_day'))->toDateString();$agreedDates=$view['dates69']['approved']??null;$fields['planned_end_date']=$agreedDates['programme_end']??$end;
    $a=$d->apprentice_id?Apprentice::whereKey($d->apprentice_id)->lockForUpdate()->firstOrFail():new Apprentice();
    if($a->exists&&$a->version!==($p['apprentice_version']??null))Rpl68::fail('The apprentice changed since this setup was opened; reconcile the record first.');
    if($a->exists&&($a->programme_id!==$t->programme_id)&&LearningTask::where('apprentice_id',$a->id)->exists())Rpl68::fail('Use the controlled programme-transfer process for existing allocated learning.');
@@ -68,7 +102,8 @@ class GuidedSetup68 {
    abort_unless(SupportAccess::lead($u,$a),403);$old=MarkerHistory::codes($a->id);$markers=$p['markers'];if($markers['state']!=='pending'){$selected=$markers['state']==='none'?[]:$markers['codes'];DB::table('apprentice_markers')->where('apprentice_id',$a->id)->whereNotIn('code',$selected)->delete();foreach(array_diff($selected,$old) as $code)DB::table('apprentice_markers')->insert(['apprentice_id'=>$a->id,'code'=>$code,'recorded_by'=>$u->id,'created_at'=>now(),'updated_at'=>now()]);MarkerHistory::record($a->id,$u->id,'guided_setup68',$old,'Recorded during apprentice setup');}
    $w=TrainingPlanWorkspace::firstOrNew(['apprentice_id'=>$a->id]);$rpl=[...$p['rpl'],'remaining_confirmed'=>true,'template_id'=>$t->id,'template_hash'=>$t->source_hash,'calculation'=>$calc,'assessment_ref'=>$p['rpl']['assessment_ref']??null,'employer_id'=>$employer->id,'employer_agreement_ref'=>$e['agreement_ref']??null,'approved_by'=>$u->id,'approved_at'=>now()->toIso8601String()];$w->setup_rpl=$rpl;$w->source_hash=$t->source_hash;$w->proposal=$w->proposal??[];$w->rpl=$w->rpl??[];$w->history=[...($w->history??[]),['event'=>'setup68_rpl_confirmed','by'=>$u->id,'at'=>now()->toIso8601String(),'draft'=>$d->id,'reason'=>$p['correction_reason']??null]];if($w->exists)$w->version++;$w->save();
    $blocks=[];foreach($calc['blocks'] as $b)$blocks[]=['number'=>$b['number'],'title'=>$b['title'],'hours'=>(string)$b['hours'],'start'=>CarbonImmutable::parse($a->start_date)->addDays($b['start_day'])->toDateString(),'end'=>CarbonImmutable::parse($a->start_date)->addDays($b['end_day'])->toDateString()];
-   $plan=IndividualDeliveryPlan::firstOrNew(['apprentice_id'=>$a->id]);$approved=['identity'=>DeliveryPlan::identity($a),'catalogue_hash'=>DeliveryPlan::catalogueHash(TaskCatalogue::keyFor($a)),'blocks'=>$blocks,'details'=>['target_hours'=>$calc['revised_hours'],'basis'=>$rpl['mode']==='none'?'Full training retained':'Controlled individual plan','source_ref'=>$t->template['source_ref'],'ksb_ref'=>$t->template['ksb_ref'],'qualifications_ref'=>$t->template['qualifications_ref'],'release_ref'=>$t->template['release_ref']],'rpl_binding'=>Rpl68::hash($rpl),'authors'=>$p['authors'],'approved_by'=>$u->id,'approved_at'=>now()->toIso8601String(),'approval_scope'=>'Existing independent provider operational plan review; participant signatures and costing remain separate'];$approved['hash']=Rpl68::hash($approved);$plan->draft=$approved;$plan->approved=$approved;$plan->active=true;$plan->history=[...($plan->history??[]),['event'=>'setup68_plan_confirmed','by'=>$u->id,'at'=>now()->toIso8601String(),'approved_hash'=>$approved['hash']]];if($plan->exists)$plan->version++;$plan->save();
+   if ($agreedDates) $blocks = $agreedDates['blocks'];
+   $plan=IndividualDeliveryPlan::firstOrNew(['apprentice_id'=>$a->id]);$previousPlan=$plan->approved;$approved=['identity'=>DeliveryPlan::identity($a),'catalogue_hash'=>DeliveryPlan::catalogueHash(TaskCatalogue::keyFor($a)),'blocks'=>$blocks,'details'=>['target_hours'=>$calc['revised_hours'],'basis'=>$rpl['mode']==='none'?'Full training retained':'Controlled individual plan','source_ref'=>$t->template['source_ref'],'ksb_ref'=>$t->template['ksb_ref'],'qualifications_ref'=>$t->template['qualifications_ref'],'release_ref'=>$t->template['release_ref'],...($agreedDates?['practical_end_date'=>$agreedDates['practical_end'],'apprenticeship_end_date'=>$agreedDates['programme_end'],'agreed_dates_source'=>$agreedDates['source']]:[])],'rpl_binding'=>Rpl68::hash($rpl),'authors'=>$p['authors'],'approved_by'=>$u->id,'approved_at'=>now()->toIso8601String(),'approval_scope'=>'Existing independent provider operational plan review; participant signatures and costing remain separate'];$approved['hash']=Rpl68::hash($approved);$plan->draft=$approved;$plan->approved=$approved;$plan->active=true;$plan->history=[...($plan->history??[]),['event'=>'setup68_plan_confirmed','by'=>$u->id,'at'=>now()->toIso8601String(),'approved_hash'=>$approved['hash'],...($agreedDates&&$previousPlan?['previous_dates'=>$previousPlan['details'],'previous_schedule'=>$previousPlan['blocks']]:[])]];if($plan->exists)$plan->version++;$plan->save();
    $p['employer']=['id'=>$employer->id,'record_version'=>$employer->record_version,'use_contact'=>$e['use_contact']??false,'agreement_ref'=>$e['agreement_ref']??null,'agreement_verified'=>$e['agreement_verified']??false]; if($p['employer']['agreement_verified'])$p['employer']['agreement_binding']=Rpl68::hash([self::employerKey($p['employer']),$employer->record_version,$p['rpl'],$e['agreement_ref']??null]);
    $p['apprentice_version']=$a->version;$p['approved_hours']=$calc['revised_hours'];$d->payload=$p;$d->apprentice_id=$a->id;$d->state='Complete';$d->version++;self::event($d,$u,'setup_confirmed',['apprentice_id'=>$a->id,'plan_hash'=>$approved['hash']]);$d->save();DB::table('audit_events')->insert(['user_id'=>$u->id,'apprentice_id'=>$a->id,'event'=>'guided_setup68_confirmed','created_at'=>now()]);return $d;
   });

@@ -26,6 +26,7 @@ class ApprenticeRoadmap67
         'extra'=>['Training','Additional training completed'],
         'achievement'=>['Achievements','Workplace achievement confirmed'],
         'completion'=>['Programme','Programme achievement recorded'],
+        'practical_end'=>['Programme','Planned practical end'],
         'planned_end'=>['Programme','Planned programme end'],
     ];
 
@@ -43,7 +44,7 @@ class ApprenticeRoadmap67
         foreach ($events as $e) {
             $type=$e['type']??null;$date=self::date($e['date']??null);
             if (!is_string($type) || !isset(self::TYPES[$type]) || !$date) continue;
-            $planned=in_array($type,['planned_end','review_booking'],true);
+            $planned=in_array($type,['practical_end','planned_end','review_booking'],true);
             if (!$planned && $date>$asOf) continue;
             [$category,$title]=self::TYPES[$type];
             $block=filter_var($e['block']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1,'max_range'=>10]]);
@@ -84,6 +85,8 @@ class ApprenticeRoadmap67
         $setup=\App\Models\ApprenticeSetupDraft68::where('apprentice_id',$a->id)->first();
         foreach($setup?->history??[] as $e)if(($e['event']??null)==='setup_confirmed')$events[]=['type'=>'plan_confirmed','date'=>substr($e['at'],0,10)];
         if($a->start_date)$events[]=['type'=>'start','date'=>$a->start_date->toDateString()];
+        $practicalEnd = DeliveryPlan::approved($a)['details']['practical_end_date'] ?? null;
+        if ($practicalEnd) $events[] = ['type'=>'practical_end','date'=>$practicalEnd];
         if($a->planned_end_date)$events[]=['type'=>'planned_end','date'=>$a->planned_end_date->toDateString()];
         // Dated employment changes are authoritative for their effective date. Do not expose their encrypted payload/reasons.
         $datedEmployment=false;

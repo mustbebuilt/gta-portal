@@ -16,8 +16,8 @@ class GuidedSetup68Test extends TestCase {
  private function template():Template {$p=Programme::firstOrCreate(['standard_code'=>'ST0499','version'=>'1.3','name'=>'Autocare acceptance fixture','level'=>2]);$t=self::source();return Template::where('programme_id',$p->id)->first()??Template::create(['programme_id'=>$p->id,'template'=>$t,'source_hash'=>Rpl68::hash($t),'active'=>true]);}
  private function save(Draft $d,int $step,array $data):Draft {$this->post('/apprentice-setup/'.$d->id.'/steps/'.$step,['version'=>$d->version,'data'=>$data])->assertRedirect()->assertSessionHasNoErrors();return $d->fresh();}
  private function capture(Draft $d,int $step,string $scenario):void {if(!getenv('GTA_SETUP68_CAPTURE_DIR'))return;$response=$this->get('/apprentice-setup/'.$d->id.'/'.$step)->assertOk();file_put_contents(getenv('GTA_SETUP68_CAPTURE_DIR').'/'.$scenario.'-step'.$step.'.html',$response->getContent());}
- private function ready(bool $partial=false):array {
-  $author=$this->actor();$reviewer=$this->actor();$this->actingAs($author);$t=$this->template();$this->post('/apprentice-setup')->assertRedirect();$d=Draft::where('owner_id',$author->id)->firstOrFail();
+ private function ready(bool $partial=false, ?Template $template=null):array {
+  $author=$this->actor();$reviewer=$this->actor();$this->actingAs($author);$t=$template??$this->template();$this->post('/apprentice-setup')->assertRedirect();$d=Draft::where('owner_id',$author->id)->firstOrFail();
   $d=$this->save($d,1,['reference'=>$partial?'DEMO68-B':'DEMO68-A','first_name'=>$partial?'Morgan':'Alex','last_name'=>'Acceptance','email'=>$partial?'morgan@example.invalid':'alex@example.invalid']);
   $this->capture($d,1,$partial?'partial':'none');$this->get('/apprentice-setup/'.$d->id.'/2')->assertOk()->assertSee('Inclusion Markers');$d=$this->save($d,2,['state'=>'pending']);
   $this->capture($d,2,$partial?'partial':'none');$d=$this->save($d,3,['template_id'=>$t->id,'start_date'=>'2026-11-18']);
@@ -55,6 +55,42 @@ class GuidedSetup68Test extends TestCase {
  public function test_template_revision_invalidates_approved_target_instead_of_silently_recalculating():void {[$d,$a,$r,$t]=$this->complete();$value=$t->template;$value['source_ref']='Revised source';$t->template=$value;$t->source_hash=Rpl68::hash($value);$t->save();$this->assertNull(DeliveryPlan::approved(Apprentice::find($d->apprentice_id)));}
  public function test_missing_remainder_confirmation_and_unresolved_blocks_prevent_submission():void {[$d,$a,$r,$t]=$this->ready(true);$this->post('/apprentice-setup/'.$d->id.'/reopen',['version'=>$d->version,'reason'=>'Continue assessment'])->assertRedirect();$d=$d->fresh();$d=$this->save($d,4,[...$d->payload['rpl'],'remaining_confirmed'=>false]);$this->post('/apprentice-setup/'.$d->id.'/submit',['version'=>$d->version,'confirmed'=>1])->assertSessionHasErrors();$this->assertDatabaseCount('apprentices',0);}
  public function test_preview_bulk_changes_has_no_mutation_then_confirm_applies_once():void {[$d]=$this->ready(true);$this->post('/apprentice-setup/'.$d->id.'/reopen',['version'=>$d->version,'reason'=>'Batch change'])->assertRedirect();$d=$d->fresh();$data=['version'=>$d->version,'action'=>'batch_preview','codes'=>['K1','K2'],'percent'=>20];$response=$this->post('/apprentice-setup/'.$d->id.'/steps/4',$data)->assertOk()->assertSee('Review these changes');$this->assertSame($d->version,$d->fresh()->version);$binding=Rpl68::hash([$d->version,['K1','K2'],20,Setup::template($d->payload)->source_hash]);$this->post('/apprentice-setup/'.$d->id.'/steps/4',[...$data,'action'=>'batch_apply','binding'=>$binding])->assertRedirect()->assertSessionHasNoErrors();$this->assertSame(20,$d->fresh()->payload['rpl']['adjustments']['K2']);$this->assertFalse($d->fresh()->payload['rpl']['remaining_confirmed']);}
+ public function test_ksb_type_filters_compose_without_changing_the_draft(): void
+ {
+  $actor = $this->actor();
+  $this->actingAs($actor);
+  $template = $this->template();
+  $matrix = $template->template;
+  $matrix['ksbs'][4]['code'] = 'S1';
+  $matrix['ksbs'][5]['code'] = 'B1';
+  $template->update(['template' => $matrix, 'source_hash' => Rpl68::hash($matrix)]);
+
+  $draft = Setup::start($actor, $actor->auth_version);
+  $draft = $this->save($draft, 3, ['template_id' => $template->id, 'start_date' => '2026-11-18']);
+  $show = route('setup68.show', [$draft, 4]);
+  $filters = ['ksb_type' => 'S', 'search' => 'CONTROLLED', 'block' => 1];
+  $query = http_build_query($filters);
+  $codes = fn ($response) => array_column($response->viewData('ksbs'), 'code');
+
+  $this->assertCount(50, $codes($this->get($show)->assertOk()->assertSee('KSB type')));
+  $this->assertContains('K1', $codes($this->get($show.'?ksb_type=K')->assertOk()));
+  $this->assertSame(['B1'], $codes($this->get($show.'?ksb_type=B')->assertOk()));
+  $this->assertCount(50, $codes($this->get($show.'?ksb_type%5B%5D=S')->assertOk()));
+  $this->assertSame(['S1'], $codes($this->get($show.'?'.$query)->assertOk()));
+  $this->assertSame([], $codes($this->get($show.'?'.$query.'&adjusted=1')->assertOk()));
+  $this->assertSame($draft->version, $draft->fresh()->version);
+
+  $save = route('setup68.save', [$draft, 4]).'?'.$query;
+  $data = ['version' => $draft->version, 'codes' => ['S1'], 'percent' => 20];
+  $preview = $this->post($save, [...$data, 'action' => 'batch_preview'])->assertOk();
+  $this->assertSame(['S1'], $codes($preview));
+  $this->assertSame($draft->version, $draft->fresh()->version);
+  $binding = $preview->viewData('batch')['binding'];
+  $this->post($save, [...$data, 'action' => 'batch_apply', 'binding' => $binding])
+   ->assertRedirect($show.'?'.$query)->assertSessionHasNoErrors();
+  $this->assertSame(['S1' => 20], $draft->fresh()->payload['rpl']['adjustments']);
+  $this->assertSame(['S1'], $codes($this->get($show.'?'.$query.'&adjusted=1')->assertOk()));
+ }
  public function test_no_prior_learning_one_click_moves_to_employer():void {$u=$this->actor();$this->actingAs($u);$t=$this->template();$d=Setup::start($u,$u->auth_version);$d=$this->save($d,3,['template_id'=>$t->id,'start_date'=>'2026-11-18']);$this->post('/apprentice-setup/'.$d->id.'/steps/4?next=5',['version'=>$d->version,'action'=>'none'])->assertRedirect('/apprentice-setup/'.$d->id.'/5');$this->assertTrue($d->fresh()->payload['rpl']['remaining_confirmed']);$this->assertSame([], $d->fresh()->payload['rpl']['adjustments']);}
  public function test_employer_change_clears_previous_agreement():void {[$d]=$this->ready(true);$this->post('/apprentice-setup/'.$d->id.'/reopen',['version'=>$d->version,'reason'=>'Employer changed'])->assertRedirect();$d=$d->fresh();$e=Employer::create(['reference'=>'OTHER68','name'=>'Another employer']);$d=$this->save($d,5,['id'=>$e->id,'agreement_ref'=>'OLD-REF','agreement_verified'=>true]);$this->assertFalse($d->payload['employer']['agreement_verified']);$this->assertTrue(collect(Setup::review($d)['issues'])->contains(fn($x)=>$x['step']===5));}
  public function test_guest_and_non_admin_cannot_read_a_private_draft():void {[$d]=$this->ready();$this->actingAs($this->actor('tutor'))->get('/apprentice-setup/'.$d->id.'/2')->assertForbidden();$this->post('/apprentice-setup/'.$d->id.'/steps/2',['version'=>$d->version,'data'=>['state'=>'selected','codes'=>['IM10']]])->assertForbidden();}
@@ -65,4 +101,70 @@ class GuidedSetup68Test extends TestCase {
  public function test_sensitive_draft_payload_and_rpl_history_are_encrypted_at_rest():void {[$d]=$this->ready(true);$raw=DB::table('apprentice_setup_drafts68')->where('id',$d->id)->first();$this->assertStringNotContainsString('Morgan',$raw->payload);$this->assertStringNotContainsString('ASSESSMENT-68-B',$raw->history);$events=$d->history;$rpl=collect($events)->first(fn($e)=>isset($e['rpl_after']));$this->assertSame(20,$rpl['rpl_after']['adjustments']['K1']);}
  public function test_rpl_does_not_create_delivered_hours_or_mark_tasks_achieved():void {[$d]=$this->complete(true);$position=OtjPosition::forApprentice(Apprentice::find($d->apprentice_id));$this->assertSame(0,$position['summary']['recorded_minutes']);$this->assertDatabaseCount('learning_tasks',0);$this->assertDatabaseCount('attendance_marks',0);}
  public function test_profile_change_and_inactive_employer_block_confirmation_transactionally():void {[$d,$author,$reviewer]=$this->ready();$e=Employer::find($d->payload['employer']['id']);$e->active=false;$e->save();$this->actingAs($reviewer)->post('/apprentice-setup/'.$d->id.'/confirm',['version'=>$d->version,'confirmed'=>1])->assertSessionHasErrors();$this->assertDatabaseCount('apprentices',0);}
+ public static function dateProgrammes(): array
+ {
+  return [
+   'Autocare' => ['ST0499', '1.3', 600, 50], 'Heavy Vehicle' => ['ST0068', '1.5', 800, 46],
+   'Panel' => ['ST0403', '1.3', 760, 44], 'Paint' => ['ST0448', '1.2', 840, 48],
+  ];
+ }
+
+ #[\PHPUnit\Framework\Attributes\DataProvider('dateProgrammes')]
+ public function test_approved_rpl_dates_are_saved_with_the_schedule_and_visible_after_confirmation(
+  string $code, string $version, int $hours, int $count
+ ): void {
+  $matrix = self::source();
+  $matrix['standard_code'] = $code;
+  $matrix['standard_version'] = $version;
+  $matrix['full_hours'] = $hours;
+  $matrix['ksbs'] = array_slice($matrix['ksbs'], 0, $count);
+  $matrix['ksbs'][4]['code'] = 'S1';
+  $matrix['ksbs'][5]['code'] = 'B1';
+  foreach (range(0, 9) as $i) $matrix['blocks'][$i]['hours'] = $hours / 10;
+  $programme = Programme::firstOrCreate(['standard_code' => $code, 'version' => $version,
+   'name' => 'Fictional date test standard', 'level' => $code === 'ST0499' ? 2 : 3]);
+  $template = Template::create(['programme_id' => $programme->id, 'template' => $matrix,
+   'source_hash' => Rpl68::hash($matrix), 'active' => true]);
+  [$draft, $author, $reviewer] = $this->ready(true, $template);
+  config(['gta_rpl_dates' => ["$code:$version" => [
+   'hours_per_training_week' => 6, 'training_weeks_per_year' => 46.4, 'epa_months' => 1,
+  ]]]);
+  $url = '/apprentice-setup/'.$draft->id;
+  $this->post($url.'/reopen', ['version' => $draft->version, 'reason' => 'Enter agreed dates'])->assertRedirect();
+  $draft->refresh();
+  $draft = $this->save($draft, 4, [...$draft->payload['rpl'],
+   'adjustments' => ['K1' => 20, 'S1' => 30, 'B1' => 50], 'remaining_confirmed' => true]);
+  $draft = $this->save($draft, 5, [...$draft->payload['employer'], 'agreement_verified' => true]);
+  $review = Setup::review($draft);
+  $dates = $review['dates69']['proposed'];
+  $this->assertArrayHasKey('practical_end', $dates);
+  $start = new \DateTimeImmutable($draft->payload['programme']['start_date']);
+  $lines = [];
+  for ($i = 0; $i < 10; $i++) {
+   $from = $start->modify('+'.($i * 40).' days')->format('Y-m-d');
+   $to = $start->modify('+'.($i * 40 + 39).' days')->format('Y-m-d');
+   $lines[] = "$from,$to";
+  }
+  $lines[] = $start->modify('+400 days')->format('Y-m-d').','.$dates['practical_end'];
+  $lines[] = (new \DateTimeImmutable($dates['practical_end']))->modify('+1 day')->format('Y-m-d').','.$dates['programme_end'];
+  $record = [...$dates, 'source' => 'Fictional approved plan v1', 'agreed_hours' => $review['calculation']['revised_hours'], 'schedule' => implode("\n", $lines)];
+  $this->post($url.'/steps/4', ['version' => $draft->version, 'action' => 'save_plan_dates',
+   'data' => [...$record, 'programme_end' => '2039-01-01']])->assertRedirect()->assertSessionHasNoErrors();
+  $draft->refresh();
+  $this->post($url.'/submit', ['version' => $draft->version, 'confirmed' => 1])->assertSessionHasErrors();
+  $this->post($url.'/steps/4', ['version' => $draft->version, 'action' => 'save_plan_dates', 'data' => $record])
+   ->assertRedirect()->assertSessionHasNoErrors();
+  $draft->refresh();
+  $this->post($url.'/submit', ['version' => $draft->version, 'confirmed' => 1])->assertRedirect()->assertSessionHasNoErrors();
+  $draft->refresh();
+  $this->actingAs($reviewer)->get($url.'/6')->assertOk()->assertSee('Fictional approved plan v1');
+  $this->post($url.'/confirm', ['version' => $draft->version, 'confirmed' => 1])->assertRedirect()->assertSessionHasNoErrors();
+  $apprentice = Apprentice::findOrFail($draft->fresh()->apprentice_id);
+  $this->assertSame($dates['programme_end'], $apprentice->planned_end_date->toDateString());
+  $approved = DeliveryPlan::approved($apprentice);
+  $this->assertSame($dates['practical_end'], $approved['details']['practical_end_date']);
+  $this->assertSame($dates['practical_end'], $approved['blocks'][10]['end']);
+  $this->assertSame($dates['programme_end'], $approved['blocks'][11]['end']);
+  $this->get('/apprentices/'.$apprentice->id.'/training-plan')->assertOk()->assertSee($dates['practical_end']);
+ }
 }
