@@ -25,6 +25,7 @@ class TrainingPlanController extends Controller
             throw ValidationException::withMessages(['programmeRef' => 'The loaded planning and RPL source is Autocare only. This programme needs its own controlled plan/KSB source.']);
         }
         $row = Workspace::where('apprentice_id', $a->id)->lockForUpdate()->first();
+        if ($row?->setup_rpl !== null) { throw ValidationException::withMessages(['version'=>'Correct the approved outcomes in the same guided setup/RPL record.']); }
         if ($r->integer('version') !== ($row?->version ?? 0)) {
             throw ValidationException::withMessages(['version' => 'This planning workspace changed. Reopen before saving.']);
         }
@@ -49,10 +50,12 @@ class TrainingPlanController extends Controller
     public function show(Request $r, Apprentice $apprentice): View
     {
         abort_unless(Access::training($r->user(), $apprentice), 403);
+        $row = Workspace::where('apprentice_id', $apprentice->id)->first();
+        if ($row?->setup_rpl !== null) { return view('setup68.training-plan',['apprentice'=>$apprentice,'plan'=>\App\Support\DeliveryPlan::approved($apprentice),'position'=>Access::manager($r->user())?Source::position($row):null,'setup'=>Access::manager($r->user())?\App\Models\ApprenticeSetupDraft68::where('apprentice_id',$apprentice->id)->first():null]); }
+
         if (TaskCatalogue::keyFor($apprentice) !== 'autocare') {
             return view('plans.source-pending', compact('apprentice'));
         }
-        $row = Workspace::where('apprentice_id', $apprentice->id)->first();
         $manage = Access::manager($r->user());
         $reference = Source::load('training-plan-reference');
         $code = $r->query('code', $reference['ksbs'][0]['code']);

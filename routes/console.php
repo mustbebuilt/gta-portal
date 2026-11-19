@@ -328,3 +328,5 @@ Artisan::command('gta:retention-followups',function(){
  $this->line(json_encode(['profiles_checked'=>$count,'messages_sent'=>0,'historical_facts_inferred'=>false]));
 })->purpose('Reconcile 3/6/12-month portal tasks with sourced exit dates; no messages');
 \Illuminate\Support\Facades\Schedule::command('gta:retention-followups')->dailyAt('07:00')->timezone('Europe/London')->withoutOverlapping();
+
+require __DIR__.'/setup68-console.php';

@@ -58,6 +58,7 @@ class TrainingPlanSource
 
     public static function position(?TrainingPlanWorkspace $row): array
     {
+        if ($row?->setup_rpl !== null) { return Rpl68::position($row); }
         $reference = self::load('training-plan-reference');
         $base = self::load('programme-baseline');
         $codes = array_column($reference['ksbs'], 'code');

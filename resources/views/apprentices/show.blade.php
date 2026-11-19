@@ -2,6 +2,7 @@
 @section('title', $apprentice->reference)
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }}</p><h1>{{ $apprentice->first_name }} {{ $apprentice->last_name }}</h1><p class="muted">{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }}</p></div><a href="{{ route('apprentices.index') }}">Back to apprentices</a></header>
+@include('setup68.record-summary')
 @include('apprentices.page-actions64')
 @include('apprentices.next-steps')
 <section class="panel"><h2>Apprentice details</h2><dl class="details-grid">

@@ -37,12 +37,14 @@ class DirectoryController extends Controller
     public function create(string $kind): View
     {
         Gate::authorize('manage-directories');
+        if($kind==='employers')return view('setup68.employer',['token'=>(string)Str::uuid(),'matches'=>collect()]);
 
         return view('directories.form', ['kind' => $kind, 'title' => DirectoryCatalog::title($kind), 'record' => DirectoryCatalog::blank($kind), 'fields' => DirectoryCatalog::fields($kind)]);
     }
 
     public function store(SaveDirectoryRequest $request, string $kind): RedirectResponse
     {
+        if($kind==='employers'){$e=\App\Support\EmployerWorkflow68::create($request->user(),(int)$request->session()->get('auth_version'),(string)Str::uuid(),$request->validated());return to_route('directories.show',[$kind,$e->id])->with('status','Employer created. No invitation or message was sent.');}
         $record = DB::transaction(function () use ($request, $kind) {
             if ($kind === 'staff') {
                 User::orderBy('id')->lockForUpdate()->get(['id']);

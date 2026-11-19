@@ -36,25 +36,16 @@ class ApprenticeController extends Controller
         return view('apprentices.index', compact('records', 'search'));
     }
 
-    public function create(): View
+    public function create(): RedirectResponse
     {
         Gate::authorize('create', Apprentice::class);
 
-        return view('apprentices.form', ['apprentice' => new Apprentice, 'tutors' => $this->tutors(), 'linkedOptions' => $this->linkedOptions()]);
+        return to_route('setup68.index');
     }
 
     public function store(SaveApprenticeRequest $request): RedirectResponse
     {
-        $record = DB::transaction(function () use ($request) {
-            $record = Apprentice::create($request->safe()->except(['version',...\App\Support\ApprenticeAlerts::INPUTS]));
-            if($request->boolean('change_alert_preferences')) { \App\Support\ApprenticeAlerts::apply($record,$request->user(),$request->session()->get('auth_version'),$request->validated());$record->save(); }
-            AssignmentHistory::record($record, $request->user()->id, null);
-            $this->audit($request, $record, 'created');
-
-            return $record;
-        });
-
-        return to_route('apprentices.show', $record)->with('status', 'Apprentice saved. You can close this page and reopen the record.');
+        throw ValidationException::withMessages(['setup' => 'Use Add apprentice → guided setup to avoid a duplicate or incomplete record.']);
     }
 
     public function show(Apprentice $apprentice): View

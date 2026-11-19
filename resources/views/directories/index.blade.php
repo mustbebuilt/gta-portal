@@ -2,7 +2,7 @@
 @section('title', $title)
 @section('content')
 @php($noun=\App\Support\DirectoryCatalog::singular($kind))
-<header class="page-heading"><div><p class="eyebrow">Administration</p><h1>{{ $title }}</h1><p class="muted">Maintain the records used when assigning apprentices.</p></div><a class="button primary" href="{{ route('directories.create',$kind) }}">Add {{ $noun }}</a></header>
+<header class="page-heading"><div><p class="eyebrow">Administration</p><h1>{{ $title }}</h1><p class="muted">Maintain the records used when assigning apprentices.</p></div><a class="button primary" href="{{ $kind==='employers'?route('employer68.show'):route('directories.create',$kind) }}">{{ $kind==='employers'?'Add employer':'Add '.$noun }}</a></header>
 <section class="panel"><form class="search" method="get"><div><label for="search">Search by name</label><input id="search" name="search" value="{{ $search }}" maxlength="100"></div><div><label for="state">Show</label><select id="state" name="state">@foreach(['all'=>'All records','active'=>'Active only','inactive'=>'Inactive only'] as $value=>$label)<option value="{{ $value }}" @selected($state===$value)>{{ $label }}</option>@endforeach</select></div><button class="primary">Apply</button></form>
 @if($kind==='employers')<p>An employer organisation record is separate from a named employer login. <a href="{{ route('employer-accounts.index') }}">Set up employer contacts and access</a>.</p>@endif
 @if($kind==='staff')<p>Add each staff member once, then assign them on the apprentice's profile. Creating a record does not send a login invitation. <a href="{{ route('setup.index') }}">Account, role and assignment guide</a> · <a href="{{ route('assignment-checks.index') }}">Assignment checks</a></p>@endif

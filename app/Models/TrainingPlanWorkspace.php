@@ -16,7 +16,7 @@ class TrainingPlanWorkspace extends Model
 
     protected function casts(): array
     {
-        return ['proposal' => 'array', 'rpl' => 'array', 'reviews' => 'array', 'history' => 'array', 'version' => 'integer'];
+        return ['setup_rpl'=>'encrypted:array', 'proposal' => 'array', 'rpl' => 'array', 'reviews' => 'array', 'history' => 'array', 'version' => 'integer'];
     }
 
     public function apprentice(): BelongsTo

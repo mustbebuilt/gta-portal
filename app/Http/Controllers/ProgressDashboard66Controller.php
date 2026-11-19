@@ -6,7 +6,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 class ProgressDashboard66Controller extends Controller {
  private function report(Request $r,?string $role=null):array{return $role===null?Dash::live($r):Dash::demo($r,$role);}
  private function show(Request $r,?string $role=null){
-  try{$report=$this->report($r,$role);if($role===null&&in_array($r->user()->role,['admin','ceo','tutor','apprentice'],true))$report['groups']=Dash::groups(Dash::actor($r));return response()->view('progress66.index',compact('report'))->header('Cache-Control','private, no-store')->header('Referrer-Policy','no-referrer');}
+  try{$report=\App\Support\ProgressReturn68::decorate($r,$this->report($r,$role));if($role===null&&in_array($r->user()->role,['admin','ceo','tutor','apprentice'],true))$report['groups']=Dash::groups(Dash::actor($r));return response()->view('progress66.index',compact('report'))->header('Cache-Control','private, no-store')->header('Referrer-Policy','no-referrer');}
   catch(\JsonException|\Illuminate\Database\QueryException $e){return response()->view('progress66.state',['message'=>'The reporting source is unavailable or needs checking. No totals have been substituted. Try again or contact GTA.','demo'=>$role!==null],503)->header('Cache-Control','private, no-store')->header('Referrer-Policy','no-referrer');}
   catch(HttpExceptionInterface $e){if(!in_array($e->getStatusCode(),[409,422,503],true))throw $e;return response()->view('progress66.state',['message'=>$e->getMessage(),'demo'=>$role!==null,'groups'=>$role===null?Dash::groups(Dash::actor($r)):[]],$e->getStatusCode())->header('Cache-Control','private, no-store')->header('Referrer-Policy','no-referrer');}
  }

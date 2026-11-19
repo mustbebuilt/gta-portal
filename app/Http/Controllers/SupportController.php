@@ -177,6 +177,7 @@ class SupportController extends Controller
         DB::transaction(function () use ($r, $apprentice, $data): void {
             $locked = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $locked);
+            $locked->inclusion_status68 = count($data['codes'] ?? []) > 0 ? 'selected' : 'none';
             $locked->version++;
             $locked->save();
             $before = MarkerHistory::codes($apprentice->id);

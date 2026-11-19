@@ -9,6 +9,7 @@ class ApprenticeRoadmap67
 {
     public const TYPES = [
         'start'=>['Programme','Programme started'],
+        'plan_confirmed'=>['Programme','Training plan confirmed'],
         'employer'=>['Employment','Employer changed'],
         'employer_record'=>['Employment','Employer link updated'],
         'tutor'=>['Training','Main tutor changed'],
@@ -80,6 +81,8 @@ class ApprenticeRoadmap67
         abort_unless(LearningAccess::training($u,$a),403);
         if($u->role==='apprentice')abort_unless(ApprenticeExperience::profile($u)?->id===$a->id,403);
         $today=today()->toDateString();$events=[];
+        $setup=\App\Models\ApprenticeSetupDraft68::where('apprentice_id',$a->id)->first();
+        foreach($setup?->history??[] as $e)if(($e['event']??null)==='setup_confirmed')$events[]=['type'=>'plan_confirmed','date'=>substr($e['at'],0,10)];
         if($a->start_date)$events[]=['type'=>'start','date'=>$a->start_date->toDateString()];
         if($a->planned_end_date)$events[]=['type'=>'planned_end','date'=>$a->planned_end_date->toDateString()];
         // Dated employment changes are authoritative for their effective date. Do not expose their encrypted payload/reasons.
@@ -109,7 +112,7 @@ class ApprenticeRoadmap67
         foreach(TrainingTopic::where('apprentice_id',$a->id)->whereIn('subject',['english','maths'])->where('status','Completed')->whereNotNull('completion_date')->get(['subject','completion_date']) as $t)$events[]=['type'=>$t->subject,'date'=>$t->completion_date->toDateString()];
         foreach(Qualification::where('apprentice_id',$a->id)->where('status','Achieved')->whereNotNull('achievement_date')->get(['subject','achievement_date']) as $q)$events[]=['type'=>in_array($q->subject,['english','maths'],true)?$q->subject.'_result':'qualification','date'=>$q->achievement_date->toDateString()];
         foreach(SignedReviewRecord::where('apprentice_id',$a->id)->whereNotNull('checked_at')->whereNull('withdrawn_at')->get() as $r)if(SignedReviews::intact($r))$events[]=['type'=>'review','date'=>$r->meeting_date->toDateString()];
-        $appointment=ReviewNextStep::for($u,$a)['appointment'];if($appointment&&$appointment->starts_at->gte(now()))$events[]=['type'=>'review_booking','date'=>$appointment->starts_at->timezone('Europe/London')->toDateString()];
+        $appointment=class_exists(ReviewNextStep::class)?ReviewNextStep::for($u,$a)['appointment']:\App\Models\ReviewAppointment::where('apprentice_id',$a->id)->where('state','Published')->where('ends_at','>',now()->utc())->orderBy('starts_at')->limit(50)->get()->first(fn($meeting)=>ReviewAppointments::published($meeting)&&ReviewAppointments::current($meeting)&&ReviewAppointments::visible($u,$meeting));if($appointment&&$appointment->starts_at->gte(now()))$events[]=['type'=>'review_booking','date'=>$appointment->starts_at->timezone('Europe/London')->toDateString()];
         foreach($otjRows as $o)if(($o['kind']??null)==='extra'&&($o['state']??null)==='Approved extra training'&&($o['minutes']??0)>0)$events[]=['type'=>'extra','date'=>$o['date']];
         foreach(ApprenticeExperienceEntry::where('apprentice_id',$a->id)->where('kind','achievement')->where('state','Approved')->whereNotNull('happened_on')->get(['happened_on']) as $e)$events[]=['type'=>'achievement','date'=>$e->happened_on->toDateString()];
         $c=ProgrammeOutcome::where('apprentice_id',$a->id)->first()?->context??[];
