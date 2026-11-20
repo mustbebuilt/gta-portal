@@ -1,0 +1,1054 @@
+{
+  "name": "Autocare Technician Level 2",
+  "standard_code": "ST0499",
+  "standard_version": "1.3",
+  "source_ref": "Autocare_Technician_L2_SOW_v4.4(4).docx | GTA SOW baseline for staging review",
+  "ksb_ref": "AF1.34 Autocare RPLE 2026/27 v1.1, KSB Assessment | GTA Foundation Skills SOW v1.2, teaching links crosswalk",
+  "qualifications_ref": "Staging only: confirm GTA programme/version qualification and EPA reference with curriculum lead",
+  "release_ref": "Staging only. Indicative offsets retained for importer testing. Use the agreed cohort and apprentice calendar for practical, gateway and EPA dates.",
+  "full_hours": 611.5,
+  "blocks": [
+    {
+      "number": 1,
+      "title": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+      "hours": 45.0,
+      "start_day": 0,
+      "end_day": 78
+    },
+    {
+      "number": 2,
+      "title": "Vehicle Inspection, Servicing and Customer Interaction",
+      "hours": 55.0,
+      "start_day": 79,
+      "end_day": 156
+    },
+    {
+      "number": 3,
+      "title": "Workshop Processes, Tools and Environmental Awareness",
+      "hours": 55.0,
+      "start_day": 157,
+      "end_day": 235
+    },
+    {
+      "number": 4,
+      "title": "Emerging Technology and Driveline Systems",
+      "hours": 55.0,
+      "start_day": 236,
+      "end_day": 314
+    },
+    {
+      "number": 5,
+      "title": "Diagnostic Thinking and Complex Repair Activities",
+      "hours": 55.0,
+      "start_day": 315,
+      "end_day": 392
+    },
+    {
+      "number": 6,
+      "title": "Vehicle Systems Integration and Advanced Diagnostics",
+      "hours": 55.0,
+      "start_day": 393,
+      "end_day": 471
+    },
+    {
+      "number": 7,
+      "title": "Advanced Workshop Practice and Technical Communication",
+      "hours": 55.0,
+      "start_day": 472,
+      "end_day": 550
+    },
+    {
+      "number": 8,
+      "title": "Advanced Diagnostics and Workshop Organisation",
+      "hours": 55.0,
+      "start_day": 551,
+      "end_day": 628
+    },
+    {
+      "number": 9,
+      "title": "Emerging Technologies, Electric Vehicles and Hydrogen Awareness",
+      "hours": 77.0,
+      "start_day": 629,
+      "end_day": 738
+    },
+    {
+      "number": 10,
+      "title": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+      "hours": 104.5,
+      "start_day": 739,
+      "end_day": 880
+    },
+    {
+      "number": 11,
+      "title": "Gateway Readiness and Confirmation",
+      "hours": 0.0,
+      "start_day": 881,
+      "end_day": 894
+    },
+    {
+      "number": 12,
+      "title": "End-Point Assessment",
+      "hours": 0.0,
+      "start_day": 895,
+      "end_day": 908
+    }
+  ],
+  "ksbs": [
+    {
+      "code": "K1",
+      "description": "The automotive industry and the role of the autocare technician. Limits of autonomy and reporting channels.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K2",
+      "description": "Vehicle safety inspections and routine maintenance: manufacturers specifications or approved schedules. The use of vehicle specific data and the legal requirements for wear and serviceability.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K3",
+      "description": "Awareness of health and safety regulations, standards, and guidance and impact on role. Safe working procedures, COSHH, fire safety, good housekeeping, hazards and risks, manual handling, PPE, safety equipment and signage, slips, trips and falls, LOLER and PUWER.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K4",
+      "description": "Environment and sustainability guidance relevant to the occupation and the autocare technician's responsibilities. Recycling, reuse and safe disposal of waste.",
+      "blocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K5",
+      "description": "Tools and equipment used in the automotive industry: purpose and operation.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K6",
+      "description": "Maintenance and storage methods for tools and equipment, including calibration checks.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K7",
+      "description": "Workplace instructions: purpose and use for inspection, maintenance and replacement.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K8",
+      "description": "Vehicle service records, owner's manuals and warranties: purpose and use.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K9",
+      "description": "Tyres: legislation, replacement, repair and technical information including tyre labelling, TPMS, sidewall markings and homologated fitments.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K10",
+      "description": "Steering systems: purpose, function and location of systems and components for inspection, removal and replacement.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K11",
+      "description": "Suspension systems: purpose, function and location of systems and components for inspection, removal and replacement.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K12",
+      "description": "Braking systems: purpose, function and location of systems and components for inspection, removal and replacement, including wheel bearings.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K13",
+      "description": "Emission control systems: purpose, function and location of systems and components for inspection, removal and replacement.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K14",
+      "description": "Vehicle heating, ventilation and air conditioning systems: purpose, function and location for inspection, maintenance and replacement.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K15",
+      "description": "Low voltage batteries, starting and charging systems: purpose, function and location.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K16",
+      "description": "Maintenance and replacement of low voltage batteries, starting and charging systems.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K17",
+      "description": "Awareness of ADAS and the impact of repair work, including static and dynamic calibration methods and equipment.",
+      "blocks": [
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K18",
+      "description": "ADAS levels of autonomy: passive and active advanced driver assistance systems.",
+      "blocks": [
+        10
+      ]
+    },
+    {
+      "code": "K19",
+      "description": "Four-wheel geometry principles including wheel alignment, Ackermann principle, toe, camber, thrust angle and adjustment methods.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K20",
+      "description": "Vehicle fluid and filtration systems: brake fluid, oil and oil filters, air filters.",
+      "blocks": [
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "K21",
+      "description": "Awareness of electrified vehicle technologies and principles of operation, including high voltage battery and onboard charger condition monitoring.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K22",
+      "description": "Awareness of hydrogen-powered vehicle technologies and principles of operation, including storage and fuel-cell condition monitoring.",
+      "blocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K23",
+      "description": "Safe working procedures for electrified vehicles, including high voltage systems and safe isolation.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K24",
+      "description": "Principles of customer care: pre- and post-vehicle service, identifying needs and handling challenging conversations.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K25",
+      "description": "Business operation considerations: efficiency, customer satisfaction, competitiveness, operational risk and ethical issues.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K26",
+      "description": "Vehicle parts costings and procurement: customer, organisation and vehicle needs.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K27",
+      "description": "Materials, resources and stock storage used in the automotive industry. Stock and resource management processes.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K28",
+      "description": "Principles of customer sales and financial compliance, including FCA and PCI requirements.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K29",
+      "description": "Principles of sales processes.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K30",
+      "description": "Team-working principles.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "K31",
+      "description": "Principles of equity, diversity and inclusion in the workplace and the impact on work.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "K32",
+      "description": "Verbal communication techniques: giving and receiving information and matching style to audience.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "K33",
+      "description": "Written communication techniques, electronic and paper, using autocare industry terminology.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "K34",
+      "description": "Information and digital technology, including email, collaboration packages, databases, digital interfaces, management information systems, point of sale, GDPR and cyber security.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S1",
+      "description": "Comply with health and safety procedures in the workplace in line with regulations, standards and guidance.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S2",
+      "description": "Prepare the vehicle and working area before the work activity.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S3",
+      "description": "Maintain and restore the work area during and on completion of the activity.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S4",
+      "description": "Store and maintain tools and equipment, including calibration checks, and return them to storage.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S5",
+      "description": "Access vehicle technical data to inform inspections and make judgements on wear and serviceability.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S6",
+      "description": "Comply with environmental and sustainability procedures and segregate resources for reuse, recycling and disposal.",
+      "blocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S7",
+      "description": "Apply vehicle safety inspection and routine maintenance procedures using vehicle-specific data.",
+      "blocks": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S8",
+      "description": "Select and use tools and equipment, including mechanical and electrical measuring tools and diagnostic equipment.",
+      "blocks": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S9",
+      "description": "Remove, repair and replace vehicle tyre and balance wheel assemblies, including specialist tyre types.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S10",
+      "description": "Inspect, remove and replace components in steering, suspension, braking, emission, air conditioning, battery/charging and fluid/filtration systems.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S11",
+      "description": "Apply state-of-health condition monitoring tests to high voltage batteries and chargers for electrified vehicles.",
+      "blocks": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S12",
+      "description": "Apply four-wheel geometry checks and adjustments.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S13",
+      "description": "Apply safe working practices and procedures to isolate electrified vehicles for maintenance.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S14",
+      "description": "Record vehicle service, maintenance, parts replacement or repair.",
+      "blocks": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S15",
+      "description": "Apply customer-service principles and organisational customer-care practices.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S16",
+      "description": "Provide quotations and order automotive parts, products and consumables applicable to the vehicle.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S17",
+      "description": "Apply procedures for stock and parts storage, including ordering, checking and rotation.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S18",
+      "description": "Apply organisational sales processes.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S19",
+      "description": "Apply team-working principles.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S20",
+      "description": "Comply with equity, diversity and inclusion guidance.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S21",
+      "description": "Communicate verbally with customers, suppliers and colleagues.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S22",
+      "description": "Communicate in writing with internal and external customers, colleagues and managers.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S23",
+      "description": "Use information and digital technology systems and comply with GDPR and cyber security.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S24",
+      "description": "Complete and record learning and development activities.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "code": "S25",
+      "description": "Apply procedures to check and replace fluids and filtration parts.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B1",
+      "description": "Put health and safety first.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B2",
+      "description": "Consider the environmental impact when using resources and carrying out work.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B3",
+      "description": "Respond and adapt to changing work demands.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B4",
+      "description": "Seek learning and development opportunities and continual professional development.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B5",
+      "description": "Support an inclusive workplace and respect different views.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    }
+  ],
+  "date_basis": "agreed_timetable"
+}

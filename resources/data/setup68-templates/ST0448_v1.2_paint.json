@@ -1,0 +1,429 @@
+{
+  "name": "Vehicle Damage Paint Technician Level 3",
+  "standard_code": "ST0448",
+  "standard_version": "1.2",
+  "source_ref": "Vehicle_Damage_Paint_Technician_L3_SOW_v1.3_Clean_Master.docx | ST0448 v1.2, GTA staging baseline",
+  "ksb_ref": "https://skillsengland.education.gov.uk/apprenticeships/st0448-v1-2 | GTA SOW teaching links; see KSB review register | GTA Foundation Skills SOW v1.2 teaching links",
+  "qualifications_ref": "Staging only: confirm GTA programme/version qualification and EPA reference with curriculum lead",
+  "release_ref": "Staging only. Indicative offsets retained for importer testing. Use the agreed cohort and apprentice calendar for practical, gateway and EPA dates.",
+  "full_hours": 754.5,
+  "blocks": [
+    {
+      "number": 1,
+      "title": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+      "hours": 45.0,
+      "start_day": 0,
+      "end_day": 78
+    },
+    {
+      "number": 2,
+      "title": "Core Paint Preparation, Materials and Workflow",
+      "hours": 99.0,
+      "start_day": 79,
+      "end_day": 219
+    },
+    {
+      "number": 3,
+      "title": "Fillers, Primers, Masking and Corrosion Protection",
+      "hours": 77.0,
+      "start_day": 220,
+      "end_day": 329
+    },
+    {
+      "number": 4,
+      "title": "Colour Theory, Paint Mixing and Technical Data",
+      "hours": 77.0,
+      "start_day": 330,
+      "end_day": 440
+    },
+    {
+      "number": 5,
+      "title": "Spray Equipment, Booths, Application and Curing",
+      "hours": 82.5,
+      "start_day": 441,
+      "end_day": 558
+    },
+    {
+      "number": 6,
+      "title": "Process Integration, Productivity and Quality Control",
+      "hours": 77.0,
+      "start_day": 559,
+      "end_day": 668
+    },
+    {
+      "number": 7,
+      "title": "Advanced Blending, Plastics and Defect Rectification",
+      "hours": 82.5,
+      "start_day": 669,
+      "end_day": 786
+    },
+    {
+      "number": 8,
+      "title": "Emerging Technology, Specialist Surfaces and Sustainability",
+      "hours": 77.0,
+      "start_day": 787,
+      "end_day": 896
+    },
+    {
+      "number": 9,
+      "title": "Commercial Workflow, Customer Communication and Portfolio Consolidation",
+      "hours": 77.0,
+      "start_day": 897,
+      "end_day": 1006
+    },
+    {
+      "number": 10,
+      "title": "Final Consolidation, Portfolio Completion and EPA Readiness",
+      "hours": 60.5,
+      "start_day": 1007,
+      "end_day": 1092
+    },
+    {
+      "number": 11,
+      "title": "Gateway Confirmation and EPA Mobilisation",
+      "hours": 0.0,
+      "start_day": 1093,
+      "end_day": 1106
+    },
+    {
+      "number": 12,
+      "title": "End-Point Assessment",
+      "hours": 0.0,
+      "start_day": 1107,
+      "end_day": 1120
+    }
+  ],
+  "ksbs": [
+    {
+      "code": "K1",
+      "description": "Automotive refinish materials, including fillers, primers, basecoats and clearcoats, and how application technique affects quality.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K2",
+      "description": "Drying and curing methods used in vehicle refinishing, including booth bake, infrared, UV and catalytic systems.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K3",
+      "description": "Paint repair tools, equipment and devices, including spray guns, nozzles, mixing schemes, paint booths and UV lamps.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K4",
+      "description": "Substrate types such as steel, aluminium, plastic, GRP and carbon fibre, and how substrate affects process and material selection.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K5",
+      "description": "Safe handling and significant risks linked to solvents, high-voltage components, conventional and alternative-fuelled vehicles.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K6",
+      "description": "Paint volume estimation, mixing ratios, viscosity, waste control and job-based material planning.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K7",
+      "description": "Health, safety and compliance requirements of a collision repair business, including COSHH and environmental responsibilities.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K8",
+      "description": "Commercial productivity, cycle time, efficiency, waste, defect prevention and the impact of rework on resources and reputation.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K9",
+      "description": "Quality control processes and the implications of poor quality repairs for safety, customer satisfaction and business outcomes.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S1",
+      "description": "Prepare the job and work area before repair, including safe setup, job documentation, materials and panel preparation.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S2",
+      "description": "Correctly identify substrate materials and select a suitable refinish route.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S3",
+      "description": "Interpret technical data, paint manufacturer methods and repair information to create the correct application process.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S4",
+      "description": "Use refinish materials to manufacturer specification to reinstate the vehicle finish to a high standard.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S5",
+      "description": "Identify, select and operate the correct repair tools, equipment and devices for the paint repair process.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B1",
+      "description": "Work safely and efficiently while following business operating procedures and policies.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B2",
+      "description": "Work as an effective team member, take responsibility, be honest and keep others informed if deadlines are at risk.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B3",
+      "description": "Seek opportunities to learn about the wider collision repair business.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B4",
+      "description": "Show commitment to customer service, deadlines and flexible support for business goals.",
+      "blocks": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B5",
+      "description": "Take responsibility for personal and professional development, including emerging technology awareness.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B6",
+      "description": "Anticipate problems, put controls in place and address root causes when issues occur.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B7",
+      "description": "Communicate effectively with customers and colleagues.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    }
+  ],
+  "date_basis": "agreed_timetable"
+}

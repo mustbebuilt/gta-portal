@@ -1,0 +1,502 @@
+{
+  "name": "Heavy Vehicle Service and Maintenance Technician Level 3",
+  "standard_code": "ST0068",
+  "standard_version": "1.5",
+  "source_ref": "Heavy_Vehicle_Service_Maintenance_Technician_L3_SOW_v1.2(3).docx | GTA SOW baseline for staging review",
+  "ksb_ref": "https://skillsengland.education.gov.uk/occupations/OCC0068-v1-5 | GTA SOW teaching links; see KSB review register | GTA Foundation Skills SOW v1.2 teaching links",
+  "qualifications_ref": "Staging only: confirm GTA programme/version qualification and EPA reference with curriculum lead",
+  "release_ref": "Staging only. Indicative offsets retained for importer testing. Use the agreed cohort and apprentice calendar for practical, gateway and EPA dates.",
+  "full_hours": 842.5,
+  "blocks": [
+    {
+      "number": 1,
+      "title": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+      "hours": 45.0,
+      "start_day": 0,
+      "end_day": 78
+    },
+    {
+      "number": 2,
+      "title": "Inspection, Planned Maintenance and Operator's Licence Compliance",
+      "hours": 99.0,
+      "start_day": 79,
+      "end_day": 204
+    },
+    {
+      "number": 3,
+      "title": "Chassis, Steering, Suspension, Wheels, Tyres and Trailers",
+      "hours": 99.0,
+      "start_day": 205,
+      "end_day": 329
+    },
+    {
+      "number": 4,
+      "title": "Air Braking, Pneumatic and Hydraulic Systems",
+      "hours": 99.0,
+      "start_day": 330,
+      "end_day": 455
+    },
+    {
+      "number": 5,
+      "title": "12/24V Electrical, Electronic and Networked Systems",
+      "hours": 99.0,
+      "start_day": 456,
+      "end_day": 581
+    },
+    {
+      "number": 6,
+      "title": "Engines, Fuel, Emissions, Thermal Management and Emerging Technology",
+      "hours": 99.0,
+      "start_day": 582,
+      "end_day": 707
+    },
+    {
+      "number": 7,
+      "title": "Transmission, Driveline, Hydraulics, Ancillaries and Complex Repair",
+      "hours": 99.0,
+      "start_day": 708,
+      "end_day": 833
+    },
+    {
+      "number": 8,
+      "title": "Advanced Diagnostic Strategy and Roadside Assistance",
+      "hours": 66.0,
+      "start_day": 834,
+      "end_day": 919
+    },
+    {
+      "number": 9,
+      "title": "Customer, Business, Records, Quality and Continuous Improvement",
+      "hours": 66.0,
+      "start_day": 920,
+      "end_day": 1006
+    },
+    {
+      "number": 10,
+      "title": "Final Consolidation, Corrective Learning and EPA Readiness Training",
+      "hours": 71.5,
+      "start_day": 1007,
+      "end_day": 1061
+    },
+    {
+      "number": 11,
+      "title": "Gateway Readiness and Confirmation",
+      "hours": 0.0,
+      "start_day": 1062,
+      "end_day": 1075
+    },
+    {
+      "number": 12,
+      "title": "End-Point Assessment",
+      "hours": 0.0,
+      "start_day": 1076,
+      "end_day": 1089
+    }
+  ],
+  "ksbs": [
+    {
+      "code": "K1",
+      "description": "The fundamentals of HV technologies, including chassis design, engines, fuels, transmissions, 12/24V electrical systems, air-conditioning, hydraulic and air braking, and air suspension.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        10
+      ],
+      "allocation": {
+        "4": 1
+      }
+    },
+    {
+      "code": "K2",
+      "description": "The types and associated characteristics of heavy vehicles, their configurations and applications.",
+      "blocks": [
+        1,
+        2,
+        3,
+        6,
+        7,
+        10
+      ],
+      "allocation": {
+        "3": 1
+      }
+    },
+    {
+      "code": "K3",
+      "description": "Diagnostic principles and logical problem-solving techniques related to heavy vehicles.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ],
+      "allocation": {
+        "5": 1
+      }
+    },
+    {
+      "code": "K4",
+      "description": "Sufficient health and safety knowledge and environmental awareness to carry out work safely.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "allocation": {
+        "1": 1
+      }
+    },
+    {
+      "code": "K5",
+      "description": "Operator's Licence requirements relating to heavy vehicles.",
+      "blocks": [
+        2,
+        4,
+        9,
+        10
+      ],
+      "allocation": {
+        "2": 1
+      }
+    },
+    {
+      "code": "K6",
+      "description": "How to service, inspect and maintain vehicles and trailers to expected standards, and the importance of safety inspection and maintenance schedules in meeting Operator's Licence and legal obligations.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        10
+      ],
+      "allocation": {
+        "2": 1
+      }
+    },
+    {
+      "code": "K7",
+      "description": "Customer expectations and the implications of work carried out.",
+      "blocks": [
+        1,
+        2,
+        9,
+        10
+      ],
+      "allocation": {
+        "9": 1
+      }
+    },
+    {
+      "code": "K8",
+      "description": "The need to be reliable, flexible, diligent and a good timekeeper.",
+      "blocks": [
+        1,
+        2,
+        7,
+        9,
+        10
+      ],
+      "allocation": {
+        "7": 1
+      }
+    },
+    {
+      "code": "K9",
+      "description": "How the business works operationally, including commercial and financial awareness in the heavy vehicle industry.",
+      "blocks": [
+        1,
+        9,
+        10
+      ],
+      "allocation": {
+        "9": 1
+      }
+    },
+    {
+      "code": "K10",
+      "description": "Complex problem-solving techniques.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ],
+      "allocation": {
+        "7": 1
+      }
+    },
+    {
+      "code": "K11",
+      "description": "The requirements of providing roadside assistance.",
+      "blocks": [
+        7,
+        8,
+        10
+      ],
+      "allocation": {
+        "8": 1
+      }
+    },
+    {
+      "code": "S1",
+      "description": "Carry out basic tasks with tools and equipment common to mechanical and electrical heavy vehicle procedures.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        10
+      ],
+      "allocation": {
+        "4": 1
+      }
+    },
+    {
+      "code": "S2",
+      "description": "Keep up to date with emerging technologies within the heavy vehicle industry.",
+      "blocks": [
+        1,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "allocation": {
+        "6": 1
+      }
+    },
+    {
+      "code": "S3",
+      "description": "Contribute to a safe and efficient workshop and follow company and legislative processes.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "allocation": {
+        "4": 1
+      }
+    },
+    {
+      "code": "S4",
+      "description": "Access specific and related heavy vehicle technical information appropriately.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "allocation": {
+        "6": 1
+      }
+    },
+    {
+      "code": "S5",
+      "description": "Service, inspect and maintain heavy vehicles and trailers to company, DVSA and manufacturer standards.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        10
+      ],
+      "allocation": {
+        "2": 1
+      }
+    },
+    {
+      "code": "S6",
+      "description": "Use diagnostic and electrical measuring equipment to identify faults and underlying causes on heavy vehicles.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ],
+      "allocation": {
+        "5": 1
+      }
+    },
+    {
+      "code": "S7",
+      "description": "Inspect and prepare vehicles and trailers to meet DVSA standards prescribed in the tester's manual.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        10
+      ],
+      "allocation": {
+        "3": 1
+      }
+    },
+    {
+      "code": "S8",
+      "description": "Carry out final quality checks before customer handover without supervision.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "allocation": {
+        "3": 1
+      }
+    },
+    {
+      "code": "S9",
+      "description": "Apply advanced diagnostic principles and logical problem-solving techniques and regimes.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ],
+      "allocation": {
+        "5": 1
+      }
+    },
+    {
+      "code": "S10",
+      "description": "Maintain records to company and Operator's Licence obligations and regulation.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "allocation": {
+        "8": 1
+      }
+    },
+    {
+      "code": "S11",
+      "description": "Communicate effectively in writing and orally, internally and with customers, on heavy vehicle inspection and diagnostic topics.",
+      "blocks": [
+        1,
+        2,
+        5,
+        8,
+        9,
+        10
+      ],
+      "allocation": {
+        "10": 1
+      }
+    },
+    {
+      "code": "B1",
+      "description": "Act in line with company values, treat customers and stakeholders courteously, and respond promptly to provide an excellent experience.",
+      "blocks": [
+        1,
+        2,
+        8,
+        9,
+        10
+      ],
+      "allocation": {
+        "10": 1
+      }
+    },
+    {
+      "code": "B2",
+      "description": "Work effectively as a team member, take ownership and responsibility, and remain honest and accountable when things do not go to plan.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "allocation": {
+        "7": 1
+      }
+    },
+    {
+      "code": "B3",
+      "description": "Commit to continuous development of self, team and processes.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "allocation": {
+        "6": 1
+      }
+    }
+  ],
+  "date_basis": "agreed_timetable"
+}

@@ -47,10 +47,10 @@ final class RplPlanDates69
         return ['practical_end' => $practical->format('Y-m-d'), 'programme_end' => $end->format('Y-m-d')];
     }
 
-    public static function schedule(array $blocks, string $start, array $dates, ?string $entered): array
+    public static function schedule(array $blocks, string $start, array $dates, ?string $entered, bool $timetable = false): array
     {
         $lines = $entered === null || trim($entered) === '' ? [] : preg_split('/\R/', trim($entered));
-        if ($lines && count($lines) !== count($blocks)) {
+        if (($timetable || $lines) && count($lines) !== count($blocks)) {
             throw new InvalidArgumentException('Enter one start and end date for each of the 12 approved blocks.');
         }
 
@@ -74,11 +74,20 @@ final class RplPlanDates69
 
             $first = self::date($from);
             $last = self::date($to);
+            $afterPractical = $block['number'] > 10;
+            if ($timetable && $afterPractical && (float) $block['hours'] !== 0.0) {
+                throw new InvalidArgumentException('Gateway confirmation and assessment must have zero planned OTJ hours.');
+            }
+            $outsidePhase = $timetable
+                ? ($afterPractical ? $from <= $dates['practical_end'] : $to > $dates['practical_end'])
+                : (($block['number'] < 12 && $to > $dates['practical_end'])
+                    || ($block['number'] === 11 && $to !== $dates['practical_end']));
             if ($first < $startDate || $first > $last || ($previous && $first <= $previous)
-                || ($block['number'] < 12 && $to > $dates['practical_end'])
-                || ($block['number'] === 11 && $to !== $dates['practical_end'])
-                || ($block['number'] === 12 && $to !== $dates['programme_end'])) {
-                throw new InvalidArgumentException('Enter approved block dates in order. Block 11 must end at the practical end and block 12 at the apprenticeship end.');
+                || $outsidePhase || ($block['number'] === 12 && $to !== $dates['programme_end'])) {
+                $message = $timetable
+                    ? 'Enter approved block dates in order. Blocks 1–10 must finish by the practical end. Gateway and EPA must follow, with Block 12 ending on the apprenticeship end date.'
+                    : 'Enter approved block dates in order. Block 11 must end at the practical end and block 12 at the apprenticeship end.';
+                throw new InvalidArgumentException($message);
             }
             $previous = $last;
             $result[] = ['number' => $block['number'], 'title' => $block['title'],
@@ -99,6 +108,11 @@ final class RplPlanDates69
     public static function review(array $template, array $programme, array $rpl, ?array $calculation, array $record): array
     {
         $policy = self::policy($template);
+        $timetable = ($template['date_basis'] ?? null) === 'agreed_timetable';
+        if ($timetable && !$policy) {
+            return ['proposed' => null, 'timetable' => true, 'approved' => null,
+                'issue' => 'Configure date rules for this programme version before approving a timetable.'];
+        }
         $start = $programme['start_date'] ?? null;
         if (!$policy || !$start || !$calculation || $calculation['revised_hours_unrounded'] <= 0) {
             return [];
@@ -106,23 +120,43 @@ final class RplPlanDates69
 
         $proposed = null;
         try {
-            $proposed = self::calculate($policy, $start, $calculation['revised_hours_unrounded'], $record);
+            $proposed = self::calculate($policy, $start, $calculation['revised_hours_unrounded'], $timetable ? [] : $record);
             if (($record['binding'] ?? null) !== self::binding($programme, $rpl, $policy)) {
-                throw new InvalidArgumentException('Check the dates against the agreed Training Plan and save its reference. If the start, RPL or template changed, confirm the dates again.');
+                throw new InvalidArgumentException($timetable
+                    ? 'Save the agreed timetable and its reference. Confirm it again when the start, RPL or programme template changes.'
+                    : 'Check the dates against the agreed Training Plan and save its reference. If the start, RPL or template changed, confirm the dates again.');
             }
-            if (($record['practical_end'] ?? null) !== $proposed['practical_end'] || ($record['programme_end'] ?? null) !== $proposed['programme_end']) {
+            $dates = $proposed;
+            if ($timetable) {
+                $practical = self::date($record['practical_end'] ?? '');
+                $programmeEnd = self::date($record['programme_end'] ?? '');
+                if ($practical < self::date($start) || $programmeEnd <= $practical) {
+                    throw new InvalidArgumentException('Check the order of the agreed learning start, practical end and apprenticeship end.');
+                }
+                if (isset($record['pause_start']) || isset($record['pause_end'])) {
+                    $first = self::date($record['pause_start'] ?? '');
+                    $last = self::date($record['pause_end'] ?? '');
+                    if ($first < self::date($start) || $last < $first || $last > $practical) {
+                        throw new InvalidArgumentException('The agreed pause must fall within the practical period.');
+                    }
+                }
+                $dates = [
+                    'practical_end' => $practical->format('Y-m-d'),
+                    'programme_end' => $programmeEnd->format('Y-m-d'),
+                ];
+            } elseif (($record['practical_end'] ?? null) !== $proposed['practical_end'] || ($record['programme_end'] ?? null) !== $proposed['programme_end']) {
                 throw new InvalidArgumentException('The calculated dates differ from the agreed Training Plan. Reconcile the inputs before requesting approval.');
             }
-            if (!isset($record['agreed_hours']) || round((float) $record['agreed_hours'], 2) !== round($calculation['revised_hours_unrounded'], 2)) {
+            if (!$timetable && (!isset($record['agreed_hours']) || round((float) $record['agreed_hours'], 2) !== round($calculation['revised_hours_unrounded'], 2))) {
                 throw new InvalidArgumentException('The revised OTJ hours differ from the agreed Training Plan. Reconcile the hours before requesting approval.');
             }
-            $schedule = self::schedule($calculation['blocks'], $start, $proposed, $record['schedule'] ?? null);
+            $schedule = self::schedule($calculation['blocks'], $start, $dates, $record['schedule'] ?? null, $timetable);
 
-            return ['proposed' => $proposed, 'approved' => [
-                ...$proposed, 'source' => $record['source'], 'blocks' => $schedule,
+            return ['proposed' => $proposed, 'timetable' => $timetable, 'approved' => [
+                ...$dates, 'source' => $record['source'], 'blocks' => $schedule,
             ], 'issue' => null];
         } catch (InvalidArgumentException $e) {
-            return ['proposed' => $proposed, 'approved' => null, 'issue' => $e->getMessage()];
+            return ['proposed' => $proposed, 'timetable' => $timetable, 'approved' => null, 'issue' => $e->getMessage()];
         }
     }
 

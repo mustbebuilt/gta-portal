@@ -42,14 +42,15 @@ class GuidedSetup68 {
    $policy = $template ? RplPlanDates69::policy($template->template) : null;
    if (!$policy || empty($p['programme']['start_date'])) Rpl68::fail('Choose the approved programme and start date first.');
 
+   $timetable = ($template->template['date_basis'] ?? null) === 'agreed_timetable';
    $dates = Validator::make($input, [
     'source' => ['required', 'string', 'max:250'],
-    'agreed_hours' => ['required', 'numeric', 'min:0.01', 'max:10000'],
+    'agreed_hours' => $timetable ? ['exclude'] : ['required', 'numeric', 'min:0.01', 'max:10000'],
     'practical_end' => ['required', 'date_format:Y-m-d'],
     'programme_end' => ['required', 'date_format:Y-m-d', 'after:practical_end'],
     'pause_start' => ['nullable', 'required_with:pause_end', 'date_format:Y-m-d'],
     'pause_end' => ['nullable', 'required_with:pause_start', 'date_format:Y-m-d'],
-    'schedule' => ['nullable', 'string', 'max:1000'],
+    'schedule' => [$timetable ? 'required' : 'nullable', 'string', 'max:1000'],
    ])->validate();
    $dates['binding'] = RplPlanDates69::binding($p['programme'], $p['rpl'] ?? [], $policy);
    $old = $p['plan_dates69'] ?? [];

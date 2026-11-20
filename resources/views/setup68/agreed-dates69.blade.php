@@ -1,28 +1,37 @@
 @php($dateRecord = $p['plan_dates69'] ?? [])
+@php($timetable = $review['dates69']['timetable'] ?? false)
 <section class="panel">
-    <h2>Training Plan dates</h2>
+    <h2>{{ $timetable ? 'Programme timetable' : 'Training Plan dates' }}</h2>
     <dl>
         @if($review['dates69']['proposed'])
-        <dt>Calculated practical end</dt><dd>{{ $review['dates69']['proposed']['practical_end'] }}</dd>
-        <dt>Calculated apprenticeship end including EPA</dt><dd>{{ $review['dates69']['proposed']['programme_end'] }}</dd>
+        <dt>Indicative practical end from hours</dt><dd>{{ $review['dates69']['proposed']['practical_end'] }}</dd>
+        <dt>Indicative apprenticeship end from hours</dt><dd>{{ $review['dates69']['proposed']['programme_end'] }}</dd>
+        @endif
+        @if($timetable && isset($review['calculation']['revised_hours']))
+            <dt>Planned OTJ hours after RPL</dt><dd>{{ number_format($review['calculation']['revised_hours'], 4) }}</dd>
         @endif
         @if(isset($dateRecord['practical_end'], $dateRecord['programme_end']))
-            <dt>Agreed core OTJ hours</dt><dd>{{ $dateRecord['agreed_hours'] }}</dd>
-            <dt>Training Plan reference</dt><dd>{{ $dateRecord['source'] }}</dd>
+            @if(!$timetable)
+                <dt>Agreed core OTJ hours</dt><dd>{{ $dateRecord['agreed_hours'] }}</dd>
+            @endif
+            <dt>{{ $timetable ? 'Timetable reference' : 'Training Plan reference' }}</dt><dd>{{ $dateRecord['source'] }}</dd>
             <dt>Agreed practical end</dt><dd>{{ $dateRecord['practical_end'] }}</dd>
             <dt>Agreed apprenticeship end</dt><dd>{{ $dateRecord['programme_end'] }}</dd>
         @endif
     </dl>
+    @if($review['dates69']['timetable'] ?? false)
+        <p>The portal calculates training hours from the approved programme and recorded RPL. Save the agreed dates from the delivery timetable.</p>
+    @endif
     @if($review['dates69']['issue'])
         <p class="warn">{{ $review['dates69']['issue'] }}</p>
     @endif
     @if($step === 6 && $review['dates69']['approved'])
         <div class="table-wrap">
             <table>
-                <thead><tr><th>Approved schedule from the Training Plan</th><th>Start</th><th>End</th></tr></thead>
+                <thead><tr><th>Approved block</th><th>Start</th><th>End</th><th>Planned OTJ hours</th></tr></thead>
                 <tbody>
                     @foreach($review['dates69']['approved']['blocks'] as $block)
-                        <tr><td>{{ $block['number'] }}. {{ $block['title'] }}</td><td>{{ $block['start'] }}</td><td>{{ $block['end'] }}</td></tr>
+                        <tr><td>{{ $block['number'] }}. {{ $block['title'] }}</td><td>{{ $block['start'] }}</td><td>{{ $block['end'] }}</td><td>{{ $block['hours'] }}</td></tr>
                     @endforeach
                 </tbody>
             </table>
@@ -32,10 +41,12 @@
         <form method="post" action="{{ route('setup68.save', [$draft, 4]) }}">
             @csrf
             <input type="hidden" name="version" value="{{ $draft->version }}">
-            <label for="agreed-plan-source">Agreed Training Plan reference and revision</label>
+            <label for="agreed-plan-source">{{ $timetable ? 'Agreed timetable reference' : 'Agreed Training Plan reference and revision' }}</label>
             <input id="agreed-plan-source" name="data[source]" required maxlength="250" value="{{ old('data.source', $dateRecord['source'] ?? '') }}">
+            @if(!$timetable)
             <label for="agreed-hours">Agreed core OTJ hours after RPL</label>
             <input id="agreed-hours" name="data[agreed_hours]" type="number" step="any" min="0.01" max="10000" required value="{{ old('data.agreed_hours', $dateRecord['agreed_hours'] ?? '') }}">
+            @endif
             <div class="setup-grid">
                 @foreach(['practical_end' => 'Agreed practical end', 'programme_end' => 'Agreed apprenticeship end', 'pause_start' => 'Approved pause start', 'pause_end' => 'Approved pause end'] as $field => $label)
                     <div>
@@ -44,8 +55,8 @@
                     </div>
                 @endforeach
             </div>
-            <label for="agreed-block-schedule">Approved block schedule if different from the template</label>
-            <textarea id="agreed-block-schedule" name="data[schedule]" rows="4" maxlength="1000">{{ old('data.schedule', $dateRecord['schedule'] ?? '') }}</textarea>
+            <label for="agreed-block-schedule">{{ ($review['dates69']['timetable'] ?? false) ? 'Agreed block timetable' : 'Approved block schedule if different from the template' }}</label>
+            <textarea id="agreed-block-schedule" name="data[schedule]" rows="4" maxlength="1000" @required($review['dates69']['timetable'] ?? false)>{{ old('data.schedule', $dateRecord['schedule'] ?? '') }}</textarea>
             <p>Paste one line per block with start and end separated by a comma, using YYYY-MM-DD. The portal checks the sequence against the agreed end dates.</p>
             <button name="action" value="save_plan_dates">Save agreed dates</button>
         </form>

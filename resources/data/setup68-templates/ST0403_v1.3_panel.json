@@ -1,0 +1,448 @@
+{
+  "name": "Vehicle Damage Panel Technician Level 3",
+  "standard_code": "ST0403",
+  "standard_version": "1.3",
+  "source_ref": "Vehicle_Damage_Panel_Technician_L3_SOW_v1.1_Clean_Master(1).docx | GTA SOW baseline for staging review",
+  "ksb_ref": "https://skillsengland.education.gov.uk/apprenticeships/st0403-v1-3 | GTA SOW teaching links; see KSB review register | GTA Foundation Skills SOW v1.2 teaching links",
+  "qualifications_ref": "Staging only: confirm GTA programme/version qualification and EPA reference with curriculum lead",
+  "release_ref": "Staging only. Indicative offsets retained for importer testing. Use the agreed cohort and apprentice calendar for practical, gateway and EPA dates.",
+  "full_hours": 754.5,
+  "blocks": [
+    {
+      "number": 1,
+      "title": "Motor Vehicle Foundation Skills - Shared Controlled Programme",
+      "hours": 45.0,
+      "start_day": 0,
+      "end_day": 78
+    },
+    {
+      "number": 2,
+      "title": "Panel Identification, Damage Assessment and Repair Planning",
+      "hours": 99.0,
+      "start_day": 79,
+      "end_day": 219
+    },
+    {
+      "number": 3,
+      "title": "Non-Structural Panel Removal, Refit and Alignment",
+      "hours": 77.0,
+      "start_day": 220,
+      "end_day": 329
+    },
+    {
+      "number": 4,
+      "title": "Materials, Technical Data and Repair-Method Selection",
+      "hours": 77.0,
+      "start_day": 330,
+      "end_day": 440
+    },
+    {
+      "number": 5,
+      "title": "Welding, Brazing, Bonding and Riveting",
+      "hours": 82.5,
+      "start_day": 441,
+      "end_day": 558
+    },
+    {
+      "number": 6,
+      "title": "Panel Repair, Pulling, Metal Finishing and Filler",
+      "hours": 77.0,
+      "start_day": 559,
+      "end_day": 668
+    },
+    {
+      "number": 7,
+      "title": "Structural Measurement, Jig Systems and Realignment",
+      "hours": 82.5,
+      "start_day": 669,
+      "end_day": 786
+    },
+    {
+      "number": 8,
+      "title": "Advanced Materials, Safety Systems and Emerging Technology",
+      "hours": 77.0,
+      "start_day": 787,
+      "end_day": 896
+    },
+    {
+      "number": 9,
+      "title": "Integrated Repair Workflow, Quality and Commercial Performance",
+      "hours": 77.0,
+      "start_day": 897,
+      "end_day": 1006
+    },
+    {
+      "number": 10,
+      "title": "Consolidation, Portfolio and EPA Readiness",
+      "hours": 60.5,
+      "start_day": 1007,
+      "end_day": 1092
+    },
+    {
+      "number": 11,
+      "title": "Gateway Confirmation and EPA Mobilisation",
+      "hours": 0.0,
+      "start_day": 1093,
+      "end_day": 1106
+    },
+    {
+      "number": 12,
+      "title": "End-Point Assessment",
+      "hours": 0.0,
+      "start_day": 1107,
+      "end_day": 1120
+    }
+  ],
+  "ksbs": [
+    {
+      "code": "K1",
+      "description": "Motor vehicle chassis and body alignment, measurement and geometry implications.",
+      "blocks": [
+        1,
+        2,
+        3,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K2",
+      "description": "Body types, panel identification, safety systems, materials and alternative-fuel considerations.",
+      "blocks": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K3",
+      "description": "Body-panel repair tools, equipment and devices.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K4",
+      "description": "Removal, repair and replacement of panels and associated parts.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K5",
+      "description": "Interpretation of technical data, repair methods and joining/replacement requirements.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K6",
+      "description": "Quality control and implications of poor-quality repair.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K7",
+      "description": "Panel joining processes including welding, brazing, riveting and bonding.",
+      "blocks": [
+        1,
+        4,
+        5,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K8",
+      "description": "Health, safety, environmental and bodyshop compliance.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "K9",
+      "description": "Commercial productivity, accuracy, cycle time and impact of rework.",
+      "blocks": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S1",
+      "description": "Prepare the job safely, including work area, panel, vehicle and measurement setup.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S2",
+      "description": "Identify construction materials and suitable repair/joining techniques.",
+      "blocks": [
+        2,
+        4,
+        5,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S3",
+      "description": "Interpret technical data, methods, measurements and alignment requirements.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S4",
+      "description": "Select and apply the correct joining technology.",
+      "blocks": [
+        1,
+        4,
+        5,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S5",
+      "description": "Remove, repair and replace panels/components safely and efficiently.",
+      "blocks": [
+        3,
+        6,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S6",
+      "description": "Identify, select and operate panel-repair tools and equipment.",
+      "blocks": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S7",
+      "description": "Identify and communicate supplementary damage, quality issues and repair progress.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "S8",
+      "description": "Detect and rectify or escalate safety-critical structural faults.",
+      "blocks": [
+        2,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B1",
+      "description": "Work safely and efficiently to procedures.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B2",
+      "description": "Work effectively with others, take responsibility and communicate progress or delay.",
+      "blocks": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B3",
+      "description": "Seek learning about the wider collision-repair business.",
+      "blocks": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B4",
+      "description": "Show commitment to customer service and deadlines.",
+      "blocks": [
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B5",
+      "description": "Take responsibility for personal/professional development and emerging technology.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B6",
+      "description": "Anticipate problems, apply controls and address root causes.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "code": "B7",
+      "description": "Communicate effectively with customers and colleagues.",
+      "blocks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    }
+  ],
+  "date_basis": "agreed_timetable"
+}
