@@ -330,6 +330,9 @@ class SupportController extends Controller
     public function savePlan(Request $r, Apprentice $apprentice, ?SupportPlan $plan = null): RedirectResponse
     {
         abort_unless($this->team($r, $apprentice), 403);
+        if (\App\Support\RoutineSupport::is($plan)) {
+            throw ValidationException::withMessages(['fields' => 'Use the routine-support form for this plan. Its non-funded basis is retained.']);
+        }
         if ($plan) {
             abort_unless($plan->apprentice_id === $apprentice->id, 404);
         }
@@ -368,6 +371,9 @@ class SupportController extends Controller
     public function approvePlan(Request $r, SupportPlan $plan): RedirectResponse
     {
         abort_unless($this->lead($r, $plan->apprentice), 403);
+        if (\App\Support\RoutineSupport::is($plan)) {
+            throw ValidationException::withMessages(['fields' => 'Use the routine-support form for this plan. Its non-funded basis is retained.']);
+        }
         $r->validate(['version' => ['required', 'integer'], 'confirmed' => ['accepted'], 'reason' => ['required', 'string', 'max:2000']]);
         DB::transaction(function () use ($r, $plan): void {
             $p = SupportPlan::whereKey($plan->id)->lockForUpdate()->firstOrFail();

@@ -39,7 +39,7 @@ class AttendanceController extends Controller
         $search=trim($input['search']??'');if($search!==''){$sessions=$sessions->filter(fn($s)=>mb_stripos($s->name,$search)!==false || mb_stripos($s->group->name,$search)!==false);}
         $followup=\App\Support\RegisterFollowup::for($sessions);$view=$input['view']??'all';$filtered=($view==='all'?$followup['rows']:$followup['rows']->where('bucket',$view))->values();$page=min(\Illuminate\Pagination\Paginator::resolveCurrentPage(),max(1,(int)ceil($filtered->count()/25)));
         $registerRows=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,25)->values(),$filtered->count(),25,$page,['path'=>$r->url(),'query'=>$r->except('page')]);
-        return view('attendance.index',['groups'=>$groups,'sessions'=>$registerRows->getCollection()->pluck('session'),'registerRows'=>$registerRows,'registerCounts'=>$followup['counts'],'registerView'=>$view,'registerSearch'=>$search]);
+        return view('attendance.index',['groups'=>$groups,'sessions'=>$registerRows->getCollection()->pluck('session'),'todayRegisterRows'=>$followup['rows']->filter(fn($row)=>$row['session']->session_date->isToday())->values(),'registerRows'=>$registerRows,'registerCounts'=>$followup['counts'],'registerView'=>$view,'registerSearch'=>$search]);
     }
 
     public function create(Request $r): RedirectResponse
@@ -114,9 +114,7 @@ class AttendanceController extends Controller
             }
             abort_unless($this->sessionAllowed($r, $s), 403);
             $before = $s->marks()->get()->toArray();
-            if ($before && ! filled($data['correction_reason'] ?? null)) {
-                throw ValidationException::withMessages(['correction_reason' => 'Explain the correction to this saved register.']);
-            }
+            $writes=[];
             foreach ($ids as $id) {
                 $v = $data['marks'][$id] ?? [];
                 $code = $v['code'] ?? null;
@@ -160,8 +158,13 @@ class AttendanceController extends Controller
                         throw ValidationException::withMessages(['marks' => 'This attendance code cannot generate OTJ hours.']);
                     }$minutes = $code ? 0 : null;
                 }
-                AttendanceMark::updateOrCreate(['training_session_id' => $s->id, 'apprentice_id' => $id], ['code' => $code, 'arrival' => in_array($code, ['O', 'T'], true) ? $v['arrival'] : null, 'departure' => in_array($code, ['O', 'T'], true) ? $v['departure'] : null, 'parts' => $parts, 'otj_minutes' => $minutes, 'otj_confirmed' => $confirmed, 'recorded_by' => $r->user()->id, 'comment' => $v['comment'] ?? null, 'adjustment' => $v['adjustment'] ?? null]);
+                $writes[$id]=['code' => $code, 'arrival' => in_array($code, ['O', 'T'], true) ? $v['arrival'] : null, 'departure' => in_array($code, ['O', 'T'], true) ? $v['departure'] : null, 'parts' => $parts, 'otj_minutes' => $minutes, 'otj_confirmed' => $confirmed, 'recorded_by' => $r->user()->id, 'comment' => $v['comment'] ?? null, 'adjustment' => $v['adjustment'] ?? null];
             }
+            if ($before && \App\Support\RegisterPayload::same($before,$writes,$s->delivered_learning,$data['delivered_learning']??null)) {return;}
+            if ($before && !filled($data['correction_reason']??null)) {
+                throw ValidationException::withMessages(['correction_reason'=>'Explain the correction to this saved register.']);
+            }
+            foreach ($writes as $id=>$values) {AttendanceMark::updateOrCreate(['training_session_id'=>$s->id,'apprentice_id'=>$id],$values);}
             $h = $s->history ?? [];
             $h[] = ['event' => 'register_saved', 'by' => $r->user()->id, 'at' => now()->toIso8601String(), 'correction_reason' => $data['correction_reason'] ?? null, 'before_marks' => $before, 'before_delivered' => $s->delivered_learning];
             $s->history = $h;

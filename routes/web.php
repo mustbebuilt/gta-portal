@@ -583,3 +583,5 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
         Route::put('/{kind}/{record}', [DirectoryController::class, 'update'])->whereNumber('record')->name('update');
     });
 });
+
+require __DIR__.'/routine-workflows.php';

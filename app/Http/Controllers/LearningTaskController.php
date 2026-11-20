@@ -126,15 +126,37 @@ class LearningTaskController extends Controller
     public function save(Request $r, LearningTask $task): RedirectResponse
     {
         abort_unless(Access::learner($r->user(), $task->apprentice), 403);
-        $r->validate(['version' => ['required', 'integer'], 'intent' => ['required', Rule::in(['draft', 'submit'])], 'own_work' => ['sometimes', 'accepted']]);
-        DB::transaction(function () use ($r, $task): void {
+        $r->validate(['version' => ['required', 'integer'], 'intent' => ['required', Rule::in(['draft', 'submit', 'upload'])], 'own_work' => ['sometimes', 'accepted']]);
+        if ($r->input('intent')==='upload' || $r->hasFile('file')) {
+            $r->validate(['file'=>['required','file','mimes:pdf,jpg,jpeg,png,docx','extensions:pdf,jpg,jpeg,png,docx','max:15360'],
+                'kind'=>['required',Rule::in(['supporting-evidence','inspection-checklist','workplace-photo'])],
+                'description'=>['nullable','required_if:kind,workplace-photo','string','max:5000']]);
+            if ($r->input('kind')==='workplace-photo') {$r->validate(['file'=>['mimes:jpg,jpeg,png','extensions:jpg,jpeg,png']]);}
+        }
+        $entry=null;
+        try { DB::transaction(function () use ($r, $task, &$entry): void {
             $t = LearningTask::whereKey($task->id)->lockForUpdate()->firstOrFail();
-            $this->version($r, $t);
+            abort_unless(Access::learner($r->user(),$t->apprentice),403);
             BlockRelease::check($t);
             if (! $t->editable() || $t->template['kind'] === 'knowledge') {
                 throw ValidationException::withMessages(['intent' => 'This task cannot be edited or submitted in its current state.']);
             }
             $answers = $this->answers($r, $t, ['apprentice']);
+            $existingFile=null;
+            if ($r->hasFile('file')) {
+                $existingFile=$t->evidence()->where('uploaded_by',$r->user()->id)->where('sha256',hash_file('sha256',$r->file('file')->getRealPath()))
+                    ->where('kind',$r->input('kind'))->where('description',$r->input('description'))->first();
+            }
+            // Exact immediate retry of a combined draft/upload can succeed without a second row or version.
+            if ($r->input('intent')!=='submit' && $r->hasFile('file') && $existingFile && $t->version===$r->integer('version')+1 && $t->answers===$answers) {return;}
+            $this->version($r,$t);
+            if ($r->hasFile('file') && !$existingFile) {
+                $entry=PrivateEvidence::store($r->file('file'),'task-evidence',$r->user()->id);
+                TaskEvidence::create(['learning_task_id'=>$t->id,'uploaded_by'=>$r->user()->id,
+                    ...array_intersect_key($entry,array_flip(['disk','path','name','mime','sha256','bytes'])),
+                    'kind'=>$r->input('kind'),'description'=>$r->input('description')]);
+                $this->audit($r,$t->apprentice_id,$t->id,'evidence_added');
+            }
             if ($r->input('intent') === 'submit') {
                 $r->validate(['own_work' => ['accepted']]);
                 $names = array_filter($t->template['fields'], fn ($f) => $f['role'] === 'apprentice' && in_array($f['key'], ['apprentice_name', 'sign_apprentice_name', 'apprentice_signoff'], true));
@@ -171,9 +193,9 @@ class LearningTaskController extends Controller
             $t->version++;
             $t->save();
             $this->audit($r, $t->apprentice_id, $t->id, $r->input('intent') === 'submit' ? 'submitted' : 'draft_saved');
-        });
+        }); } catch (\Throwable $error) {if ($entry) {PrivateEvidence::delete($entry);} throw $error;}
 
-        return back()->with('status', $r->input('intent') === 'submit' ? 'Submitted to the tutor. This version is locked.' : 'Draft saved.');
+        return back()->with('status', $r->input('intent') === 'submit' ? 'Submitted to the tutor. This version is locked.' : ($r->hasFile('file')?'Answers and evidence saved together.':'Draft saved.'));
     }
 
     public function decide(Request $r, LearningTask $task): RedirectResponse

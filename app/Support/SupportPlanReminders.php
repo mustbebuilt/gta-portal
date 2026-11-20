@@ -46,7 +46,7 @@ class SupportPlanReminders
         if ($due > today()->toDateString()) { return ['state' => 'upcoming', 'source' => null, 'key' => null, 'due' => $due]; }
         $a = Apprentice::find($plan->apprentice_id);
         $owner = $plan->review_owner_id ? User::find($plan->review_owner_id) : null;
-        if (! $a || ! $owner || ! SupportAccess::writer($owner, $a) || $plan->review_owner_revision < 1) {
+        if (! $a || ! $owner || ! (SupportAccess::writer($owner, $a) || (RoutineSupport::is($plan) && RoutineSupport::ownerAllowed($owner,$a))) || $plan->review_owner_revision < 1) {
             return ['state' => 'coordinator_checks', 'source' => null, 'key' => null, 'due' => $due];
         }
         $source = ['plan_id' => $plan->id, 'apprentice_id' => $a->id, 'recipient_id' => $owner->id,
