@@ -5,7 +5,8 @@ use Illuminate\Validation\ValidationException;
 /** Training hours only. Each unique KSB has one equal programme share. */
 class Rpl68 {
  public static function fail(string $message):never {throw ValidationException::withMessages(['setup'=>$message]);}
- public static function hash(array $v):string {return hash('sha256',json_encode($v,JSON_THROW_ON_ERROR));}
+ public static function canonicalize(mixed $v):mixed {if(!is_array($v)){return is_float($v)&&(float)(int)$v===$v?(int)$v:$v;}if(!array_is_list($v)){ksort($v,SORT_STRING);}return array_map([self::class,'canonicalize'],$v);}
+ public static function hash(array $v):string {return hash('sha256',json_encode(self::canonicalize($v),JSON_THROW_ON_ERROR));}
  public static function validateTemplate(array $t):void {
   if(!is_numeric($t['full_hours']??null)||$t['full_hours']<=0||$t['full_hours']>10000||!filled($t['source_ref']??null)||!filled($t['ksb_ref']??null)||!filled($t['qualifications_ref']??null)||!filled($t['release_ref']??null)||!filled($t['standard_code']??null)||!filled($t['standard_version']??null))self::fail('A controlled standard/version, source references and full eligible OTJ hours are required.');
   $codes=array_column($t['ksbs']??[],'code');
