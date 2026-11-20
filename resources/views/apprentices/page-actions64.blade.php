@@ -15,6 +15,7 @@
 <li><a href="{{ route('delivery.show',$apprentice) }}">Individual delivery plan and block calendar</a></li>
 <li><a href="{{ route('plans.show',$apprentice) }}">Training-plan preparation</a></li>
 <li><a href="{{ route('journey.show',$apprentice) }}">Apprenticeship journey</a></li>
+<li><a href="{{ route('training-journey72.show',$apprentice) }}">Personal training bank and gaps</a></li>
 <li><a href="{{ route('em.index',$apprentice) }}">Maths and English</a></li>
 <li><a href="{{ route('actions.index',$apprentice) }}">Action plan</a></li>
 <li><a href="{{ route('scorecards.index',$apprentice) }}">Monthly learning snapshot</a></li>

@@ -1,7 +1,7 @@
 @extends('layout')
 @section('title','Groups and sessions')
 @section('content')
-<header class="page-heading"><div><h1>Groups and sessions</h1><p>Plan the session, record attendance and confirm eligible training time.</p><a class="button primary" href="#session-planner">Plan a new session</a></div></header>
+<header class="page-heading"><div><h1>Groups and sessions</h1><p>Plan the session, record attendance and confirm eligible training time.</p><div class="toolbar"><a class="button primary" href="#session-planner">Plan a new session</a><a class="button" href="{{ route('training-gaps72.index') }}">Training gaps report</a></div></div></header>
 @include('learning.errors')
 <section class="panel"><h2>Today’s sessions</h2>@forelse($todayRegisterRows as $row)<article class="work-row"><div><h3>{{ $row['session']->name }}</h3><p>{{ $row['session']->group->name }} · {{ $row['session']->start_time }}–{{ $row['session']->end_time }}</p><p>{{ $row['coded'] }} of {{ $row['roster'] }} roster entries have codes.</p></div>@if($row['can_open'])<a class="button primary" href="{{ route('attendance.show',$row['session']) }}">Open register</a>@else<p>Source check needed before this register can open.</p>@endif</article>@empty<p>No sessions today within your current permitted scope and filters.</p>@endforelse
 <p><strong>{{ $registerCounts['needs-register'] }}</strong> ended registers need codes · <strong>{{ $registerCounts['checks'] }}</strong> source checks.</p><p>Past missing registers remain in the follow-up list below. Attendance codes alone do not confirm OTJ.</p></section>

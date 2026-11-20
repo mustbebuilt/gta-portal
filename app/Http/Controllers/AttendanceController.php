@@ -93,13 +93,19 @@ class AttendanceController extends Controller
 
         $session->load('marks');$readiness=\App\Support\RegisterFollowup::readiness($session);
         abort_unless($readiness['can_open'],422,'The saved session timing needs an administrator source check before this register can open.');
-        return view('attendance.session', ['session'=>$session,'members'=>Apprentice::whereIn('id',$session->members)->orderBy('last_name')->get(),'registerReadiness'=>$readiness]);
+        return view('attendance.session', [
+            'session'=>$session,
+            'members'=>Apprentice::whereIn('id',$session->members)->orderBy('last_name')->get(),
+            'registerReadiness'=>$readiness,
+            'trainingCatalogue'=>\App\Support\TrainingJourney72::catalogueForSession($session),
+            'trainingRecord'=>\App\Models\RegisterTrainingRecord::find($session->id),
+        ]);
     }
 
     public function save(Request $r, TrainingSession $session): RedirectResponse
     {
         abort_unless($this->sessionAllowed($r, $session), 403);
-        $data = $r->validate(['version' => ['required', 'integer'], 'correction_reason' => ['nullable', 'string', 'max:2000'], 'delivered_learning' => ['nullable', 'string', 'max:10000'], 'marks' => ['required', 'array'], 'marks.*.code' => ['nullable', Rule::in(array_keys(Math::CODES))], 'marks.*.arrival' => ['nullable', 'date_format:H:i'], 'marks.*.departure' => ['nullable', 'date_format:H:i'], 'marks.*.otj_confirmed' => ['nullable', 'boolean'], 'marks.*.minutes' => ['nullable', 'integer', 'min:0'], 'marks.*.comment' => ['nullable', 'string', 'max:2000'], 'marks.*.adjustment' => ['nullable', 'string', 'max:2000']]);
+        $data = $r->validate(['version' => ['required', 'integer'], 'correction_reason' => ['nullable', 'string', 'max:2000'], 'delivered_learning' => ['nullable', 'string', 'max:10000'], 'marks' => ['required', 'array'], 'marks.*.code' => ['nullable', Rule::in(array_keys(Math::CODES))], 'marks.*.arrival' => ['nullable', 'date_format:H:i'], 'marks.*.departure' => ['nullable', 'date_format:H:i'], 'marks.*.otj_confirmed' => ['nullable', 'boolean'], 'marks.*.minutes' => ['nullable', 'integer', 'min:0'], 'marks.*.comment' => ['nullable', 'string', 'max:2000'], 'marks.*.adjustment' => ['nullable', 'string', 'max:2000'], 'training_subjects' => ['nullable', 'array', 'max:40'], 'training_subjects.*' => ['string', 'max:120'], 'training_coverage' => ['nullable', 'array'], 'training_custom' => ['nullable', 'string', 'max:200'], 'training_custom_coverage' => ['nullable', Rule::in(['delivered', 'partial'])], 'training_confirmed' => ['nullable', 'boolean'], 'training_note' => ['nullable', 'string', 'max:2000'], 'training_exceptions' => ['nullable', 'array']]);
         DB::transaction(function () use ($r, $session, $data): void {
             $s = TrainingSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $s);
@@ -113,6 +119,7 @@ class AttendanceController extends Controller
                 throw ValidationException::withMessages(['marks' => 'A mark was supplied for someone outside this roster.']);
             }
             abort_unless($this->sessionAllowed($r, $s), 403);
+            $structured = \App\Support\TrainingJourney72::normaliseInput($s, $data, $ids);
             $before = $s->marks()->get()->toArray();
             $writes=[];
             foreach ($ids as $id) {
@@ -160,7 +167,10 @@ class AttendanceController extends Controller
                 }
                 $writes[$id]=['code' => $code, 'arrival' => in_array($code, ['O', 'T'], true) ? $v['arrival'] : null, 'departure' => in_array($code, ['O', 'T'], true) ? $v['departure'] : null, 'parts' => $parts, 'otj_minutes' => $minutes, 'otj_confirmed' => $confirmed, 'recorded_by' => $r->user()->id, 'comment' => $v['comment'] ?? null, 'adjustment' => $v['adjustment'] ?? null];
             }
-            if ($before && \App\Support\RegisterPayload::same($before,$writes,$s->delivered_learning,$data['delivered_learning']??null)) {return;}
+            $existingTraining = \App\Models\RegisterTrainingRecord::find($s->id);
+            $existingStructured = $existingTraining ? collect($existingTraining->details ?? [])->only(['items', 'note', 'exceptions', 'confirmed'])->all() : null;
+            $sameTraining = $structured === null || ($existingTraining && $existingTraining->register_version === $s->version && $existingStructured === $structured);
+            if ($before && $sameTraining && \App\Support\RegisterPayload::same($before,$writes,$s->delivered_learning,$data['delivered_learning']??null)) {return;}
             if ($before && !filled($data['correction_reason']??null)) {
                 throw ValidationException::withMessages(['correction_reason'=>'Explain the correction to this saved register.']);
             }
@@ -171,6 +181,7 @@ class AttendanceController extends Controller
             $s->delivered_learning = $data['delivered_learning'] ?? null;
             $s->version++;
             $s->save();
+            \App\Support\TrainingJourney72::saveRecord($s, $structured, $r->user()->id, $s->version, $data['correction_reason'] ?? null);
             $this->audit($r, $s, 'register_saved');
         });
 
