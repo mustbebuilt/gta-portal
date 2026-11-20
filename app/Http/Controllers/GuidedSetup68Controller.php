@@ -50,7 +50,7 @@ class GuidedSetup68Controller extends Controller {
  public function save(Request $r,Draft $draft,int $step){$this->allow($r);$r->validate(['version'=>['required','integer','min:1'],'next'=>['nullable','integer','between:1,6']]);$input=$r->input('data',$step===5&&$r->has('employer_search')?($draft->payload['employer']??[]):[]);abort_unless(is_array($input),422);
   if ($step === 4 && $r->input('action') === 'save_plan_dates') {
    $d = Setup::savePlanDates($r->user(), (int) $r->session()->get('auth_version'), $draft, $r->integer('version'), $input);
-   return to_route('setup68.show', [$d, 4])->with('status', 'Training Plan dates saved for comparison and independent review.');
+   return to_route('setup68.show', [$d, 4])->with('status', 'Training Plan dates saved for setup confirmation.');
   }
   if($step===4){$current=$draft->payload['rpl']??[];$action=$r->input('action','save');if($action==='none')$input=['mode'=>'none'];
    elseif(in_array($action,['batch_preview','batch_apply'],true)){
@@ -65,7 +65,7 @@ class GuidedSetup68Controller extends Controller {
   }
   return to_route('setup68.show', [$d, $next, ...$returnFilters])->with('status',$next===1&&$step===1?'Draft saved. Review any possible existing record before continuing.':'Draft saved.');
  }
- public function submit(Request $r,Draft $draft){$this->allow($r);$r->validate(['version'=>['required','integer'],'confirmed'=>['accepted']]);$d=Setup::submit($r->user(),(int)$r->session()->get('auth_version'),$draft,$r->integer('version'));return to_route('setup68.show',[$d,6])->with('status','Ready for independent plan review in this same setup record.');}
+ public function submit(Request $r,Draft $draft){$this->allow($r);$r->validate(['version'=>['required','integer'],'confirmed'=>['accepted']]);$d=Setup::submit($r->user(),(int)$r->session()->get('auth_version'),$draft,$r->integer('version'));return to_route('setup68.show',[$d,6])->with('status','Setup ready. Confirm it from Step 6.');}
  public function confirm(Request $r,Draft $draft){$this->allow($r);$r->validate(['version'=>['required','integer'],'confirmed'=>['accepted']]);$d=Setup::confirm($r->user(),(int)$r->session()->get('auth_version'),$draft,$r->integer('version'));return to_route('setup68.show',[$d,6])->with('status','Setup complete. The approved training plan and OTJ target are now linked to the apprentice.');}
- public function reopen(Request $r,Draft $draft){$this->allow($r);$v=$r->validate(['version'=>['required','integer'],'reason'=>['required','string','max:1000']]);$d=Setup::reopen($r->user(),(int)$r->session()->get('auth_version'),$draft,$v['version'],$v['reason']);return to_route('setup68.show',[$d,4])->with('status','Same RPL record reopened. The current approved plan stays active until the correction is independently confirmed.');}
+ public function reopen(Request $r,Draft $draft){$this->allow($r);$v=$r->validate(['version'=>['required','integer'],'reason'=>['required','string','max:1000']]);$d=Setup::reopen($r->user(),(int)$r->session()->get('auth_version'),$draft,$v['version'],$v['reason']);return to_route('setup68.show',[$d,4])->with('status','Same RPL record reopened. The current plan applies until staff confirm the correction.');}
 }
