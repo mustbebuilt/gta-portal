@@ -13,4 +13,5 @@ Route::middleware(['auth',\App\Http\Middleware\ActiveAccount::class,\App\Http\Mi
     Route::post('/support-register/schedules/{schedule}/review',[\App\Http\Controllers\SupportRegister71Controller::class,'review'])->name('support-register71.review');
     Route::post('/support-register/actions',[\App\Http\Controllers\SupportRegister71Controller::class,'addAction'])->name('support-register71.add-action');
     Route::post('/support-register/actions/{action}/complete',[\App\Http\Controllers\SupportRegister71Controller::class,'completeAction'])->name('support-register71.complete-action');
+    Route::get('/apprentices/{apprentice}/progress-review74',[\App\Http\Controllers\ProgressReview74Controller::class,'show'])->name('progress-review74.show');
 });

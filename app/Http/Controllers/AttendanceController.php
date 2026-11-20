@@ -93,19 +93,24 @@ class AttendanceController extends Controller
 
         $session->load('marks');$readiness=\App\Support\RegisterFollowup::readiness($session);
         abort_unless($readiness['can_open'],422,'The saved session timing needs an administrator source check before this register can open.');
+        $members = Apprentice::whereIn('id',$session->members)->orderBy('last_name')->get();
+        $month = $session->session_date->format('Y-m');
+        $monthlyCards = \App\Models\MonthlyScorecard::whereIn('apprentice_id', $members->pluck('id'))->where('month', $month)->get()->keyBy('apprentice_id');
         return view('attendance.session', [
             'session'=>$session,
-            'members'=>Apprentice::whereIn('id',$session->members)->orderBy('last_name')->get(),
+            'members'=>$members,
             'registerReadiness'=>$readiness,
             'trainingCatalogue'=>\App\Support\TrainingJourney72::catalogueForSession($session),
             'trainingRecord'=>\App\Models\RegisterTrainingRecord::find($session->id),
+            'monthlyCards'=>$monthlyCards,
+            'sessionMonth'=>$month,
         ]);
     }
 
     public function save(Request $r, TrainingSession $session): RedirectResponse
     {
         abort_unless($this->sessionAllowed($r, $session), 403);
-        $data = $r->validate(['version' => ['required', 'integer'], 'correction_reason' => ['nullable', 'string', 'max:2000'], 'delivered_learning' => ['nullable', 'string', 'max:10000'], 'marks' => ['required', 'array'], 'marks.*.code' => ['nullable', Rule::in(array_keys(Math::CODES))], 'marks.*.arrival' => ['nullable', 'date_format:H:i'], 'marks.*.departure' => ['nullable', 'date_format:H:i'], 'marks.*.otj_confirmed' => ['nullable', 'boolean'], 'marks.*.minutes' => ['nullable', 'integer', 'min:0'], 'marks.*.comment' => ['nullable', 'string', 'max:2000'], 'marks.*.adjustment' => ['nullable', 'string', 'max:2000'], 'training_subjects' => ['nullable', 'array', 'max:40'], 'training_subjects.*' => ['string', 'max:120'], 'training_coverage' => ['nullable', 'array'], 'training_custom' => ['nullable', 'string', 'max:200'], 'training_custom_coverage' => ['nullable', Rule::in(['delivered', 'partial'])], 'training_confirmed' => ['nullable', 'boolean'], 'training_note' => ['nullable', 'string', 'max:2000'], 'training_exceptions' => ['nullable', 'array']]);
+        $data = $r->validate(['version' => ['required', 'integer'], 'correction_reason' => ['nullable', 'string', 'max:2000'], 'delivered_learning' => ['nullable', 'string', 'max:10000'], 'marks' => ['required', 'array'], 'marks.*.code' => ['nullable', Rule::in(array_keys(Math::CODES))], 'marks.*.arrival' => ['nullable', 'date_format:H:i'], 'marks.*.departure' => ['nullable', 'date_format:H:i'], 'marks.*.otj_confirmed' => ['nullable', 'boolean'], 'marks.*.minutes' => ['nullable', 'integer', 'min:0'], 'marks.*.comment' => ['nullable', 'string', 'max:2000'], 'marks.*.adjustment' => ['nullable', 'string', 'max:2000'], 'training_subjects' => ['nullable', 'array', 'max:40'], 'training_subjects.*' => ['string', 'max:120'], 'training_coverage' => ['nullable', 'array'], 'training_custom' => ['nullable', 'string', 'max:200'], 'training_custom_coverage' => ['nullable', Rule::in(['delivered', 'partial'])], 'training_confirmed' => ['nullable', 'boolean'], 'training_note' => ['nullable', 'string', 'max:2000'], 'training_exceptions' => ['nullable', 'array'], 'monthly_dev' => ['nullable', 'array']]);
         DB::transaction(function () use ($r, $session, $data): void {
             $s = TrainingSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $s);
@@ -182,6 +187,24 @@ class AttendanceController extends Controller
             $s->version++;
             $s->save();
             \App\Support\TrainingJourney72::saveRecord($s, $structured, $r->user()->id, $s->version, $data['correction_reason'] ?? null);
+            foreach ((array) ($data['monthly_dev'] ?? []) as $aid => $payload) {
+                if (empty($payload['save'])) {
+                    continue;
+                }
+                $target = Apprentice::findOrFail((int) $aid);
+                try {
+                    \App\Support\MonthlyDevelopment::save(
+                        $r->user(),
+                        $target,
+                        $s,
+                        (int) ($payload['version'] ?? 0),
+                        (array) ($payload['ratings'] ?? []),
+                        (string) ($payload['comment'] ?? '')
+                    );
+                } catch (\InvalidArgumentException $ex) {
+                    throw ValidationException::withMessages(['development' => $ex->getMessage()]);
+                }
+            }
             $this->audit($r, $s, 'register_saved');
         });
 
