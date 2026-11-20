@@ -160,6 +160,147 @@ final class RplPlanDates69
         }
     }
 
+    public static function step6Dates(array $template, array $programme, array $rpl, ?array $calculation, array $record): array
+    {
+        $start = $programme['start_date'] ?? null;
+        if (!$start || !$calculation || ($calculation['revised_hours_unrounded'] ?? 0) <= 0) {
+            return [];
+        }
+
+        $policy = self::policy($template);
+        $timetable = ($template['date_basis'] ?? null) === 'agreed_timetable';
+        $defaults = null;
+        $source = 'template';
+        try {
+            if ($policy) {
+                $defaults = self::calculate($policy, $start, $calculation['revised_hours_unrounded']);
+                $source = 'policy';
+            } else {
+                $startDate = self::date($start);
+                $blocks = $calculation['blocks'] ?? $template['blocks'] ?? [];
+                $practicalBlock = $timetable ? 10 : 11;
+                $pEndDay = null;
+                $maxEndDay = null;
+                foreach ($blocks as $b) {
+                    if (($b['number'] ?? null) === $practicalBlock) {
+                        $pEndDay = (int) $b['end_day'];
+                    }
+                    $maxEndDay = $maxEndDay === null ? (int) $b['end_day'] : max($maxEndDay, (int) $b['end_day']);
+                }
+                if ($pEndDay !== null && $maxEndDay !== null && $maxEndDay > $pEndDay) {
+                    $defaults = [
+                        'practical_end' => $startDate->modify('+'.$pEndDay.' days')->format('Y-m-d'),
+                        'programme_end' => $startDate->modify('+'.$maxEndDay.' days')->format('Y-m-d'),
+                    ];
+                }
+            }
+        } catch (InvalidArgumentException) {
+            $defaults = null;
+        }
+
+        $binding = self::binding($programme, $rpl, $policy ?? ['template_offsets' => true]);
+        $hasSaved = isset($record['practical_end'], $record['programme_end'])
+            && $record['practical_end'] !== '' && $record['programme_end'] !== '';
+        $stale = $hasSaved && (($record['binding'] ?? null) !== $binding);
+        $selected = ($hasSaved && !$stale)
+            ? ['practical_end' => $record['practical_end'], 'programme_end' => $record['programme_end']]
+            : ($defaults ?? ['practical_end' => '', 'programme_end' => '']);
+
+        return [
+            'proposed' => $defaults,
+            'defaults' => $defaults,
+            'selected' => $selected,
+            'binding' => $binding,
+            'stale' => $stale,
+            'previous' => $stale ? ['practical_end' => $record['practical_end'], 'programme_end' => $record['programme_end']] : null,
+            'source' => $source,
+            'saved_source' => $record['source'] ?? null,
+            'timetable' => $timetable,
+        ];
+    }
+
+    public static function buildStep6Plan(array $template, array $programme, array $rpl, array $calculation, string $practicalEnd, string $programmeEnd, ?string $customSchedule = null): array
+    {
+        $start = $programme['start_date'] ?? '';
+        $startDate = self::date($start);
+        $practical = self::date($practicalEnd);
+        $programmeDate = self::date($programmeEnd);
+
+        if ($practical < $startDate) {
+            throw new InvalidArgumentException('Planned practical end date must be on or after the first day in learning.');
+        }
+        if ($programmeDate <= $practical) {
+            throw new InvalidArgumentException('Planned apprenticeship end date (including assessment) must be after the planned practical end date.');
+        }
+
+        $timetable = ($template['date_basis'] ?? null) === 'agreed_timetable';
+        $dates = ['practical_end' => $practical->format('Y-m-d'), 'programme_end' => $programmeDate->format('Y-m-d')];
+
+        if ($customSchedule !== null && trim($customSchedule) !== '') {
+            $blocks = self::schedule($calculation['blocks'], $start, $dates, $customSchedule, $timetable);
+        } else {
+            $rawBlocks = array_values($calculation['blocks']);
+            $lastPractical = $timetable ? 10 : 11;
+            $practicalSpanDays = (int) $startDate->diff($practical)->days;
+            $epaSpanDays = (int) $practical->diff($programmeDate)->days;
+
+            if ($practicalSpanDays + 1 < $lastPractical) {
+                throw new InvalidArgumentException('The planned practical end date is too close to the first day in learning to schedule the controlled training blocks in sequence.');
+            }
+            if ($timetable && $epaSpanDays < 2) {
+                throw new InvalidArgumentException('Allow at least two days between the planned practical end date and the planned apprenticeship end date for Gateway and EPA.');
+            }
+
+            $templatePracticalMax = max(1, (int) ($rawBlocks[$lastPractical - 1]['end_day'] ?? ($lastPractical * 30 - 1)));
+            $blocks = [];
+            $cursor = 0;
+
+            for ($i = 0; $i < $lastPractical; $i++) {
+                $b = $rawBlocks[$i];
+                $remainingAfter = $lastPractical - 1 - $i;
+                if ($i === $lastPractical - 1) {
+                    $endOffset = $practicalSpanDays;
+                } else {
+                    $scaled = (int) round(((int) $b['end_day'] / $templatePracticalMax) * $practicalSpanDays);
+                    $endOffset = max($cursor, min($practicalSpanDays - $remainingAfter, $scaled));
+                }
+                $blocks[] = [
+                    'number' => $b['number'],
+                    'title' => $b['title'],
+                    'hours' => (string) $b['hours'],
+                    'start' => $startDate->modify('+'.$cursor.' days')->format('Y-m-d'),
+                    'end' => $startDate->modify('+'.$endOffset.' days')->format('Y-m-d'),
+                ];
+                $cursor = $endOffset + 1;
+            }
+
+            if ($timetable) {
+                $b11 = $rawBlocks[10];
+                $b12 = $rawBlocks[11];
+                if ((float) $b11['hours'] !== 0.0 || (float) $b12['hours'] !== 0.0) {
+                    throw new InvalidArgumentException('Gateway confirmation and assessment must have zero planned OTJ hours.');
+                }
+                $b11Days = max(1, min($epaSpanDays - 1, intdiv($epaSpanDays, 2)));
+                $b11Start = $practical->modify('+1 day');
+                $b11End = $practical->modify('+'.$b11Days.' days');
+                $b12Start = $b11End->modify('+1 day');
+                $blocks[] = ['number' => $b11['number'], 'title' => $b11['title'], 'hours' => (string) $b11['hours'], 'start' => $b11Start->format('Y-m-d'), 'end' => $b11End->format('Y-m-d')];
+                $blocks[] = ['number' => $b12['number'], 'title' => $b12['title'], 'hours' => (string) $b12['hours'], 'start' => $b12Start->format('Y-m-d'), 'end' => $programmeDate->format('Y-m-d')];
+            } else {
+                $b12 = $rawBlocks[11];
+                $blocks[] = ['number' => $b12['number'], 'title' => $b12['title'], 'hours' => (string) $b12['hours'], 'start' => $practical->modify('+1 day')->format('Y-m-d'), 'end' => $programmeDate->format('Y-m-d')];
+            }
+        }
+
+        $policy = self::policy($template);
+        return [
+            ...$dates,
+            'source' => ($template['source_ref'] ?? 'Portal programme').' · '.$template['standard_code'].' v'.$template['standard_version'],
+            'binding' => self::binding($programme, $rpl, $policy ?? ['template_offsets' => true]),
+            'blocks' => $blocks,
+        ];
+    }
+
     private static function date(string $value): DateTimeImmutable
     {
         $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value, new \DateTimeZone('UTC'));
