@@ -374,6 +374,7 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/tasks/{task}/original-pdf', [LearningTaskController::class, 'pdf'])->name('tasks.pdf');
     Route::get('/tasks/{task}/evidence/{evidence}', [LearningTaskController::class, 'download'])->name('tasks.evidence.download');
     Route::get('/maths-english', [EnglishMathsController::class, 'caseload'])->name('em.caseload');
+    Route::post('/apprentices/{apprentice}/maths-english/requirements', [EnglishMathsController::class, 'saveRequirements'])->name('em.requirements.save');
     Route::get('/apprentices/{apprentice}/maths-english', [EnglishMathsController::class, 'index'])->name('em.index');
     Route::post('/apprentices/{apprentice}/topics', [EnglishMathsController::class, 'assign'])->name('topics.assign');
     Route::get('/topics/{topic}', [EnglishMathsController::class, 'topic'])->name('topics.show');
@@ -532,7 +533,12 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/apprentices/{apprentice}/retention-timeline', [\App\Http\Controllers\RecruitmentRetentionController::class,'timeline'])->name('retention.timeline');
     Route::post('/destination-milestones/{milestone}/owner', [\App\Http\Controllers\RecruitmentRetentionController::class,'assign'])->name('retention.milestone.assign');
     Route::post('/destination-milestones/{milestone}/checks', [\App\Http\Controllers\RecruitmentRetentionController::class,'check'])->name('retention.milestone.check');
+    Route::get('/reports/achievers-and-leavers', [\App\Http\Controllers\AchieversAndLeaversController::class, 'index'])->name('achievers-leavers.index');
     Route::get('/reports/retention', [RetentionReportController::class, 'report'])->name('retention.report');
+    Route::get('/apprentice-archive', [\App\Http\Controllers\ApprenticeCloseDownController::class, 'archive'])->name('apprentices.archive');
+    Route::get('/apprentices/{apprentice}/close-down', [\App\Http\Controllers\ApprenticeCloseDownController::class, 'show'])->name('apprentices.close-down');
+    Route::get('/apprentices/{apprentice}/close-down/completion-pack', [\App\Http\Controllers\ApprenticeCloseDownController::class, 'downloadCompletionPack'])->name('apprentices.close-down.completion-pack');
+    Route::post('/apprentices/{apprentice}/close-down', [\App\Http\Controllers\ApprenticeCloseDownController::class, 'save'])->name('apprentices.close-down.save');
     Route::get('/apprentices/{apprentice}/outcome', [RetentionReportController::class, 'edit'])->name('retention.edit');
     Route::post('/apprentices/{apprentice}/outcome', [RetentionReportController::class, 'save'])->name('retention.save');
     Route::get('/apprentices/{apprentice}/monthly-snapshot', [MonthlyScorecardController::class, 'index'])->name('scorecards.index');

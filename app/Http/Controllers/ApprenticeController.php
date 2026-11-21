@@ -12,6 +12,7 @@ use App\Models\TutorGroup;
 use App\Models\User;
 use App\Support\AssignmentHistory;
 use App\Support\DirectoryCatalog;
+use App\Support\EntryContext;
 use App\Support\LearningAccess;
 use App\Support\MonthlyDevelopment;
 use App\Support\TaskCatalogue;
@@ -30,6 +31,7 @@ class ApprenticeController extends Controller
         Gate::authorize('viewAny', Apprentice::class);
         $search = trim((string) $request->query('search', ''));
         $records = Apprentice::visibleTo($request->user())->with(['tutor', 'programmeRecord'])
+            ->whereNotIn('id', \App\Models\ProgrammeOutcome::archived()->select('apprentice_id'))
             ->when($search !== '', fn ($q) => $q->where(fn ($q) => $q
                 ->where('reference', 'like', '%'.$search.'%')
                 ->orWhere('first_name', 'like', '%'.$search.'%')
@@ -39,16 +41,31 @@ class ApprenticeController extends Controller
         return view('apprentices.index', compact('records', 'search'));
     }
 
-    public function create(): RedirectResponse
+    public function create(): View
     {
         Gate::authorize('create', Apprentice::class);
 
-        return to_route('setup68.index');
+        return view('apprentices.form', ['apprentice' => new Apprentice, 'recruitmentChoices' => array_intersect_key(EntryContext::choices(), EntryContext::RECRUITMENT_FIELDS), 'tutors' => $this->tutors(), 'linkedOptions' => $this->linkedOptions()]);
     }
 
     public function store(SaveApprenticeRequest $request): RedirectResponse
     {
-        throw ValidationException::withMessages(['setup' => 'Use Add apprentice → guided setup to avoid a duplicate or incomplete record.']);
+        $record = DB::transaction(function () use ($request) {
+            $recruitmentFields = array_keys(EntryContext::RECRUITMENT_FIELDS);
+            $record = Apprentice::create($request->safe()->except(['version', ...$recruitmentFields, ...\App\Support\ApprenticeAlerts::INPUTS]));
+            $recruitment = array_filter($request->safe()->only($recruitmentFields), fn ($value) => $value !== null);
+            if ($recruitment !== []) {
+                EntryContext::save($request->user(), $record, ['stage' => 'Application', ...$recruitment], 0);
+            }
+            if($request->boolean('change_alert_preferences')) { \App\Support\ApprenticeAlerts::apply($record,$request->user(),$request->session()->get('auth_version'),$request->validated());$record->save(); }
+            AssignmentHistory::record($record, $request->user()->id, null);
+            $this->audit($request, $record, 'created');
+
+            return $record;
+        });
+
+        \App\Support\DestinationMilestones::sync($record);
+        return to_route('apprentices.show', $record)->with('status', 'Apprentice record saved.');
     }
 
     public function show(Request $request, Apprentice $apprentice): View

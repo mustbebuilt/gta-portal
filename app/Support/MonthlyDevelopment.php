@@ -3,12 +3,55 @@
 namespace App\Support;
 
 use App\Models\{Apprentice, MonthlyScorecard, TrainingSession, User};
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /** Storage component for the EXISTING monthly_scorecards table. */
 final class MonthlyDevelopment
 {
+    public static function outstanding(User $actor, Collection $groups, Collection $sessions, ?int $groupId, ?int $apprenticeId): Collection
+    {
+        $today = today();
+        $month = $today->format('Y-m');
+        $groupIds = $groups->where('active', true)->when($groupId, fn ($rows) => $rows->where('id', $groupId))->pluck('id');
+        $apprentices = Apprentice::visibleTo($actor)->whereIn('tutor_group_id', $groupIds)
+            ->when($apprenticeId, fn ($query) => $query->whereKey($apprenticeId))
+            ->whereDate('start_date', '<=', $today->toDateString())
+            ->whereNotIn('id', MonthlyScorecard::where('month', $month)->whereNotNull('development')->select('apprentice_id'))
+            ->orderBy('last_name')->orderBy('first_name')->get(['id', 'first_name', 'last_name', 'tutor_group_id', 'start_date']);
+
+        if ($apprentices->isEmpty()) {
+            return collect();
+        }
+
+        $outcomes = \App\Models\ProgrammeOutcome::whereIn('apprentice_id', $apprentices->modelKeys())->get()->keyBy('apprentice_id');
+        $apprentices = $apprentices->reject(fn (Apprentice $a): bool => in_array(
+            $outcomes->get($a->id)?->context['status'] ?? null,
+            ['Break in learning', 'Completed', 'Withdrawn', 'Transferred'],
+            true
+        ))->keyBy('id');
+        $latest = [];
+        foreach ($sessions->sortByDesc(fn (TrainingSession $s): array => [$s->session_date->toDateString(), $s->start_time, $s->id]) as $session) {
+            if ($session->state !== 'Planned' || $session->session_date->format('Y-m') !== $month || !RegisterFollowup::roster($session)['shape'] || !$session->ended()) {
+                continue;
+            }
+            foreach ($session->marks as $mark) {
+                $apprentice = $apprentices->get($mark->apprentice_id);
+                if ($apprentice && !isset($latest[$apprentice->id]) && in_array($mark->code, ['O', 'T'], true)
+                    && in_array($apprentice->id, $session->members, true) && $session->session_date->gte($apprentice->start_date)) {
+                    $latest[$apprentice->id] = $session;
+                }
+            }
+        }
+
+        return $apprentices->values()->map(fn (Apprentice $a): array => [
+            'apprentice' => $a,
+            'group' => $groups->firstWhere('id', $a->tutor_group_id)?->name,
+            'session' => $latest[$a->id] ?? null,
+        ])->sortByDesc(fn (array $row): bool => $row['session'] !== null)->values();
+    }
+
     public static function read(MonthlyScorecard $row): ?array
     {
         $value = $row->getRawOriginal('development');

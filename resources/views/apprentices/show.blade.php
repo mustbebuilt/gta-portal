@@ -1,7 +1,7 @@
 @extends('layout')
 @section('title', $apprentice->reference)
 @section('content')
-<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }}</p><h1>{{ $apprentice->first_name }} {{ $apprentice->last_name }}</h1><p class="muted">{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }}</p></div><div class="toolbar"><a class="button" href="{{ route('apprentices.index') }}">Back to apprentices</a>@can('update', $apprentice)<a class="button primary" href="{{ route('apprentices.edit', $apprentice) }}">Edit apprentice</a>@endcan</div></header>
+<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }}</p><h1>{{ $apprentice->first_name }} {{ $apprentice->last_name }}</h1><p class="muted">{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }}</p></div><div class="toolbar"><a class="button" href="{{ route('apprentices.index') }}">Back to apprentices</a>@if(\App\Support\LearningAccess::manager(auth()->user()))<a class="button" href="{{ route('apprentices.close-down', $apprentice) }}">Close down and archive</a>@endif @can('update', $apprentice)<a class="button primary" href="{{ route('apprentices.edit', $apprentice) }}">Edit apprentice</a>@endcan</div></header>
 @include('setup68.record-summary')
 <nav aria-label="Common apprentice actions" class="toolbar">
 <a class="button primary" href="{{ route('progress66.index',['apprentice'=>$apprentice->id]) }}">View progress</a>

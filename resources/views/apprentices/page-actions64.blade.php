@@ -34,6 +34,7 @@
 <li><a href="{{ route('employer-grants.index',$apprentice) }}">Verify employer access</a></li>
 <li><a href="{{ route('retention.entry',$apprentice) }}">Recruitment and starting circumstances</a></li>
 <li><a href="{{ route('retention.timeline',$apprentice) }}">Retention chronology</a></li>
+<li><a href="{{ route('apprentices.close-down',$apprentice) }}">Close down and archive</a></li>
 </ul></section>@endif
 @if(\App\Support\PortalActions::hasPerson(auth()->user(),$apprentice))<p><a href="{{ route('quick-actions.person',$apprentice) }}">All available actions for this apprentice</a></p>@endif
 </div></details></nav>

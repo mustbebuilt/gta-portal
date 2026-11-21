@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Apprentice;
+use App\Models\ApprenticeEntryContext;
 use App\Models\User;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -61,12 +62,43 @@ class ApprenticeManagementTest extends TestCase
         $this->assertDatabaseHas('audit_events', ['apprentice_id' => $record->id, 'user_id' => $admin->id, 'event' => 'created']);
     }
 
+    public function test_add_apprentice_records_both_routes_for_retention_reporting(): void
+    {
+        $this->actingAs($this->actor())->get(route('apprentices.create'))->assertOk()
+            ->assertSee('How did they first hear about GTA?')
+            ->assertSee('How did they obtain the apprenticeship job?');
+
+        $this->from(route('apprentices.create'))->post(route('apprentices.store'), $this->fields([
+            'recruitment_route' => 'Social media',
+            'employment_route' => 'Unrecognised route',
+        ]))->assertSessionHasErrors('employment_route');
+        $this->assertDatabaseCount('apprentices', 0);
+
+        $this->post(route('apprentices.store'), $this->fields([
+            'recruitment_route' => 'Social media',
+            'employment_route' => 'Already employed by the employer',
+        ]))->assertRedirect()->assertSessionHasNoErrors();
+        $apprentice = Apprentice::firstOrFail();
+        $entry = ApprenticeEntryContext::where('apprentice_id', $apprentice->id)->firstOrFail();
+        $this->assertSame('Application', $entry->stage);
+        $this->assertSame('Social media', $entry->recruitment_route);
+        $this->assertSame('Already employed by the employer', $entry->employment_route);
+        $this->get(route('retention.entry', $apprentice))->assertOk()
+            ->assertSee('selected>Social media', false)
+            ->assertSee('selected>Already employed by the employer', false);
+        foreach (['recruitment_route', 'employment_route'] as $field) {
+            $this->get(route('retention.report', ['factor' => $field]))->assertOk()
+                ->assertViewHas('groups', fn ($groups) => $groups->has($entry->$field));
+        }
+    }
+
     public function test_missing_optional_information_remains_null_and_not_rated(): void
     {
         $this->actingAs($this->actor())->post('/apprentices', $this->fields())->assertRedirect()->assertSessionHasNoErrors();
         $a = Apprentice::first();
         $this->assertNull($a->start_date);
         $this->assertNull($a->tutor_id);
+        $this->assertDatabaseCount('apprentice_entry_contexts', 0);
         $this->get('/apprentices/'.$a->id)->assertSee('Not recorded')->assertDontSee('0%');
     }
 

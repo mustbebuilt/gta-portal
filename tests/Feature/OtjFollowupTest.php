@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\ProgressReviewDraft;
 use App\Models\SmartAction;
 use App\Models\TrainingSession;
+use App\Models\TutorGroup;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\Concerns\CreatesOperationalPlan;
 use Tests\TestCase;
@@ -61,4 +62,32 @@ class OtjFollowupTest extends TestCase
         $later = ProgressReviewDraft::latest('id')->firstOrFail();
         $this->get($reviews.'/'.$later->id)->assertOk()->assertDontSee('Open OTJ catch-up actions');
     }
+    public function test_pending_sources_open_the_record_only_for_authorised_staff(): void
+    {
+        [$a, $admin, , $tutor, $learner] = $this->approvedFixture();
+        $group = TutorGroup::factory()->create(['tutor_id' => $tutor->id]);
+        $other = TutorGroup::factory()->create();
+        $dates = ['session_date' => today()->subDay(), 'members' => [$a->id]];
+        $owned = TrainingSession::factory()->create($dates + ['tutor_group_id' => $group->id]);
+        $external = TrainingSession::factory()->create($dates + ['tutor_group_id' => $other->id]);
+        $ledger = '/apprentices/'.$a->id.'/otj-ledger';
+
+        $this->actingAs($tutor)->get('/visual-reports?apprentice='.$a->id)->assertOk()->assertSee($ledger.'#pending-otj', false);
+        $this->get($ledger)->assertOk()->assertSee('OTJ records to check')
+            ->assertSee(route('attendance.show', $owned), false)
+            ->assertDontSee(route('attendance.show', $external), false)
+            ->assertSee('Ask an authorised member of staff to check this register.');
+        $this->get('/sessions/'.$external->id)->assertForbidden();
+        $this->get('/sessions/'.$owned->id)->assertOk();
+        $this->post('/sessions/'.$owned->id, [
+            'version'=>1, 'delivered_learning'=>'Fictional vehicle inspection',
+            'marks'=>[$a->id=>['code'=>'O', 'arrival'=>'09:00', 'departure'=>'16:00', 'otj_confirmed'=>1]],
+        ])->assertSessionHasNoErrors();
+        $this->get($ledger)->assertOk()->assertDontSee(route('attendance.show', $owned), false);
+
+        $this->actingAs($admin)->get($ledger)->assertOk()->assertSee(route('attendance.show', $external), false);
+        $this->actingAs($learner)->get($ledger)->assertOk()->assertDontSee('OTJ records to check')
+            ->assertDontSee(route('attendance.show', $external), false);
+    }
+
 }

@@ -10,6 +10,8 @@ use App\Models\TutorGroup;
 use App\Support\AttendanceLedger;
 use App\Support\AttendanceMath as Math;
 use App\Support\LearningAccess as Access;
+use App\Support\MonthlyDevelopment;
+use App\Support\RegisterFollowup;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +29,7 @@ class AttendanceController extends Controller
 
     private function sessionAllowed(Request $r, TrainingSession $s): bool
     {
-        return $this->groupAllowed($r, $s->group) && (Access::manager($r->user()) || Apprentice::whereIn('id', $s->members)->where(fn ($q) => $q->whereNull('tutor_id')->orWhere('tutor_id', '!=', $r->user()->id))->doesntExist());
+        return RegisterFollowup::canOpen($r->user(), $s);
     }
 
     public function index(Request $r): View
@@ -36,10 +38,14 @@ class AttendanceController extends Controller
         $input=$r->validate(['view'=>['nullable','string',Rule::in(\App\Support\RegisterFollowup::VIEWS)],'group'=>['nullable','integer','min:1'],'apprentice'=>['nullable','integer','min:1'],'search'=>['nullable','string','max:250']]);
         if($r->filled('group')){abort_unless($groups->contains('id',(int)$input['group']),404);$sessions=$sessions->where('tutor_group_id',(int)$input['group']);}
         if($r->filled('apprentice')){abort_unless(Apprentice::visibleTo($r->user())->whereKey((int)$input['apprentice'])->exists(),404);$sessions=$sessions->filter(fn($s)=>in_array((int)$input['apprentice'],\App\Support\RegisterFollowup::roster($s)['ids'],true));}
+        $monthlyOutstanding = MonthlyDevelopment::outstanding(
+            $r->user(), $groups, $visible['sessions'], isset($input['group']) ? (int) $input['group'] : null,
+            isset($input['apprentice']) ? (int) $input['apprentice'] : null
+        );
         $search=trim($input['search']??'');if($search!==''){$sessions=$sessions->filter(fn($s)=>mb_stripos($s->name,$search)!==false || mb_stripos($s->group->name,$search)!==false);}
         $followup=\App\Support\RegisterFollowup::for($sessions);$view=$input['view']??'all';$filtered=($view==='all'?$followup['rows']:$followup['rows']->where('bucket',$view))->values();$page=min(\Illuminate\Pagination\Paginator::resolveCurrentPage(),max(1,(int)ceil($filtered->count()/25)));
         $registerRows=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,25)->values(),$filtered->count(),25,$page,['path'=>$r->url(),'query'=>$r->except('page')]);
-        return view('attendance.index',['groups'=>$groups,'sessions'=>$registerRows->getCollection()->pluck('session'),'weeklyGroupSessions'=>$sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'),'todayRegisterRows'=>$followup['rows']->filter(fn($row)=>$row['session']->session_date->isToday())->values(),'registerRows'=>$registerRows,'registerCounts'=>$followup['counts'],'registerView'=>$view,'registerSearch'=>$search]);
+        return view('attendance.index',['groups'=>$groups,'sessions'=>$registerRows->getCollection()->pluck('session'),'weeklyGroupSessions'=>$sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'),'monthlyOutstanding'=>$monthlyOutstanding,'todayRegisterRows'=>$followup['rows']->filter(fn($row)=>$row['session']->session_date->isToday())->values(),'registerRows'=>$registerRows,'registerCounts'=>$followup['counts'],'registerView'=>$view,'registerSearch'=>$search]);
     }
 
     public function create(Request $r): RedirectResponse

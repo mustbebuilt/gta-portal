@@ -23,11 +23,13 @@ class RetentionScorecardTest extends TestCase
         return $u;
     }
 
-    public function test_completed_programme_does_not_automatically_mean_achieved(): void
+    public function test_historical_completion_does_not_automatically_mean_achieved(): void
     {
         $a = Apprentice::factory()->create(['start_date' => '2026-01-01']);
-        $this->actingAs($this->actor())->post('/apprentices/'.$a->id.'/outcome', ['version' => 0, 'context' => ['status' => 'Completed', 'endDate' => '2026-10-01', 'sourceRef' => 'Fictional completion record']])->assertRedirect()->assertSessionHasNoErrors();
-        $o = ProgrammeOutcome::firstOrFail();
+        $o = ProgrammeOutcome::create(['apprentice_id' => $a->id, 'context' => [
+            'status' => 'Completed', 'achievement' => 'Unknown', 'endDate' => '2026-10-01', 'sourceRef' => 'Fictional historical completion record',
+        ]]);
+        $this->actingAs($this->actor());
         $this->assertSame('Unknown', $o->context['achievement']);
         $this->get('/reports/retention')->assertOk()->assertSee('Completed')->assertSee('Achievement Unknown');
     }

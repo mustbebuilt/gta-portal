@@ -5,6 +5,11 @@ use Illuminate\Support\Facades\{DB,Validator};
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 class EntryContext {
+ public const RECRUITMENT_FIELDS = [
+  'recruitment_route' => 'How did they first hear about GTA?',
+  'employment_route' => 'How did they obtain the apprenticeship job?',
+ ];
+
  public static function choices(): array {return json_decode(file_get_contents(resource_path('data/entry-choices.json')),true,512,JSON_THROW_ON_ERROR);}
  public static function fields(): array {return array_merge(array_keys(self::choices()),['entry_employer_id','employment_start_date','referral_source','notes','stage','confirmed_on']);}
  public static function rules(bool $employment=false): array {

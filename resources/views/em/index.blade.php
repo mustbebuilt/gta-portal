@@ -5,11 +5,39 @@
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Maths and English</h1><p>Training topics and qualification achievement are shown separately.</p></div>@if(auth()->user()->can('view',$apprentice))<a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a>@endif</header>
 @include('learning.errors')
 <p><a href="{{ route('em.caseload') }}">Back to Maths and English caseload</a></p>
+@if($editableSubjects)
+<section class="panel" id="requirements-at-entry">
+    <h2>Functional Skills requirements at entry</h2>
+    <p>Record whether each subject was required when the apprentice started. These answers feed the Retention report.</p>
+    <form method="post" action="{{ route('em.requirements.save', $apprentice) }}">
+        @csrf
+        <input type="hidden" name="version" value="{{ $entryRequirements?->version ?? 0 }}">
+        <div class="form-grid">
+        @foreach($editableSubjects as $key)
+            <div>
+                <label for="requirement-{{ $key }}">{{ ucfirst($key) }} required at entry?</label>
+                <select id="requirement-{{ $key }}" name="{{ $key }}">
+                    @php($savedAnswer = $entryRequirements?->context[$key] ?? 'Unknown')
+                    @foreach(\App\Models\ProgrammeOutcome::REQUIREMENT_CHOICES as $answer)
+                        <option @selected(($errors->has('version') ? $savedAnswer : old($key, $savedAnswer)) === $answer)>{{ $answer }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endforeach
+        </div>
+        <button class="primary">Save requirements</button>
+    </form>
+</section>
+@endif
 @if(collect($subjects)->contains(fn($s)=>\App\Support\LearningAccess::subject(auth()->user(),$apprentice,$s)))<section class="panel"><h2>Set up training or record a result</h2><p>Add the qualification to record its start date and result. Assign assessed training topics separately; topic completion does not record a qualification pass.</p><div class="toolbar"><a class="button primary" href="{{ route('qualifications.create',$apprentice) }}">Add qualification</a><a class="button" href="#em-qualification-results">Record / update a result</a><a class="button" href="#em-topic-assignment">Assign a training topic</a></div></section>@endif
 <div class="dashboard-grid">@foreach($subjects as $subject)
 @php($assigned=$topics->where('subject',$subject)->filter(fn($t)=>(float)$t->planned_hours>0))
 @php($done=$assigned->where('status','Completed')->count())
-<section class="panel"><h2>{{ ucfirst($subject) }} training</h2>@if($assigned->count())<div class="progress-summary"><div class="progress-ring" style="--progress:{{ round(100*$done/$assigned->count()) }};--progress-color:var(--achieved)"><strong>{{ round(100*$done/$assigned->count()) }}%</strong></div><div><p>{{ $done }} of {{ $assigned->count() }} assigned training topics completed.</p><p class="muted">{{ number_format($assigned->sum('planned_hours'),2) }} planned training hours. These are not achieved hours.</p></div></div>@else<p>No training topics with planned hours assigned. No completion percentage available.</p>@endif<p class="muted">{{ $topics->where('subject',$subject)->where('status','Secure')->count() }} zero-hour secure areas, excluded from training completion.</p></section>
+<section class="panel"><h2>{{ ucfirst($subject) }} training</h2>@if($assigned->count())<div class="progress-summary"><div class="progress-ring" style="--progress:{{ round(100*$done/$assigned->count()) }};--progress-color:var(--achieved)"><strong>{{ round(100*$done/$assigned->count()) }}%</strong></div><div><p>{{ $done }} of {{ $assigned->count() }} assigned training topics completed.</p><p class="muted">{{ number_format($assigned->sum('planned_hours'),2) }} planned training hours. These are not achieved hours.</p></div></div>@else<p>No training topics with planned hours assigned. No completion percentage available.</p>@endif<p class="muted">{{ $topics->where('subject',$subject)->where('status','Secure')->count() }} zero-hour secure areas, excluded from training completion.</p>
+@if(in_array($subject, $editableSubjects, true))
+    <a class="button" href="{{ route('qualifications.create', [$apprentice, 'subject' => $subject]) }}">Add {{ ucfirst($subject) }} training</a>
+@endif
+</section>
 @endforeach</div>
 <section class="panel" id="em-qualification-results"><header class="page-heading"><div><h2>Qualification results</h2><p>Each qualification uses its own custom start and twelve-month target.</p></div>@if(collect($subjects)->contains(fn($s)=>\App\Support\LearningAccess::subject(auth()->user(),$apprentice,$s)))<a class="button primary" href="{{ route('qualifications.create',$apprentice) }}">Add qualification</a>@endif</header>
 <form class="search" method="get">@if(request('topics'))<input type="hidden" name="topics" value="{{ request('topics') }}">@endif

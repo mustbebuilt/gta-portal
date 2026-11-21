@@ -56,4 +56,34 @@ class ReviewAppointmentsTest extends TestCase {
  public function test_audit_failure_rolls_back_publication_and_all_parties():void {$f=$this->fixture();$p=$this->draft($f);AuditFault::install('appointment_fault','review_appointment_events','Fictional failure','appointment_published');try{A::publish($f['admin'],1,$p,1);$this->fail('Expected DB failure');}catch(\Illuminate\Database\QueryException){$this->assertSame('Draft',$p->refresh()->state);$this->assertDatabaseCount('review_appointment_parties',0);}}
  public function test_no_external_messages_or_provider_calls():void {Mail::fake();Http::preventStrayRequests();$f=$this->fixture();$p=$this->published($f);A::respond($f['learner'],1,$p,2,0,'Available');A::calendar($p);Mail::assertNothingSent();Http::assertNothingSent();}
  public function test_json_export_omits_names_locations_and_operational_notes():void {$f=$this->fixture();$p=$this->published($f);$r=$this->login($f['admin'])->get(route('review-appointments.export'))->assertOk()->assertJsonPath('review_completion_inferred',false);$r->assertDontSee('Fictional room')->assertDontSee($f['employer']->email)->assertDontSee($f['learner']->name);}
+ public function test_reported_held_appointment_is_visible_for_preparation_in_the_signoff_worklist():void
+ {
+    $f=$this->fixture();
+    $appointment=$this->published($f);
+    $this->ended($appointment);
+    F::record($f['admin'],1,$appointment,2,$this->data($f,'Held'));
+    $this->actingAs($f['tutor'])->get('/reviews?view=awaiting-signoff')->assertOk()
+        ->assertSee($f['a']->reference)->assertSee('Prepare review for sign-off')
+        ->assertSee(route('review-appointments.show',$appointment),false)->assertDontSee('PRIVATE-OPERATIONAL-NOTE');
+ }
+
+ public function test_due_soon_worklist_links_current_booking_instead_of_offering_a_duplicate():void
+ {
+    $f=$this->fixture();
+    $appointment=$this->published($f);
+    \App\Models\ProgrammeOutcome::create(['apprentice_id'=>$f['a']->id,'context'=>['status'=>'Active','sourceRef'=>'Fictional enrolment']]);
+    $draft=\App\Models\ProgressReviewDraft::factory()->create(['apprentice_id'=>$f['a']->id]);
+    $meeting=today()->subDays(60)->toDateString();
+    $hash=str_repeat('a',64);
+    $snapshot=['apprentice_id'=>$f['a']->id,'review_id'=>$draft->id,'review_version'=>1,'fields'=>['reviewDate'=>$meeting],'file_sha256'=>$hash];
+    \App\Models\SignedReviewRecord::create([
+        'apprentice_id'=>$f['a']->id,'progress_review_draft_id'=>$draft->id,'review_version'=>1,
+        'meeting_date'=>$meeting,'snapshot'=>$snapshot,'snapshot_hash'=>\App\Support\ReviewedImports::hash($snapshot),
+        'file'=>['sha256'=>$hash],'prepared_by'=>$f['admin']->id,'checked_by'=>$f['tutor']->id,'checked_at'=>now(),'history'=>[]
+    ]);
+    $this->actingAs($f['tutor'])->get('/reviews?view=meeting-soon')->assertOk()
+        ->assertSee($f['a']->reference)->assertSee('Open booked meeting')->assertDontSee('Arrange review meeting')
+        ->assertSee(route('review-appointments.show',$appointment),false);
+ }
+
 }

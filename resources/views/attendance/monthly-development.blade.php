@@ -4,9 +4,12 @@
     $field = 'development['.$a->id.']';
     $saved = $record ? \App\Support\MonthlyDevelopment::read($record) : null;
 @endphp
-<details @if(old($prefix.'.enabled')) open @endif>
+<details id="monthly-development-{{ $a->id }}" @if(old($prefix.'.enabled') || request()->integer('snapshot_for') === $a->id) open @endif>
     <summary>Monthly personal development · {{ $session->session_date->format('M Y') }} · {{ $saved ? 'Recorded' : 'Due' }}</summary>
     <p class="muted">Record one snapshot per calendar month. Use observations from attended training.</p>
+    @if(request()->integer('snapshot_for') === $a->id)
+        <p><a href="{{ route('attendance.index', ['group' => $session->tutor_group_id]).'#monthly-outstanding' }}">Back to the monthly checklist</a></p>
+    @endif
     <label class="check"><input type="checkbox" name="{{ $field }}[enabled]" value="1" @checked(old($prefix.'.enabled'))> {{ $saved ? 'Update' : 'Save' }} this month’s snapshot with the register</label>
     <input type="hidden" name="{{ $field }}[version]" value="{{ old($prefix.'.version', $record?->version ?? 0) }}">
     <div class="form-grid">

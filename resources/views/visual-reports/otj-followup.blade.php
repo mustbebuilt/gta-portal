@@ -23,7 +23,7 @@
                                     <a href="{{ route('actions.create', ['apprentice' => $row['id'], 'otj' => 1]) }}">Agree catch-up</a>
                                 @endif
                                 @if($checkRecords)
-                                    <p><a href="{{ route('otj.show', $row['id']) }}">Check pending OTJ records</a><br>{{ $row['otj_pending'] }} pending · {{ $row['otj_checks'] }} to check</p>
+                                    <p><a href="{{ route('otj.show', $row['id']) }}#pending-otj">Check pending OTJ records</a><br>{{ $row['otj_pending'] }} pending · {{ $row['otj_checks'] }} to check</p>
                                 @elseif(!$row['catchup'])
                                     <br><a href="{{ route('otj.show', $row['id']) }}">View OTJ ledger</a>
                                 @endif

@@ -148,9 +148,9 @@ class RemainingOperationalBatchTest extends TestCase
         $data = ['version' => 1, 'delivered_learning' => 'Fictional actual learning', 'marks' => [$a->id => ['code' => 'O', 'arrival' => '09:00', 'departure' => '16:00', 'otj_confirmed' => 1]]];
         $this->post('/sessions/'.$s->id, $data)->assertRedirect()->assertSessionHasNoErrors();
         $before = AttendanceMark::first()->otj_minutes;
+        $data['marks'][$a->id]['departure'] = '15:00';
         $this->post('/sessions/'.$s->id, [...$data, 'version' => 2])->assertSessionHasErrors('correction_reason');
         $this->assertSame(2, $s->fresh()->version);
-        $data['marks'][$a->id]['departure'] = '15:00';
         $this->post('/sessions/'.$s->id, [...$data, 'version' => 2, 'correction_reason' => 'Fictional departure correction'])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame($before - 60, AttendanceMark::first()->otj_minutes);
         $h = $s->fresh()->history;

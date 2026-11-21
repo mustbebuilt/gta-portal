@@ -54,4 +54,22 @@ class ReviewFollowupTest extends TestCase
     {
         $this->actingAs($this->actor())->getJson('/reviews?view=made-up')->assertUnprocessable()->assertJsonValidationErrors('view');$this->getJson('/reviews?search[]=invalid')->assertUnprocessable()->assertJsonValidationErrors('search');$this->getJson('/reviews?apprentice[]=1')->assertUnprocessable()->assertJsonValidationErrors('apprentice');$this->actingAs($this->actor('employer'))->get('/reviews')->assertForbidden();
     }
+    public function test_a_held_review_is_in_signoff_followup_without_resetting_the_checked_due_date(): void
+    {
+        [$a, $draft, , $tutor] = $this->source();
+        [$overdue] = $this->source(80, 'Active', true, $tutor);
+        [$soon] = $this->source(60, 'Active', true, $tutor);
+        $draft->state = 'Ready for signatures';
+        $draft->fields = ['reviewDate'=>today()->subDay()->toDateString(), 'summary'=>'Private held review text'];
+        $draft->save();
+        $next = \App\Support\SignedReviews::cycle($a)['next_due'];
+        $page = $this->actingAs($tutor)->get('/reviews?view=awaiting-signoff')->assertOk()
+            ->assertSee($a->reference)->assertDontSee($overdue->reference)->assertDontSee('Private held review text')
+            ->assertSee(route('reviews.edit', [$a, $draft]), false);
+        $this->assertSame(1, $page->viewData('triageCounts')['awaiting-signoff']);
+        $this->get('/reviews?view=meeting-overdue')->assertOk()->assertSee($overdue->reference)->assertDontSee($a->reference);
+        $this->get('/reviews?view=meeting-soon')->assertOk()->assertSee($soon->reference)->assertDontSee($a->reference);
+        $this->assertSame($next, \App\Support\SignedReviews::cycle($a)['next_due']);
+    }
+
 }

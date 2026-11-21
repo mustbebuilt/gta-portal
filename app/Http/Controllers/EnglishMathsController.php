@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Apprentice;
+use App\Models\ProgrammeOutcome;
 use App\Models\Qualification;
 use App\Models\TrainingTopic;
 use App\Support\LearningAccess as Access;
@@ -74,7 +75,56 @@ class EnglishMathsController extends Controller
             'working' => $q->status === 'Working towards','achieved' => $q->achieved(),'overdue' => $q->position() === 'Overdue','today' => $q->position() === 'Due today','checks' => $q->position() === 'Date check',default => true
         });
 
-        return view('em.index', ['apprentice' => $apprentice, 'subjects' => $subjects, 'topics' => $topics, 'topicRows' => $topics->filter(fn ($t) => match ($data['topics'] ?? '') { 'awaiting' => $t->evidence_stage === 'Awaiting review', 'referred' => $t->evidence_stage === 'Referred', default => true }), 'qualifications' => $quals, 'catalogue' => $this->catalogue(), 'canManage' => Access::manager($r->user())]);
+        $editableSubjects = array_values(array_filter($subjects, fn ($subject) => Access::subject($r->user(), $apprentice, $subject)));
+        $entryRequirements = $editableSubjects
+            ? ProgrammeOutcome::where('apprentice_id', $apprentice->id)->first()
+            : null;
+
+        return view('em.index', ['apprentice' => $apprentice, 'subjects' => $subjects, 'topics' => $topics, 'topicRows' => $topics->filter(fn ($t) => match ($data['topics'] ?? '') { 'awaiting' => $t->evidence_stage === 'Awaiting review', 'referred' => $t->evidence_stage === 'Referred', default => true }), 'qualifications' => $quals, 'catalogue' => $this->catalogue(), 'canManage' => Access::manager($r->user()), 'entryRequirements' => $entryRequirements, 'editableSubjects' => $editableSubjects]);
+    }
+
+    public function saveRequirements(Request $request, Apprentice $apprentice): RedirectResponse
+    {
+        $actor = $request->user();
+        abort_unless(Access::subject($actor, $apprentice, 'maths') || Access::subject($actor, $apprentice, 'english'), 403);
+        $data = $request->validate([
+            'version' => ['required', 'integer', 'min:0'],
+            'maths' => ['sometimes', 'required', Rule::in(ProgrammeOutcome::REQUIREMENT_CHOICES)],
+            'english' => ['sometimes', 'required', Rule::in(ProgrammeOutcome::REQUIREMENT_CHOICES)],
+        ]);
+        $requirements = array_intersect_key($data, array_flip(['maths', 'english']));
+        if ($requirements === []) {
+            throw ValidationException::withMessages(['maths' => 'Choose a requirement for at least one subject.']);
+        }
+        DB::transaction(function () use ($request, $actor, $apprentice, $data, $requirements): void {
+            $profile = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            foreach (array_keys($requirements) as $subject) {
+                abort_unless(Access::subject($actor, $profile, $subject), 403);
+            }
+            $outcome = ProgrammeOutcome::where('apprentice_id', $apprentice->id)->lockForUpdate()->first();
+            if ((int) $data['version'] !== ($outcome?->version ?? 0)) {
+                throw ValidationException::withMessages(['version' => 'The programme outcome changed. Check the saved requirements before trying again.']);
+            }
+            $outcome ??= new ProgrammeOutcome(['apprentice_id' => $apprentice->id]);
+            $context = $outcome->context ?? [];
+            $updated = array_replace($context, $requirements);
+            if ($updated === $context) {
+                return;
+            }
+            $outcome->history = [...($outcome->history ?? []), [
+                'before' => $outcome->context,
+                'by' => $actor->id,
+                'at' => now()->toIso8601String(),
+            ]];
+            $outcome->context = $updated;
+            if ($outcome->exists) {
+                $outcome->version++;
+            }
+            $outcome->save();
+            $this->audit($request, $profile->id, 'outcome_context', $outcome->id, 'entry_requirements_recorded');
+        });
+
+        return to_route('em.index', $apprentice)->with('status', 'Functional Skills requirements at entry saved.');
     }
 
     public function assign(Request $r, Apprentice $apprentice): RedirectResponse
@@ -218,7 +268,16 @@ class EnglishMathsController extends Controller
             abort_unless($qualification->apprentice_id === $apprentice->id, 404);
         }
 
-        return view('em.qualification', ['qualification' => $qualification ?? new Qualification, 'apprentice' => $apprentice, 'subjects' => array_values(array_filter(['maths', 'english'], fn ($s) => Access::subject($r->user(), $apprentice, $s)))]);
+        $subjects = array_values(array_filter(['maths', 'english'], fn ($subject) => Access::subject($r->user(), $apprentice, $subject)));
+        if (! $qualification && $r->filled('subject')) {
+            $subject = $r->validate(['subject' => ['required', Rule::in(['maths', 'english'])]])['subject'];
+            abort_unless(in_array($subject, $subjects, true), 403);
+            $qualification = new Qualification([
+                'subject' => $subject, 'type' => 'Functional Skills', 'status' => 'Working towards',
+            ]);
+        }
+
+        return view('em.qualification', ['qualification' => $qualification ?? new Qualification, 'apprentice' => $apprentice, 'subjects' => $subjects]);
     }
 
     public function uploadQualification(Request $r, Qualification $qualification): RedirectResponse

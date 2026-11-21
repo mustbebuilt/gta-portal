@@ -12,6 +12,7 @@ use App\Models\SupportPlan;
 use App\Models\TaskEvidence;
 use App\Models\TrainingTopic;
 use App\Models\User;
+use App\Models\ProgrammeOutcome;
 use App\Support\EvidenceInventory;
 use App\Support\PrivateEvidence;
 use Illuminate\Database\Schema\Blueprint;
@@ -46,9 +47,11 @@ class EvidenceInventoryTest extends TestCase
         $extra=ExtraTraining::factory()->create(['apprentice_id'=>$a->id]);$extra->file=$entry;$extra->history=[['before'=>['file'=>$entry]]];$extra->save();
         $review=ProgressReviewDraft::create(['apprentice_id'=>$a->id,'author_id'=>$u->id,'fields'=>[],'source_snapshot'=>[]]);
         SignedReviewRecord::create(['apprentice_id'=>$a->id,'progress_review_draft_id'=>$review->id,'review_version'=>1,'meeting_date'=>today(),'snapshot'=>['identity_reference'=>'Secret identity record'],'snapshot_hash'=>str_repeat('a',64),'file'=>$entry,'prepared_by'=>$u->id,'history'=>[]]);
+        $pack=PrivateEvidence::store(UploadedFile::fake()->createWithContent('Private completion pack.pdf', "%PDF-1.4\nFictional completion pack"),'completion-packs',$u->id);
+        ProgrammeOutcome::create(['apprentice_id'=>$a->id,'context'=>['epa_closure'=>['completion_pack'=>$pack]]]);
         $before=$plan->fresh()->getAttributes();Storage::shouldReceive('disk')->never();
-        $r=EvidenceInventory::run(details:true);$this->assertSame('references_scanned',$r['result']);$this->assertCount(8,$r['modules']);$this->assertSame(1,$r['totals']['objects']);$this->assertSame(12,$r['totals']['references']);$this->assertSame(0,$r['totals']['verified_objects']);$this->assertFalse($r['files_read']);$this->assertFalse($r['writes_performed']);
-        $text=json_encode($r);foreach(['Sensitive learner name','Secret support','Secret HR','Secret identity',$entry['path'],$entry['sha256']] as $secret){$this->assertStringNotContainsString($secret,$text);}
+        $r=EvidenceInventory::run(details:true);$this->assertSame('references_scanned',$r['result']);$this->assertCount(9,$r['modules']);$this->assertSame(2,$r['totals']['objects']);$this->assertSame(13,$r['totals']['references']);$this->assertSame(0,$r['totals']['verified_objects']);$this->assertFalse($r['files_read']);$this->assertFalse($r['writes_performed']);
+        $text=json_encode($r);foreach(['Sensitive learner name','Secret support','Secret HR','Secret identity',$pack['name'],$pack['path'],$entry['path'],$entry['sha256']] as $secret){$this->assertStringNotContainsString($secret,$text);}
         $this->assertSame($before,$plan->fresh()->getAttributes());$this->assertDatabaseCount('account_access_events',0);
     }
     public function test_explicit_verification_deduplicates_objects_and_preserves_every_source_and_file(): void

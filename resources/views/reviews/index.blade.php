@@ -7,6 +7,10 @@
 @include('employer-resources65.dashboard-link')
 <section class="panel"><h2>Start or continue a review</h2><p>Find the apprentice below. Open their review record to start a draft or continue saved work. Book the meeting through Review appointments. After checking and saving the content, prepare participant sign-off from a review marked Ready for signatures.</p><div class="toolbar"><a class="button" href="{{ route('review-appointments.index') }}">Review appointments</a><a class="button" href="{{ route('electronic-reviews.index') }}">Review signing</a></div><p>Booking an appointment or saving a draft does not complete a review.</p></section>
 <p class="test-notice">Tracked dates use independently checked actual meetings. Electronic signing, external sharing and whole-history compliance assurance remain separate. No review compliance percentage is calculated.</p>
+@include('reviews.triage')
+@if($triageView)
+@include('reviews.triage-rows')
+@else
 @include('reviews.followup-controls')
 <section class="panel"><h2>Apprentices in your scope</h2>
 @forelse($reviewRows as $reviewRow)
@@ -30,7 +34,9 @@
 @include('reviews.draft-status')
 </div><div class="toolbar"><a class="button" href="{{ route('reviews.create',$a) }}">Start review / View history</a>@if($reviewRow['latest'])<a class="button" href="{{ route('reviews.edit',[$a,$reviewRow['latest']->id]) }}">Continue latest draft<span class="sr-only">: {{ $a->reference }}</span></a>@endif</div></article>
 @empty<p>No apprentices match this review view. Clear the filters to see other records in your permitted scope.</p>@endforelse
-<nav class="pagination" aria-label="Review follow-up pages">@if($reviewRows->previousPageUrl())<a class="button" href="{{ $reviewRows->previousPageUrl() }}">Previous reviews</a>@endif @if($reviewRows->nextPageUrl())<a class="button" href="{{ $reviewRows->nextPageUrl() }}">Next reviews</a>@endif</nav></section>
+</section>
+@endif
+<nav class="pagination" aria-label="Review follow-up pages">@if($reviewRows->previousPageUrl())<a class="button" href="{{ $reviewRows->previousPageUrl() }}">Previous reviews</a>@endif @if($reviewRows->nextPageUrl())<a class="button" href="{{ $reviewRows->nextPageUrl() }}">Next reviews</a>@endif</nav>
 @if($manager)
 <details class="panel"><summary>In-portal review reminders for all eligible sources</summary><p>This processes all eligible sources regardless of the filters above. Due today or overdue checked-meeting references for a recorded Active programme only. Each current tutor and mentor gets one reminder per source; marking it seen does not complete a review. Provisional first-review dates do not create reminders.</p>
 <p><strong>{{ $reminderPreview['due'] }}</strong> apprentices due · {{ $reminderPreview['eligible'] }} eligible staff reminders · {{ $reminderPreview['already_recorded'] }} already recorded · {{ $reminderPreview['awaiting_seen'] }} recorded and awaiting acknowledgement.</p>

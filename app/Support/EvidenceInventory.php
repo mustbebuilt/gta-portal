@@ -15,6 +15,7 @@ class EvidenceInventory
         'support_plans'=>['version','files','active_plan','reviews','history'],
         'staff_development_profiles'=>['version','payload'],
         'extra_trainings'=>['version','file','history','approval','agreement','compensation'],
+        'programme_outcomes'=>['version','context','history'],
         'signed_review_records'=>['version','file','snapshot','history'],
     ];
     private array $references=[];

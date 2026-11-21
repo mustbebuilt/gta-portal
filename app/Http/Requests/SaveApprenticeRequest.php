@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Apprentice;
+use App\Support\EntryContext;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -39,6 +40,8 @@ class SaveApprenticeRequest extends FormRequest
             'maths_tutor_id' => 'maths tutor',
             'english_tutor_id' => 'English tutor',
             'version' => 'record version',
+            'recruitment_route' => 'recruitment route',
+            'employment_route' => 'apprenticeship job route',
         ];
     }
 
@@ -46,7 +49,10 @@ class SaveApprenticeRequest extends FormRequest
     {
         $record = $this->route('apprentice');
 
+        $recruitmentRules = $record ? [] : array_intersect_key(EntryContext::rules(), EntryContext::RECRUITMENT_FIELDS);
+
         return [
+            ...$recruitmentRules,
             'reference' => ['required', 'string', 'max:40', 'regex:/^[A-Z0-9][A-Z0-9_-]*$/', Rule::unique('apprentices')->ignore($record)],
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],
