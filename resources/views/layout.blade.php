@@ -3,7 +3,7 @@
 <body class="{{ request()->routeIs('login')?'signin-page':'portal-page' }}"><a class="skip-link" href="#main-content">Skip to main content</a><div class="shell">
 <aside class="sidebar"><a class="brand" href="{{ url('/') }}"><img src="{{ asset('assets/gta-logo.jpg') }}?v=53" width="48" height="48" alt="GTA"><span>GTA Portal<br><small>Learning and progress</small></span></a>
 @auth @include('navigation.menu') @endauth
-@if(app()->environment('local','testing'))<p class="release">Local development<br>Pack 77</p>@elseif(app()->environment('staging'))<p class="release">Staging<br>Pack 77</p>@endif</aside>
+@if(app()->environment('local','testing'))<p class="release">Local development<br>Pack 78</p>@elseif(app()->environment('staging'))<p class="release">Staging<br>Pack 78</p>@endif</aside>
 <div class="workspace"><header class="topbar"><span>{{ auth()->user()?->name ?? 'GTA sign in' }} @auth<small>{{ \App\Support\PortalLanguage::role(auth()->user()->role) }}</small>@endauth</span><div class="toolbar"><button type="button" id="theme-toggle">Dark mode</button>@auth<form action="{{ route('logout') }}" method="post">@csrf<button>Sign out</button></form>@endauth</div></header>
 <main id="main-content" tabindex="-1">@if(app()->environment('local','testing'))<div class="test-notice">Local development environment — do not enter real apprentice data.</div>@endif
 @if(session('status'))<div class="notice" role="status">{{ session('status') }}</div>@endif

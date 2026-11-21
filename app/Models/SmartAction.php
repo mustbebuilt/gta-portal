@@ -11,6 +11,8 @@ class SmartAction extends Model
 {
     use HasFactory;
 
+    public const OTJ_CATCHUP = 'otj';
+
     public const OWNERS = ['Apprentice', 'Tutor', 'Learning & Progress Mentor', 'Employer / workplace mentor'];
 
     protected $attributes = ['status' => 'To do', 'version' => 1];

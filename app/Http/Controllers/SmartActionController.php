@@ -38,7 +38,7 @@ class SmartActionController extends Controller
         return view('actions.proposals',['apprentice'=>$apprentice,...\App\Support\ActionProposals::forApprentice($apprentice)]);
     }
 
-    public function form(Request $r, Apprentice $apprentice, ?SmartAction $action = null): View
+    public function form(Request $r, Apprentice $apprentice, ?SmartAction $action = null): View|RedirectResponse
     {
         abort_unless($this->manage($r, $apprentice), 403);
         if ($action) {
@@ -54,6 +54,19 @@ class SmartActionController extends Controller
             $action = new SmartAction(['title'=>'Correct and resubmit '.$proposalTask->reference.': '.$proposalTask->title,'owner'=>'Apprentice','method'=>'linked-task','learning_task_id'=>$proposalTask->id,'evidence_method'=>'portal','relevance'=>'correction','learning_reference'=>$proposalTask->reference]);
         }
 
+        if (!$action && $r->boolean('otj')) {
+            $open = SmartAction::where('apprentice_id', $apprentice->id)
+                ->where('relevance', SmartAction::OTJ_CATCHUP)->where('status', '!=', 'Completed')->first();
+            if ($open) {
+                return redirect()->to(route('actions.index', $apprentice).'#action-'.$open->id);
+            }
+            $action = new SmartAction([
+                'method' => 'outcomes',
+                'relevance' => SmartAction::OTJ_CATCHUP,
+                'learning_reference' => 'Off-the-job training catch-up',
+            ]);
+        }
+
         return view('actions.form', ['proposalTask'=>$proposalTask,'sourceBinding'=>$sourceBinding,'apprentice' => $apprentice, 'action' => $action ?? new SmartAction, 'tasks' => LearningTask::where('apprentice_id', $apprentice->id)->where('status', 'Referred')->get()]);
     }
 
@@ -63,7 +76,7 @@ class SmartActionController extends Controller
         if ($action) {
             abort_unless($action->apprentice_id === $apprentice->id, 404);
         }
-        $data = $r->validate(['source_task_id' => ['nullable','required_with:source_binding','integer'], 'source_binding' => ['nullable','required_with:source_task_id','string','size:64'], 'title' => ['required', 'string', 'max:2000'], 'owner' => ['required', Rule::in(SmartAction::OWNERS)], 'due_date' => ['nullable', 'date_format:Y-m-d'], 'method' => ['required', Rule::in(['quantity', 'outcomes', 'linked-task'])], 'quantity' => ['nullable', 'required_if:method,quantity', 'integer', 'min:1'], 'unit' => ['nullable', 'required_if:method,quantity', Rule::in(['questions', 'exercises', 'worksheets', 'tasks', 'jobcards', 'evidence', 'other'])], 'custom_unit' => ['nullable', 'required_if:unit,other', 'string', 'max:100'], 'criteria' => ['nullable', 'required_if:method,outcomes', 'string', 'max:5000'], 'observable' => ['exclude_unless:method,outcomes', 'accepted'], 'evidence_method' => ['required', Rule::in(['portal', 'worksheet', 'observation', 'discussion', 'other'])], 'relevance' => ['required', Rule::in(['block', 'englishmaths', 'correction', 'review', 'workplace', 'other'])], 'learning_reference' => ['required', 'string', 'max:250'], 'support' => ['required', 'string', 'max:2000'], 'achievable' => ['accepted'], 'agreed' => ['accepted'], 'learning_task_id' => ['nullable', 'required_if:method,linked-task', 'integer'], 'version' => $action ? ['required', 'integer'] : ['prohibited']]);
+        $data = $r->validate(['source_task_id' => ['nullable','required_with:source_binding','integer'], 'source_binding' => ['nullable','required_with:source_task_id','string','size:64'], 'title' => ['required', 'string', 'max:2000'], 'owner' => ['required', Rule::in(SmartAction::OWNERS)], 'due_date' => ['nullable', 'date_format:Y-m-d'], 'method' => ['required', Rule::in(['quantity', 'outcomes', 'linked-task'])], 'quantity' => ['nullable', 'required_if:method,quantity', 'integer', 'min:1'], 'unit' => ['nullable', 'required_if:method,quantity', Rule::in(['questions', 'exercises', 'worksheets', 'tasks', 'jobcards', 'evidence', 'other'])], 'custom_unit' => ['nullable', 'required_if:unit,other', 'string', 'max:100'], 'criteria' => ['nullable', 'required_if:method,outcomes', 'string', 'max:5000'], 'observable' => ['exclude_unless:method,outcomes', 'accepted'], 'evidence_method' => ['required', Rule::in(['portal', 'worksheet', 'observation', 'discussion', 'other'])], 'relevance' => ['required', Rule::in(['block', 'englishmaths', 'correction', 'review', 'workplace', 'other', SmartAction::OTJ_CATCHUP])], 'learning_reference' => ['required', 'string', 'max:250'], 'support' => ['required', 'string', 'max:2000'], 'achievable' => ['accepted'], 'agreed' => ['accepted'], 'learning_task_id' => ['nullable', 'required_if:method,linked-task', 'integer'], 'version' => $action ? ['required', 'integer'] : ['prohibited']]);
         DB::transaction(function () use ($r, $apprentice, $action, $data): void {
             $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
             abort_unless($this->manage($r,$fresh),403);
@@ -74,6 +87,18 @@ class SmartActionController extends Controller
                     throw ValidationException::withMessages(['title' => 'Reopen an action in To do before changing its target.']);
                 }
             }
+            if ($data['relevance'] === SmartAction::OTJ_CATCHUP) {
+                if ($data['method'] === 'linked-task') {
+                    throw ValidationException::withMessages(['method' => 'Record an OTJ catch-up as its own measurable action.']);
+                }
+                $duplicate = SmartAction::where('apprentice_id', $fresh->id)
+                    ->where('relevance', SmartAction::OTJ_CATCHUP)->where('status', '!=', 'Completed')
+                    ->when($a->exists, fn ($query) => $query->whereKeyNot($a->id))->exists();
+                if ($duplicate) {
+                    throw ValidationException::withMessages(['relevance' => 'This apprentice already has an open OTJ catch-up action. Open it in the Action Plan.']);
+                }
+            }
+
             $linked = null;
             if ($data['method'] === 'linked-task') {
                 $linked = LearningTask::where('apprentice_id', $apprentice->id)->lockForUpdate()->find($data['learning_task_id']);

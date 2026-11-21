@@ -9,6 +9,9 @@
 @if($taskChart)@include('visuals.task-summary')@endif
 @include('visuals.controls')
 <div class="visual-grid">@foreach($report['charts'] as $chart)@include('visuals.panel')@endforeach</div>
+@if(auth()->user()->role !== 'apprentice')
+@include('visual-reports.otj-followup')
+@endif
 @include('visual-reports.tables')
 <section class="panel"><h2>Definitions and limits</h2><ul>@foreach($report['definitions'] as $text)<li>{{ $text }}</li>@endforeach</ul></section>
 @endsection
