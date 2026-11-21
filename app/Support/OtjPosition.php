@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Apprentice;
 use App\Models\ExtraTraining;
 use App\Models\TrainingSession;
+use Carbon\CarbonImmutable;
 
 class OtjPosition
 {
@@ -44,6 +45,51 @@ class OtjPosition
         $due = $plan ? array_sum(array_column(array_filter($plan['blocks'], fn ($b) => $b['number'] < 12 && $b['end'] < today()->toDateString()), 'hours')) : null;
         $summary = ['captured_at' => now()->toIso8601String(), 'date' => today()->toDateString(), 'session_minutes' => array_sum(array_column(array_filter($rows,fn($r)=>$r['kind']==='session'),'minutes')), 'historical_minutes' => array_sum(array_column($historical,'minutes')), 'extra_minutes' => array_sum(array_column(array_filter($rows,fn($r)=>$r['kind']==='extra'),'minutes')), 'recorded_minutes' => $cumulative, 'pending_sources' => $pending, 'invalid_sources' => $invalid, 'target_hours' => $target, 'plan_hash' => $plan['hash'] ?? null, 'plan_source' => $plan['details']['source_ref'] ?? null, 'planned_due_hours' => $due, 'recorded_percent' => $target > 0 ? $cumulative / 60 / $target * 100 : null, 'loaded_record_gap_hours' => $due !== null ? max(0, $due - $cumulative / 60) : null, 'historical_completeness' => 'Not verified; loaded source records only', 'pace_basis' => 'Planned hours in blocks ending before today; no assumed daily distribution or historic target reconstruction'];
 
+        $expected = self::progressiveHours($plan, today()->toDateString());
+        $summary['progressive_expected_hours'] = $expected;
+        $summary['progressive_gap_hours'] = $expected === null ? null : round(max(0, $expected - $cumulative / 60), 2);
+        $summary['progressive_basis'] = 'Indicative pace by elapsed calendar days within each dated training block. Includes time up to the start of today.';
+
         return ['summary' => $summary, 'rows' => $rows];
+    }
+
+    private static function progressiveHours(?array $plan, string $date): ?float
+    {
+        if ($plan === null) {
+            return null;
+        }
+
+        $asOf = CarbonImmutable::parse($date);
+        $hours = 0.0;
+        $scheduled = 0.0;
+        foreach ($plan['blocks'] as $block) {
+            if ($block['number'] >= 12) {
+                continue;
+            }
+            if (!is_numeric($block['hours'] ?? null) || (float) $block['hours'] < 0) {
+                return null;
+            }
+            $blockHours = (float) $block['hours'];
+            if ($blockHours === 0.0) {
+                continue;
+            }
+            if (!filled($block['start'] ?? null) || !filled($block['end'] ?? null) || $block['end'] < $block['start']) {
+                return null;
+            }
+
+            $start = CarbonImmutable::parse($block['start']);
+            $end = CarbonImmutable::parse($block['end'])->addDay();
+            $elapsed = $start->diffInDays($asOf, false);
+            $fraction = min(1, max(0, $elapsed / $start->diffInDays($end)));
+            $scheduled += $blockHours;
+            $hours += $blockHours * $fraction;
+        }
+
+        if (!is_numeric($plan['details']['target_hours'] ?? null)
+            || abs($scheduled - (float) $plan['details']['target_hours']) > 0.001) {
+            return null;
+        }
+
+        return round($hours, 2);
     }
 }
