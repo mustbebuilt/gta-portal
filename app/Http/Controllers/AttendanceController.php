@@ -32,14 +32,14 @@ class AttendanceController extends Controller
 
     public function index(Request $r): View
     {
-        $visible=\App\Support\RegisterFollowup::visible($r->user());$groups=$visible['groups'];$sessions=$visible['sessions'];
+        $visible=\App\Support\RegisterFollowup::visible($r->user(), includeInactive: true);$groups=$visible['groups'];$sessions=$visible['sessions'];
         $input=$r->validate(['view'=>['nullable','string',Rule::in(\App\Support\RegisterFollowup::VIEWS)],'group'=>['nullable','integer','min:1'],'apprentice'=>['nullable','integer','min:1'],'search'=>['nullable','string','max:250']]);
         if($r->filled('group')){abort_unless($groups->contains('id',(int)$input['group']),404);$sessions=$sessions->where('tutor_group_id',(int)$input['group']);}
         if($r->filled('apprentice')){abort_unless(Apprentice::visibleTo($r->user())->whereKey((int)$input['apprentice'])->exists(),404);$sessions=$sessions->filter(fn($s)=>in_array((int)$input['apprentice'],\App\Support\RegisterFollowup::roster($s)['ids'],true));}
         $search=trim($input['search']??'');if($search!==''){$sessions=$sessions->filter(fn($s)=>mb_stripos($s->name,$search)!==false || mb_stripos($s->group->name,$search)!==false);}
         $followup=\App\Support\RegisterFollowup::for($sessions);$view=$input['view']??'all';$filtered=($view==='all'?$followup['rows']:$followup['rows']->where('bucket',$view))->values();$page=min(\Illuminate\Pagination\Paginator::resolveCurrentPage(),max(1,(int)ceil($filtered->count()/25)));
         $registerRows=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,25)->values(),$filtered->count(),25,$page,['path'=>$r->url(),'query'=>$r->except('page')]);
-        return view('attendance.index',['groups'=>$groups,'sessions'=>$registerRows->getCollection()->pluck('session'),'todayRegisterRows'=>$followup['rows']->filter(fn($row)=>$row['session']->session_date->isToday())->values(),'registerRows'=>$registerRows,'registerCounts'=>$followup['counts'],'registerView'=>$view,'registerSearch'=>$search]);
+        return view('attendance.index',['groups'=>$groups,'sessions'=>$registerRows->getCollection()->pluck('session'),'weeklyGroupSessions'=>$sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'),'todayRegisterRows'=>$followup['rows']->filter(fn($row)=>$row['session']->session_date->isToday())->values(),'registerRows'=>$registerRows,'registerCounts'=>$followup['counts'],'registerView'=>$view,'registerSearch'=>$search]);
     }
 
     public function create(Request $r): RedirectResponse
@@ -197,6 +197,14 @@ class AttendanceController extends Controller
                     }$minutes = $code ? 0 : null;
                 }
                 $writes[$id]=['code' => $code, 'arrival' => in_array($code, ['O', 'T'], true) ? $v['arrival'] : null, 'departure' => in_array($code, ['O', 'T'], true) ? $v['departure'] : null, 'parts' => $parts, 'otj_minutes' => $minutes, 'otj_confirmed' => $confirmed, 'recorded_by' => $r->user()->id, 'comment' => $v['comment'] ?? null, 'adjustment' => $v['adjustment'] ?? null];
+            }
+            if ($s->regular_week !== null) {
+                foreach ($writes as $id => $mark) {
+                    if (!$mark['code']) {
+                        throw ValidationException::withMessages(['marks.'.$id.'.code' => 'Mark every apprentice before submitting the weekly register.']);
+                    }
+                }
+                $r->validate(['weekly_confirmed' => ['accepted']]);
             }
             $existingTraining = \App\Models\RegisterTrainingRecord::find($s->id);
             $existingStructured = $existingTraining ? collect($existingTraining->details ?? [])->only(['items', 'note', 'exceptions', 'confirmed'])->all() : null;

@@ -16,7 +16,7 @@ class TutorGroup extends Model
 
     protected function casts(): array
     {
-        return ['active' => 'boolean', 'record_version' => 'integer'];
+        return ['active' => 'boolean', 'record_version' => 'integer', 'weekly_register' => 'array'];
     }
 
     public function programme(): BelongsTo

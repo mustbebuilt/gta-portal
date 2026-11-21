@@ -33,7 +33,7 @@ class PortalNavigation
             $links[]=$item('Maths and English','em.caseload',[],['em.*','topics.*','qualifications.*']);
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)) {
-            $links[]=$item('Groups and sessions','attendance.index',[],['attendance.*']);$links[]=$item('Session operations','session-operations.index',[],['session-operations.*','session-changes.*','register-actions.*']);$links[]=$item('Marking worklist','marking.index',[],['marking.*']);
+            $links[]=$item('Apprentice Register','attendance.index',[],['attendance.*']);$links[]=$item('Session operations','session-operations.index',[],['session-operations.*','session-changes.*','register-actions.*']);$links[]=$item('Marking worklist','marking.index',[],['marking.*']);
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)){$links[]=$item('Gateway preparation','gateway.index',[],['gateway.*']);}
         if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'Timetable','centre-planning.index',[],['centre-planning.*','work-moves.*','optimiser.*','timetable-duties.*','timetable-governance.*','timetable-management.*']);}

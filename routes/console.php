@@ -329,4 +329,31 @@ Artisan::command('gta:retention-followups',function(){
 })->purpose('Reconcile 3/6/12-month portal tasks with sourced exit dates; no messages');
 \Illuminate\Support\Facades\Schedule::command('gta:retention-followups')->dailyAt('07:00')->timezone('Europe/London')->withoutOverlapping();
 
+Artisan::command('gta:weekly-registers', function () {
+    $prepared = 0;
+    $needsCheck = [];
+    \App\Models\TutorGroup::where('active', true)->whereNotNull('weekly_register')->each(function ($group) use (&$prepared, &$needsCheck) {
+        $next = \App\Support\WeeklyRegisters::next($group);
+        if (!$next || $next['date'] !== today(config('app.timezone'))->toDateString()) {
+            return;
+        }
+        $actor = \App\Models\User::find($next['settings']['configured_by']);
+        try {
+            if (!$actor) {
+                throw new \RuntimeException('The schedule owner is unavailable.');
+            }
+            \App\Support\WeeklyRegisters::open($actor, $actor->auth_version, $group, $next);
+            $prepared++;
+        } catch (\Illuminate\Validation\ValidationException | \Symfony\Component\HttpKernel\Exception\HttpException | \RuntimeException $error) {
+            $needsCheck[] = $group->id;
+            report($error);
+        }
+    });
+    $this->line(json_encode(['ready' => $prepared, 'groups_to_check' => $needsCheck], JSON_THROW_ON_ERROR));
+    return $needsCheck ? 1 : 0;
+})->purpose('Prepare today’s weekly registers from agreed group schedules');
+
+\Illuminate\Support\Facades\Schedule::command('gta:weekly-registers')
+    ->hourly()->timezone('Europe/London')->withoutOverlapping();
+
 require __DIR__.'/setup68-console.php';

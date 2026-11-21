@@ -24,10 +24,10 @@ class RegisterFollowup
         $bucket=$s->state==='Cancelled'?'cancelled':((!in_array($s->state,['Planned'],true) || $problems || (!$ended && $marks->isNotEmpty()))?'checks':(!$ended?'not-ended':($coded<count($ids)?'needs-register':'recorded')));
         return ['bucket'=>$bucket,'roster'=>count($ids),'coded'=>$coded,'missing_codes'=>max(0,count($ids)-$coded),'missing_people'=>$missingPeople,'unknown_codes'=>$unknown,'outside_marks'=>$outside,'roster_shape_ok'=>$roster['shape'],'duplicate_roster'=>$roster['duplicates'],'can_open'=>$roster['shape'] && $timing,'ended'=>$ended,'issues'=>$issues];
     }
-    public static function visible(User $u): array
+    public static function visible(User $u, bool $includeInactive = false): array
     {
         abort_unless($u->active && (LearningAccess::manager($u) || $u->role==='tutor'),403);
-        $manager=LearningAccess::manager($u);$groups=TutorGroup::where('active',true)->when(!$manager,fn($q)=>$q->where('tutor_id',$u->id))->orderBy('name')->get();
+        $manager=LearningAccess::manager($u);$groups=TutorGroup::where(fn ($q) => $q->where('active', true)->when($includeInactive, fn ($q) => $q->orWhereNotNull('weekly_register')))->when(!$manager,fn($q)=>$q->where('tutor_id',$u->id))->orderBy('name')->get();
         $sessions=TrainingSession::with(['group','marks'=>fn($q)=>$q->select('id','training_session_id','apprentice_id','code')])->whereIn('tutor_group_id',$groups->pluck('id'))->get();
         $sessions=$sessions->filter(function($s)use($u,$manager){if($manager){return true;}if(!self::roster($s)['shape']){return false;}return Apprentice::whereIn('id',$s->members)->where(fn($q)=>$q->whereNull('tutor_id')->orWhere('tutor_id','!=',$u->id))->doesntExist();});
         return ['groups'=>$groups,'sessions'=>$sessions];

@@ -409,6 +409,9 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/sessions/{session}/follow-up/decision', [\App\Http\Controllers\SessionOperationsController::class,'caseDecide'])->name('register-actions.decide');
     Route::get('/sessions', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::post('/sessions', [AttendanceController::class, 'create'])->name('attendance.create');
+    Route::post('/register-groups/{group}/schedule', [\App\Http\Controllers\WeeklyRegisterController::class, 'configure'])->name('attendance.weekly.configure');
+    Route::post('/register-groups/{group}/open', [\App\Http\Controllers\WeeklyRegisterController::class, 'open'])->name('attendance.weekly.open');
+    Route::post('/register-groups/{group}/close', [\App\Http\Controllers\WeeklyRegisterController::class, 'close'])->name('attendance.weekly.close');
     Route::get('/sessions/{session}', [AttendanceController::class, 'show'])->name('attendance.show');
     Route::post('/sessions/{session}', [AttendanceController::class, 'save'])->name('attendance.save');
     Route::post('/sessions/{session}/cancel', [AttendanceController::class, 'cancel'])->name('attendance.cancel');
