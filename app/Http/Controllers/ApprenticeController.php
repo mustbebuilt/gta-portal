@@ -6,11 +6,14 @@ use App\Http\Requests\SaveApprenticeRequest;
 use App\Models\Apprentice;
 use App\Models\Employer;
 use App\Models\LearningTask;
+use App\Models\MonthlyScorecard;
 use App\Models\Programme;
 use App\Models\TutorGroup;
 use App\Models\User;
 use App\Support\AssignmentHistory;
 use App\Support\DirectoryCatalog;
+use App\Support\LearningAccess;
+use App\Support\MonthlyDevelopment;
 use App\Support\TaskCatalogue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -48,11 +51,18 @@ class ApprenticeController extends Controller
         throw ValidationException::withMessages(['setup' => 'Use Add apprentice → guided setup to avoid a duplicate or incomplete record.']);
     }
 
-    public function show(Apprentice $apprentice): View
+    public function show(Request $request, Apprentice $apprentice): View
     {
         Gate::authorize('view', $apprentice);
+        $monthly = LearningAccess::training($request->user(), $apprentice)
+            ? MonthlyScorecard::where('apprentice_id', $apprentice->id)->whereNotNull('development')->orderByDesc('month')->first()
+            : null;
 
-        return view('apprentices.show', ['apprentice' => $apprentice->load(['tutor', 'programmeRecord', 'employerRecord', 'groupRecord', 'mentor', 'careersAdviser', 'mathsTutor', 'englishTutor'])]);
+        return view('apprentices.show', [
+            'apprentice' => $apprentice->load(['tutor', 'programmeRecord', 'employerRecord', 'groupRecord', 'mentor', 'careersAdviser', 'mathsTutor', 'englishTutor']),
+            'developmentMonth' => $monthly?->month,
+            'latestDevelopment' => $monthly ? MonthlyDevelopment::read($monthly) : null,
+        ]);
     }
 
     public function edit(Apprentice $apprentice): View

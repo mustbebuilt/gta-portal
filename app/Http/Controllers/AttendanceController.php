@@ -103,6 +103,7 @@ class AttendanceController extends Controller
             'trainingCatalogue'=>\App\Support\TrainingJourney72::catalogueForSession($session),
             'trainingRecord'=>\App\Models\RegisterTrainingRecord::find($session->id),
             'monthlyCards'=>$monthlyCards,
+            'monthlyDevelopment'=>$monthlyCards,
             'sessionMonth'=>$month,
         ]);
     }
@@ -111,7 +112,29 @@ class AttendanceController extends Controller
     {
         abort_unless($this->sessionAllowed($r, $session), 403);
         $data = $r->validate(['version' => ['required', 'integer'], 'correction_reason' => ['nullable', 'string', 'max:2000'], 'delivered_learning' => ['nullable', 'string', 'max:10000'], 'marks' => ['required', 'array'], 'marks.*.code' => ['nullable', Rule::in(array_keys(Math::CODES))], 'marks.*.arrival' => ['nullable', 'date_format:H:i'], 'marks.*.departure' => ['nullable', 'date_format:H:i'], 'marks.*.otj_confirmed' => ['nullable', 'boolean'], 'marks.*.minutes' => ['nullable', 'integer', 'min:0'], 'marks.*.comment' => ['nullable', 'string', 'max:2000'], 'marks.*.adjustment' => ['nullable', 'string', 'max:2000'], 'training_subjects' => ['nullable', 'array', 'max:40'], 'training_subjects.*' => ['string', 'max:120'], 'training_coverage' => ['nullable', 'array'], 'training_custom' => ['nullable', 'string', 'max:200'], 'training_custom_coverage' => ['nullable', Rule::in(['delivered', 'partial'])], 'training_confirmed' => ['nullable', 'boolean'], 'training_note' => ['nullable', 'string', 'max:2000'], 'training_exceptions' => ['nullable', 'array'], 'monthly_dev' => ['nullable', 'array']]);
-        DB::transaction(function () use ($r, $session, $data): void {
+        $selection = $r->validate([
+            'development' => ['nullable', 'array'],
+            'development.*' => ['array:enabled,version,ratings,comment'],
+            'development.*.enabled' => ['nullable', 'boolean'],
+        ]);
+        $monthly = array_filter($selection['development'] ?? [], static fn (array $entry): bool => (bool) ($entry['enabled'] ?? false));
+        foreach (array_keys($monthly) as $id) {
+            if (! is_int($id) || $id <= 0) {
+                throw ValidationException::withMessages(['development' => 'A snapshot was supplied for someone outside this roster.']);
+            }
+            $prefix = 'development.'.$id.'.';
+            $areas = array_keys(\App\Support\ApprenticeReviewData::DEVELOPMENT_AREAS);
+            $rules = [
+                $prefix.'version' => ['required', 'integer', 'min:0'],
+                $prefix.'ratings' => ['required', 'array:'.implode(',', $areas)],
+                $prefix.'comment' => ['nullable', 'string', 'max:1000'],
+            ];
+            foreach ($areas as $area) {
+                $rules[$prefix.'ratings.'.$area] = ['required', Rule::in(\App\Support\ApprenticeReviewData::RATINGS)];
+            }
+            $monthly[$id] = $r->validate($rules)['development'][$id];
+        }
+        DB::transaction(function () use ($r, $session, $data, $monthly): void {
             $s = TrainingSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $s);
             if ($s->state === 'Cancelled' || ! $s->ended()) {
@@ -119,7 +142,10 @@ class AttendanceController extends Controller
             }
             $ids = $s->members;
             sort($ids);
-            Apprentice::whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get();
+            $apprentices = Apprentice::whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            if (array_diff(array_keys($monthly), $apprentices->keys()->all())) {
+                throw ValidationException::withMessages(['development' => 'A snapshot was supplied for someone outside this roster.']);
+            }
             if (array_diff(array_map('intval', array_keys($data['marks'])), $ids)) {
                 throw ValidationException::withMessages(['marks' => 'A mark was supplied for someone outside this roster.']);
             }
@@ -175,18 +201,29 @@ class AttendanceController extends Controller
             $existingTraining = \App\Models\RegisterTrainingRecord::find($s->id);
             $existingStructured = $existingTraining ? collect($existingTraining->details ?? [])->only(['items', 'note', 'exceptions', 'confirmed'])->all() : null;
             $sameTraining = $structured === null || ($existingTraining && $existingTraining->register_version === $s->version && $existingStructured === $structured);
-            if ($before && $sameTraining && \App\Support\RegisterPayload::same($before,$writes,$s->delivered_learning,$data['delivered_learning']??null)) {return;}
-            if ($before && !filled($data['correction_reason']??null)) {
-                throw ValidationException::withMessages(['correction_reason'=>'Explain the correction to this saved register.']);
+            $unchanged = $before && $sameTraining && \App\Support\RegisterPayload::same($before, $writes, $s->delivered_learning, $data['delivered_learning'] ?? null);
+            if (! $unchanged) {
+                if ($before && ! filled($data['correction_reason'] ?? null)) {
+                    throw ValidationException::withMessages(['correction_reason' => 'Explain the correction to this saved register.']);
+                }
+                foreach ($writes as $id => $values) {
+                    AttendanceMark::updateOrCreate(['training_session_id' => $s->id, 'apprentice_id' => $id], $values);
+                }
+                $h = $s->history ?? [];
+                $h[] = ['event' => 'register_saved', 'by' => $r->user()->id, 'at' => now()->toIso8601String(), 'correction_reason' => $data['correction_reason'] ?? null, 'before_marks' => $before, 'before_delivered' => $s->delivered_learning];
+                $s->history = $h;
+                $s->delivered_learning = $data['delivered_learning'] ?? null;
+                $s->version++;
+                $s->save();
+                \App\Support\TrainingJourney72::saveRecord($s, $structured, $r->user()->id, $s->version, $data['correction_reason'] ?? null);
+                $this->audit($r, $s, 'register_saved');
             }
-            foreach ($writes as $id=>$values) {AttendanceMark::updateOrCreate(['training_session_id'=>$s->id,'apprentice_id'=>$id],$values);}
-            $h = $s->history ?? [];
-            $h[] = ['event' => 'register_saved', 'by' => $r->user()->id, 'at' => now()->toIso8601String(), 'correction_reason' => $data['correction_reason'] ?? null, 'before_marks' => $before, 'before_delivered' => $s->delivered_learning];
-            $s->history = $h;
-            $s->delivered_learning = $data['delivered_learning'] ?? null;
-            $s->version++;
-            $s->save();
-            \App\Support\TrainingJourney72::saveRecord($s, $structured, $r->user()->id, $s->version, $data['correction_reason'] ?? null);
+            foreach ($ids as $id) {
+                if (isset($monthly[$id])) {
+                    $entry = $monthly[$id];
+                    \App\Support\MonthlyDevelopment::save($r->user(), $apprentices[$id], $s, (int) $entry['version'], $entry['ratings'], $entry['comment'] ?? '');
+                }
+            }
             foreach ((array) ($data['monthly_dev'] ?? []) as $aid => $payload) {
                 if (empty($payload['save'])) {
                     continue;
@@ -205,7 +242,6 @@ class AttendanceController extends Controller
                     throw ValidationException::withMessages(['development' => $ex->getMessage()]);
                 }
             }
-            $this->audit($r, $s, 'register_saved');
         });
 
         return back()->with('status', 'Register saved. Only explicitly confirmed eligible minutes enter the session OTJ subtotal.');
