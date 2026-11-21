@@ -119,8 +119,14 @@ class LearningTaskController extends Controller
         abort_unless(Access::training($r->user(), $task->apprentice), 403);
 
         $release = BlockRelease::state($task);
+        $presentation = \App\Support\TaskPresentation::forSavedTask(
+            \App\Support\TaskPresentation::manifest(),
+            TaskCatalogue::savedKey($task),
+            $task->reference,
+            $task->template ?? []
+        );
 
-        return view('learning.task', ['release' => $release, 'planning' => collect(TaskCatalogue::savedKey($task) === 'autocare' ? json_decode(file_get_contents(resource_path('data/training-plan-reference.json')), true, 512, JSON_THROW_ON_ERROR)['curriculumAmendment']['block9Planning']['activities'] : [])->where('taskId', $task->reference), 'task' => $task->load('evidence'), 'apprentice' => $task->apprentice, 'tutor' => ($release['open'] || $task->status === 'Awaiting marking') && (Access::tutor($r->user(), $task->apprentice) || Access::manager($r->user())), 'learner' => $release['open'] && Access::learner($r->user(), $task->apprentice)]);
+        return view('learning.task', ['release' => $release, 'presentation' => $presentation, 'planning' => collect(TaskCatalogue::savedKey($task) === 'autocare' ? json_decode(file_get_contents(resource_path('data/training-plan-reference.json')), true, 512, JSON_THROW_ON_ERROR)['curriculumAmendment']['block9Planning']['activities'] : [])->where('taskId', $task->reference), 'task' => $task->load('evidence'), 'apprentice' => $task->apprentice, 'tutor' => ($release['open'] || $task->status === 'Awaiting marking') && (Access::tutor($r->user(), $task->apprentice) || Access::manager($r->user())), 'learner' => $release['open'] && Access::learner($r->user(), $task->apprentice)]);
     }
 
     public function save(Request $r, LearningTask $task): RedirectResponse
@@ -142,6 +148,25 @@ class LearningTaskController extends Controller
                 throw ValidationException::withMessages(['intent' => 'This task cannot be edited or submitted in its current state.']);
             }
             $answers = $this->answers($r, $t, ['apprentice']);
+            $presentation = \App\Support\TaskPresentation::forSavedTask(
+                \App\Support\TaskPresentation::manifest(),
+                TaskCatalogue::savedKey($t),
+                $t->reference,
+                $t->template ?? []
+            );
+            if ($presentation && ! empty($presentation['checklist']) && $r->boolean('checklist75_present')) {
+                try {
+                    $checked = \App\Support\TaskPresentation::checkedSteps($presentation, (array) $r->input('checklist75', []));
+                } catch (\InvalidArgumentException $ex) {
+                    throw ValidationException::withMessages(['checklist75' => $ex->getMessage()]);
+                }
+                $answers['_checklist75'] = [
+                    'steps' => $checked,
+                    'labels' => array_column($presentation['checklist'], 'label', 'id'),
+                ];
+            } elseif (isset($t->answers['_checklist75'])) {
+                $answers['_checklist75'] = $t->answers['_checklist75'];
+            }
             $existingFile=null;
             if ($r->hasFile('file')) {
                 $existingFile=$t->evidence()->where('uploaded_by',$r->user()->id)->where('sha256',hash_file('sha256',$r->file('file')->getRealPath()))
@@ -235,6 +260,18 @@ class LearningTaskController extends Controller
             $t->save();
             $this->audit($r, $t->apprentice_id, $t->id, 'decision_recorded');
         });
+
+        if ($r->input('after_decide') === 'next') {
+            $nextTask = LearningTask::whereIn('apprentice_id', Apprentice::visibleTo($r->user())->select('id'))
+                ->where('status', 'Awaiting marking')
+                ->where('id', '!=', $task->id)
+                ->orderBy('submitted_at')
+                ->orderBy('id')
+                ->first();
+
+            return ($nextTask ? to_route('tasks.show', $nextTask) : to_route('marking.index'))
+                ->with('status', 'Whole-task decision saved. This is not overall apprenticeship or KSB sign-off.');
+        }
 
         return back()->with('status', 'Whole-task decision saved. This is not overall apprenticeship or KSB sign-off.');
     }
