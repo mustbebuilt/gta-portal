@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title','Support and retention')
 @section('content')
+<p><a class="button" href="{{ route('support.worklist', ['view'=>'all']) }}">Support and Retention Register</a></p>
 <header class="page-heading"><div><h1>Support and retention</h1><p>Find an apprentice to start support, manage markers or review an existing plan.</p></div><button type="button" data-print>Print / Save PDF</button></header>
 @include('learning.errors')
 <nav class="toolbar" aria-label="Support sections"><a class="button primary" href="{{ route('support-register71.index') }}">Support and Retention Register</a><a class="button" href="{{ route('support-register71.reports') }}">Register reports</a><a class="button" href="#support-people">Find an apprentice / Start support</a><a class="button" href="#support-concerns">Follow up concerns</a><a class="button" href="#support-plans">Review saved plans</a></nav>

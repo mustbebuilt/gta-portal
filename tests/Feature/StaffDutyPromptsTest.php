@@ -24,7 +24,7 @@ class StaffDutyPromptsTest extends TestCase
             'mentor'=>$staff->name,'tutor'=>$tutor->name,'employerRep'=>'Fictional Employer Representative','method'=>'Face to face',
             'attendance'=>'Present','judgement'=>'Behind plan','previousCheck'=>'Existing action plan checked','planChange'=>'No',
             'summary'=>'Fictional review','learning'=>'Actual learning checked','progressDiscussion'=>'Evidence checked','previousNotes'=>'N/A',
-            'planChangeNotes'=>'N/A','sharedSupport'=>'N/A','absence'=>'N/A','newNeeds'=>'No','trainingChecked'=>1,'targetsAgreed'=>1,'providerPrepared'=>1];
+            'planChangeNotes'=>'N/A','sharedSupport'=>'N/A','absence'=>'N/A','newNeeds'=>'No','trainingChecked'=>1,'targetsAgreed'=>1,'providerPrepared'=>1, 'safetyAnswer'=>'no'];
         $this->actingAs($staff)->post('/apprentices/'.$a->id.'/reviews',['fields'=>$fields])->assertSessionHasNoErrors();
         $review=ProgressReviewDraft::where('apprentice_id',$a->id)->firstOrFail();
         $this->post('/apprentices/'.$a->id.'/reviews/'.$review->id.'/ready',['version'=>1,'confirmed'=>1])->assertSessionHasNoErrors();$review->refresh();

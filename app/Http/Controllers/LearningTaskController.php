@@ -8,9 +8,12 @@ use App\Models\LearningTask;
 use App\Models\TaskEvidence;
 use App\Support\BlockRelease;
 use App\Support\LearningAccess as Access;
+use App\Support\MarkingQueueViews;
+use App\Support\MarkingReminders;
 use App\Support\PortalPdf;
 use App\Support\PrivateEvidence;
 use App\Support\TaskCatalogue;
+use App\Support\TaskPresentation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -119,28 +122,29 @@ class LearningTaskController extends Controller
         abort_unless(Access::training($r->user(), $task->apprentice), 403);
 
         $release = BlockRelease::state($task);
-        $presentation = \App\Support\TaskPresentation::forSavedTask(
-            \App\Support\TaskPresentation::manifest(),
-            TaskCatalogue::savedKey($task),
-            $task->reference,
-            $task->template ?? []
-        );
+        $queue = MarkingReminders::allowed($r->user()) && $r->boolean('from_marking')
+            ? MarkingQueueViews::parameters($r->query()) : null;
+        $presentation = TaskPresentation::forTask($task);
+        $attempt = collect($task->submissions ?? [])->last();
+        $awaiting = $task->status === 'Awaiting marking';
+        $evidence = $task->evidence;
+        if ($awaiting && isset($attempt['evidence'])) {
+            $snapshot = collect($attempt['evidence'])->keyBy('id');
+            $evidence = $evidence->filter(fn ($file) => $file->sha256 === ($snapshot->get($file->id)['sha256'] ?? null));
+        }
 
-        return view('learning.task', ['release' => $release, 'presentation' => $presentation, 'planning' => collect(TaskCatalogue::savedKey($task) === 'autocare' ? json_decode(file_get_contents(resource_path('data/training-plan-reference.json')), true, 512, JSON_THROW_ON_ERROR)['curriculumAmendment']['block9Planning']['activities'] : [])->where('taskId', $task->reference), 'task' => $task->load('evidence'), 'apprentice' => $task->apprentice, 'tutor' => ($release['open'] || $task->status === 'Awaiting marking') && (Access::tutor($r->user(), $task->apprentice) || Access::manager($r->user())), 'learner' => $release['open'] && Access::learner($r->user(), $task->apprentice)]);
+        return view('learning.task', ['release' => $release, 'queue' => $queue, 'presentation' => $presentation,
+            'currentAnswers' => $awaiting ? ($attempt['answers'] ?? $task->answers ?? []) : ($task->answers ?? []),
+            'currentEvidence' => $evidence, 'planning' => collect(TaskCatalogue::savedKey($task) === 'autocare' ? json_decode(file_get_contents(resource_path('data/training-plan-reference.json')), true, 512, JSON_THROW_ON_ERROR)['curriculumAmendment']['block9Planning']['activities'] : [])->where('taskId', $task->reference), 'task' => $task, 'apprentice' => $task->apprentice, 'tutor' => ($release['open'] || $task->status === 'Awaiting marking') && (Access::tutor($r->user(), $task->apprentice) || Access::manager($r->user())), 'learner' => $release['open'] && Access::learner($r->user(), $task->apprentice)]);
     }
 
     public function save(Request $r, LearningTask $task): RedirectResponse
     {
         abort_unless(Access::learner($r->user(), $task->apprentice), 403);
         $r->validate(['version' => ['required', 'integer'], 'intent' => ['required', Rule::in(['draft', 'submit', 'upload'])], 'own_work' => ['sometimes', 'accepted']]);
-        if ($r->input('intent')==='upload' || $r->hasFile('file')) {
-            $r->validate(['file'=>['required','file','mimes:pdf,jpg,jpeg,png,docx','extensions:pdf,jpg,jpeg,png,docx','max:15360'],
-                'kind'=>['required',Rule::in(['supporting-evidence','inspection-checklist','workplace-photo'])],
-                'description'=>['nullable','required_if:kind,workplace-photo','string','max:5000']]);
-            if ($r->input('kind')==='workplace-photo') {$r->validate(['file'=>['mimes:jpg,jpeg,png','extensions:jpg,jpeg,png']]);}
-        }
-        $entry=null;
-        try { DB::transaction(function () use ($r, $task, &$entry): void {
+        $files = $this->submissionFiles($r);
+        $entries = [];
+        try { DB::transaction(function () use ($r, $task, $files, &$entries): void {
             $t = LearningTask::whereKey($task->id)->lockForUpdate()->firstOrFail();
             abort_unless(Access::learner($r->user(),$t->apprentice),403);
             BlockRelease::check($t);
@@ -148,35 +152,17 @@ class LearningTaskController extends Controller
                 throw ValidationException::withMessages(['intent' => 'This task cannot be edited or submitted in its current state.']);
             }
             $answers = $this->answers($r, $t, ['apprentice']);
-            $presentation = \App\Support\TaskPresentation::forSavedTask(
-                \App\Support\TaskPresentation::manifest(),
-                TaskCatalogue::savedKey($t),
-                $t->reference,
-                $t->template ?? []
-            );
-            if ($presentation && ! empty($presentation['checklist']) && $r->boolean('checklist75_present')) {
-                try {
-                    $checked = \App\Support\TaskPresentation::checkedSteps($presentation, (array) $r->input('checklist75', []));
-                } catch (\InvalidArgumentException $ex) {
-                    throw ValidationException::withMessages(['checklist75' => $ex->getMessage()]);
-                }
-                $answers['_checklist75'] = [
-                    'steps' => $checked,
-                    'labels' => array_column($presentation['checklist'], 'label', 'id'),
-                ];
-            } elseif (isset($t->answers['_checklist75'])) {
-                $answers['_checklist75'] = $t->answers['_checklist75'];
+            $this->recordActivities($r, $t, $answers);
+            $missing = $this->newEvidenceFiles($r, $t, $files);
+            // A retry of the immediately preceding draft/upload must not create a second version.
+            if ($r->input('intent') !== 'submit' && $files && !$missing
+                && $t->version === $r->integer('version') + 1 && $t->answers === $answers) {
+                return;
             }
-            $existingFile=null;
-            if ($r->hasFile('file')) {
-                $existingFile=$t->evidence()->where('uploaded_by',$r->user()->id)->where('sha256',hash_file('sha256',$r->file('file')->getRealPath()))
-                    ->where('kind',$r->input('kind'))->where('description',$r->input('description'))->first();
-            }
-            // Exact immediate retry of a combined draft/upload can succeed without a second row or version.
-            if ($r->input('intent')!=='submit' && $r->hasFile('file') && $existingFile && $t->version===$r->integer('version')+1 && $t->answers===$answers) {return;}
-            $this->version($r,$t);
-            if ($r->hasFile('file') && !$existingFile) {
-                $entry=PrivateEvidence::store($r->file('file'),'task-evidence',$r->user()->id);
+            $this->version($r, $t);
+            foreach ($missing as $file) {
+                $entry = PrivateEvidence::store($file, 'task-evidence', $r->user()->id);
+                $entries[] = $entry;
                 TaskEvidence::create(['learning_task_id'=>$t->id,'uploaded_by'=>$r->user()->id,
                     ...array_intersect_key($entry,array_flip(['disk','path','name','mime','sha256','bytes'])),
                     'kind'=>$r->input('kind'),'description'=>$r->input('description')]);
@@ -218,17 +204,96 @@ class LearningTaskController extends Controller
             $t->version++;
             $t->save();
             $this->audit($r, $t->apprentice_id, $t->id, $r->input('intent') === 'submit' ? 'submitted' : 'draft_saved');
-        }); } catch (\Throwable $error) {if ($entry) {PrivateEvidence::delete($entry);} throw $error;}
+        }); } catch (\Throwable $error) {
+            foreach ($entries as $entry) {
+                PrivateEvidence::delete($entry);
+            }
+            throw $error;
+        }
 
-        return back()->with('status', $r->input('intent') === 'submit' ? 'Submitted to the tutor. This version is locked.' : ($r->hasFile('file')?'Answers and evidence saved together.':'Draft saved.'));
+        return back()->with('status', $r->input('intent') === 'submit' ? 'Submitted to the tutor. This version is locked.' : ($files ? 'Answers and evidence saved together.' : 'Draft saved.'));
+    }
+
+    private function submissionFiles(Request $request): array
+    {
+        $uploads = $request->file('files');
+        $batchSupplied = ($uploads !== null && $uploads !== []) || filled($request->input('files'));
+        $singleSupplied = $request->file('file') !== null || filled($request->input('file'));
+        if (!$batchSupplied && !$singleSupplied && $request->input('intent') !== 'upload') {
+            return [];
+        }
+
+        $kind = $request->input('kind');
+        $extensions = $kind === 'workplace-photo' ? 'jpg,jpeg,png' : 'pdf,jpg,jpeg,png,docx';
+        $fileRules = ['required', 'file', 'mimes:'.$extensions, 'extensions:'.$extensions, 'max:15360'];
+        $fileInput = $batchSupplied
+            ? ['files'=>['required','array','list','min:1','max:5','prohibits:file'],'files.*'=>$fileRules]
+            : ['file'=>$fileRules];
+        $request->validate($fileInput + [
+            'kind'=>['required',Rule::in(['supporting-evidence','inspection-checklist','workplace-photo'])],
+            'description'=>['nullable','required_if:kind,workplace-photo','string','max:5000'],
+        ]);
+
+        return $request->file('files') ?? [$request->file('file')];
+    }
+
+    private function newEvidenceFiles(Request $request, LearningTask $task, array $files): array
+    {
+        if (!$files) {
+            return [];
+        }
+        $known = $task->evidence()->where('uploaded_by', $request->user()->id)
+            ->where('kind', $request->input('kind'))->where('description', $request->input('description'))
+            ->pluck('sha256')->flip();
+
+        $pending = [];
+        foreach ($files as $file) {
+            $sha = hash_file('sha256', $file->getRealPath());
+            if (!$known->has($sha)) {
+                $pending[$sha] ??= $file;
+            }
+        }
+
+        return $pending;
+    }
+
+    private function recordActivities(Request $request, LearningTask $task, array &$answers): void
+    {
+        if (!$request->has('activities_present')) {
+            unset($answers['_activities']);
+            if (array_key_exists('_activities', $task->answers ?? [])) {
+                $answers['_activities'] = $task->answers['_activities'];
+            }
+            return;
+        }
+
+        $posted = $request->validate([
+            'activities_present'=>['accepted'], 'activities'=>['sometimes','array','list','max:100'],
+        ]);
+        $presentation = TaskPresentation::forTask($task);
+        $steps = TaskPresentation::checklist($presentation);
+        if (!$steps) {
+            throw ValidationException::withMessages(['activities'=>'Activity checks are unavailable for this task version. Reopen the task.']);
+        }
+        try {
+            $checked = TaskPresentation::checkedSteps($presentation, $posted['activities'] ?? []);
+        } catch (\InvalidArgumentException $error) {
+            throw ValidationException::withMessages(['activities'=>$error->getMessage()]);
+        }
+
+        $answers['_activities'] = array_values(array_filter($steps, fn ($step) => in_array($step['id'], $checked, true)));
     }
 
     public function decide(Request $r, LearningTask $task): RedirectResponse
     {
         abort_unless(Access::tutor($r->user(), $task->apprentice) || Access::manager($r->user()), 403);
-        $r->validate(['version' => ['required', 'integer'], 'decision' => ['required', Rule::in(['Approved', 'Referred'])], 'decision_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'feedback' => ['nullable', 'required_if:decision,Referred', 'string'], 'confirmed' => ['accepted']]);
+        $r->validate(['version' => ['required', 'integer'], 'decision' => ['required', Rule::in(['Approved', 'Referred'])], 'decision_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'feedback' => ['nullable', 'required_if:decision,Referred', 'string'], 'confirmed' => ['accepted'], 'after_save'=>['nullable',Rule::in(['stay','next'])]]);
         DB::transaction(function () use ($r, $task): void {
+            $apprentice = Apprentice::whereKey($task->apprentice_id)->lockForUpdate()->firstOrFail();
             $t = LearningTask::whereKey($task->id)->lockForUpdate()->firstOrFail();
+            abort_unless($t->apprentice_id === $apprentice->id
+                && (Access::tutor($r->user(), $apprentice) || Access::manager($r->user())), 403);
+            $t->setRelation('apprentice', $apprentice);
             $this->version($r, $t);
             if ($t->status !== 'Awaiting marking') {
                 BlockRelease::check($t);
@@ -242,8 +307,8 @@ class LearningTaskController extends Controller
             }
             $evidence = $this->answers($r, $t, ['trainer', 'observer']);
             if ($knowledge) {
-                $r->validate(['test_title' => ['required', 'string'], 'marks_available' => ['required', 'numeric', 'gt:0'], 'marks_achieved' => ['required', 'numeric', 'min:0', 'lte:marks_available']]);
-                $evidence = [...$evidence, ...$r->only('test_title', 'marks_available', 'marks_achieved')];
+                $r->validate(['test_title' => ['required', 'string'], 'marks_available' => ['required', 'numeric', 'gt:0'], 'marks_achieved' => ['required', 'numeric', 'min:0', 'lte:marks_available'], 'test_evidence_reference'=>['nullable','string','max:2000']]);
+                $evidence = [...$evidence, ...$r->only('test_title', 'marks_available', 'marks_achieved', 'test_evidence_reference')];
             }
             if ($t->template['kind'] === 'jobcard' && $r->input('decision') === 'Approved') {
                 $r->validate(['answers.mentor_confirmation' => ['accepted'], 'answers.sign_mentor_name' => ['required', 'string'], 'answers.sign_mentor_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today']]);
@@ -253,6 +318,10 @@ class LearningTaskController extends Controller
                 $history[] = ['version' => count($history) + 1, 'submitted_at' => null, 'answers' => [], 'template_hash' => $t->template['sha256'], 'evidence' => [], 'decision' => null];
             }
             $index = count($history) - 1;
+            if (!$knowledge && ($index < 0 || !array_key_exists('decision', $history[$index])
+                || $history[$index]['decision'] !== null || ($history[$index]['template_hash'] ?? null) !== ($t->template['sha256'] ?? null))) {
+                throw ValidationException::withMessages(['decision'=>'The locked submission needs checking before it can be marked.']);
+            }
             $history[$index]['decision'] = ['status' => $r->input('decision'), 'tutor_id' => $r->user()->id, 'tutor_name' => $r->user()->name, 'date' => $r->input('decision_date'), 'feedback' => $r->input('feedback'), 'recorded_at' => now()->toIso8601String(), 'source_fields' => $evidence];
             $t->submissions = $history;
             $t->status = $r->input('decision');
@@ -261,19 +330,17 @@ class LearningTaskController extends Controller
             $this->audit($r, $t->apprentice_id, $t->id, 'decision_recorded');
         });
 
-        if ($r->input('after_decide') === 'next') {
-            $nextTask = LearningTask::whereIn('apprentice_id', Apprentice::visibleTo($r->user())->select('id'))
-                ->where('status', 'Awaiting marking')
-                ->where('id', '!=', $task->id)
-                ->orderBy('submitted_at')
-                ->orderBy('id')
-                ->first();
-
-            return ($nextTask ? to_route('tasks.show', $nextTask) : to_route('marking.index'))
-                ->with('status', 'Whole-task decision saved. This is not overall apprenticeship or KSB sign-off.');
+        if ($r->input('after_save') === 'next') {
+            $filters = MarkingQueueViews::parameters($r->input('queue', []));
+            $next = MarkingQueueViews::next($r->user(), $filters, $task->id);
+            if (!$next) {
+                return redirect()->route('marking.index', $filters)->with('status', 'Decision saved. No further submissions in this view.');
+            }
+            return redirect()->route('tasks.show', ['task'=>$next, 'from_marking'=>1] + $filters)
+                ->with('status', 'Decision saved.');
         }
 
-        return back()->with('status', 'Whole-task decision saved. This is not overall apprenticeship or KSB sign-off.');
+        return back()->with('status', 'Whole-task decision saved.');
     }
 
     public function deadline(Request $r, LearningTask $task): RedirectResponse

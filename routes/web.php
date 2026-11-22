@@ -448,6 +448,8 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/apprentices/{apprentice}/support-plans', [SupportController::class, 'savePlan'])->name('support.plan.create');
     Route::post('/apprentices/{apprentice}/support-plans/{plan}', [SupportController::class, 'savePlan'])->name('support.plan.save');
     Route::post('/support-plans/{plan}/approve', [SupportController::class, 'approvePlan'])->name('support.plan.approve');
+    Route::post('/support-plans/{plan}/objectives', [SupportController::class, 'supportObjective'])->name('support.objectives.store');
+    Route::post('/support-plans/{plan}/activities/{activity}/follow-up', [SupportController::class, 'completeActivityFollowup'])->whereUuid('activity')->name('support.activity.followup');
     Route::post('/support-plans/{plan}/activities', [SupportController::class, 'supportActivity'])->name('support.activity');
     Route::post('/support-plans/{plan}/files', [SupportController::class, 'uploadPlanEvidence'])->name('support.files.upload');
     Route::get('/support-plans/{plan}/files/{file}', [SupportController::class, 'downloadPlanEvidence'])->name('support.files.download');
@@ -466,6 +468,7 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/apprentices/{apprentice}/delivery-plan/approved.pdf', [DeliveryPlanController::class, 'pdf'])->name('delivery.pdf');
     Route::post('/apprentices/{apprentice}/delivery-plan/calendar', [DeliveryPlanController::class, 'calendar'])->name('delivery.calendar');
     Route::post('/apprentices/{apprentice}/delivery-plan/details', [DeliveryPlanController::class, 'details'])->name('delivery.details');
+    Route::post('/apprentices/{apprentice}/delivery-plan/curriculum', [DeliveryPlanController::class, 'curriculum'])->name('delivery.curriculum');
     Route::post('/apprentices/{apprentice}/delivery-plan/approve', [DeliveryPlanController::class, 'approve'])->name('delivery.approve');
     Route::post('/apprentices/{apprentice}/delivery-plan/withdraw', [DeliveryPlanController::class, 'withdraw'])->name('delivery.withdraw');
     Route::post('/apprentices/{apprentice}/delivery-plan/apply', [DeliveryPlanController::class, 'apply'])->name('delivery.apply');
@@ -495,6 +498,8 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/reviews/reminders', [\App\Http\Controllers\ReviewReminderController::class, 'record'])->name('reviews.reminders.record');
     Route::post('/reviews/reminders/{reminder}/seen', [\App\Http\Controllers\ReviewReminderController::class, 'seen'])->name('reviews.reminders.seen');
     Route::get('/reviews', [ProgressReviewController::class, 'index'])->name('reviews.index');
+    Route::get('/apprentices/{apprentice}/formal-ksb-assessments', [\App\Http\Controllers\FormalKsbAssessmentController::class, 'index'])->name('reviews.ksb.index');
+    Route::post('/apprentices/{apprentice}/formal-ksb-assessments', [\App\Http\Controllers\FormalKsbAssessmentController::class, 'store'])->name('reviews.ksb.store');
     Route::get('/apprentices/{apprentice}/reviews/new', [ProgressReviewController::class, 'form'])->name('reviews.create');
     Route::get('/apprentices/{apprentice}/reviews/{review}', [ProgressReviewController::class, 'form'])->name('reviews.edit');
     Route::post('/apprentices/{apprentice}/reviews/{review}/ready', [ProgressReviewController::class, 'ready'])->name('reviews.ready');
@@ -533,6 +538,15 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/apprentices/{apprentice}/retention-timeline', [\App\Http\Controllers\RecruitmentRetentionController::class,'timeline'])->name('retention.timeline');
     Route::post('/destination-milestones/{milestone}/owner', [\App\Http\Controllers\RecruitmentRetentionController::class,'assign'])->name('retention.milestone.assign');
     Route::post('/destination-milestones/{milestone}/checks', [\App\Http\Controllers\RecruitmentRetentionController::class,'check'])->name('retention.milestone.check');
+    Route::get('/reports', function (\Illuminate\Http\Request $request) {
+        $reports = \App\Support\ReportDirectory::links($request->user());
+        abort_unless($reports, 403);
+        return response()->view('reports.index', compact('reports'))->header('Cache-Control', 'private, no-store');
+    })->name('reports.index');
+    Route::get('/reports/support-and-retention', [SupportController::class, 'registerReport'])->name('support.report');
+    Route::post('/apprentices/{apprentice}/support/track-marker', [SupportController::class, 'trackMarker'])->name('support.track-marker');
+    Route::post('/concerns/{concern}/formal-review', [SupportController::class, 'formalMarkerReview'])->name('support.marker-review');
+    Route::post('/concerns/{concern}/complete-action', [SupportController::class, 'completeMarkerAction'])->name('support.complete-action');
     Route::get('/reports/achievers-and-leavers', [\App\Http\Controllers\AchieversAndLeaversController::class, 'index'])->name('achievers-leavers.index');
     Route::get('/reports/retention', [RetentionReportController::class, 'report'])->name('retention.report');
     Route::get('/apprentice-archive', [\App\Http\Controllers\ApprenticeCloseDownController::class, 'archive'])->name('apprentices.archive');

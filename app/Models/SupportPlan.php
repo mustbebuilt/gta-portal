@@ -21,6 +21,23 @@ class SupportPlan extends Model
         return $this->belongsTo(Apprentice::class);
     }
 
+    public function activeObjectives(): array
+    {
+        if ($this->status !== 'Active' || !$this->active_plan) {
+            return [];
+        }
+
+        return collect($this->history ?? [])->filter(fn ($event) =>
+            ($event['event'] ?? null) === 'support_objective_added'
+            && ($event['approval'] ?? null) === $this->objectiveApproval()
+        )->pluck('objective', 'objective.id')->all();
+    }
+
+    public function objectiveApproval(): string
+    {
+        return \App\Support\ReviewedImports::hash($this->active_plan ?? []);
+    }
+
     public function nextReview(): ?string
     {
         return (collect($this->reviews ?? [])->filter(fn ($r) => ($r['active_snapshot']['approved_at'] ?? null) === ($this->active_plan['approved_at'] ?? null))->last()['next'] ?? null) ?? ($this->active_plan['fields']['review'] ?? null);

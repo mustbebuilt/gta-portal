@@ -22,7 +22,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (\Illuminate\Support\Facades\DB::table('register_training_records')->exists()) {
+        if (Schema::hasTable('register_training_records') && \Illuminate\Support\Facades\DB::table('register_training_records')->exists()) {
             throw new \RuntimeException('Training records exist. Retain the table and roll back application code only; export and reconcile data before any separately authorised destructive removal.');
         }
         Schema::dropIfExists('register_training_records');

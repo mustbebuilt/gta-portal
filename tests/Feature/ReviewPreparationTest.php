@@ -9,7 +9,7 @@ class ReviewPreparationTest extends TestCase
 {
  use LazilyRefreshDatabase;
  private function fields():array {
-  return ['reviewDate'=>'2026-11-01','trainingFrom'=>'2026-10-01','mentor'=>'Fictional Mentor','tutor'=>'Fictional Tutor','employerRep'=>'Fictional Employer','method'=>'Face to face','attendance'=>'Present','judgement'=>'Behind plan','previousCheck'=>'Existing action plan checked','planChange'=>'No','summary'=>'Fictional discussion','learning'=>'Learning checked','progressDiscussion'=>'Progress checked','previousNotes'=>'N/A','planChangeNotes'=>'N/A','sharedSupport'=>'N/A','absence'=>'N/A','newNeeds'=>'No','trainingChecked'=>1,'targetsAgreed'=>1,'providerPrepared'=>1];
+  return ['reviewDate'=>'2026-11-01','trainingFrom'=>'2026-10-01','mentor'=>'Fictional Mentor','tutor'=>'Fictional Tutor','employerRep'=>'Fictional Employer','method'=>'Face to face','attendance'=>'Present','judgement'=>'Behind plan','previousCheck'=>'Existing action plan checked','planChange'=>'No','summary'=>'Fictional discussion','learning'=>'Learning checked','progressDiscussion'=>'Progress checked','previousNotes'=>'N/A','planChangeNotes'=>'N/A','sharedSupport'=>'N/A','absence'=>'N/A','newNeeds'=>'No','trainingChecked'=>1,'targetsAgreed'=>1,'providerPrepared'=>1, 'safetyAnswer'=>'no'];
  }
  private function fixture():array {
   $u=User::factory()->create(['role'=>'tutor']);$a=Apprentice::factory()->create(['tutor_id'=>$u->id]);$this->actingAs($u)->post('/apprentices/'.$a->id.'/reviews',['fields'=>['summary'=>'Fictional draft']])->assertSessionHasNoErrors();$r=ProgressReviewDraft::where('apprentice_id',$a->id)->firstOrFail();$r->fields=[];$r->save();return [$u,$a,$r];

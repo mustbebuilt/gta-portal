@@ -198,7 +198,7 @@ class IndividualDeliveryPlanTest extends TestCase
 
     private function completeReviewFields(): array
     {
-        return ['reviewDate'=>today()->toDateString(),'trainingFrom'=>today()->subDays(70)->toDateString(),'mentor'=>'Fictional Mentor','tutor'=>'Fictional Tutor','employerRep'=>'Fictional Employer','method'=>'Face to face','attendance'=>'Present','judgement'=>'Behind plan','previousCheck'=>'Existing action plan checked','planChange'=>'No','summary'=>'Fictional three-way discussion recorded','learning'=>'Actual training discussed','progressDiscussion'=>'Evidence and remaining gaps discussed','previousNotes'=>'N/A - no outstanding previous actions','planChangeNotes'=>'N/A - no amendment','sharedSupport'=>'N/A','absence'=>'N/A','newNeeds'=>'No','trainingChecked'=>1,'targetsAgreed'=>1,'providerPrepared'=>1];
+        return ['reviewDate'=>today()->toDateString(),'trainingFrom'=>today()->subDays(70)->toDateString(),'mentor'=>'Fictional Mentor','tutor'=>'Fictional Tutor','employerRep'=>'Fictional Employer','method'=>'Face to face','attendance'=>'Present','judgement'=>'Behind plan','previousCheck'=>'Existing action plan checked','planChange'=>'No','summary'=>'Fictional three-way discussion recorded','learning'=>'Actual training discussed','progressDiscussion'=>'Evidence and remaining gaps discussed','previousNotes'=>'N/A - no outstanding previous actions','planChangeNotes'=>'N/A - no amendment','sharedSupport'=>'N/A','absence'=>'N/A','newNeeds'=>'No','trainingChecked'=>1,'targetsAgreed'=>1,'providerPrepared'=>1, 'safetyAnswer'=>'no'];
     }
 
     public function test_reviews_link_fixed_approved_plan_then_freeze_and_reopen_without_completing_review(): void

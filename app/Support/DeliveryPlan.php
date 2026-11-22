@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Apprentice;
 use App\Models\IndividualDeliveryPlan;
 use App\Models\LearningTask;
+use App\Models\TrainingPlanWorkspace;
 use Carbon\CarbonImmutable;
 
 class DeliveryPlan
@@ -16,6 +17,11 @@ class DeliveryPlan
         return ['programme_id' => $a->programme_id, 'catalogue' => TaskCatalogue::keyFor($a), 'code' => $p?->standard_code, 'version' => $p?->version, 'active' => $p?->active, 'start' => $a->start_date?->toDateString(), 'employer_id' => $a->employer_id, 'employer' => $a->employerLabel()];
     }
 
+    public static function identityMatches(Apprentice $apprentice, ?array $saved): bool
+    {
+        return $saved !== null && hash_equals(ReviewedImports::hash(self::identity($apprentice)), ReviewedImports::hash($saved));
+    }
+
     public static function catalogueHash(string $key): string
     {
         return hash('sha256', file_get_contents(resource_path('data/'.$key.'-tasks.json')).file_get_contents(resource_path('data/'.$key.'-catalogue.json')));
@@ -24,18 +30,49 @@ class DeliveryPlan
     public static function approved(Apprentice $a): ?array
     {
         $row = IndividualDeliveryPlan::where('apprentice_id', $a->id)->first();
-        if (! $row?->active || ! $row->approved || ($row->approved['identity'] ?? null) !== self::identity($a)) {
+        if (! $row?->active || ! $row->approved || !self::identityMatches($a, $row->approved['identity'] ?? null)) {
             return null;
         }
 
-        if ($row->approved['rpl_binding'] ?? null) {
-            $w = \App\Models\TrainingPlanWorkspace::where('apprentice_id', $a->id)->first();
-            $p = TrainingPlanSource::position($w);
-            if (! $p['approved'] || $p['binding'] !== $row->approved['rpl_binding']) { return null; }
+        if ($binding = $row->approved['rpl_binding'] ?? null) {
+            $position = self::rplPosition($a, $binding);
+            if (!$position || !self::targetMatches($position, $row->approved['details']['target_hours'] ?? null)) {
+                return null;
+            }
         }
 
         // A later blank-task release does not rewrite an already approved individual plan.
         return $row->approved;
+    }
+
+    public static function rplPosition(Apprentice $apprentice, string $binding, bool $lock = false): ?array
+    {
+        $query = TrainingPlanWorkspace::where('apprentice_id', $apprentice->id);
+        $workspace = ($lock ? $query->lockForUpdate() : $query)->first();
+        if (!$workspace) {
+            return null;
+        }
+        // Guided setup and the earlier assessed Autocare workflow issue different bindings.
+        if (class_exists(Rpl68::class) && $workspace->getRawOriginal('setup_rpl') !== null) {
+            $setup = $workspace->setup_rpl;
+            if (is_array($setup) && hash_equals($binding, Rpl68::hash($setup))) {
+                $template = \App\Models\ProgrammeSetupTemplate68::find($setup['template_id'] ?? 0);
+                if (!$template || $template->programme_id !== $apprentice->programme_id) {
+                    return null;
+                }
+                $position = Rpl68::position($workspace);
+                return $position['approved'] ? $position : null;
+            }
+        }
+
+        $position = TrainingPlanSource::position($workspace);
+        return $position['approved'] && hash_equals($binding, $position['binding']) ? $position : null;
+    }
+
+    public static function targetMatches(array $position, mixed $target): bool
+    {
+        return is_numeric($target) && is_numeric($position['remaining_hours'] ?? null)
+            && abs((float) $target - (float) $position['remaining_hours']) <= 0.005001;
     }
 
     public static function blocks(Apprentice $a): array

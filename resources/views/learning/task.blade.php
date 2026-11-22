@@ -3,12 +3,23 @@
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }} · Block {{ $task->block }}</p><h1>{{ $task->title }}</h1><p>{{ $task->theme }}</p><span class="status {{ $task->status==='Approved'?'achieved':($task->markingOverdue()?'red':'neutral') }}">{{ $task->markingOverdue()?'Overdue marking':$task->status }}</span></div><div class="toolbar">@if($task->template['kind']!=='source-pending')<a class="button" href="{{ route('tasks.recorded.pdf',$task) }}">Download recorded work PDF</a>@endif<button type="button" data-print>Print task / Save PDF</button><a class="button" href="{{ route('learning.index',$apprentice) }}">Back to training tasks</a>@if(str_ends_with($task->template['sourcePdfFilename']??$task->template['filename'],'.pdf'))<a class="button" href="{{ route('tasks.pdf',$task) }}">Download original PDF</a>@endif</div></header>
 @include('learning.errors')
+@if($queue !== null)
+<p><a class="button" href="{{ route('marking.index', $queue) }}">Back to Work to mark</a></p>
+@endif
 @include('learning.next-step')
 @if(!$release['open'])<p class="notice">{{ $release['label'] }}. Saved work remains available to read. An administrator can record an exception from the training-task list.</p>@endif
 @if($planning->isNotEmpty())<section class="panel"><h2>Approved Block 9 planning guidance</h2><p class="muted">Dated GTA amendment, 6 Nov 2026. Use existing answer fields; this adds no tasks, hours or achievement. The saved task schema and original PDF remain unchanged.</p>@foreach($planning as $activity)<p><strong>{{ $activity['code'] }}:</strong> {{ $activity['instruction'] }}</p>@endforeach</section>@endif
-<details class="panel" @if(isset($task->template['catalogueId']) && $task->template['catalogueId']!=='autocare')open @endif><summary>Task instructions and source</summary><p class="recorded-answer">{{ $task->template['instructions'] }}</p><p class="muted">Source: {{ $task->template['filename'] }} · Version {{ $task->template['version'] }}. The saved task keeps its source version.</p></details>
+<details class="panel" @if($presentation || (isset($task->template['catalogueId']) && $task->template['catalogueId']!=='autocare'))open @endif><summary>Task instructions and source</summary><p class="recorded-answer">{{ $task->template['instructions'] }}</p><p class="muted">Source: {{ $task->template['filename'] }} · Version {{ $task->template['version'] }}. The saved task keeps its source version.</p></details>
 @if($presentation)
-<details class="panel"><summary>Source KSB links</summary>@if(!empty($presentation['ksbSource']))<p class="recorded-answer">{{ $presentation['ksbSource'] }}</p><p class="muted">KSB links describe task scope only; approving this task does not automatically sign off formal KSB competence.</p>@else<p class="muted">No specific KSB links are supplied in this task source.</p>@endif</details>
+<details class="panel">
+    <summary>Linked knowledge, skills and behaviours (KSBs)</summary>
+    @if(filled($presentation['ksbSource']))
+        <p class="recorded-answer">{{ $presentation['ksbSource'] }}</p>
+    @else
+        <p>No specific KSB links are listed in the task source.</p>
+    @endif
+    <p class="muted">Task links from the source. Formal KSB sign-off is recorded separately.</p>
+</details>
 @endif
 @foreach($task->template['supplementaryPages']??[] as $sourcePage)<details class="panel"><summary>Scenario / source material · page {{ $sourcePage['page'] }}</summary><p class="recorded-answer">{{ $sourcePage['text'] }}</p></details>@endforeach
 @if($tutor)<details class="panel"><summary>Task deadline</summary><form method="post" action="{{ route('tasks.deadline',$task) }}">@csrf<input type="hidden" name="version" value="{{ $task->version }}"><div class="search"><div><label for="due-date">Agreed deadline</label><input id="due-date" type="date" name="due_date" value="{{ $task->due_date?->format('Y-m-d') }}"></div><button>Save deadline</button></div><label for="deadline-reason">Reason for changing the date (optional)</label><textarea id="deadline-reason" name="reason" rows="2" maxlength="2000">{{ old('reason') }}</textarea></form><p>Saving the same date makes no change. Clearing the date is recorded as a change. This does not amend an approved delivery plan.</p></details>@endif
@@ -17,41 +28,63 @@
 @forelse(array_reverse($task->deadline_history??[]) as $change)<article class="work-row"><div><p><strong>{{ $change['before']??'Not set' }} → {{ $change['after']??'Not set' }}</strong> · {{ $change['origin']==='approved_plan'?'Applied from approved delivery plan':'Individual task change' }}</p><p>{{ $change['at'] }} · {{ $change['by_name']??('Account '.$change['by']) }}</p>@if($change['reason'])<p class="recorded-answer">{{ $change['reason'] }}</p>@endif @if($change['origin']==='approved_plan')<p>Recorded plan {{ $change['source']['plan_id'] }} · approval reference <code class="recorded-answer">{{ $change['source']['approved_hash'] }}</code></p>@endif</div></article>@empty<p>No deadline changes have been recorded since Pack17. This does not prove the date was never changed earlier.</p>@endforelse</details>
 @endif
 @if($task->template['kind']==='source-pending')<p class="notice">Source required. This task cannot receive answers, evidence, a submission or an approval until its own programme source is loaded.</p>@endif
-<section class="panel"><h2>Apprentice work</h2>
-@if($task->template['kind']==='knowledge')<p>This assessment is completed on paper. Your tutor records its title, score, outcome and feedback below.</p>
-@elseif($learner && $task->editable())
-<form method="post" enctype="multipart/form-data" action="{{ route('tasks.save',$task) }}">@csrf<input type="hidden" name="version" value="{{ $task->version }}">
-@if($presentation && !empty($presentation['checklist']))
-<fieldset><legend>Practical activity checklist</legend>
-<input type="hidden" name="checklist75_present" value="1">
-<p class="muted">Tick each activity carried out. Record findings and measured values in the fields below.</p>
-@php($savedSteps = old('checklist75_present') ? (array) old('checklist75', []) : (array) ($task->answers['_checklist75']['steps'] ?? []))
-@foreach($presentation['checklist'] as $step)
-<label class="check"><input type="checkbox" name="checklist75[]" value="{{ $step['id'] }}" @checked(in_array($step['id'], $savedSteps, true))>{{ $step['label'] }}</label>
-@endforeach
-</fieldset>
-@endif
-@include('learning.fields',['fields'=>collect($task->template['fields'])->where('role','apprentice'),'values'=>$task->answers??[],'readonly'=>false])
-<details class="panel"><summary>Add supporting evidence (optional)</summary><label for="task-combined-file">File (PDF, image or DOCX, up to 15 MB)</label><input id="task-combined-file" data-evidence-file name="file" type="file" accept=".pdf,.jpg,.jpeg,.png,.docx"><label for="task-combined-kind">Evidence type</label><select id="task-combined-kind" data-evidence-kind name="kind"><option value="supporting-evidence">Supporting evidence</option><option value="inspection-checklist">Inspection checklist</option><option value="workplace-photo">Workplace photo</option></select><label for="task-photo-description">Photo explanation (required for workplace photos)</label><textarea id="task-photo-description" data-photo-description name="description" rows="3" maxlength="5000">{{ old('description') }}</textarea><p class="muted">For a workplace photo, choose a JPEG or PNG and explain what it shows. Your phone may offer its camera or file picker. Avoid confidential customer information.</p><p class="muted">Current answers and the selected file save together. Choose Save draft or Submit to tutor below; submission still needs your own-work confirmation.</p><button name="intent" value="upload">Save answers and add evidence</button></details>
-<label class="check"><input type="checkbox" name="own_work" value="1" @checked(old('own_work'))>I confirm this is my own work.</label><div class="form-actions"><button name="intent" value="draft">Save draft</button><button name="intent" value="submit" class="primary">Submit to tutor</button></div></form>
-@else
-@if($presentation && !empty($presentation['checklist']))
-@php($savedSteps = (array) ($task->answers['_checklist75']['steps'] ?? []))
-<h3>Practical activity checklist</h3>
-<ul>@foreach($presentation['checklist'] as $step)<li>{{ in_array($step['id'], $savedSteps, true) ? '☑' : '☐' }} {{ $step['label'] }}</li>@endforeach</ul>
-@endif
-@include('learning.fields',['fields'=>collect($task->template['fields'])->where('role','apprentice'),'values'=>$task->answers??[],'readonly'=>true])
-@endif
+@php($fields = \App\Support\TaskPresentation::apprenticeFields($task, $presentation))
+@php($isKnowledge = $task->template['kind'] === 'knowledge')
+@php($isEditing = !$isKnowledge && $learner && $task->editable())
+<section class="panel">
+    <h2>{{ $task->status === 'Awaiting marking' ? 'Submitted apprentice work' : 'Apprentice work' }}</h2>
+    @if($isKnowledge)
+        <p>This assessment is completed on paper. The tutor records the result and feedback below.</p>
+    @elseif($isEditing)
+        <form method="post" enctype="multipart/form-data" action="{{ route('tasks.save', $task) }}">
+            @csrf
+            <input type="hidden" name="version" value="{{ $task->version }}">
+            @include('learning.activity-checklist', ['answers'=>$currentAnswers, 'editing'=>true])
+            @include('learning.fields', ['fields'=>$fields,'values'=>$currentAnswers,'readonly'=>false])
+            <details class="panel" @if($errors->has('file') || $errors->has('files') || $errors->has('files.*') || $errors->has('description') || $errors->has('kind')) open @endif>
+                <summary>Add evidence files</summary>
+                <label for="task-combined-file">Up to five files, 15 MB each (PDF, JPEG, PNG or DOCX)</label>
+                <input id="task-combined-file" data-evidence-file name="files[]" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.docx">
+                <label for="task-combined-kind">Evidence type for these files</label>
+                <select id="task-combined-kind" data-evidence-kind name="kind">
+                    <option value="supporting-evidence" @selected(old('kind') === 'supporting-evidence')>Supporting evidence</option>
+                    <option value="inspection-checklist" @selected(old('kind') === 'inspection-checklist')>Inspection checklist</option>
+                    <option value="workplace-photo" @selected(old('kind') === 'workplace-photo')>Workplace photo</option>
+                </select>
+                <label for="task-photo-description">Evidence note (required for workplace photos)</label>
+                <textarea id="task-photo-description" data-photo-description name="description" rows="3" maxlength="5000">{{ old('description') }}</textarea>
+                <button name="intent" value="upload">Save answers and add evidence</button>
+            </details>
+            <label class="check"><input type="checkbox" name="own_work" value="1" @checked(old('own_work'))> I confirm this is my own work.</label>
+            <div class="form-actions">
+                <button name="intent" value="draft">Save draft</button>
+                <button name="intent" value="submit" class="primary">Submit to tutor</button>
+            </div>
+        </form>
+    @else
+        @include('learning.activity-checklist', ['answers'=>$currentAnswers, 'editing'=>false])
+        @include('learning.fields', ['fields'=>$fields,'values'=>$currentAnswers,'readonly'=>true])
+    @endif
+    @if(!$isKnowledge || $currentEvidence->isNotEmpty())
+        <h3>{{ $task->status === 'Awaiting marking' ? 'Evidence in this submission' : 'Saved evidence' }}</h3>
+        <div class="work-list">
+            @forelse($currentEvidence as $file)
+                <div class="work-row">
+                    <div><strong>{{ $file->name }}</strong>
+                        <p class="muted">{{ ucfirst(str_replace('-', ' ', $file->kind)) }} · {{ number_format($file->bytes/1024) }} KB</p>
+                        @if($file->description)<p class="recorded-answer">{{ $file->description }}</p>@endif
+                    </div>
+                    <a class="button" href="{{ route('tasks.evidence.download', [$task, $file]) }}">Download evidence<span class="sr-only"> {{ $file->name }}</span></a>
+                </div>
+            @empty
+                <p>No evidence uploaded.</p>
+            @endforelse
+        </div>
+    @endif
 </section>
-<section class="panel"><h2>Supporting evidence</h2><p>Evidence does not automatically approve this task.</p><div class="work-list">@forelse($task->evidence as $file)<div class="work-row"><div><strong>{{ $file->name }}</strong><p class="muted">{{ $file->kind==='workplace-photo'?'Workplace photo':($file->kind==='inspection-checklist'?'Inspection checklist':'Supporting evidence') }} · {{ number_format($file->bytes/1024) }} KB</p>@if($file->description)<p class="recorded-answer">{{ $file->description }}</p>@endif</div><a class="button" href="{{ route('tasks.evidence.download',[$task,$file]) }}">Download evidence</a></div>@empty<p>No evidence uploaded.</p>@endforelse</div>
-</section>
-@if($tutor && ($task->status==='Awaiting marking'||($task->template['kind']==='knowledge' && $task->editable())))
-<section class="panel"><h2>GTA tutor decision</h2><p>The decision applies to the whole task, regardless of the number of evidence files.</p><form method="post" action="{{ route('tasks.decide',$task) }}">@csrf<input type="hidden" name="version" value="{{ $task->version }}">
-@if($task->template['kind']==='knowledge')<div class="form-grid"><div class="full"><label for="test-title">Paper test title</label><textarea id="test-title" name="test_title" rows="3" required>{{ old('test_title',$task->template['testTitleDefault']) }}</textarea></div><div><label for="marks-achieved">Marks achieved</label><input id="marks-achieved" name="marks_achieved" type="number" min="0" step="any" required></div><div><label for="marks-available">Marks available</label><input id="marks-available" name="marks_available" type="number" min="0.01" step="any" required></div></div>
-@else
-@include('learning.fields',['fields'=>collect($task->template['fields'])->whereIn('role',['trainer','observer']),'values'=>[],'readonly'=>false])
+@if($tutor && ($task->status === 'Awaiting marking' || ($isKnowledge && $task->editable())))
+    @include('learning.task-decision')
 @endif
-<div class="form-grid"><div><label for="decision">Decision</label><select id="decision" name="decision" required><option value="">Choose</option><option value="Approved">Approve task</option><option value="Referred">Return for changes</option></select></div><div><label for="decision-date">Decision / assessment date</label><input id="decision-date" name="decision_date" type="date" required max="{{ now()->toDateString() }}"></div><div class="full"><label for="feedback">Feedback / corrections required</label><textarea id="feedback" name="feedback" rows="4">{{ old('feedback') }}</textarea></div></div><label class="check"><input name="confirmed" value="1" type="checkbox" required>I confirm this whole-task decision as {{ auth()->user()->name }}.</label><div class="form-actions"><button class="primary" name="after_decide" value="stay">Save and stay</button><button name="after_decide" value="next">Save and open next</button></div></form></section>@endif
-<section class="panel"><h2>Submission and decision history</h2>@forelse(array_reverse($task->submissions??[]) as $submission)<details><summary>Version {{ $submission['version'] }} · {{ $submission['decision']['status']??'Awaiting marking' }}</summary><p>Submitted: {{ $submission['submitted_at']??'Paper assessment record' }}</p>@if($submission['decision'])@if($task->template['kind']==='knowledge' && ($submission['decision']['source_fields']['marks_available']??0)>0)<p><strong>Paper test score: {{ round(100*$submission['decision']['source_fields']['marks_achieved']/$submission['decision']['source_fields']['marks_available'],1) }}%</strong>. The tutor selected the outcome; no pass threshold is inferred.</p>@endif<p>{{ $submission['decision']['tutor_name'] }} · {{ $submission['decision']['date'] }}</p><p class="recorded-answer">{{ $submission['decision']['feedback']??'No feedback recorded' }}</p><dl class="details-grid">@foreach($submission['decision']['source_fields'] as $key=>$value)<div><dt>{{ collect($task->template['fields'])->firstWhere('name',$key)['label']??str_replace('_',' ',$key) }}</dt><dd>{{ (collect($task->template['fields'])->firstWhere('name',$key)['type']??null)==='checkbox' && in_array($value,['on','1',1,true],true)?'Confirmed':($value??'Not recorded') }}</dd></div>@endforeach</dl>@endif<details><summary>Recorded answers</summary>@include('learning.fields',['fields'=>collect($task->template['fields'])->where('role','apprentice'),'values'=>$submission['answers'],'readonly'=>true])</details></details>@empty<p>No submission or decision recorded.</p>@endforelse</section>
+@include('learning.task-history')
 <script src="{{ asset('assets/routine-workflows.js') }}" defer></script>
 @endsection

@@ -3,8 +3,20 @@
 @section('content')
 @if(\App\Support\LeaverDestinations::allowed(auth()->user()))<p><a href="{{ route('destinations.index') }}">Leaver follow-up and destination checks</a></p>@endif
 <header class="page-heading"><div><h1>Retention and early-leaver report</h1><p>Compare recorded outcomes and context. Identify themes to investigate.</p></div><button type="button" data-print>Print / Save PDF</button></header>
+<section class="panel">
+    <h2>Cohort outcomes</h2>
+    <p>First day in learning · {{ request('from') ?: 'Any start date' }} to {{ request('to') ?: 'Latest recorded starts' }}. {{ $cohortCount }} apprentices in scope.</p>
+    <div class="priority-summary">
+        @foreach(['achievers' => 'Achievers', 'early-leavers' => 'Early leavers', 'withdrawals' => 'Withdrawals', 'active' => 'Confirmed active', 'checks' => 'Records to check'] as $key => $label)
+            <a class="button" href="{{ route('retention.report', array_replace(request()->except('page','export'), ['outcome' => $key])) }}#retention-source-records">
+                <strong>{{ $headlines[$key] }}</strong> {{ $label }}
+            </a>
+        @endforeach
+    </div>
+    <p>Early leavers are included in withdrawals. Use <a href="{{ route('achievers-leavers.index') }}">Achievers and Early Leavers</a> to report by outcome date.</p>
+</section>
 @include('learning.errors')
-<p><a href="{{ route('achievers-leavers.index') }}">Achievers and Early Leavers</a> · <a href="{{ route('retention.admin') }}">Data-quality actions</a> · <a href="{{ route('retention.admin',['show'=>'followup']) }}">3, 6 and 12-month follow-up</a> · <a href="{{ route('retention.report',array_merge(request()->except('page'),['export'=>'csv'])) }}">Export aggregate comparison CSV</a></p>
+<p><a href="{{ route('achievers-leavers.index') }}">Achievers and Early Leavers</a> · <a href="{{ route('retention.admin') }}">Data-quality actions</a> · <a href="{{ route('retention.admin',['show'=>'followup']) }}">3, 6 and 12-month follow-up</a> · <a href="{{ route('retention.report',array_merge(request()->except('page','outcome'),['export'=>'csv'])) }}">Export aggregate comparison CSV</a></p>
 <p class="test-notice">Internal descriptive analysis, not official QAR, a risk prediction or evidence that a factor caused someone to leave. Completion is separate from achievement. Unknown data stays visible.</p>
 <form class="panel search" method="get"><div><label for="cohort-from">First-learning-day cohort from</label><input id="cohort-from" name="from" type="date" value="{{ request('from') }}"></div><div><label for="cohort-to">Cohort to</label><input id="cohort-to" name="to" type="date" value="{{ request('to') }}"></div><div><label for="cohort-factor">Compare by</label><select id="cohort-factor" name="factor">@foreach(['programme'=>'Apprenticeship','entry_employer'=>'Employer at entry','linked_employer'=>'Employer linked to the profile','age'=>'Age band at start','size'=>'Employer headcount band','maths'=>'Functional Skills Maths required at entry','english'=>'Functional Skills English required at entry','additional'=>'Additional needs/support context','ehcp'=>'EHC plan context','reason'=>'Recorded leaving reason'] as $key=>$label)<option value="{{ $key }}" @selected($factor===$key)>{{ $label }}</option>@endforeach
 @foreach($entryFactors as $key)<option value="{{ $key }}" @selected($factor===$key)>{{ ucwords(str_replace('_',' ',$key)) }} at entry</option>@endforeach</select></div>
@@ -95,7 +107,11 @@
 @foreach($groups as $label=>$g)<h3>{{ $label }}</h3><p>Recorded attendance: mean {{ $g['attendance_mean']??'Unknown' }}%, {{ $g['attendance_known'] }} / {{ $g['total'] }} apprentices with a calculable register rate (unweighted mean). Current task approvals: {{ $g['tasks_approved'] }} / {{ $g['tasks_assigned'] }} tasks; {{ $g['task_records'] }} / {{ $g['total'] }} apprentices have assigned tasks. Delivered support recorded for {{ $g['support_delivered_people'] }} / {{ $g['total'] }} apprentices; mean recorded support days {{ $g['support_days_mean']??'Unknown' }} across {{ $g['support_days_known'] }} / {{ $g['total'] }} with dated exposure.</p><p>Withdrawal reason and concern combinations: @foreach($g['reason_concerns'] as $reason=>$count){{ $reason }}: {{ $count }} / {{ $g['withdrawn'] }} withdrawn; @endforeach</p><p>Destination recorded for the actual exit date: @foreach($g['exit_destinations'] as $destination=>$count){{ $destination }}: {{ $count }} / {{ $g['total'] }}; @endforeach</p><p>Recorded concern combinations (not causal attribution): @foreach($g['concern_combinations'] as $codes=>$count){{ $codes }}: {{ $count }} / {{ $g['total'] }}; @endforeach</p>
 @foreach($milestoneGroups[$label] as $month=>$m)<p>{{ $month }} months: {{ $m['eligible'] }} scheduled; {{ $m['due'] }} due; {{ $m['checked'] }} have attempts; destination known {{ $m['known'] }} / {{ $m['due'] }} ({{ \App\Support\RetentionAnalysis::rate($m['known'],$m['due'])??'N/A' }}%); missing/unknown {{ $m['unknown'] }}. Uninterrupted employment/training confirmed from exit: {{ $m['uninterrupted_from_exit'] }} / {{ $m['due'] }} ({{ $m['verified_uninterrupted'] }} verified; remainder reported).</p>@endforeach
 @endforeach</section>
-<section class="panel" id="retention-source-records"><h2>Source records and gaps</h2>@forelse($rows as $row)<article class="work-row"><div><h3>{{ $row['apprentice']->first_name }} {{ $row['apprentice']->last_name }}</h3><p>{{ $byEmployer ? $row['sourced_status'] : $row['status'] }} · Achievement {{ $byEmployer ? $row['sourced_achievement'] : $row['achievement'] }}</p>
+<section class="panel" id="retention-source-records"><h2>Source records and gaps</h2>
+@if($selectedOutcome)
+<p>{{ ucfirst(str_replace('-', ' ', $selectedOutcome)) }} · {{ $rows->total() }} records · <a href="{{ route('retention.report', request()->except('outcome','page','export')) }}#retention-source-records">Show all records</a></p>
+@endif
+@forelse($rows as $row)<article class="work-row"><div><h3>{{ $row['apprentice']->first_name }} {{ $row['apprentice']->last_name }}</h3><p>{{ $byEmployer ? $row['sourced_status'] : $row['status'] }} · Achievement {{ $byEmployer ? $row['sourced_achievement'] : $row['achievement'] }}</p>
 <p>Employer at entry · {{ $row['entry_employer'] ?? 'Not recorded' }}<br>
 Employer linked to the profile · {{ $row['linked_employer'] ?? 'Not recorded' }}</p>
 <p>Functional Skills required at entry · Maths {{ $row['maths_requirement'] }} · English {{ $row['english_requirement'] }}</p>

@@ -28,6 +28,16 @@ class ReviewPreparation
         }
         $items[]=['key'=>'currentPlan','label'=>'Saved draft linked to the current approved delivery plan','section'=>'review-3',
             'checked'=>$plan!==null&&isset($plan['hash'])&&($snapshot['delivery_plan']['hash']??null)===$plan['hash']];
+        if ($snapshot['requires_safety_answer'] ?? false) {
+            $safety = match ($fields['safetyAnswer'] ?? null) { 'yes'=>true, 'no'=>false, default=>null };
+            try {
+                ApprenticeReviewData::safety($safety, $fields['safetyFollowup'] ?? null);
+                $safetyChecked = true;
+            } catch (\InvalidArgumentException) {
+                $safetyChecked = false;
+            }
+            $items[]=['key'=>'safety', 'label'=>'Accidents or near-misses answer and follow-up if needed', 'section'=>'review-4', 'checked'=>$safetyChecked];
+        }
         $pending=array_values(array_filter($items,fn($item)=>!$item['checked']));
         return ['items'=>$items,'pending'=>$pending,'ready'=>$pending===[]];
     }

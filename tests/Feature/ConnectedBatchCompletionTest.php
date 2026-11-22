@@ -122,7 +122,7 @@ class ConnectedBatchCompletionTest extends TestCase
         $task = LearningTask::factory()->create(['apprentice_id' => $a->id, 'block' => 2, 'reference' => 'b2-t4', 'template' => TaskCatalogue::template('b2-t4')]);
         $task->status = 'Awaiting marking';
         $task->submitted_at = now()->subDay();
-        $task->submissions = [['version' => 1, 'submitted_at' => now()->subDay()->toIso8601String(), 'answers' => [], 'decision' => null]];
+        $task->submissions = [['version' => 1, 'submitted_at' => now()->subDay()->toIso8601String(), 'answers' => [], 'template_hash' => $task->template['sha256'], 'decision' => null]];
         $task->save();
         $this->actingAs($t)->post('/tasks/'.$task->id.'/decision', ['version' => 1, 'decision' => 'Approved', 'decision_date' => today()->toDateString(), 'confirmed' => 1])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame('Approved', $task->fresh()->status);

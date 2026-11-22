@@ -106,11 +106,16 @@ class ProgressReviewController extends Controller
         foreach (['trainingChecked', 'shareSupport', 'targetsAgreed', 'providerPrepared'] as $key) {
             $rules['fields.'.$key] = ['sometimes', 'boolean'];
         }
+        $rules['fields.safetyAnswer'] = ['nullable', Rule::in(['yes','no'])];
+        $rules['fields.safetyFollowup'] = ['nullable', 'string', 'max:250'];
         $data = $r->validate($rules);
         $keys = array_map(fn ($key) => substr($key, 7), array_filter(array_keys($rules), fn ($key) => str_starts_with($key, 'fields.')));
         $fields = collect($data['fields'])->only($keys)->all();
         if (filled($fields['trainingFrom'] ?? null) && filled($fields['reviewDate'] ?? null) && $fields['trainingFrom'] > $fields['reviewDate']) {
             throw ValidationException::withMessages(['fields.trainingFrom' => 'The training period cannot start after the actual meeting date.']);
+        }
+        if (($fields['safetyAnswer'] ?? null) !== 'yes') {
+            unset($fields['safetyFollowup']);
         }
         $fields['nextReview'] = filled($fields['reviewDate'] ?? null) ? Carbon::parse($fields['reviewDate'])->addDays(70)->toDateString() : null;
         $saved = DB::transaction(function () use ($r, $apprentice, $review, $fields) {

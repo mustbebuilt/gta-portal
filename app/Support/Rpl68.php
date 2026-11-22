@@ -7,6 +7,15 @@ class Rpl68 {
  public static function fail(string $message):never {throw ValidationException::withMessages(['setup'=>$message]);}
  public static function canonicalize(mixed $v):mixed {if(!is_array($v)){return is_float($v)&&(float)(int)$v===$v?(int)$v:$v;}if(!array_is_list($v)){ksort($v,SORT_STRING);}return array_map([self::class,'canonicalize'],$v);}
  public static function hash(array $v):string {return hash('sha256',json_encode(self::canonicalize($v),JSON_THROW_ON_ERROR));}
+ public static function templateHash(array $template): string
+ {
+  return ReviewedImports::hash($template);
+ }
+ public static function templateMatches(ProgrammeSetupTemplate68 $template): bool
+ {
+  return hash_equals($template->source_hash, self::templateHash($template->template))
+   || hash_equals($template->source_hash, self::hash($template->template));
+ }
  public static function validateTemplate(array $t):void {
   if(!is_numeric($t['full_hours']??null)||$t['full_hours']<=0||$t['full_hours']>10000||!filled($t['source_ref']??null)||!filled($t['ksb_ref']??null)||!filled($t['qualifications_ref']??null)||!filled($t['release_ref']??null)||!filled($t['standard_code']??null)||!filled($t['standard_version']??null))self::fail('A controlled standard/version, source references and full eligible OTJ hours are required.');
   $codes=array_column($t['ksbs']??[],'code');
@@ -36,7 +45,7 @@ class Rpl68 {
   return ['original_hours'=>(float)$t['full_hours'],'removed_hours'=>round($removed,4),'revised_hours'=>$revised,'revised_hours_unrounded'=>(float)$t['full_hours']-$removed,'unit_hours_unrounded'=>$unit,'ksb_count'=>$ksbs,'adjusted_count'=>count(array_filter($adjustments,fn($v)=>$v>0)),'remaining_count'=>$ksbs-count(array_filter($adjustments,fn($v)=>$v>0)),'blocks'=>$blocks,'unresolved'=>$unresolved];
  }
  public static function position(TrainingPlanWorkspace $w):array {
-  $v=$w->setup_rpl;$template=ProgrammeSetupTemplate68::find($v['template_id']??0);$sourceOk=$template&&$template->active&&$template->source_hash===($v['template_hash']??null)&&self::hash($template->template)===$template->source_hash;
+  $v=$w->setup_rpl;$template=ProgrammeSetupTemplate68::find($v['template_id']??0);$sourceOk=$template&&$template->active&&$template->source_hash===($v['template_hash']??null)&&self::templateMatches($template);
   $binding=self::hash($v??[]);$complete=$sourceOk&&($v['remaining_confirmed']??false)&&in_array($v['mode']??null,['none','applies'],true);$calc=$v['calculation']??[];
   return ['recorded'=>$complete?($calc['ksb_count']??0):0,'total'=>$calc['ksb_count']??0,'complete'=>(bool)$complete,'source_ok'=>(bool)$sourceOk,'issues'=>$sourceOk?[]:['Controlled setup template changed; reconcile the existing RPL record.'],'binding'=>$binding,'review'=>null,'current'=>(bool)$complete,'approved'=>(bool)$complete,'recognised_hours'=>$complete?$calc['removed_hours']:null,'remaining_hours'=>$complete?$calc['revised_hours']:null,'allocation_reduction'=>null,'remaining_allocation'=>null];
  }

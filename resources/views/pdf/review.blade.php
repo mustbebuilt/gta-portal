@@ -1,6 +1,9 @@
 @extends('pdf.layout')
 @section('title',$review->state==='Ready for signatures'?'Frozen review for external signatures':'Progress review draft')
 @section('content')
+@if(isset($review->source_snapshot['review_summary']))
+@include('pdf.apprentice-progress-summary')
+@else
 <p><strong>Revision status: {{ $review->state??'Draft' }}</strong>. Awaiting participant signatures; not a completed review.</p>
 @if($review->source_snapshot['delivery_plan']??null)<h2>Linked provider delivery plan</h2><p>{{ $review->source_snapshot['delivery_plan']['source_ref'] }} · Occupational target {{ $review->source_snapshot['delivery_plan']['target_hours'] }} hours.</p><p>Approved {{ $review->source_snapshot['delivery_plan']['approved_at'] }} · Snapshot {{ $review->source_snapshot['delivery_plan']['hash'] }}</p>@foreach($review->source_snapshot['delivery_plan']['next_period_blocks'] as $b)<p>Block {{ $b['number'] }} · {{ $b['start'] }} to {{ $b['end'] }} · {{ $b['hours'] }} planned hours</p>@endforeach @endif
 <h1>{{ $review->state==='Ready for signatures'?'Frozen review for external signatures':'Progress review draft' }}</h1><p>{{ $apprentice->reference }} · {{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><div class="notice">{{ $review->state==='Ready for signatures'?'UNSIGNED FROZEN SOURCE':'DRAFT' }} · Review {{ $review->id }} · Version {{ $review->version }} · This generated copy contains no participant signatures. This download does not reset the review cycle or confirm whole-plan compliance. Employer/apprentice access to this private draft is not enabled.</div>
@@ -19,5 +22,6 @@
 <div class="record"><p><strong>{{ $role }}</strong> · {{ $name }}</p><p>Signature <span style="display:inline-block;width:220px;height:24px;border-bottom:1px solid #576879"></span> Date <span style="display:inline-block;width:100px;height:24px;border-bottom:1px solid #576879"></span></p></div>
 @endforeach
 <p>The portal records a completed meeting only after the actual signed PDF is uploaded and independently checked. This generated form does not confirm signing, sharing or whole-programme compliance.</p></div>
+@endif
 @endif
 @endsection

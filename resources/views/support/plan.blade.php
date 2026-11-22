@@ -25,5 +25,5 @@
 <section class="panel"><h2>Support-impact review history</h2>@forelse($plan->reviews??[] as $r)<article class="work-row"><div><h3>{{ $r['date'] }}</h3><p>{{ $r['delivered'] }}</p><p class="recorded-answer"><strong>What changed:</strong> {{ $r['impact'] }}</p><p class="recorded-answer"><strong>Practical example / evidence and apprentice feedback:</strong> {{ $r['evidence'] }}</p>@if(filled($r['notes']??null))<p class="recorded-answer"><strong>Review notes / agreed next action:</strong> {{ $r['notes'] }}</p>@endif<p>Next review: {{ $r['next'] }}</p></div></article>@empty<p>No formal review recorded.</p>@endforelse</section>
 <details class="panel"><summary>Plan version history</summary>@foreach(array_reverse($plan->history??[]) as $h)<p>{{ $h['event'] }} · {{ $h['at'] }}</p>@endforeach</details>
 <p class="muted">This private plan does not automatically create funding claims, OTJ hours, apprenticeship achievement, employer sharing or safeguarding records.</p>
-@if($plan->exists)@include('support.activity-evidence')@endif
+@if($plan->exists)@include('support.plan-objectives')@include('support.activity-evidence')@endif
 @endsection

@@ -55,15 +55,171 @@ class SupportController extends Controller
     public function worklist(Request $r): View
     {
         abort_unless($this->team($r), 403);
-        $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'state' => ['nullable', Rule::in(SupportFollowup::CONCERN_VIEWS)], 'plan_state' => ['nullable', Rule::in(SupportFollowup::PLAN_VIEWS)], 'page' => ['nullable', 'integer', 'min:1'], 'plan_page' => ['nullable', 'integer', 'min:1'], 'apprentice_page' => ['nullable', 'integer', 'min:1']]);
+        $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'view' => ['nullable','in:all,needs-review'], 'by' => ['nullable','date_format:Y-m-d'], 'marker' => ['nullable',Rule::in(array_keys($this->codes()))], 'state' => ['nullable', Rule::in(SupportFollowup::CONCERN_VIEWS)], 'plan_state' => ['nullable', Rule::in(SupportFollowup::PLAN_VIEWS)], 'page' => ['nullable', 'integer', 'min:1'], 'plan_page' => ['nullable', 'integer', 'min:1'], 'apprentice_page' => ['nullable', 'integer', 'min:1']]);
         $search = trim($data['search'] ?? ''); $state = $data['state'] ?? 'open'; $planState = $data['plan_state'] ?? 'all';
         $people = Apprentice::whereIn('id', SupportAccess::ids($r->user()))->get();
         if ($search !== '') { $people = $people->filter(fn ($a) => Str::contains(Str::lower($a->first_name.' '.$a->last_name.' '.$a->reference), Str::lower($search))); }
-        $concerns = SupportConcern::with(['apprentice', 'owner:id,name,role,active'])->whereIn('apprentice_id', $people->pluck('id'))->orderBy('created_at')->orderBy('id')->get(['id', 'apprentice_id', 'owner_id', 'code', 'status', 'action_due', 'next_review', 'acknowledged_at', 'created_at']);
+        $concerns = SupportConcern::with(['apprentice', 'owner:id,name,role,active'])->whereIn('apprentice_id', $people->pluck('id'))->orderBy('created_at')->orderBy('id')->get(['id', 'apprentice_id', 'owner_id', 'code', 'status', 'action_due', 'next_action', 'next_review', 'acknowledged_at', 'created_at', 'version']);
         $concernSummary = SupportFollowup::concerns($concerns);
         $plans = SupportPlan::whereIn('apprentice_id', $people->pluck('id'))->get(['id', 'apprentice_id', 'status', 'active_plan', 'reviews']);
         $planSummary = SupportFollowup::plans($plans, $people);
+        if ($r->filled('view')) {
+            return view('support.register', $this->registerData($r, $people, $concerns, $data) + ['search' => $search]);
+        }
         return view('support.worklist', ['supportPeople' => SupportFollowup::paginate($people->sortBy(fn ($a) => Str::lower($a->last_name.' '.$a->first_name.' '.$a->reference))->values(), $r, 'apprentice_page'), 'concernRows' => SupportFollowup::paginate($concernSummary['rows']->filter(fn ($row) => $row['flags'][$state])->values(), $r, 'page'), 'concernCounts' => $concernSummary['counts'], 'planRows' => SupportFollowup::paginate($planSummary['rows']->filter(fn ($row) => $row['flags'][$planState])->values(), $r, 'plan_page'), 'planCounts' => $planSummary['counts'], 'search' => $search, 'state' => $state, 'planState' => $planState, 'codes' => $this->codes()]);
+    }
+
+    private function registerData(Request $request, $people, $concerns, array $filters): array
+    {
+        $by = $filters['by'] ?? today()->toDateString();
+        $concerns = $concerns->groupBy('apprentice_id');
+        $markers = DB::table('apprentice_markers')->whereIn('apprentice_id', $people->pluck('id'))
+            ->get(['apprentice_id', 'code'])->groupBy('apprentice_id');
+        $rows = $people->sortBy([['last_name','asc'], ['first_name','asc']])->map(function ($person) use ($concerns, $markers, $by) {
+            $cases = $concerns->get($person->id, collect());
+            $open = $cases->where('status', '!=', 'Closed');
+            $codes = $open->pluck('code')->filter()->merge($markers->get($person->id, collect())->pluck('code'))->unique();
+            $due = $open->filter(fn ($marker) => !$marker->next_review || $marker->next_review->toDateString() <= $by);
+            $unlinked = $codes->diff($cases->pluck('code'))->reject(fn ($code) =>
+                in_array($code, ['IM18','IM19','IM27','IM28','IM32','IM33'], true));
+            return ['person' => $person, 'open' => $open, 'codes' => $codes, 'due' => $due, 'unlinked' => $unlinked,
+                'needs_review' => $due->isNotEmpty() || $unlinked->isNotEmpty()];
+        })->when(isset($filters['marker']), fn ($rows) => $rows->filter(fn ($row) => $row['codes']->contains($filters['marker'])));
+        $dueCount = $rows->where('needs_review', true)->count();
+        $allCount = $rows->count();
+        if (($filters['view'] ?? 'all') === 'needs-review') {
+            $rows = $rows->where('needs_review', true);
+        }
+
+        return ['rows' => SupportFollowup::paginate($rows->values(), $request, 'page'), 'allCount' => $allCount,
+            'dueCount' => $dueCount, 'by' => $by, 'codes' => $this->codes(), 'view' => $filters['view'] ?? 'all'];
+    }
+
+    public function registerReport(Request $request): View
+    {
+        abort_unless($this->team($request), 403);
+        $people = Apprentice::whereIn('id', SupportAccess::ids($request->user()))->get();
+        $concerns = SupportConcern::whereIn('apprentice_id', $people->pluck('id'))
+            ->get(['id','apprentice_id','code','status','action_due','next_review','acknowledged_at']);
+        $data = $this->registerData($request, $people, $concerns, []);
+        $open = $concerns->where('status', '!=', 'Closed');
+        $summary = $open->whereNotNull('code')->groupBy('code')->map(fn ($markers) => $markers->pluck('apprentice_id')->unique()->count());
+        $actions = $open->filter(fn ($marker) => $marker->action_due?->lt(today()))->pluck('apprentice_id')->unique()->count();
+
+        $plans = SupportPlan::whereIn('apprentice_id', $people->pluck('id'))->get(['activities','reviews']);
+        $delivered = $plans->sum(fn ($plan) => count($plan->activities ?? []));
+        $impact = $plans->sum(fn ($plan) => count($plan->reviews ?? []));
+        return view('reports.support', $data + ['summary' => $summary, 'overdueActions' => $actions, 'delivered' => $delivered, 'impact' => $impact]);
+    }
+
+    public function trackMarker(Request $request, Apprentice $apprentice): RedirectResponse
+    {
+        abort_unless($this->lead($request, $apprentice), 403);
+        $data = $request->validate(['code'=>['required',Rule::in(array_keys($this->codes()))],
+            'other'=>['nullable','required_if:code,IM40','string','max:250'],
+            'frequency'=>['required','in:weekly,fortnightly,monthly,quarterly,six-monthly']]);
+        DB::transaction(function () use ($request, $apprentice, $data): void {
+            $profile = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->lead($request, $profile), 403);
+            if (SupportConcern::where('apprentice_id',$profile->id)->where('code',$data['code'])->where('status','!=','Closed')->exists()) {
+                throw ValidationException::withMessages(['code'=>'This marker already has an open review record.']);
+            }
+            $marker = new SupportConcern(['apprentice_id'=>$profile->id,'raised_by'=>$request->user()->id,'initial_note'=>'Marker added to the Support and Retention Register.']);
+            $marker->code = $data['code'];
+            $marker->other_code = $data['code'] === 'IM40' ? $data['other'] : null;
+            $marker->owner_id = $request->user()->id;
+            $marker->history = [['event'=>'marker_review_frequency_set','frequency'=>$data['frequency'],
+                'by'=>$request->user()->id,'at'=>now()->toIso8601String()]];
+            $marker->save();
+            $before = MarkerHistory::codes($profile->id);
+            DB::table('apprentice_markers')->insertOrIgnore(['apprentice_id'=>$profile->id,'code'=>$marker->code,
+                'recorded_by'=>$request->user()->id,'created_at'=>now(),'updated_at'=>now()]);
+            MarkerHistory::record($profile->id,$request->user()->id,'register_marker',$before);
+            $this->audit($request,$profile->id,$marker->id,'register_marker_added');
+        });
+
+        return back()->with('status','Marker added for a first review.');
+    }
+
+    public function formalMarkerReview(Request $request, SupportConcern $concern): RedirectResponse
+    {
+        abort_unless($this->team($request, $concern->apprentice), 403);
+        $periods = ['weekly','fortnightly','monthly','quarterly','six-monthly'];
+        $data = $request->validate([
+            'version' => ['required','integer'],
+            'date' => ['required','date_format:Y-m-d','before_or_equal:today'],
+            'frequency' => ['required', Rule::in($periods)],
+            'outcome' => ['required','string','max:1000'],
+            'action' => ['nullable','string','max:1000'],
+            'owner' => ['nullable','required_with:action,due','integer'],
+            'due' => ['nullable','required_with:action,owner','date_format:Y-m-d','after_or_equal:date'],
+        ]);
+        DB::transaction(function () use ($request, $concern, $data): void {
+            $marker = SupportConcern::whereKey($concern->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->team($request, $marker->apprentice), 403);
+            $this->version($request, $marker);
+            $history = $marker->history ?? [];
+            $previous = collect($history)->last(fn ($event) => ($event['event'] ?? '') === 'formal_marker_review');
+            if ($marker->status === 'Closed' || !$marker->code || $data['date'] < $marker->created_at->toDateString()
+                || ($previous && $data['date'] < $previous['date'])) {
+                throw ValidationException::withMessages(['date' => 'Use a current open marker and a date within its review history.']);
+            }
+            $date = \Carbon\CarbonImmutable::parse($data['date']);
+            $next = match ($data['frequency']) {
+                'weekly' => $date->addWeek(), 'fortnightly' => $date->addWeeks(2), 'monthly' => $date->addMonthNoOverflow(),
+                'quarterly' => $date->addMonthsNoOverflow(3), 'six-monthly' => $date->addMonthsNoOverflow(6),
+            };
+            if (filled($data['action'] ?? null)) {
+                if (!SupportAccess::owners($marker->apprentice)->contains('id', (int) $data['owner'])) {
+                    throw ValidationException::withMessages(['owner' => 'Choose an eligible owner for this apprentice.']);
+                }
+                if (filled($marker->next_action)) {
+                    throw ValidationException::withMessages(['action' => 'Complete the open action before replacing it. You can still save the review by itself.']);
+                }
+                $marker->owner_id = $data['owner'];
+                $marker->action_due = $data['due'];
+                $marker->next_action = $data['action'];
+            } elseif (filled($data['owner'] ?? null) || filled($data['due'] ?? null)) {
+                throw ValidationException::withMessages(['action' => 'Enter the follow-up action or clear its owner and due date.']);
+            }
+            $history[] = ['event' => 'formal_marker_review', 'date' => $data['date'], 'frequency' => $data['frequency'],
+                'outcome' => $data['outcome'], 'next_review' => $next->toDateString(), 'by' => $request->user()->id, 'at' => now()->toIso8601String()];
+            $marker->history = $history;
+            $marker->acknowledged_at ??= now();
+            if ($marker->status === 'New') {
+                $marker->status = 'Open';
+            }
+            $marker->next_review = $next;
+            $marker->version++;
+            $marker->save();
+            $this->audit($request, $marker->apprentice_id, $marker->id, 'formal_marker_review');
+        });
+
+        return back()->with('status', 'Formal marker review saved.');
+    }
+
+    public function completeMarkerAction(Request $request, SupportConcern $concern): RedirectResponse
+    {
+        abort_unless($this->team($request, $concern->apprentice), 403);
+        $request->validate(['version'=>['required','integer'],'outcome'=>['required','string','max:1000']]);
+        DB::transaction(function () use ($request, $concern): void {
+            $marker = SupportConcern::whereKey($concern->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->team($request, $marker->apprentice), 403);
+            $this->version($request, $marker);
+            if ($marker->status === 'Closed' || !filled($marker->next_action)) {
+                throw ValidationException::withMessages(['outcome' => 'Choose a marker with an open action.']);
+            }
+            $marker->history = [...($marker->history ?? []), ['event'=>'marker_action_completed',
+                'before'=>$marker->only('next_action','owner_id','action_due'), 'outcome'=>$request->input('outcome'),
+                'by'=>$request->user()->id,'at'=>now()->toIso8601String()]];
+            $marker->next_action = null;
+            $marker->action_due = null;
+            $marker->version++;
+            $marker->save();
+            $this->audit($request, $marker->apprentice_id, $marker->id, 'marker_action_completed');
+        });
+
+        return back()->with('status', 'Action completed.');
     }
 
     public function index(Request $r, Apprentice $apprentice): View
@@ -141,7 +297,9 @@ class SupportController extends Controller
             $c->followups = $h;
             $c->next_action = $data['target'];
             $c->action_due = $data['due_date'];
-            $c->next_review = $data['next_review'];
+            if (!collect($c->history ?? [])->contains('event', 'formal_marker_review')) {
+                $c->next_review = $data['next_review'];
+            }
             $c->version++;
             $c->save();
             $this->audit($r, $c->apprentice_id, $c->id, 'weekly_followup');
@@ -409,12 +567,67 @@ class SupportController extends Controller
 
     public const ACTIVITY_TYPES = ['Specialist 1:1 Coaching', 'In-Class Teaching Adjustment', 'Assistive Tech Setup & Support', 'Pastoral & Wellbeing Check-in', 'Workplace Mentor Consultation', 'Assessment & Exam Preparation'];
 
+    public function supportObjective(Request $r, SupportPlan $plan): RedirectResponse
+    {
+        abort_unless($this->team($r, $plan->apprentice), 403);
+        $data = $r->validate(['version'=>['required','integer'],'objective'=>['required','string','max:250']]);
+        DB::transaction(function () use ($r, $plan, $data): void {
+            $p = SupportPlan::whereKey($plan->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->team($r, $p->apprentice), 403);
+            $this->version($r, $p);
+            if ($p->status !== 'Active' || !$p->active_plan) {
+                throw ValidationException::withMessages(['objective'=>'Use an active support plan.']);
+            }
+            $existing = collect($p->activeObjectives())->contains(fn ($item) => strcasecmp($item['title'], $data['objective']) === 0);
+            if ($existing) {
+                throw ValidationException::withMessages(['objective'=>'This objective is already recorded on the plan.']);
+            }
+            $p->history = [...($p->history ?? []), [
+                'event'=>'support_objective_added', 'approval'=>$p->objectiveApproval(),
+                'objective'=>['id'=>(string) Str::uuid(), 'title'=>$data['objective']],
+                'by'=>$r->user()->id, 'at'=>now()->toIso8601String(),
+            ]];
+            $p->version++;
+            $p->save();
+            $this->audit($r, $p->apprentice_id, $p->id, 'support_objective_added');
+        });
+        return back()->with('status', 'Support objective saved.');
+    }
+
+    public function completeActivityFollowup(Request $r, SupportPlan $plan, string $activity): RedirectResponse
+    {
+        abort_unless($this->team($r, $plan->apprentice), 403);
+        $data = $r->validate(['version'=>['required','integer'],'outcome'=>['required','string','max:1000']]);
+        DB::transaction(function () use ($r, $plan, $activity, $data): void {
+            $p = SupportPlan::whereKey($plan->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->team($r, $p->apprentice), 403);
+            $this->version($r, $p);
+            $items = $p->activities ?? [];
+            $index = collect($items)->search(fn ($item) => $item['id'] === $activity);
+            $followup = $index === false ? null : ($items[$index]['followup'] ?? null);
+            if ($p->status !== 'Active' || !$followup || isset($followup['completed_at'])) {
+                throw ValidationException::withMessages(['outcome'=>'This follow-up is unavailable or already complete.']);
+            }
+            $items[$index]['followup'] = [...$followup, 'completed_at'=>now()->toIso8601String(),
+                'completed_by'=>$r->user()->id, 'outcome'=>$data['outcome']];
+            $p->activities = $items;
+            $p->version++;
+            $p->save();
+            $this->audit($r, $p->apprentice_id, $p->id, 'support_activity_followup_completed');
+        });
+        return back()->with('status', 'Support activity follow-up completed.');
+    }
+
     public function supportActivity(Request $r, SupportPlan $plan): RedirectResponse
     {
         abort_unless($this->team($r, $plan->apprentice), 403);
-        $data = $r->validate(['version' => ['required', 'integer'], 'approved_at' => ['required', 'string'], 'request_id' => ['required', 'uuid'], 'date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'type' => ['required', Rule::in(self::ACTIVITY_TYPES)], 'minutes' => ['nullable', 'integer', 'min:1', 'max:1440'], 'who' => ['required', 'string'], 'other_name' => ['nullable', 'required_if:who,other', 'string', 'max:250'], 'delivered' => ['required', 'string', 'max:10000'], 'response' => ['nullable', 'string', 'max:10000'], 'impact' => ['nullable', 'string', 'max:10000']]);
+        $data = $r->validate(['version' => ['required', 'integer'], 'approved_at' => ['required', 'string'], 'request_id' => ['required', 'uuid'], 'date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'type' => ['required', Rule::in(self::ACTIVITY_TYPES)], 'minutes' => ['nullable', 'integer', 'min:1', 'max:1440'], 'who' => ['required', 'string'], 'other_name' => ['nullable', 'required_if:who,other', 'string', 'max:250'], 'delivered' => ['required', 'string', 'max:10000'], 'response' => ['nullable', 'string', 'max:10000'], 'impact' => ['nullable', 'string', 'max:10000'],
+            'objective_id'=>['nullable','uuid'], 'followup_note'=>['nullable','required_with:followup_due,followup_owner','string','max:1000'],
+            'followup_due'=>['nullable','required_with:followup_note','date_format:Y-m-d','after_or_equal:date'],
+            'followup_owner'=>['nullable','required_with:followup_note','integer']]);
         DB::transaction(function () use ($r, $plan, $data): void {
             $p = SupportPlan::whereKey($plan->id)->lockForUpdate()->firstOrFail();
+            abort_unless($this->team($r, $p->apprentice), 403);
             $this->version($r, $p);
             if ($p->status !== 'Active' || ! $p->active_plan || $p->active_plan['approved_at'] !== $data['approved_at']) {
                 throw ValidationException::withMessages(['approved_at' => 'Open the current active support plan before recording delivered support.']);
@@ -429,9 +642,22 @@ class SupportController extends Controller
             if (! $person && $data['who'] !== 'other') {
                 throw ValidationException::withMessages(['who' => 'Choose an active named staff member or Other named person.']);
             }
-            $activity = [...collect($data)->except('version', 'who', 'other_name')->all(), 'id' => (string) Str::uuid(), 'delivered_by' => ['id' => $person?->id, 'name' => $person?->name ?? $data['other_name'], 'reported' => $person === null], 'recorded_at' => now()->toIso8601String(), 'recorded_by' => $r->user()->id];
+            $objective = $p->activeObjectives()[$data['objective_id'] ?? ''] ?? null;
+            if (filled($data['objective_id'] ?? null) && !$objective) {
+                throw ValidationException::withMessages(['objective_id'=>'Choose an objective from the current active support plan.']);
+            }
+            $followup = null;
+            if (filled($data['followup_note'] ?? null)) {
+                $owner = SupportAccess::owners($p->apprentice)->firstWhere('id', (int) $data['followup_owner']);
+                if (!$owner) {
+                    throw ValidationException::withMessages(['followup_owner'=>'Choose an authorised support team member.']);
+                }
+                $followup = ['note'=>$data['followup_note'],'due'=>$data['followup_due'],
+                    'owner_id'=>$owner->id,'owner_name'=>$owner->name];
+            }
+            $activity = [...collect($data)->except('version', 'who', 'other_name','objective_id','followup_note','followup_due','followup_owner')->all(), 'id' => (string) Str::uuid(), 'delivered_by' => ['id' => $person?->id, 'name' => $person?->name ?? $data['other_name'], 'reported' => $person === null], 'recorded_at' => now()->toIso8601String(), 'recorded_by' => $r->user()->id];
             $items = $p->activities ?? [];
-            $items[] = $activity;
+            $items[] = [...$activity, 'objective'=>$objective, 'followup'=>$followup];
             $p->activities = $items;
             $p->version++;
             $p->save();

@@ -93,7 +93,7 @@ with tempfile.TemporaryDirectory(prefix='gta-staff-duties-') as temporary:
         assert 'My responsibilities'in nav and 'Dashboard'in nav and 'Help and how to'in nav and '<summary>Administration</summary>'in nav
         passed('Actual management Help response groups the full menu into seven native closed sections with common shortcuts retained')
         status,text,_,_=req(tutor,'/help');assert status==200
-        nav=menu(text);assert 'data-navigation-group="administration"'not in nav and 'data-navigation-group="system"'not in nav and 'Marking worklist'in nav
+        nav=menu(text);assert 'data-navigation-group="administration"'not in nav and 'data-navigation-group="system"'not in nav and 'Work to mark'in nav
         status,text,_,_=req(learner,'/help');assert status==200 and 'data-navigation-group="staff-quality"'not in menu(text)
         passed('Role-specific rendered menus omit empty administration/system/staff groups while retaining permitted staff work links')
         status,text,_,_=req(admin,'/account/password');assert status==200 and open_group(text,'account') and not open_group(text,'training')

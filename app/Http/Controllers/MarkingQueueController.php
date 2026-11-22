@@ -22,16 +22,16 @@ class MarkingQueueController extends Controller
         if($manager){
             $ids=(clone $base)->join('apprentices','apprentices.id','=','learning_tasks.apprentice_id')->whereNotNull('apprentices.tutor_id')->distinct()->pluck('apprentices.tutor_id');
             $tutorOptions=User::where(fn($q)=>$q->where('role','tutor')->orWhereIn('id',$ids))->orderBy('name')->orderBy('id')->get(['id','name','active','role']);
-            if($tutorFilter==='unassigned'){$base->whereHas('apprentice',fn($q)=>$q->whereNull('tutor_id'));}
-            elseif($tutorFilter!==''){
-                abort_unless(ctype_digit($tutorFilter) && $tutorOptions->contains(fn($u)=>(string)$u->id===$tutorFilter),422,'Choose a main tutor listed in this worklist.');
-                $base->whereHas('apprentice',fn($q)=>$q->where('tutor_id',(int)$tutorFilter));
+            if ($tutorFilter !== '' && $tutorFilter !== 'unassigned') {
+                abort_unless(ctype_digit($tutorFilter) && $tutorOptions->contains(fn ($u) => (string)$u->id === $tutorFilter), 422, 'Choose a main tutor listed in this worklist.');
             }
-        }elseif($tutorFilter!=='' && $tutorFilter!==(string)$request->user()->id){abort(403,'Your worklist follows your current apprentice assignments.');}
-        $search=trim($input['search']??'');
-        if($search!==''){$base->whereHas('apprentice',fn($a)=>$a->where(fn($n)=>$n->where('reference','like','%'.$search.'%')->orWhere('first_name','like','%'.$search.'%')->orWhere('last_name','like','%'.$search.'%')));}
+        } elseif ($tutorFilter !== '' && $tutorFilter !== (string)$request->user()->id) {
+            abort(403, 'Your worklist follows your current apprentice assignments.');
+        }
+        $search = trim($input['search'] ?? '');
+        $base = MarkingQueueViews::filter($base, $search, $tutorFilter);
         $counts=MarkingQueueViews::counts($base);
-        $filter=$input['view']??'overdue';if(!in_array($filter,MarkingQueueViews::VIEWS,true)){$filter='overdue';}
+        $filter=$input['view']??'all';if(!in_array($filter,MarkingQueueViews::VIEWS,true)){$filter='overdue';}
         $q=MarkingQueueViews::apply(clone $base,$filter);
         $q->with('apprentice.tutor')->orderBy('submitted_at')->orderBy('id');
         $tasks=(clone $q)->paginate(25)->withQueryString();

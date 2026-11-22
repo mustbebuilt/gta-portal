@@ -20,6 +20,13 @@
 @endif
 @foreach(['Learner reference' => $apprentice->reference, 'Email address' => $apprentice->email ?? 'Not recorded', 'First day in learning' => $apprentice->start_date?->format('d M Y') ?? 'Not recorded', ((isset($approvedDateDetails['apprenticeship_end_date'])) ? 'Planned apprenticeship end including EPA' : 'Planned training end date') => $apprentice->planned_end_date?->format('d M Y') ?? 'Not recorded', 'Employer' => $apprentice->employerLabel() ?? 'Not recorded', 'Tutor group' => $apprentice->groupLabel() ?? 'Not assigned', 'Main tutor' => $apprentice->tutor?->name ?? 'Not assigned', 'Learning & Progress Mentor' => $apprentice->mentor?->name ?? 'Not assigned', 'Careers adviser' => $apprentice->careersAdviser?->name ?? 'Not assigned', 'Maths tutor' => $apprentice->mathsTutor?->name ?? 'Not assigned', 'English tutor' => $apprentice->englishTutor?->name ?? 'Not assigned', 'Saved version' => $apprentice->version] as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ $value }}</dd></div>@endforeach
 </dl><p class="muted">Last saved {{ $apprentice->updated_at->format('d M Y H:i') }} (UK time).</p></section>
+@include('apprentices.training-coverage')
+@if($trainingReceipts ?? [])
+<details class="panel"><summary>Training received · {{ count($trainingReceipts) }} records</summary>
+<ul>@foreach($trainingReceipts as $training)
+<li>{{ $training['date'] }} · {{ $training['group'] }} · {{ $training['label'] }} @if($training['coverage'] === 'partial') · Partly received @endif</li>
+@endforeach</ul></details>
+@endif
 @if($latestDevelopment ?? null)
 <details class="panel">
     <summary>Latest personal development snapshot · {{ $developmentMonth }}</summary>

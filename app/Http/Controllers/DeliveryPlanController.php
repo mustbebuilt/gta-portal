@@ -9,6 +9,7 @@ use App\Models\TrainingPlanWorkspace;
 use App\Support\DeliveryPlan;
 use App\Support\LearningAccess as Access;
 use App\Support\PortalPdf;
+use App\Support\PlanCurriculum;
 use App\Support\TaskCatalogue;
 use App\Support\TrainingPlanSource;
 use Illuminate\Http\Request;
@@ -43,7 +44,7 @@ class DeliveryPlanController extends Controller
 
     private function draft(Plan $row, Apprentice $a, Request $r, array $values): array
     {
-        $same = ($row->draft['identity'] ?? DeliveryPlan::identity($a)) === DeliveryPlan::identity($a) && ($row->draft['catalogue_hash'] ?? DeliveryPlan::catalogueHash(TaskCatalogue::keyFor($a))) === DeliveryPlan::catalogueHash(TaskCatalogue::keyFor($a));
+        $same = DeliveryPlan::identityMatches($a, $row->draft['identity'] ?? DeliveryPlan::identity($a)) && ($row->draft['catalogue_hash'] ?? DeliveryPlan::catalogueHash(TaskCatalogue::keyFor($a))) === DeliveryPlan::catalogueHash(TaskCatalogue::keyFor($a));
         $base = $same ? $row->draft : [];
 
         return [...$base, ...$values, 'identity' => DeliveryPlan::identity($a), 'catalogue_hash' => DeliveryPlan::catalogueHash(TaskCatalogue::keyFor($a)), 'authors' => array_values(array_unique([...($base['authors'] ?? []), $r->user()->id]))];
@@ -56,7 +57,8 @@ class DeliveryPlanController extends Controller
         $approved = DeliveryPlan::approved($apprentice);
         $manage = Access::manager($r->user());
 
-        return view('plans.delivery', ['apprentice' => $apprentice, 'row' => $row, 'draft' => $manage ? $row?->draft ?? [] : [], 'blocks' => $manage ? $row?->draft['blocks'] ?? DeliveryPlan::blocks($apprentice) : $approved['blocks'] ?? [], 'approved' => $approved, 'manage' => $manage, 'preview' => $manage ? DeliveryPlan::preview($apprentice, $approved) : [], 'taskBinding' => $manage ? DeliveryPlan::taskBinding($apprentice) : null]);
+        return view('plans.delivery', ['apprentice' => $apprentice, 'row' => $row, 'draft' => $manage ? $row?->draft ?? [] : [], 'blocks' => $manage ? $row?->draft['blocks'] ?? DeliveryPlan::blocks($apprentice) : $approved['blocks'] ?? [], 'approved' => $approved, 'manage' => $manage, 'curriculumTasks'=>$manage ? PlanCurriculum::tasks(TaskCatalogue::keyFor($apprentice)) : [],
+            'curriculumTopics'=>$manage ? PlanCurriculum::topics() : [], 'preview' => $manage ? DeliveryPlan::preview($apprentice, $approved) : [], 'taskBinding' => $manage ? DeliveryPlan::taskBinding($apprentice) : null]);
     }
 
     public function calendar(Request $r, Apprentice $apprentice)
@@ -90,24 +92,74 @@ class DeliveryPlanController extends Controller
     public function details(Request $r, Apprentice $apprentice)
     {
         abort_unless(Access::manager($r->user()), 403);
-        $data = $r->validate(['version' => ['required', 'integer', 'min:0'], 'source_ref' => ['required', 'string', 'max:2000'], 'ksb_ref' => ['required', 'string', 'max:2000'], 'qualifications_ref' => ['required', 'string', 'max:2000'], 'release_ref' => ['required', 'string', 'max:2000'], 'target_hours' => ['required', 'numeric', 'gt:0', 'max:10000'], 'basis' => ['required', Rule::in(['Full training retained', 'Controlled individual plan', 'Current Autocare RPL assessment'])]]);
+        $data = $r->validate(['version' => ['required', 'integer', 'min:0'], 'source_ref' => ['required', 'string', 'max:2000'], 'ksb_ref' => ['required', 'string', 'max:2000'], 'qualifications_ref' => ['required', 'string', 'max:2000'], 'release_ref' => ['required', 'string', 'max:2000'], 'target_hours' => ['required', 'numeric', 'gt:0', 'max:10000'], 'practical_end_date'=>['nullable','date_format:Y-m-d'], 'apprenticeship_end_date'=>['nullable','date_format:Y-m-d'], 'basis' => ['required', Rule::in(['Full training retained', 'Controlled individual plan', 'Current Autocare RPL assessment'])]]);
         DB::transaction(function () use ($r, $apprentice, $data): void {
             [$a, $row] = $this->lock($r, $apprentice);
             $before = $row->draft;
             $rpl = null;
-            if ($data['basis'] === 'Current Autocare RPL assessment') {
+            $dates = array_intersect_key($before['details'] ?? [], array_flip(['practical_end_date','apprenticeship_end_date','agreed_dates_source']));
+            $data += $dates;
+            $practical = $data['practical_end_date'] ?? null;
+            $end = $data['apprenticeship_end_date'] ?? null;
+            if (($practical || $end) && (!$a->start_date || !$practical || !$end
+                || $practical < $a->start_date->toDateString() || $end < $practical)) {
+                throw ValidationException::withMessages(['practical_end_date'=>'Enter both agreed finish dates in order after the apprenticeship start.']);
+            }
+            if (($before['rpl_binding'] ?? null) && (($before['details']['basis'] ?? null) === $data['basis'])) {
+                $position = DeliveryPlan::rplPosition($a, $before['rpl_binding'], true);
+                if (!$position || !DeliveryPlan::targetMatches($position, $data['target_hours'])) {
+                    throw ValidationException::withMessages(['target_hours'=>'The saved prior learning approval and revised hours must agree. Reconcile them before changing plan details.']);
+                }
+                $rpl = $before['rpl_binding'];
+            } elseif (($before['rpl_binding'] ?? null) && ($before['details']['basis'] ?? null) === 'Controlled individual plan') {
+                throw ValidationException::withMessages(['basis'=>'Amend the assessed prior learning through guided apprentice setup.']);
+            } elseif ($data['basis'] === 'Current Autocare RPL assessment') {
                 $w = TrainingPlanWorkspace::where('apprentice_id', $a->id)->lockForUpdate()->first();
                 $p = TrainingPlanSource::position($w);
                 if (TaskCatalogue::keyFor($a) !== 'autocare' || ! $p['approved']) {
                     throw ValidationException::withMessages(['basis' => 'A complete current approved Autocare RPL assessment is required. Other programmes need their own controlled source.']);
                 }
+                if (!DeliveryPlan::targetMatches($p, $data['target_hours'])) {
+                    throw ValidationException::withMessages(['target_hours'=>'Use the remaining hours from the approved prior learning assessment.']);
+                }
                 $rpl = $p['binding'];
+            }
+            if ($practical && $end && ($practical !== ($dates['practical_end_date'] ?? null) || $end !== ($dates['apprenticeship_end_date'] ?? null))) {
+                $data['agreed_dates_source'] = 'Approved individual delivery plan';
+            }
+            if (!$practical && !$end) {
+                unset($data['agreed_dates_source']);
             }
             $row->draft = $this->draft($row, $a, $r, ['details' => collect($data)->except('version')->all(), 'rpl_binding' => $rpl]);
             $this->commit($r, $row, 'plan_details_saved', ['before' => $before]);
         });
 
         return back()->with('status', 'Individual delivery-plan details saved for review. No price, funding or profile target changed.');
+    }
+
+    public function curriculum(Request $r, Apprentice $apprentice)
+    {
+        abort_unless(Access::manager($r->user()), 403);
+        $data = $r->validate([
+            'version'=>['required','integer','min:0'],
+            'task_scope'=>['required','in:all,selected'], 'tasks'=>['nullable','array','list','max:100'],
+            'tasks.*'=>['required','string','max:100'],
+            'subjects'=>['nullable','array:english,maths'],
+            'subjects.*'=>['array:scope,topics,due'],
+            'subjects.*.scope'=>['nullable','in:none,selected'],
+            'subjects.*.topics'=>['nullable','array','list','max:100'],
+            'subjects.*.topics.*'=>['required','string','max:100'],
+            'subjects.*.due'=>['nullable','date_format:Y-m-d'],
+        ]);
+        DB::transaction(function () use ($r, $apprentice, $data): void {
+            [$a, $row] = $this->lock($r, $apprentice);
+            $before = $row->draft;
+            $scope = PlanCurriculum::prepare($a, $data);
+            $row->draft = $this->draft($row, $a, $r, ['curriculum'=>$scope]);
+            $this->commit($r, $row, 'curriculum_scope_saved', ['before'=>$before]);
+        });
+
+        return back()->with('status', 'Draft curriculum saved. It will feed reviews and register coverage once the plan is approved.');
     }
 
     public function approve(Request $r, Apprentice $apprentice)
@@ -117,14 +169,22 @@ class DeliveryPlanController extends Controller
         DB::transaction(function () use ($r, $apprentice): void {
             [$a, $row] = $this->lock($r, $apprentice); $d = $row->draft;
             if (! $row->exists || in_array($r->user()->id, $d['authors'] ?? [], true)) { throw ValidationException::withMessages(['version' => 'An independent administrator or CEO who did not prepare this draft must review it.']); }
-            if (($d['identity'] ?? null) !== DeliveryPlan::identity($a) || ($d['catalogue_hash'] ?? null) !== DeliveryPlan::catalogueHash(TaskCatalogue::keyFor($a))) { throw ValidationException::withMessages(['version' => 'The programme, profile or source changed. Reconcile and save the draft before approval.']); }
+            if (!DeliveryPlan::identityMatches($a, $d['identity'] ?? null) || ($d['catalogue_hash'] ?? null) !== DeliveryPlan::catalogueHash(TaskCatalogue::keyFor($a))) { throw ValidationException::withMessages(['version' => 'The programme, profile or source changed. Reconcile and save the draft before approval.']); }
             $blocks = $d['blocks'] ?? []; $details = $d['details'] ?? [];
             if (count($blocks) !== 12 || collect($blocks)->contains(fn ($b) => ! filled($b['start']) || ! filled($b['end']) || $b['hours'] === null) || ! $a->start_date || ! filled($a->employerLabel()) || ! filled($details['source_ref'] ?? null) || ! filled($details['ksb_ref'] ?? null) || ! filled($details['qualifications_ref'] ?? null) || ! filled($details['release_ref'] ?? null) || ! isset($details['target_hours']) || abs(array_sum(array_column($blocks, 'hours')) - (float) $details['target_hours']) > 0.001) {
                 throw ValidationException::withMessages(['version' => 'Complete all twelve dated blocks/hours and the controlled source references. Planned hours must equal the occupational target; first learning and employer must be recorded.']);
             }
+            if (isset($details['practical_end_date'], $details['apprenticeship_end_date'])) {
+                $practical = $details['practical_end_date'];
+                $practicalMatches = $practical === $blocks[10]['end']
+                    || ($practical >= $blocks[9]['end'] && $practical < $blocks[10]['start']);
+                if (!$practicalMatches || $details['apprenticeship_end_date'] !== $blocks[11]['end']) {
+                    throw ValidationException::withMessages(['practical_end_date'=>'The agreed finish dates must match the practical training and EPA phases of the block schedule.']);
+                }
+            }
             if ($d['rpl_binding'] ?? null) {
-                $w = TrainingPlanWorkspace::where('apprentice_id', $a->id)->lockForUpdate()->first(); $p = TrainingPlanSource::position($w);
-                if (! $p['approved'] || $p['binding'] !== $d['rpl_binding']) { throw ValidationException::withMessages(['version' => 'The RPL assessment approval changed. Reconcile the plan first.']); }
+                $p = DeliveryPlan::rplPosition($a, $d['rpl_binding'], true);
+                if (!$p || !DeliveryPlan::targetMatches($p, $details['target_hours'])) { throw ValidationException::withMessages(['version' => 'The RPL assessment approval changed. Reconcile the plan first.']); }
             }
             if ($row->active && ($row->approved['draft_hash'] ?? null) === hash('sha256', json_encode($d, JSON_THROW_ON_ERROR))) { throw ValidationException::withMessages(['version' => 'This draft revision is already approved.']); }
             $before = $row->approved;

@@ -148,7 +148,7 @@ class RetentionReportController extends Controller
         $entryFactors=array_keys(\App\Support\EntryContext::choices());
         $employerFactors = ['entry_employer', 'linked_employer'];
         $factors=array_merge($employerFactors,['programme','age','size','maths','english','additional','ehcp','reason'],$entryFactors);
-        $d=$r->validate(['from'=>['nullable','date_format:Y-m-d'],'to'=>['nullable','date_format:Y-m-d','after_or_equal:from'],'factor'=>['nullable',Rule::in($factors)],'programme_id'=>['nullable','integer'],'entry_employer_id'=>['nullable','integer'],'linked_employer_id'=>['nullable','integer'],'age'=>['nullable',Rule::in($this->choices()['age'])],'prior'=>['nullable',Rule::in(['Yes','No','Unknown','Prefer not to say'])],'page'=>['nullable','integer','min:1'],'export'=>['nullable','in:csv']]);
+        $d=$r->validate(['from'=>['nullable','date_format:Y-m-d'],'to'=>['nullable','date_format:Y-m-d','after_or_equal:from'],'factor'=>['nullable',Rule::in($factors)],'programme_id'=>['nullable','integer'],'entry_employer_id'=>['nullable','integer'],'linked_employer_id'=>['nullable','integer'],'age'=>['nullable',Rule::in($this->choices()['age'])],'prior'=>['nullable',Rule::in(['Yes','No','Unknown','Prefer not to say'])],'page'=>['nullable','integer','min:1'],'outcome'=>['nullable','in:achievers,early-leavers,withdrawals,active,checks'],'export'=>['nullable','in:csv']]);
         $query=Apprentice::query();$all=$query->count();
         if(!empty($d['from'])){$query->whereDate('start_date','>=',$d['from']);}if(!empty($d['to'])){$query->whereDate('start_date','<=',$d['to']);}if(!empty($d['programme_id'])){$query->where('programme_id',$d['programme_id']);}
         if(!empty($d['entry_employer_id'])){$query->whereIn('id',\App\Models\ApprenticeEntryContext::where('entry_employer_id',$d['entry_employer_id'])->select('apprentice_id'));}
@@ -249,7 +249,19 @@ class RetentionReportController extends Controller
             DB::table('retention_report_exports')->insert(['actor_id'=>$r->user()->id,'cohort_count'=>count($rows),'filters'=>json_encode(collect($d)->except(['page','export'])->all()),'created_at'=>now()]);
             return response()->streamDownload(function()use($groups,$byEmployer){$f=fopen('php://output','w');fputcsv($f,['Factor','Included','Completed','Withdrawn','Completed or withdrawn denominator','Withdrawal rate %','Achieved','Known completed results denominator','Achievement rate %','Missing completed results','Unknown status','Median recorded leaving days','Leaving dates denominator','Exploratory below 10','Early leavers','Completed without achievement'],',','"','');foreach($groups as $label=>$g){fputcsv($f,array_map([\App\Support\LeaverDestinations::class,'csvCell'],[$label,$g['total'],$g['completed'],$g['withdrawn'],$g['terminal'],$g['withdrawal_rate'],$g['achieved'],$g['known_results'],$g['achievement_rate'],$g['missing_results'],$g['unknown'],$g['median_leaving_days'],$g['leaving_dates_known'],($g['small'] || ($byEmployer && $g['known_results'] < 10))?'Yes':'No',$g['early_leavers'],$g['not_achieved']]),',','"','');}fclose($f);},'GTA-Retention-Comparison.csv',['Content-Type'=>'text/csv','Cache-Control'=>'no-store, private']);
         }
-        $rowPage=new \Illuminate\Pagination\LengthAwarePaginator(collect($rows)->forPage((int)($d['page']??1),25)->values(),count($rows),25,(int)($d['page']??1),['path'=>$r->url(),'query'=>$r->except('page')]);
-        return response()->view('retention.report',['rows'=>$rowPage,'earlyWarning'=>RetentionEarlyWarning::forReport($rows),'attendanceByOutcome'=>RetentionAnalysis::attendanceByOutcome($rows),'skillsStarts'=>RetentionAnalysis::functionalSkillsStarts($rows),'markerLabels'=>$markerLabels,'markerTrends'=>RetentionMarkerAnalysis::trends($rows, $markerLabels),'unscheduled'=>$unscheduled,'cohortCount'=>count($rows),'groups'=>$groups,'factor'=>$factor,'excluded'=>$excluded,'milestoneGroups'=>$milestoneGroups,'entryFactors'=>$entryFactors,'programmes'=>\App\Models\Programme::orderBy('name')->get(['id','name']),'employerLabels'=>$employerLabels,'byEmployer'=>$byEmployer,'employerIdsByLabel'=>$employerLabels->flip(),'ageChoices'=>$this->choices()['age']])->header('Cache-Control','no-store, private');
+        $sourceRows = collect($rows);
+        $headlines = [
+            'achievers' => $sourceRows->where('sourced_achievement', 'Achieved'),
+            'early-leavers' => $sourceRows->where('withdrawal_timing', 'Early leaver'),
+            'withdrawals' => $sourceRows->where('sourced_status', 'Withdrawn'),
+            'active' => $sourceRows->where('sourced_status', 'Active'),
+            'checks' => $sourceRows->filter(fn ($row) => $row['sourced_status'] === 'Unknown'
+                || str_starts_with($row['withdrawal_timing'] ?? '', 'Check')),
+        ];
+        $detailRows = $headlines[$d['outcome'] ?? ''] ?? $sourceRows;
+        $page = (int) ($d['page'] ?? 1);
+        $rowPage = new \Illuminate\Pagination\LengthAwarePaginator($detailRows->forPage($page, 25)->values(),
+            $detailRows->count(), 25, $page, ['path' => $r->url(), 'query' => $r->except('page')]);
+        return response()->view('retention.report',['rows'=>$rowPage,'headlines'=>array_map(fn ($records) => $records->count(), $headlines),'selectedOutcome'=>$d['outcome']??null,'earlyWarning'=>RetentionEarlyWarning::forReport($rows),'attendanceByOutcome'=>RetentionAnalysis::attendanceByOutcome($rows),'skillsStarts'=>RetentionAnalysis::functionalSkillsStarts($rows),'markerLabels'=>$markerLabels,'markerTrends'=>RetentionMarkerAnalysis::trends($rows, $markerLabels),'unscheduled'=>$unscheduled,'cohortCount'=>count($rows),'groups'=>$groups,'factor'=>$factor,'excluded'=>$excluded,'milestoneGroups'=>$milestoneGroups,'entryFactors'=>$entryFactors,'programmes'=>\App\Models\Programme::orderBy('name')->get(['id','name']),'employerLabels'=>$employerLabels,'byEmployer'=>$byEmployer,'employerIdsByLabel'=>$employerLabels->flip(),'ageChoices'=>$this->choices()['age']])->header('Cache-Control','no-store, private');
     }
 }

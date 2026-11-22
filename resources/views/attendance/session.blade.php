@@ -8,36 +8,28 @@
 @if($session->state==='Cancelled')<section class="panel"><h2>Cancelled session</h2><p>{{ $session->cancellation_reason }}</p><p>This session is excluded from attendance and OTJ totals.</p></section>
 @else
 <form method="post" data-compact-register data-start="{{ substr($session->start_time,0,5) }}" data-end="{{ substr($session->end_time,0,5) }}" action="{{ route('attendance.save',$session) }}">@csrf<input type="hidden" name="version" value="{{ $session->version }}"><section class="panel"><h2>Subjects actually delivered</h2><label for="delivered-learning">Brief subjects and eligible new learning delivered</label><textarea id="delivered-learning" name="delivered_learning" rows="4">{{ old('delivered_learning',$session->delivered_learning) }}</textarea><p class="muted">Record what happened, rather than copying the plan without checking. Confirm OTJ only for eligible apprenticeship training in normal paid working time. Maths/English and excluded activity must not be counted in this subtotal. Extra/out-of-hours training has its own agreement, actual-compensation and tutor-approval workflow.</p></section>
-@php($savedTraining = $trainingRecord?->details ?? [])
-@php($savedBySubject = collect($savedTraining['items'] ?? [])->keyBy('subjectId'))
-<details class="panel" @if($trainingRecord || $errors->has('training_subjects') || $errors->has('training_confirmed'))open @endif><summary>Structured training delivery for personal training bank</summary>
-@if($trainingRecord && $trainingRecord->register_version !== $session->version)<p class="errors">Attendance changed after structured training was saved. Re-confirm and save to keep personal training banks current.</p>@endif
-<p class="muted">Select the subjects actually delivered across vocational, Functional Skills and cross-cutting themes. Attended apprentices bank these subjects across groups; no per-apprentice hours are invented.</p>
-@foreach(['vocational' => 'Vocational subjects', 'functional_skills' => 'Functional Skills', 'cross_cutting' => 'Cross-cutting themes'] as $areaKey => $areaLabel)
-<fieldset><legend>{{ $areaLabel }}</legend>
-@foreach($trainingCatalogue[$areaKey] ?? [] as $sid => $slabel)
-<div class="work-row">
-<label class="check"><input type="checkbox" name="training_subjects[]" value="{{ $sid }}" @checked(in_array($sid, old('training_subjects', $savedBySubject->keys()->all()), true))>{{ $slabel }}</label>
-<select name="training_coverage[{{ $sid }}]" aria-label="Coverage for {{ $slabel }}"><option value="delivered" @selected(old('training_coverage.'.$sid, $savedBySubject[$sid]['coverage'] ?? 'delivered') === 'delivered')>Delivered</option><option value="partial" @selected(old('training_coverage.'.$sid, $savedBySubject[$sid]['coverage'] ?? 'delivered') === 'partial')>Part delivered</option></select>
-</div>
-@endforeach
-</fieldset>
-@endforeach
-<div class="form-grid">
-<div><label for="training-custom">Custom subject entry (optional, max 200 chars)</label><input id="training-custom" name="training_custom" maxlength="200" value="{{ old('training_custom', collect($savedTraining['items'] ?? [])->firstWhere('area', 'custom')['label'] ?? '') }}"></div>
-<div><label for="training-custom-coverage">Custom entry coverage</label><select id="training-custom-coverage" name="training_custom_coverage"><option value="delivered">Delivered</option><option value="partial">Part delivered</option></select></div>
-<div class="full"><label for="training-note">Session delivery note (optional)</label><textarea id="training-note" name="training_note" rows="2" maxlength="2000">{{ old('training_note', $savedTraining['note'] ?? '') }}</textarea></div>
-</div>
-<label class="check"><input type="checkbox" name="training_confirmed" value="1" @checked(old('training_confirmed', $savedTraining['confirmed'] ?? false))>I confirm the selected training subjects above were actually delivered in this session.</label>
-</details>
+@include('attendance.structured-training')
 @foreach($members as $a)
 @php($m=$session->marks->firstWhere('apprentice_id',$a->id))
 <section class="panel" data-register-person><h2><a href="{{ route('training-journey72.show', $a) }}">{{ $a->first_name }} {{ $a->last_name }}</a></h2><p class="muted">{{ $a->reference }}</p><div class="form-grid"><div><label for="code-{{ $a->id }}">Attendance code</label><select id="code-{{ $a->id }}" name="marks[{{ $a->id }}][code]" @required($session->regular_week !== null)><option value="">Not marked</option>@foreach(\App\Support\AttendanceMath::CODES as $code=>$label)<option value="{{ $code }}" @selected(old('marks.'.$a->id.'.code',$m?->code)===$code)>{{ $label }}</option>@endforeach</select></div></div><button type="button" data-full-session hidden>Attended for the full session</button><p class="muted" data-full-session-status role="status"></p><details @if($m && ($m->arrival || $m->departure || $m->comment || $m->adjustment || $m->otj_confirmed))open @endif><summary>Actual times, OTJ and other details</summary><div class="form-grid"><div><label for="arrival-{{ $a->id }}">Actual arrival (attended codes)</label><input id="arrival-{{ $a->id }}" name="marks[{{ $a->id }}][arrival]" type="time" value="{{ old('marks.'.$a->id.'.arrival',$m?->arrival) }}"></div><div><label for="departure-{{ $a->id }}">Actual departure (attended codes)</label><input id="departure-{{ $a->id }}" name="marks[{{ $a->id }}][departure]" type="time" value="{{ old('marks.'.$a->id.'.departure',$m?->departure) }}"></div><div><label for="minutes-{{ $a->id }}">Eligible OTJ minutes, if reducing the proposal</label><input id="minutes-{{ $a->id }}" name="marks[{{ $a->id }}][minutes]" type="number" step="1" min="0" value="{{ old('marks.'.$a->id.'.minutes',$m?->otj_confirmed?$m->otj_minutes:null) }}"><p class="muted">Leave blank to use actual attendance less excluded periods. Never rounds up.</p></div><div><label for="adjustment-{{ $a->id }}">Reason for reducing eligible minutes</label><textarea id="adjustment-{{ $a->id }}" name="marks[{{ $a->id }}][adjustment]">{{ old('marks.'.$a->id.'.adjustment',$m?->adjustment) }}</textarea></div><div><label for="comment-{{ $a->id }}">Attendance comment</label><textarea id="comment-{{ $a->id }}" name="marks[{{ $a->id }}][comment]">{{ old('marks.'.$a->id.'.comment',$m?->comment) }}</textarea></div></div><label class="check"><input type="checkbox" name="marks[{{ $a->id }}][otj_confirmed]" value="1" @checked(old('marks.'.$a->id.'.otj_confirmed',$m?->otj_confirmed))>I checked that this apprentice’s recorded minutes are eligible OTJ, actually delivered in paid working time, with excluded activity removed.</label><p>Current confirmed OTJ: {{ $m?->otj_confirmed?number_format($m->otj_minutes/60,2).' hours':'Not confirmed' }}</p></details>
+<details><summary>Individual training exceptions</summary>
+@if($trainingOptions)
+<div data-topic-exceptions="{{ $a->id }}" data-saved-exceptions="{{ json_encode(old('training.topic_exceptions.'.$a->id, $structuredTraining['topicExceptions'][$a->id] ?? []), JSON_THROW_ON_ERROR) }}"></div>
+@endif
+<a href="{{ route('apprentices.show', $a) }}#training-coverage">Open required training coverage</a>
+@foreach(\App\Support\RegisterTraining::AREAS as $area=>$label)
+<label>{{ $label }} <select name="training[exceptions][{{ $a->id }}][{{ $area }}]">
+@foreach([''=>'As recorded for the group','missed'=>'Missed','partial'=>'Partly received'] as $value=>$text)
+<option value="{{ $value }}" @selected(old("training.exceptions.{$a->id}.{$area}", $structuredTraining['exceptions'][$a->id][$area] ?? '') === $value)>{{ $text }}</option>
+@endforeach
+</select></label>
+@endforeach
+</details>
 @include('attendance.monthly-development', ['record' => $monthlyDevelopment->get($a->id)])
 </section>
 @endforeach
 @if($session->marks->isNotEmpty())<section class="panel"><h2>Correct this register</h2><label for="correction-reason">Reason for correction (only when changing saved information)</label><textarea id="correction-reason" name="correction_reason" maxlength="2000">{{ old('correction_reason') }}</textarea><p>The previous marks and delivered subjects are retained in the history. Updated minutes replace the previous subtotal; they are not added again.</p></section>@endif
-@if($session->regular_week)<label class="check"><input type="checkbox" name="weekly_confirmed" value="1" @checked(old('weekly_confirmed'))> Confirm this weekly register</label>@endif
+<label class="check"><input type="checkbox" name="weekly_confirmed" value="1" @checked(old('weekly_confirmed'))> Confirm this register and its recorded training</label>
 <div class="form-actions"><button class="primary">{{ $session->regular_week ? 'Submit register' : 'Save actual register' }}</button></div></form>
 <details class="panel"><summary>Cancel session</summary><form method="post" action="{{ route('attendance.cancel',$session) }}">@csrf<input type="hidden" name="version" value="{{ $session->version }}"><label for="cancel-reason">Cancellation reason</label><textarea id="cancel-reason" name="reason" required></textarea><div class="form-actions"><button>Cancel this session</button></div></form></details>
 @endif

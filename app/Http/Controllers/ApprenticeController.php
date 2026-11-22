@@ -75,9 +75,16 @@ class ApprenticeController extends Controller
             ? MonthlyScorecard::where('apprentice_id', $apprentice->id)->whereNotNull('development')->orderByDesc('month')->first()
             : null;
 
+        $trainingAccess = LearningAccess::training($request->user(), $apprentice);
+        $receipts = $trainingAccess ? \App\Support\RegisterTraining::receipts($apprentice->id) : [];
+        $coverage = $trainingAccess
+            ? \App\Support\RegisterTraining::coverage($apprentice, $receipts, \App\Support\DeliveryPlan::approved($apprentice))
+            : [];
         return view('apprentices.show', [
             'apprentice' => $apprentice->load(['tutor', 'programmeRecord', 'employerRecord', 'groupRecord', 'mentor', 'careersAdviser', 'mathsTutor', 'englishTutor']),
             'developmentMonth' => $monthly?->month,
+            'trainingReceipts' => $receipts,
+            'trainingCoverage' => $coverage,
             'latestDevelopment' => $monthly ? MonthlyDevelopment::read($monthly) : null,
         ]);
     }

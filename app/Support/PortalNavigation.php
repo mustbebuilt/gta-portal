@@ -23,6 +23,10 @@ class PortalNavigation
         if(StaffHandover::recipientAllowed($u)) {$primary[]=$item('Staff handovers','incoming-handovers.index',[],['incoming-handovers.*']);}
         if(MyResponsibilities::allowed($u)) {$primary[]=$item('My responsibilities','responsibilities.index',[],['responsibilities.*']);}
         if(in_array($u->role,['admin','ceo','tutor','apprentice'],true)) {$primary[]=$item('Dashboard','dashboard.index',[],['dashboard.*']);}
+        $reports = ReportDirectory::links($u);
+        if ($reports) {
+            $primary[] = $item('Reports','reports.index',[],['reports.index', ...array_keys($reports), 'visual-reports.pdf', 'historical-cohorts.*']);
+        }
         if(in_array($u->role,['admin','ceo','tutor','apprentice','employer','mentor'],true)||StaffDuties::has($u,'mentor')||($u->role==='manager'&&CentreManagerAccess::workspace($u))) {$primary[]=$item($u->role==='apprentice'?'My progress':'Progress reporting','progress66.index',[],['progress66.*']);}
         $links=[];
         if(Gate::forUser($u)->allows('viewAny',Apprentice::class)) {
@@ -33,11 +37,10 @@ class PortalNavigation
             $links[]=$item('Maths and English','em.caseload',[],['em.*','topics.*','qualifications.*']);
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)) {
-            $links[]=$item('Apprentice Register','attendance.index',[],['attendance.*']);$links[]=$item('Session operations','session-operations.index',[],['session-operations.*','session-changes.*','register-actions.*']);$links[]=$item('Marking worklist','marking.index',[],['marking.*']);
+            $links[]=$item('Apprentice Register','attendance.index',[],['attendance.*']);$links[]=$item('Session operations','session-operations.index',[],['session-operations.*','session-changes.*','register-actions.*']);$links[]=$item('Work to mark','marking.index',[],['marking.*']);
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)){$links[]=$item('Gateway preparation','gateway.index',[],['gateway.*']);}
         if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'Timetable','centre-planning.index',[],['centre-planning.*','work-moves.*','optimiser.*','timetable-duties.*','timetable-governance.*','timetable-management.*']);}
-        if(LearningAccess::manager($u)){$links[]=$item('Apprentice progress','cohort-insights.index',[],['cohort-insights.*','historical-cohorts.*']);}
         if(\App\Support\ApprenticeRecordChecks::allowed($u)){$links[]=$item('Record checks','record-checks.index',[],['record-checks.*']);}
         if($u->role==='apprentice'){$links[]=$item('My calendar','calendar.index',[],['calendar.*']);}
         if(CentreManagerAccess::workspace($u)){$links[]=$item('Centre oversight','centre-oversight.index',[],['centre-oversight.*']);}
@@ -52,7 +55,7 @@ class PortalNavigation
         $group('reviews-careers','Reviews & Careers',$links);
         $links=[];
         if(SupportAccess::team($u)) {
-            $links[]=$item('Support and retention','support.worklist',[],[], $request->routeIs('support.*')&&!$request->routeIs('support.permissions'));
+            $links[]=$item('Support and Retention Register','support.worklist',['view'=>'all'],[], $request->routeIs('support.*')&&!$request->routeIs('support.permissions','support.report'));
             $links[]=$item('Support review reminders','support-review-reminders.index',[],['support-review-reminders.*']);
         }
         if(QuestionnaireLinks::canView($u)) {$links[]=$item('Questionnaires','questionnaires.index',[],['questionnaires.index','portal-questionnaires.*']);}
