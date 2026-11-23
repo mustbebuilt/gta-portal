@@ -4,3 +4,56 @@
 (()=>{const form=document.querySelector('#step-form');if(!form)return;let dirty=false;form.addEventListener('input',()=>dirty=true);form.addEventListener('change',()=>dirty=true);document.querySelectorAll('.setup68 nav a').forEach(link=>link.addEventListener('click',event=>{if(!dirty)return;const match=link.getAttribute('href').match(/\/([1-6])$/);if(!match)return;event.preventDefault();const next=document.createElement('input');next.type='hidden';next.name='next';next.value=match[1];form.append(next);form.requestSubmit();}));})();
 
 (()=>{const search=document.querySelector('#employer-search-form'),main=document.querySelector('#step-form');search?.addEventListener('submit',()=>{for(const [key,value] of new FormData(main)){if(!key.startsWith('data['))continue;const h=document.createElement('input');h.type='hidden';h.name=key;h.value=value;search.append(h);}});})();
+
+(() => {
+    const panel = document.querySelector('#rpl-adjustments');
+    if (!panel) return;
+    const mode = document.querySelector('#rpl-mode');
+    const disclosure = panel.querySelector('summary');
+    const clearNote = document.querySelector('#rpl-clear-note');
+    const tools = panel.querySelector('[data-rpl-tools]');
+    const picker = panel.querySelector('#rpl-ksb');
+    const table = panel.querySelector('[data-rpl-rows]');
+    const summary = panel.querySelector('[data-rpl-summary]');
+    const assessment = panel.querySelector('#assessment');
+    const reductions = Array.from(panel.querySelectorAll('[data-rpl-reduction]'));
+
+    function toggleAdjustments() {
+        const applies = mode.value === 'applies';
+        panel.hidden = !applies;
+        panel.open = applies;
+        disclosure.hidden = true;
+        assessment.disabled = !applies;
+        reductions.forEach(select => { select.disabled = !applies; });
+        if (clearNote) clearNote.hidden = mode.value !== 'none';
+    }
+
+    function updateSummary() {
+        const count = Number(summary.dataset.otherAdjusted) + reductions.filter(select => Number(select.value) > 0).length;
+        summary.textContent = count + (count === 1 ? ' KSB with a reduction' : ' KSBs with reductions');
+    }
+
+    if (picker) {
+        const byCode = new Map();
+        reductions.forEach(select => {
+            const row = select.closest('tr');
+            row.hidden = Number(select.value) === 0 && !row.hasAttribute('data-rpl-error');
+            byCode.set(row.dataset.rplCode, {row, select});
+            select.addEventListener('change', updateSummary);
+        });
+        table.hidden = Array.from(byCode.values()).every(({row}) => row.hidden);
+        tools.hidden = false;
+        picker.addEventListener('change', () => {
+            const entry = byCode.get(picker.value);
+            if (!entry) return;
+            entry.row.hidden = false;
+            table.hidden = false;
+            picker.value = '';
+            entry.select.focus();
+        });
+    }
+
+    mode.addEventListener('change', toggleAdjustments);
+    toggleAdjustments();
+    updateSummary();
+})();

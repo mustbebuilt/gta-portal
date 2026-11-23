@@ -50,9 +50,12 @@ class GuidedSetup68Controller extends Controller {
  public function save(Request $r,Draft $draft,int $step){$this->allow($r);$r->validate(['version'=>['required','integer','min:1'],'next'=>['nullable','integer','between:1,6']]);$input=$r->input('data',$step===5&&$r->has('employer_search')?($draft->payload['employer']??[]):[]);abort_unless(is_array($input),422);
   if ($step === 4 && $r->input('action') === 'save_plan_dates') {
    $d = Setup::savePlanDates($r->user(), (int) $r->session()->get('auth_version'), $draft, $r->integer('version'), $input);
-   return to_route('setup68.show', [$d, 4])->with('status', 'Training Plan dates saved for setup confirmation.');
+   return to_route('setup68.show', [$d, $r->integer('next') === 6 ? 6 : 4])->with('status', 'Training Plan dates saved for setup confirmation.');
   }
   if($step===4){$current=$draft->payload['rpl']??[];$action=$r->input('action','save');if($action==='none')$input=['mode'=>'none'];
+   elseif ($action === 'record_rpl') {
+    $input = $this->rplEntry($r, $draft);
+   }
    elseif(in_array($action,['batch_preview','batch_apply'],true)){
     $v=$r->validate(['codes'=>['required','array','min:1','max:300'],'codes.*'=>['required','string'],'percent'=>['required','integer','between:0,100']]);if($v['percent']%10!==0)Rpl68::fail('Choose a 10-percentage-point reduction.');abort_if($draft->version!==$r->integer('version'),409,'Draft changed. Reload the KSB list.');$t=Setup::template($draft->payload);if(!$t)Rpl68::fail('Select a programme first.');$codes=array_values(array_unique($v['codes']));if(array_diff($codes,array_column($t->template['ksbs'],'code')))Rpl68::fail('Select KSBs from this programme only.');$batch=['codes'=>$codes,'percent'=>(int)$v['percent'],'binding'=>Rpl68::hash([$draft->version,$codes,(int)$v['percent'],$t->source_hash])];
     if($action==='batch_preview'){$proposed=$current;foreach($codes as $code)$proposed['adjustments'][$code]=(int)$v['percent'];return $this->page($r,$draft,4,['batch'=>$batch,'batch_calculation'=>Rpl68::calculate($t->template,$proposed)]);}if($r->input('binding')!==$batch['binding'])Rpl68::fail('Preview these KSB changes again.');$input=[...$current,'mode'=>'applies','remaining_confirmed'=>false];foreach($codes as $code){if($v['percent']===0||$v['percent']==='0')unset($input['adjustments'][$code]);else $input['adjustments'][$code]=(int)$v['percent'];}
@@ -64,6 +67,46 @@ class GuidedSetup68Controller extends Controller {
    $returnFilters['employer_search'] = mb_substr((string) $r->input('employer_search'), 0, 100);
   }
   return to_route('setup68.show', [$d, $next, ...$returnFilters])->with('status',$step===4&&($r->input('action')==='batch_apply')?'Reductions saved to this draft. Check the revised OTJ hours before continuing.':($next===1&&$step===1?'Draft saved. Review any possible existing record before continuing.':'Draft saved.'));
+ }
+ private function rplEntry(Request $request, Draft $draft): array
+ {
+  $data = $request->validate([
+   'data.mode' => ['required', 'in:none,applies'],
+  ])['data'];
+
+  $template = Setup::template($draft->payload);
+  if (! $template || $template->source_hash !== ($draft->payload['programme']['template_hash'] ?? null)) {
+   Rpl68::fail('Select the current programme template in Step 3 before recording prior learning.');
+  }
+
+  if ($data['mode'] === 'none') {
+   return ['mode' => 'none'];
+  }
+
+  $continuing = $request->integer('next') !== 4;
+  $values = $request->validate([
+   'data.assessment_ref' => [$continuing ? 'required' : 'nullable', 'string', 'max:1000'],
+   'reductions' => ['nullable', 'array'],
+   'reductions.*' => ['required', 'integer', 'between:0,100', 'multiple_of:10'],
+  ]);
+  $entered = $values['reductions'] ?? [];
+  if (array_diff(array_keys($entered), array_column($template->template['ksbs'], 'code'))) {
+   Rpl68::fail('Select KSBs from this programme only.');
+  }
+  $adjustments = array_replace($draft->payload['rpl']['adjustments'] ?? [], array_map('intval', $entered));
+  $adjustments = array_filter($adjustments, fn ($percent) => $percent > 0);
+  ksort($adjustments, SORT_NATURAL);
+
+  if ($continuing && $adjustments === []) {
+   Rpl68::fail('Record at least one approved reduction, or choose No relevant prior learning.');
+  }
+
+  return [
+   'mode' => 'applies',
+   'assessment_ref' => $values['data']['assessment_ref'] ?? null,
+   'adjustments' => $adjustments,
+   'remaining_confirmed' => $continuing,
+  ];
  }
  public function submit(Request $r,Draft $draft){$this->allow($r);$r->validate(['version'=>['required','integer'],'confirmed'=>['accepted']]);$d=Setup::submit($r->user(),(int)$r->session()->get('auth_version'),$draft,$r->integer('version'));return to_route('setup68.show',[$d,6])->with('status','Setup ready. Confirm it from Step 6.');}
  public function confirm(Request $r,Draft $draft){$this->allow($r);$v=$r->validate(['version'=>['required','integer'],'confirmed'=>['accepted'],'practical_end'=>['nullable','date_format:Y-m-d'],'programme_end'=>['nullable','date_format:Y-m-d','after:practical_end']]);$d=Setup::confirm($r->user(),(int)$r->session()->get('auth_version'),$draft,(int)$v['version'],$v['practical_end']??null,$v['programme_end']??null);return to_route('setup68.show',[$d,6])->with('status','Setup complete. The approved training plan and OTJ target are now linked to the apprentice.');}

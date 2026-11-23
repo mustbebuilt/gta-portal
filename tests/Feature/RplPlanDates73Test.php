@@ -59,13 +59,11 @@ class RplPlanDates73Test extends TestCase
         $step3->assertDontSee('Save agreed dates')->assertDontSee('Programme timetable');
 
         $step4 = $this->get(route('setup68.show', [$draft->fresh(), 4]))->assertOk();
-        $html = $step4->getContent();
         $step4->assertDontSee('Save agreed dates')
-            ->assertSee('Select the KSBs covered by the approved assessment, then preview and apply the reductions.')
-            ->assertSee('Find affected KSBs')
-            ->assertSee('Confirm remaining KSBs');
-
-        $this->assertLessThan(strpos($html, 'Confirm remaining KSBs'), strpos($html, 'Find affected KSBs'));
+            ->assertSee('Prior learning decision')
+            ->assertSee('No relevant prior learning')
+            ->assertSee('Apply assessed prior learning')
+            ->assertSee('Choose a KSB');
     }
 
     public function test_step6_allows_single_confirmation_with_default_and_amended_planned_dates(): void

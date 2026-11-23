@@ -82,7 +82,7 @@ class GuidedSetup68Test extends TestCase {
   $query = http_build_query($filters);
   $codes = fn ($response) => array_column($response->viewData('ksbs'), 'code');
 
-  $this->assertCount(50, $codes($this->get($show)->assertOk()->assertSee('KSB type')));
+  $this->assertCount(50, $codes($this->get($show)->assertOk()->assertSee('Choose a KSB')));
   $this->assertContains('K1', $codes($this->get($show.'?ksb_type=K')->assertOk()));
   $this->assertSame(['B1'], $codes($this->get($show.'?ksb_type=B')->assertOk()));
   $this->assertCount(50, $codes($this->get($show.'?ksb_type%5B%5D=S')->assertOk()));
@@ -100,6 +100,48 @@ class GuidedSetup68Test extends TestCase {
    ->assertRedirect($show.'?'.$query)->assertSessionHasNoErrors();
   $this->assertSame(['S1' => 20], $draft->fresh()->payload['rpl']['adjustments']);
   $this->assertSame(['S1'], $codes($this->get($show.'?'.$query.'&adjusted=1')->assertOk()));
+ }
+ public function test_simplified_rpl_saves_the_reference_and_reductions_in_one_step(): void
+ {
+  $actor = $this->actor();
+  $this->actingAs($actor);
+  $template = $this->template();
+  $matrix = $template->template;
+  $matrix['ksbs'][4]['code'] = 'S1';
+  $matrix['ksbs'][5]['code'] = 'B1';
+  $template->update(['template' => $matrix, 'source_hash' => Rpl68::hash($matrix)]);
+  $draft = Setup::start($actor, $actor->auth_version);
+  $draft = $this->save($draft, 3, ['template_id' => $template->id, 'start_date' => '2026-11-18']);
+  $show = route('setup68.show', [$draft, 4]);
+  $save = route('setup68.save', [$draft, 4]);
+  $this->get($show)->assertOk()
+   ->assertSee('Prior learning decision')->assertSee('<select id="rpl-mode"', false)
+   ->assertSee('No relevant prior learning')->assertSee('Apply assessed prior learning')
+   ->assertSee('<select id="rpl-ksb">', false)
+   ->assertSee('<optgroup label="Skills">', false)->assertSee('<optgroup label="Behaviours">', false)
+   ->assertSee('Save and continue')
+   ->assertSee('<details id="rpl-adjustments"', false)
+   ->assertSee('assets/setup68.js?v=rpl-entry-2')
+   ->assertDontSee('Saved training-hours preview')
+   ->assertSee('Reduction for S1')->assertSee('Reduction for B1')
+   ->assertDontSee('Save assessment reference')->assertDontSee('Preview selected changes')
+   ->assertDontSee('Save agreed dates');
+  $input = ['version' => $draft->version, 'next' => 5, 'action' => 'record_rpl',
+   'data' => ['mode' => 'applies', 'assessment_ref' => 'CHECKED-REFERENCE']];
+  $this->from($show)->post($save, $input + ['reductions' => ['K1' => '0']])->assertSessionHasErrors('setup');
+  $this->post($save, $input + ['reductions' => ['K1' => '15']])->assertSessionHasErrors('reductions.K1');
+  $this->post($save, $input + ['reductions' => ['K999' => '0']])->assertSessionHasErrors('setup');
+  $this->post($save, $input + ['reductions' => ['K1' => '20', 'S1' => '30', 'B1' => '50']])
+   ->assertRedirect(route('setup68.show', [$draft, 5]))->assertSessionHasNoErrors();
+  $saved = $draft->fresh();
+  $this->assertSame('CHECKED-REFERENCE', $saved->payload['rpl']['assessment_ref']);
+  $this->assertTrue($saved->payload['rpl']['remaining_confirmed']);
+  $this->assertSame(3, Setup::review($saved)['calculation']['adjusted_count']);
+  $this->post($save, $input + ['reductions' => ['K1' => 0]])->assertConflict();
+  $this->post($save, [...$input, 'version' => $saved->version, 'data' => ['mode' => 'none']])
+   ->assertRedirect(route('setup68.show', [$draft, 5]))->assertSessionHasNoErrors();
+  $this->assertSame([], $draft->fresh()->payload['rpl']['adjustments']);
+  $this->assertEquals($template->template['full_hours'], Setup::review($draft->fresh())['calculation']['revised_hours']);
  }
  public function test_no_prior_learning_one_click_moves_to_employer():void {$u=$this->actor();$this->actingAs($u);$t=$this->template();$d=Setup::start($u,$u->auth_version);$d=$this->save($d,3,['template_id'=>$t->id,'start_date'=>'2026-11-18']);$this->post('/apprentice-setup/'.$d->id.'/steps/4?next=5',['version'=>$d->version,'action'=>'none'])->assertRedirect('/apprentice-setup/'.$d->id.'/5');$this->assertTrue($d->fresh()->payload['rpl']['remaining_confirmed']);$this->assertSame([], $d->fresh()->payload['rpl']['adjustments']);}
  public function test_employer_change_clears_previous_agreement():void {[$d]=$this->ready(true);$this->post('/apprentice-setup/'.$d->id.'/reopen',['version'=>$d->version,'reason'=>'Employer changed'])->assertRedirect();$d=$d->fresh();$e=Employer::create(['reference'=>'OTHER68','name'=>'Another employer']);$d=$this->save($d,5,['id'=>$e->id,'agreement_ref'=>'OLD-REF','agreement_verified'=>true]);$this->assertFalse($d->payload['employer']['agreement_verified']);$this->assertTrue(collect(Setup::review($d)['issues'])->contains(fn($x)=>$x['step']===5));}
