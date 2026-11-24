@@ -39,7 +39,7 @@ class TaskDeadlineHistoryTest extends TestCase
  }
  public function test_history_is_staff_only_escaped_and_preserves_approved_work():void {
   [$tutor,$a,$t]=$this->fixture();$learner=User::factory()->create(['role'=>'apprentice']);$a->user_id=$learner->id;$a->save();$t->status='Approved';$t->answers=['saved'=>'UNCHANGED-ANSWERS'];$t->submissions=[['version'=>1,'decision'=>null,'answers'=>[],'fixture'=>'UNCHANGED-SUBMISSION']];$t->save();
-  $this->actingAs($tutor)->post($this->url($t),['version'=>1,'due_date'=>'2026-12-01','reason'=>'<script>PRIVATE-PLANNING-REASON</script>'])->assertRedirect();$this->get(route('tasks.show',$t))->assertOk()->assertSee('Deadline change history')->assertSee('&lt;script&gt;PRIVATE-PLANNING-REASON&lt;/script&gt;',false)->assertDontSee('<script>PRIVATE-PLANNING-REASON</script>',false);
+  $this->actingAs($tutor)->post($this->url($t),['version'=>1,'due_date'=>'2026-12-01','reason'=>'<script>PRIVATE-PLANNING-REASON</script>'])->assertRedirect();$this->get(route('tasks.show',$t))->assertOk()->assertSee('Deadline change history')->assertSee('Submission date not recorded')->assertSee('&lt;script&gt;PRIVATE-PLANNING-REASON&lt;/script&gt;',false)->assertDontSee('<script>PRIVATE-PLANNING-REASON</script>',false);
   $this->actingAs($learner)->get(route('tasks.show',$t))->assertOk()->assertDontSee('Deadline change history')->assertDontSee('PRIVATE-PLANNING-REASON');$this->assertSame('Approved',$t->fresh()->status);$this->assertSame(['saved'=>'UNCHANGED-ANSWERS'],$t->fresh()->answers);$this->assertSame([['version'=>1,'decision'=>null,'answers'=>[],'fixture'=>'UNCHANGED-SUBMISSION']],$t->fresh()->submissions);
  }
  public function test_audit_failure_rolls_back_date_history_and_version_atomically():void {

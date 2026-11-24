@@ -41,9 +41,9 @@
             <input type="hidden" name="version" value="{{ $task->version }}">
             @include('learning.activity-checklist', ['answers'=>$currentAnswers, 'editing'=>true])
             @include('learning.fields', ['fields'=>$fields,'values'=>$currentAnswers,'readonly'=>false])
-            <details class="panel" @if($errors->has('file') || $errors->has('files') || $errors->has('files.*') || $errors->has('description') || $errors->has('kind')) open @endif>
+            <details class="panel" @if($errors->has('file') || $errors->has('files') || $errors->has('files.*') || $errors->has('description') || $errors->has('kind') || $errors->has('camera_photo') || $errors->has('camera_description')) open @endif>
                 <summary>Add evidence files</summary>
-                <label for="task-combined-file">Up to five files, 15 MB each (PDF, JPEG, PNG or DOCX)</label>
+                <label for="task-combined-file">Choose files (PDF, JPEG, PNG or DOCX). Up to five uploads per save, including any photo taken below. 15 MB each.</label>
                 <input id="task-combined-file" data-evidence-file name="files[]" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.docx">
                 <label for="task-combined-kind">Evidence type for these files</label>
                 <select id="task-combined-kind" data-evidence-kind name="kind">
@@ -53,6 +53,10 @@
                 </select>
                 <label for="task-photo-description">Evidence note (required for workplace photos)</label>
                 <textarea id="task-photo-description" data-photo-description name="description" rows="3" maxlength="5000">{{ old('description') }}</textarea>
+                <label for="task-camera-photo">Take a workplace photo</label>
+                <input id="task-camera-photo" name="camera_photo" type="file" accept="image/jpeg,image/png" capture="environment">
+                <label for="task-camera-description">What did you do, and how does this photo support the task?</label>
+                <textarea id="task-camera-description" name="camera_description" rows="3" maxlength="5000">{{ old('camera_description') }}</textarea>
                 <button name="intent" value="upload">Save answers and add evidence</button>
             </details>
             <label class="check"><input type="checkbox" name="own_work" value="1" @checked(old('own_work'))> I confirm this is my own work.</label>

@@ -102,6 +102,9 @@ class PortalNavigation
         $links=[];
         if(SecondFactor::required($u)||SecondFactor::mayEnrol($u)) {$links[]=$item('Two-step sign-in','second-factor.settings',[],['second-factor.settings','second-factor.change']);}
         if($u->role==='apprentice') {$links[]=$item('My reminders','apprentice-reminders.index',[],['apprentice-reminders.*']);}
+        if(in_array($u->role,['apprentice','tutor'],true)) {
+            $links[]=$item('Weekly training reminders','weekly-retention.reminders');
+        }
         if($u->role==='apprentice') {$links[]=$item('Alert preferences','alerts.index',[],['alerts.*']);}
         $links[]=$item('Confirm email','account.email',[],['account.email*']);$links[]=$item('Change password','account.password',[],['account.password*']);
         if($u->role==='apprentice'){$links[]=$item('My reminder status','communications.own');}

@@ -7,6 +7,7 @@ use App\Models\SupportConcern;
 use App\Models\SupportPlan;
 use App\Models\TeachingInstruction;
 use App\Models\User;
+use App\Support\EmployerAttendance;
 use App\Support\ExecutiveAccess;
 use App\Support\LearningAccess as Access;
 use App\Support\MarkerHistory;
@@ -14,6 +15,7 @@ use App\Support\PortalPdf;
 use App\Support\PrivateEvidence;
 use App\Support\SupportAccess;
 use App\Support\SupportFollowup;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +26,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class SupportController extends Controller
 {
@@ -57,16 +60,42 @@ class SupportController extends Controller
         abort_unless($this->team($r), 403);
         $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'view' => ['nullable','in:all,needs-review'], 'by' => ['nullable','date_format:Y-m-d'], 'marker' => ['nullable',Rule::in(array_keys($this->codes()))], 'state' => ['nullable', Rule::in(SupportFollowup::CONCERN_VIEWS)], 'plan_state' => ['nullable', Rule::in(SupportFollowup::PLAN_VIEWS)], 'page' => ['nullable', 'integer', 'min:1'], 'plan_page' => ['nullable', 'integer', 'min:1'], 'apprentice_page' => ['nullable', 'integer', 'min:1']]);
         $search = trim($data['search'] ?? ''); $state = $data['state'] ?? 'open'; $planState = $data['plan_state'] ?? 'all';
-        $people = Apprentice::whereIn('id', SupportAccess::ids($r->user()))->get();
+        $allowedIds = SupportAccess::ids($r->user());
+        $people = Apprentice::whereIn('id', $allowedIds)->get();
         if ($search !== '') { $people = $people->filter(fn ($a) => Str::contains(Str::lower($a->first_name.' '.$a->last_name.' '.$a->reference), Str::lower($search))); }
         $concerns = SupportConcern::with(['apprentice', 'owner:id,name,role,active'])->whereIn('apprentice_id', $people->pluck('id'))->orderBy('created_at')->orderBy('id')->get(['id', 'apprentice_id', 'owner_id', 'code', 'status', 'action_due', 'next_action', 'next_review', 'acknowledged_at', 'created_at', 'version']);
         $concernSummary = SupportFollowup::concerns($concerns);
         $plans = SupportPlan::whereIn('apprentice_id', $people->pluck('id'))->get(['id', 'apprentice_id', 'status', 'active_plan', 'reviews']);
         $planSummary = SupportFollowup::plans($plans, $people);
         if ($r->filled('view')) {
-            return view('support.register', $this->registerData($r, $people, $concerns, $data) + ['search' => $search]);
+            return view('support.register', $this->registerData($r, $people, $concerns, $data) + [
+                'search' => $search,
+                'employerMeeting' => ($data['view'] ?? null) === 'needs-review' ? $this->employerMeeting($allowedIds) : null,
+            ]);
         }
         return view('support.worklist', ['supportPeople' => SupportFollowup::paginate($people->sortBy(fn ($a) => Str::lower($a->last_name.' '.$a->first_name.' '.$a->reference))->values(), $r, 'apprentice_page'), 'concernRows' => SupportFollowup::paginate($concernSummary['rows']->filter(fn ($row) => $row['flags'][$state])->values(), $r, 'page'), 'concernCounts' => $concernSummary['counts'], 'planRows' => SupportFollowup::paginate($planSummary['rows']->filter(fn ($row) => $row['flags'][$planState])->values(), $r, 'plan_page'), 'planCounts' => $planSummary['counts'], 'search' => $search, 'state' => $state, 'planState' => $planState, 'codes' => $this->codes()]);
+    }
+
+    private function employerMeeting(array $allowedIds): array
+    {
+        $monday = CarbonImmutable::now('Europe/London')->startOfWeek(CarbonImmutable::MONDAY);
+        $from = $monday->subWeeks(4)->toDateString();
+        $through = $monday->subDay()->toDateString();
+
+        try {
+            [$rows, $employers] = EmployerAttendance::keptAtWork($from, $through, $allowedIds);
+        } catch (HttpException $exception) {
+            if ($exception->getStatusCode() !== 422) {
+                throw $exception;
+            }
+
+            return ['available' => false, 'from' => $from, 'through' => $through, 'items' => collect()];
+        }
+
+        $items = EmployerAttendance::groups($rows, $employers)
+            ->filter(fn ($group) => $group['employer'] && $group['apprentices'] >= 2);
+
+        return ['available' => true, 'from' => $from, 'through' => $through, 'items' => $items];
     }
 
     private function registerData(Request $request, $people, $concerns, array $filters): array

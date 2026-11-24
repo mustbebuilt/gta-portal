@@ -356,4 +356,33 @@ Artisan::command('gta:weekly-registers', function () {
 \Illuminate\Support\Facades\Schedule::command('gta:weekly-registers')
     ->hourly()->timezone('Europe/London')->withoutOverlapping();
 
+Artisan::command('gta:weekly-retention {--record : Store the current weekly checks} {--send : Send the current week’s prepared emails}', function () {
+    $monday = \App\Support\WeeklyRetention::monday();
+    if (!$this->option('record') && !$this->option('send')) {
+        $this->info('Week of '.$monday->toDateString().'. Use --record to prepare portal reminders.');
+        return 0;
+    }
+
+    $week = $monday->toDateString();
+    if ($this->option('record')) {
+        \App\Models\Apprentice::where('start_date', '<', $week)->eachById(
+            fn ($apprentice) => \App\Support\WeeklyRetention::capture($apprentice, $monday));
+    }
+    if ($this->option('send')) {
+        \App\Models\WeeklyRetentionReminder::whereIn('email_state', ['pending', 'held'])
+            ->whereHas('check', fn ($q) => $q->where('week_of', $week))
+            ->with('check.apprentice')->eachById(
+                fn ($reminder) => \App\Support\WeeklyRetention::send($reminder, $reminder->check->apprentice));
+    }
+
+    $reminders = \App\Models\WeeklyRetentionReminder::whereHas('check', fn ($q) => $q->where('week_of', $week));
+    $this->info('Week of '.$week.' · '.(clone $reminders)->count().' portal reminders · '
+        .$reminders->where('email_state', 'sent')->count().' emails sent.');
+    return 0;
+})->purpose('Prepare and deliver weekly Support and Retention training reminders');
+
+\Illuminate\Support\Facades\Schedule::command('gta:weekly-retention --record --send')
+    ->mondays()->at('09:00')->timezone('Europe/London')->withoutOverlapping(30)
+    ->when(fn () => config('weekly_retention.scheduled'));
+
 require __DIR__.'/setup68-console.php';

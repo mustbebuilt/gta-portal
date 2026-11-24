@@ -2,17 +2,22 @@
 
 namespace App\Support;
 
+use App\Models\AttendanceMark;
 use App\Models\ExtraTraining;
 use App\Models\TrainingSession;
 
 class AttendanceLedger
 {
-    public static function forIds(array $ids, bool $includeOtj = true): array
+    public static function forIds(array $ids, bool $includeOtj = true, ?string $from = null, ?string $through = null, ?string $code = null): array
     {
         if(!$ids){return [];}
         $rows = array_fill_keys($ids, []);
         $allowed = array_flip($ids);
-        $sessions = TrainingSession::with(['marks' => fn ($q) => $q->whereIn('apprentice_id', $ids)])->whereDate('session_date', '<=', today())->get();
+        $sessions = TrainingSession::with(['marks' => fn ($q) => $q->whereIn('apprentice_id', $ids)])->whereDate('session_date', '<=', $through ?? today())
+            ->when($from, fn ($query) => $query->whereDate('session_date', '>=', $from))
+            ->when($code, fn ($query) => $query->whereIn('id', AttendanceMark::whereIn('apprentice_id', $ids)
+                ->where('code', $code)->select('training_session_id')))
+            ->get();
         foreach ($sessions as $s) {
             if (! $s->ended()) {
                 continue;
@@ -24,6 +29,9 @@ class AttendanceLedger
                 if (! isset($allowed[$id])) {
                     continue;
                 }$m = $marks->get($id);
+                if ($code && $m?->code !== $code) {
+                    continue;
+                }
                 $rows[$id][] = ['id' => $s->id, 'name' => $s->name, 'date' => $s->session_date->toDateString(), 'code' => $m?->code, 'minutes' => $s->state === 'Cancelled' ? 0 : ($m?->otj_confirmed ? $m->otj_minutes : null), 'cancelled' => $s->state === 'Cancelled', 'delivered' => $s->delivered_learning];
             }
         }

@@ -53,7 +53,7 @@ class OtjPosition
         return ['summary' => $summary, 'rows' => $rows];
     }
 
-    private static function progressiveHours(?array $plan, string $date): ?float
+    public static function progressiveHours(?array $plan, string $date): ?float
     {
         if ($plan === null) {
             return null;

@@ -1,7 +1,7 @@
 @extends('layout')
 @section('title','Support and Retention Register')
 @section('content')
-<header class="page-heading"><h1>Support and Retention Register</h1><a class="button" href="{{ route('reports.index') }}">Reports</a></header>
+<header class="page-heading"><h1>Support and Retention Register</h1><div class="toolbar"><a class="button" href="{{ route('weekly-retention.index') }}">Weekly early warnings</a><a class="button" href="{{ route('reports.index') }}">Reports</a></div></header>
 @include('learning.errors')
 <form method="get" class="panel search">
 <label for="support-search">Apprentice name or reference</label><input id="support-search" name="search" value="{{ $search }}">
@@ -11,8 +11,11 @@
 @foreach($codes as $code => $label)<option value="{{ $code }}" @selected(request('marker') === $code)>{{ $code }} · {{ $label }}</option>@endforeach
 </select>
 <button name="view" value="all">All · {{ $allCount }}</button>
-<button name="view" value="needs-review" @if($view === 'needs-review') aria-current="true" @endif>Needs review · {{ $dueCount }}</button>
+<button name="view" value="needs-review" @if($view === 'needs-review') aria-current="true" @endif>Needs review · {{ $dueCount }} apprentices</button>
 </form>
+@if($employerMeeting)
+    @include('support.employer-meeting', ['meeting' => $employerMeeting])
+@endif
 <section class="panel">
 @forelse($rows as $row)
 @php($person = $row['person'])

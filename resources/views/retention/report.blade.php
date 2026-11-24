@@ -50,6 +50,7 @@
 </section>
 <section class="panel">
     <h2>Register attendance by programme outcome</h2>
+    <p><a href="{{ route('retention.employer-attendance') }}">View Kept at work by employer</a></p>
     <p>Uses saved registers in each apprenticeship's recorded date range, through the actual programme end date or today. The average uses apprentices with a calculable rate. If any expected session is unmarked, the apprentice's rate is withheld.</p>
     <div class="table-scroll"><table>
         <thead><tr><th scope="col">Programme outcome</th><th scope="col">Apprentices with a rate</th><th scope="col">Average attendance</th><th scope="col">Sessions attended</th><th scope="col">Sessions missed</th><th scope="col">Unmarked sessions</th></tr></thead>

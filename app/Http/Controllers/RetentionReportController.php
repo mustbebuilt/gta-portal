@@ -229,7 +229,7 @@ class RetentionReportController extends Controller
                 'marker_summary' => $markerSummary,
                 'early_warning' => RetentionEarlyWarning::evidence(
                     $checkIns->get($a->id, collect()), $attendance[$a->id]['rows'], $markerSummary,
-                    $a->start_date?->toDateString(), $attendanceThrough,
+                    $a->start_date?->toDateString(), $attendanceThrough, $outcome['status'] === 'Active',
                 ),
                 'exit_employment' => $outcome['end_date'] ? RetentionAnalysis::employmentAtExit($c) : null,
                 'planned_end' => RetentionAnalysis::plannedEnd($a),
