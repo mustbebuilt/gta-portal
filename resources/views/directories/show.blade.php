@@ -2,7 +2,7 @@
 @section('title', $record->name)
 @section('content')
 @php($noun=\App\Support\DirectoryCatalog::singular($kind))
-<header class="page-heading"><div><p class="eyebrow">{{ $title }}</p><h1>{{ $record->name }}</h1><p class="muted">{{ $record->active ? 'Active' : 'Inactive' }}</p></div><div class="toolbar"><a class="button" href="{{ route('directories.index',$kind) }}">Back to list</a><a class="button primary" href="{{ route('directories.edit',[$kind,$record->id]) }}">Edit {{ $noun }}</a></div></header>
+<header class="page-heading"><div><p class="eyebrow">{{ $title }}</p><h1>{{ $record->name }}</h1><p class="muted">{{ $record->active ? 'Active' : 'Inactive' }}</p></div><div class="toolbar"><a class="button" href="{{ route('directories.index',$kind) }}">Back to list</a>@if($kind === 'employers' && $record->active)<a class="button primary" href="{{ route('employer68.show',['link'=>$record->id]) }}">Link apprentice</a>@endif<a class="button" href="{{ route('directories.edit',[$kind,$record->id]) }}">Edit {{ $noun }}</a></div></header>
 @include('directories.next-steps')
 @if($kind === 'staff')
 <p><a class="button" href="{{ route('assignment-checks.index',['staff'=>$record->id,'view'=>'all']) }}">View this person’s apprentice assignments</a></p>

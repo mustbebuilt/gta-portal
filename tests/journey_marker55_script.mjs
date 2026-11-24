@@ -1,15 +1,16 @@
-import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
-const code=fs.readFileSync('public/assets/journey-marker55.js','utf8');let passed=0;
-function f({reduced=false,saved=null,denied=false,previous=true,empty=false}={}){const events={};const media={matches:reduced,addEventListener:(n,fn)=>events.media=fn};const attrs={};const button={hidden:true,disabled:false,setAttribute:(k,v)=>attrs[k]=v,addEventListener:(n,fn)=>events.button=fn};const note={};const classes=new Set();const img={style:{}};const marker={style:{},querySelector:()=>img};const current={getBoundingClientRect:()=>({left:0,top:180,width:100,height:40})};const prev={getBoundingClientRect:()=>({left:0,top:80,width:100,height:40})};const matrix={a:1,d:1,inverse(){return this;}};const path={ownerSVGElement:{getScreenCTM:()=>matrix},getTotalLength:()=>300,getPointAtLength:n=>({x:50,y:n})};const road={classList:{add:n=>classes.add(n),toggle:(n,on)=>on?classes.add(n):classes.delete(n)},querySelector:q=>q==='[data-journey-vehicle]'?(empty?null:marker):q==='[data-journey-current-stop]'?current:q==='[data-journey-path]'?path:previous?prev:null};const document={hidden:false,querySelector:q=>q==='[data-journey-road]'?road:q==='[data-journey-motion]'?button:note,addEventListener:(n,fn)=>events[n]=fn};let next=0;const frames=new Map();const writes=[];const window={matchMedia:()=>media,requestAnimationFrame:fn=>{frames.set(++next,fn);return next;},cancelAnimationFrame:id=>frames.delete(id),addEventListener:(n,fn)=>events[n]=fn};class DOMPoint{constructor(x,y){this.x=x;this.y=y;}matrixTransform(){return this;}}vm.runInNewContext(code,{document,window,DOMPoint,localStorage:{getItem:()=>{if(denied)throw Error();return saved;},setItem:(...v)=>{if(denied)throw Error();writes.push(v);}}});return{events,media,attrs,button,note,marker,classes,document,frames,writes,tick(t){const [id,fn]=frames.entries().next().value??[];if(fn){frames.delete(id);fn(t);}}};}
-let x=f({reduced:true});assert.equal(x.frames.size,0);assert.equal(x.button.disabled,true);assert.equal(x.attrs['aria-pressed'],'true');assert.ok(Math.abs(parseFloat(x.marker.style.top)-20)<.01);passed++;
-x=f({saved:'paused'});assert.equal(x.frames.size,0);assert.ok(x.classes.has('journey-motion-paused'));assert.equal(x.button.textContent,'Resume marker pulse');passed++;
-x=f();assert.equal(x.frames.size,1);x.tick(0);assert.ok(parseFloat(x.marker.style.top)<0);x.tick(2200);assert.equal(x.frames.size,0);assert.ok(Math.abs(parseFloat(x.marker.style.top)-20)<.01);passed++;
-x=f();x.events.button();assert.equal(x.frames.size,0);assert.ok(x.classes.has('journey-motion-paused'));assert.ok(Math.abs(parseFloat(x.marker.style.top)-20)<.01);assert.equal(x.writes[0][0],'gta-journey-motion');passed++;
-x.events.button();assert.equal(x.frames.size,0);assert.ok(!x.classes.has('journey-motion-paused'));passed++;
-x=f();x.media.matches=true;x.events.media();assert.equal(x.frames.size,0);assert.equal(x.button.disabled,true);passed++;
-x=f();x.document.hidden=true;x.events.visibilitychange();assert.equal(x.frames.size,0);assert.ok(x.classes.has('journey-motion-paused'));passed++;
-assert.doesNotThrow(()=>{x=f({denied:true});x.events.button();});passed++;
-x=f({empty:true});assert.equal(x.frames.size,0);assert.equal(x.button.hidden,true);passed++;
-x=f({previous:false});assert.equal(x.frames.size,0);assert.ok(Math.abs(parseFloat(x.marker.style.top)-20)<.01);passed++;
-x=f();x.events.resize();assert.equal(x.frames.size,0);assert.ok(Math.abs(parseFloat(x.marker.style.top)-20)<.01);passed++;
-console.log(JSON.stringify({passed,failed:0,actualBrowserRendered:false,scope:'Mock SVG/DOM geometry, finite travel, endpoint snap, pause/resume, reduced motion, storage failure, visibility, resize and empty-data fallback; no network/record writes'}));
+import { readFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
+
+const timelineStyle = readFileSync('public/assets/journey-marker55.css', 'utf8');
+const roadmapStyle = readFileSync('public/assets/progress66.css', 'utf8');
+const timelineView = readFileSync('resources/views/dashboard/journey.blade.php', 'utf8');
+const roadmapView = readFileSync('resources/views/progress67/roadmap.blade.php', 'utf8');
+
+assert.match(timelineStyle, /\.journey-vehicle\s*\{[^}]*box-shadow:/s);
+assert.match(roadmapStyle, /\.p67-current \.p67-stop\s*\{[^}]*box-shadow:/s);
+assert.doesNotMatch(timelineStyle, /animation:|@keyframes/);
+for (const markup of [timelineView, roadmapView]) {
+    assert.match(markup, /You are here/);
+    assert.doesNotMatch(markup, /p67-pulse|journey-marker55\.js/);
+}
+console.log('Both journey views use a steady glowing marker and a text label.');

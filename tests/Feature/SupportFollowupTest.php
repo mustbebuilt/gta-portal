@@ -21,7 +21,7 @@ class SupportFollowupTest extends TestCase
     }
     public function test_concern_counts_overlap_but_closed_concerns_never_enter_new_or_due_buckets(): void
     {
-        $this->concern(null,['acknowledged_at'=>null,'next_review'=>null]);$this->concern(null,['action_due'=>today()]);$this->concern(null,['status'=>'Closed','acknowledged_at'=>null,'next_review'=>null]);$r=$this->actingAs($this->actor())->get('/support')->assertOk();$c=$r->viewData('concernCounts');$this->assertSame(2,$c['open']);$this->assertSame(1,$c['new']);$this->assertSame(1,$c['overdue']);$this->assertSame(1,$c['today']);$this->assertSame(1,$c['weekly']);$this->assertSame(1,$c['dates']);$this->assertSame(1,$c['closed']);$this->get('/support?state=new')->assertViewHas('concernRows',fn($rows)=>$rows->total()===1);
+        $this->concern(null,['acknowledged_at'=>null,'next_review'=>null]);$this->concern(null,['action_due'=>today()]);$this->concern(null,['status'=>'Closed','acknowledged_at'=>null,'next_review'=>null]);$r=$this->actingAs($this->actor())->get('/support?state=open')->assertOk();$c=$r->viewData('concernCounts');$this->assertSame(2,$c['open']);$this->assertSame(1,$c['new']);$this->assertSame(1,$c['overdue']);$this->assertSame(1,$c['today']);$this->assertSame(1,$c['weekly']);$this->assertSame(1,$c['dates']);$this->assertSame(1,$c['closed']);$this->get('/support?state=new')->assertViewHas('concernRows',fn($rows)=>$rows->total()===1);
     }
     public function test_missing_action_date_is_a_check_not_overdue_or_due_today(): void
     {
@@ -33,11 +33,11 @@ class SupportFollowupTest extends TestCase
     }
     public function test_assigned_inclusion_scope_cannot_expand_with_search_or_plan_filters(): void
     {
-        $member=$this->actor('tutor');$a=Apprentice::factory()->create(['tutor_id'=>$member->id]);$outside=Apprentice::factory()->create();SupportCapability::create(['user_id'=>$member->id,'duty'=>'member','scope'=>'assigned','apprentice_ids'=>[],'group_ids'=>[]]);$this->concern($a);$this->plan($a);$this->concern($outside);$this->plan($outside);$this->actingAs($member)->get('/support')->assertOk()->assertSee($a->reference)->assertDontSee($outside->reference);$r=$this->get('/support?search='.$outside->reference.'&plan_state=overdue')->assertOk();$this->assertSame(0,$r->viewData('concernCounts')['open']);$this->assertSame(0,$r->viewData('planCounts')['all']);$a->tutor_id=null;$a->save();$this->get('/support')->assertViewHas('planCounts',fn($c)=>$c['all']===0);
+        $member=$this->actor('tutor');$a=Apprentice::factory()->create(['tutor_id'=>$member->id]);$outside=Apprentice::factory()->create();SupportCapability::create(['user_id'=>$member->id,'duty'=>'member','scope'=>'assigned','apprentice_ids'=>[],'group_ids'=>[]]);$this->concern($a);$this->plan($a);$this->concern($outside);$this->plan($outside);$this->actingAs($member)->get('/support?state=open')->assertOk()->assertSee($a->reference)->assertDontSee($outside->reference);$r=$this->get('/support?search='.$outside->reference.'&plan_state=overdue')->assertOk();$this->assertSame(0,$r->viewData('concernCounts')['open']);$this->assertSame(0,$r->viewData('planCounts')['all']);$a->tutor_id=null;$a->save();$this->get('/support?state=open')->assertViewHas('planCounts',fn($c)=>$c['all']===0);
     }
     public function test_private_case_plan_and_review_text_are_absent_from_summary_views(): void
     {
-        $a=Apprentice::factory()->create();$this->concern($a);$p=$this->plan($a);$p->reviews=[['active_snapshot'=>$p->active_plan,'next'=>'2026-11-20','notes'=>'PRIVATE REVIEW NOTES']];$p->save();$r=$this->actingAs($this->actor())->get('/support')->assertOk();foreach(['PRIVATE CONCERN BODY','PRIVATE TARGET TEXT','PRIVATE DRAFT SUPPORT','PRIVATE ACTIVE SUPPORT','PRIVATE APPROVAL REASON','PRIVATE REVIEW NOTES'] as $text){$r->assertDontSee($text);$this->assertStringNotContainsString($text,json_encode($r->viewData('planRows')->items()));}$this->assertFalse($r->viewData('concernRows')->first()['concern']->hasAttribute('initial_note'));
+        $a=Apprentice::factory()->create();$this->concern($a);$p=$this->plan($a);$p->reviews=[['active_snapshot'=>$p->active_plan,'next'=>'2026-11-20','notes'=>'PRIVATE REVIEW NOTES']];$p->save();$r=$this->actingAs($this->actor())->get('/support?state=open')->assertOk();foreach(['PRIVATE CONCERN BODY','PRIVATE TARGET TEXT','PRIVATE DRAFT SUPPORT','PRIVATE ACTIVE SUPPORT','PRIVATE APPROVAL REASON','PRIVATE REVIEW NOTES'] as $text){$r->assertDontSee($text);$this->assertStringNotContainsString($text,json_encode($r->viewData('planRows')->items()));}$this->assertFalse($r->viewData('concernRows')->first()['concern']->hasAttribute('initial_note'));
     }
     public function test_concern_and_plan_pagination_are_independent_and_keep_filters(): void
     {
@@ -45,7 +45,7 @@ class SupportFollowupTest extends TestCase
     }
     public function test_plan_states_keep_draft_closed_missing_and_known_dates_separate(): void
     {
-        $a=Apprentice::factory()->create();$this->plan($a);$this->plan($a,'Active','2026-11-13');$this->plan($a,'Active','2026-11-14');$this->plan($a,'Active',null);$this->plan($a,'Draft');$this->plan($a,'Closed');$r=$this->actingAs($this->actor())->get('/support')->assertOk();$this->assertSame(['all'=>6,'due'=>2,'overdue'=>1,'today'=>1,'upcoming'=>1,'checks'=>1,'draft'=>1,'closed'=>1],$r->viewData('planCounts'));
+        $a=Apprentice::factory()->create();$this->plan($a);$this->plan($a,'Active','2026-11-13');$this->plan($a,'Active','2026-11-14');$this->plan($a,'Active',null);$this->plan($a,'Draft');$this->plan($a,'Closed');$r=$this->actingAs($this->actor())->get('/support?state=open')->assertOk();$this->assertSame(['all'=>6,'due'=>2,'overdue'=>1,'today'=>1,'upcoming'=>1,'checks'=>1,'draft'=>1,'closed'=>1],$r->viewData('planCounts'));
     }
     public function test_latest_matching_approved_review_controls_due_date_and_draft_or_old_snapshot_cannot_reset_it(): void
     {
@@ -57,14 +57,14 @@ class SupportFollowupTest extends TestCase
     }
     public function test_sources_are_linked_and_get_preserves_cases_plans_versions_and_audits(): void
     {
-        $a=Apprentice::factory()->create();$c=$this->concern($a);$p=$this->plan($a);$before=[$c->fresh()->getAttributes(),$p->fresh()->getAttributes()];$r=$this->actingAs($this->actor())->get('/support')->assertOk()->assertSee(route('support.index',$a).'#concern-'.$c->id,false)->assertSee(route('support.plan',[$a,$p]),false);$this->assertSame($before,[$c->fresh()->getAttributes(),$p->fresh()->getAttributes()]);$this->assertDatabaseCount('learning_events',0);$this->assertDatabaseCount('marker_change_events',0);
+        $a=Apprentice::factory()->create();$c=$this->concern($a);$p=$this->plan($a);$before=[$c->fresh()->getAttributes(),$p->fresh()->getAttributes()];$r=$this->actingAs($this->actor())->get('/support?state=open')->assertOk()->assertSee(route('support.index',$a).'#concern-'.$c->id,false)->assertSee(route('support.plan',[$a,$p]),false);$this->assertSame($before,[$c->fresh()->getAttributes(),$p->fresh()->getAttributes()]);$this->assertDatabaseCount('learning_events',0);$this->assertDatabaseCount('marker_change_events',0);
     }
     public function test_unknown_concern_code_is_labelled_for_checking_without_breaking_worklist(): void
     {
-        $this->concern(null,['code'=>'UNKNOWN']);$this->actingAs($this->actor())->get('/support')->assertOk()->assertSee('Code needs source check');
+        $this->concern(null,['code'=>'UNKNOWN']);$this->actingAs($this->actor())->get('/support?state=open')->assertOk()->assertSee('Code needs source check');
     }
     public function test_invalid_queries_and_roles_are_refused_instead_of_showing_broader_private_lists(): void
     {
-        $this->actingAs($this->actor());foreach(['state=invalid','plan_state=invalid','search[]=x','page=0','plan_page=0'] as $q){$this->getJson('/support?'.$q)->assertUnprocessable();}foreach(['apprentice','employer','tutor','careers_adviser'] as $role){$this->actingAs($this->actor($role))->get('/support')->assertForbidden();}
+        $this->actingAs($this->actor());foreach(['state=invalid','plan_state=invalid','search[]=x','page=0','plan_page=0'] as $q){$this->getJson('/support?'.$q)->assertUnprocessable();}foreach(['apprentice','employer','tutor','careers_adviser'] as $role){$this->actingAs($this->actor($role))->get('/support?state=open')->assertForbidden();}
     }
 }

@@ -45,7 +45,7 @@ class ConsolidatedPortalPackTest extends TestCase
         }
         $first = SupportConcern::where('code','IM34')->firstOrFail();
         $second = SupportConcern::where('code','IM36')->firstOrFail();
-        $this->get(route('support.index',$person))->assertOk()->assertSee('Save formal review');
+        $this->get(route('support.index',$person))->assertOk()->assertSee('Save review');
         $this->post(route('support.marker-review',$first), [
             'version'=>$first->version,'date'=>'2026-11-21','frequency'=>'monthly','outcome'=>'Private review text',
             'action'=>'Contact employer', 'owner'=>$admin->id, 'due'=>'2026-11-24',
@@ -53,7 +53,7 @@ class ConsolidatedPortalPackTest extends TestCase
         $this->assertSame('2026-12-21', $first->fresh()->next_review->toDateString());
         $this->assertNull($second->fresh()->next_review);
         $register = $this->get(route('support.worklist',['view'=>'needs-review']))->assertOk()
-            ->assertDontSee('Private review text')->assertDontSee('Contact employer');
+            ->assertDontSee('Private review text')->assertSee('Contact employer');
         $this->assertSame([$second->id], $register->viewData('rows')->items()[0]['due']->pluck('id')->all());
         $this->get(route('support.report'))->assertOk()->assertDontSee('Private review text');
         $this->post(route('support.complete-action',$first), [

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Apprentice;
 use App\Models\SupportConcern;
+use App\Models\SupportMarkerSchedule71;
+use App\Models\SupportSharedAction71;
 use App\Models\SupportPlan;
 use App\Models\TeachingInstruction;
 use App\Models\User;
@@ -30,6 +32,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class SupportController extends Controller
 {
+    private const PRIVATE_CACHE = ['Cache-Control'=>'private, no-store', 'Referrer-Policy'=>'same-origin'];
     private function team(Request $r, ?Apprentice $apprentice = null): bool
     {
         return SupportAccess::team($r->user(), $apprentice);
@@ -55,25 +58,33 @@ class SupportController extends Controller
         return User::whereIn('id', array_filter([$a->tutor_id, $a->maths_tutor_id, $a->english_tutor_id]))->where('active', true)->get()->filter(fn ($u) => Access::tutor($u, $a) || (\App\Support\StaffDuties::assigned($u,$a,'maths_tutor') || \App\Support\StaffDuties::assigned($u,$a,'english_tutor')))->pluck('id')->all();
     }
 
-    public function worklist(Request $r): View
+    public function worklist(Request $r): Response
     {
         abort_unless($this->team($r), 403);
         $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'view' => ['nullable','in:all,needs-review'], 'by' => ['nullable','date_format:Y-m-d'], 'marker' => ['nullable',Rule::in(array_keys($this->codes()))], 'state' => ['nullable', Rule::in(SupportFollowup::CONCERN_VIEWS)], 'plan_state' => ['nullable', Rule::in(SupportFollowup::PLAN_VIEWS)], 'page' => ['nullable', 'integer', 'min:1'], 'plan_page' => ['nullable', 'integer', 'min:1'], 'apprentice_page' => ['nullable', 'integer', 'min:1']]);
-        $search = trim($data['search'] ?? ''); $state = $data['state'] ?? 'open'; $planState = $data['plan_state'] ?? 'all';
+        $search = trim($data['search'] ?? '');
         $allowedIds = SupportAccess::ids($r->user());
-        $people = Apprentice::whereIn('id', $allowedIds)->get();
-        if ($search !== '') { $people = $people->filter(fn ($a) => Str::contains(Str::lower($a->first_name.' '.$a->last_name.' '.$a->reference), Str::lower($search))); }
-        $concerns = SupportConcern::with(['apprentice', 'owner:id,name,role,active'])->whereIn('apprentice_id', $people->pluck('id'))->orderBy('created_at')->orderBy('id')->get(['id', 'apprentice_id', 'owner_id', 'code', 'status', 'action_due', 'next_action', 'next_review', 'acknowledged_at', 'created_at', 'version']);
-        $concernSummary = SupportFollowup::concerns($concerns);
-        $plans = SupportPlan::whereIn('apprentice_id', $people->pluck('id'))->get(['id', 'apprentice_id', 'status', 'active_plan', 'reviews']);
-        $planSummary = SupportFollowup::plans($plans, $people);
-        if ($r->filled('view')) {
-            return view('support.register', $this->registerData($r, $people, $concerns, $data) + [
-                'search' => $search,
-                'employerMeeting' => ($data['view'] ?? null) === 'needs-review' ? $this->employerMeeting($allowedIds) : null,
-            ]);
+        $people = Apprentice::whereIn('id', $allowedIds)->with('groupRecord')->get();
+        if ($search !== '') {
+            $people = $people->filter(fn ($a) => Str::contains(Str::lower($a->first_name.' '.$a->last_name.' '.$a->reference), Str::lower($search)));
         }
-        return view('support.worklist', ['supportPeople' => SupportFollowup::paginate($people->sortBy(fn ($a) => Str::lower($a->last_name.' '.$a->first_name.' '.$a->reference))->values(), $r, 'apprentice_page'), 'concernRows' => SupportFollowup::paginate($concernSummary['rows']->filter(fn ($row) => $row['flags'][$state])->values(), $r, 'page'), 'concernCounts' => $concernSummary['counts'], 'planRows' => SupportFollowup::paginate($planSummary['rows']->filter(fn ($row) => $row['flags'][$planState])->values(), $r, 'plan_page'), 'planCounts' => $planSummary['counts'], 'search' => $search, 'state' => $state, 'planState' => $planState, 'codes' => $this->codes()]);
+        $concerns = SupportConcern::with(['apprentice', 'owner:id,name,role,active'])
+            ->whereIn('apprentice_id', $people->pluck('id'))->oldest()->orderBy('id')
+            ->get(['id', 'apprentice_id', 'owner_id', 'code', 'status', 'action_due', 'next_action', 'next_review', 'acknowledged_at', 'created_at', 'version']);
+        $plans = SupportPlan::whereIn('apprentice_id', $people->pluck('id'))->get(['id', 'apprentice_id', 'status', 'active_plan', 'reviews', 'activities']);
+        if (!$r->hasAny(['state', 'plan_state', 'plan_page', 'apprentice_page']) || $r->filled('view')) {
+            $data['view'] ??= 'needs-review';
+            return response()->view('support.register', $this->registerData($r, $people, $concerns, $plans, $data) + [
+                'search' => $search,
+                'employerMeeting' => $data['view'] === 'needs-review' ? $this->employerMeeting($allowedIds) : null,
+            ], 200, self::PRIVATE_CACHE);
+        }
+
+        $state = $data['state'] ?? 'open';
+        $planState = $data['plan_state'] ?? 'all';
+        $concernSummary = SupportFollowup::concerns($concerns);
+        $planSummary = SupportFollowup::plans($plans, $people);
+        return response()->view('support.worklist', ['supportPeople' => SupportFollowup::paginate($people->sortBy(fn ($a) => Str::lower($a->last_name.' '.$a->first_name.' '.$a->reference))->values(), $r, 'apprentice_page'), 'concernRows' => SupportFollowup::paginate($concernSummary['rows']->filter(fn ($row) => $row['flags'][$state])->values(), $r, 'page'), 'concernCounts' => $concernSummary['counts'], 'planRows' => SupportFollowup::paginate($planSummary['rows']->filter(fn ($row) => $row['flags'][$planState])->values(), $r, 'plan_page'), 'planCounts' => $planSummary['counts'], 'search' => $search, 'state' => $state, 'planState' => $planState, 'codes' => $this->codes()], 200, self::PRIVATE_CACHE);
     }
 
     private function employerMeeting(array $allowedIds): array
@@ -98,47 +109,78 @@ class SupportController extends Controller
         return ['available' => true, 'from' => $from, 'through' => $through, 'items' => $items];
     }
 
-    private function registerData(Request $request, $people, $concerns, array $filters): array
+    private function registerData(Request $request, $people, $concerns, $plans, array $filters): array
     {
         $by = $filters['by'] ?? today()->toDateString();
-        $concerns = $concerns->groupBy('apprentice_id');
-        $markers = DB::table('apprentice_markers')->whereIn('apprentice_id', $people->pluck('id'))
+        $ids = $people->pluck('id');
+        $today = today()->toDateString();
+        $schedules = SupportMarkerSchedule71::whereIn('apprentice_id', $ids)->get()->keyBy('support_concern_id');
+        $shared = SupportSharedAction71::with('owner:id,name')->whereIn('apprentice_id', $ids)
+            ->where('state', 'Open')->orderBy('due_date')->orderBy('id')->get()->groupBy('apprentice_id');
+        $markers = DB::table('apprentice_markers')->whereIn('apprentice_id', $ids)
             ->get(['apprentice_id', 'code'])->groupBy('apprentice_id');
-        $rows = $people->sortBy([['last_name','asc'], ['first_name','asc']])->map(function ($person) use ($concerns, $markers, $by) {
+        $concerns = $concerns->groupBy('apprentice_id');
+        $plans = $plans->groupBy('apprentice_id');
+        $rows = $people->sortBy([['last_name','asc'], ['first_name','asc']])->map(function ($person) use ($concerns, $markers, $schedules, $shared, $plans, $by, $today) {
             $cases = $concerns->get($person->id, collect());
             $open = $cases->where('status', '!=', 'Closed');
             $codes = $open->pluck('code')->filter()->merge($markers->get($person->id, collect())->pluck('code'))->unique();
-            $due = $open->filter(fn ($marker) => !$marker->next_review || $marker->next_review->toDateString() <= $by);
+            $due = $open->filter(function ($marker) use ($schedules, $by) {
+                $schedule = $schedules->get($marker->id);
+                return $schedule
+                    ? (!$schedule->first_review_completed || !$schedule->next_due_date || $schedule->next_due_date->toDateString() <= $by)
+                    : ($marker->status === 'New' || !$marker->next_review || $marker->next_review->toDateString() <= $by);
+            });
+            $overdue = $due->contains(function ($marker) use ($schedules, $today) {
+                $date = $schedules->get($marker->id)?->next_due_date ?? $marker->next_review;
+
+                return $date && $date->toDateString() < $today;
+            });
             $unlinked = $codes->diff($cases->pluck('code'))->reject(fn ($code) =>
                 in_array($code, ['IM18','IM19','IM27','IM28','IM32','IM33'], true));
+            $actions = $open->filter(fn ($marker) => filled($marker->next_action))->map(fn ($marker) => [
+                'title' => $marker->next_action, 'owner' => $marker->owner?->name, 'due' => $marker->action_due?->toDateString(),
+            ])->values()->concat($shared->get($person->id, collect())->map(fn ($action) => [
+                'title' => $action->details['summary'] ?? 'Follow-up action', 'owner' => $action->owner?->name, 'due' => $action->due_date->toDateString(),
+            ]));
+            foreach ($plans->get($person->id, collect())->where('status', 'Active') as $plan) {
+                foreach ($plan->activities ?? [] as $activity) {
+                    $followup = $activity['followup'] ?? null;
+                    if ($followup && empty($followup['completed_at'])) {
+                        $actions->push(['title'=>$followup['note'], 'owner'=>$followup['owner_name'], 'due'=>$followup['due']]);
+                    }
+                }
+            }
+
             return ['person' => $person, 'open' => $open, 'codes' => $codes, 'due' => $due, 'unlinked' => $unlinked,
-                'needs_review' => $due->isNotEmpty() || $unlinked->isNotEmpty()];
+                'next_action' => $actions->sortBy(fn ($action) => $action['due'] ?? '9999-12-31')->first(),
+                'needs_review' => $due->isNotEmpty() || $unlinked->isNotEmpty(), 'overdue' => $overdue];
         })->when(isset($filters['marker']), fn ($rows) => $rows->filter(fn ($row) => $row['codes']->contains($filters['marker'])));
+
         $dueCount = $rows->where('needs_review', true)->count();
         $allCount = $rows->count();
+        $overdueActions = $rows->filter(fn ($row) => filled($row['next_action']['due'] ?? null) && $row['next_action']['due'] < today()->toDateString())->count();
         if (($filters['view'] ?? 'all') === 'needs-review') {
-            $rows = $rows->where('needs_review', true);
+            $rows = $rows->where('needs_review', true)->sortByDesc('overdue');
         }
 
         return ['rows' => SupportFollowup::paginate($rows->values(), $request, 'page'), 'allCount' => $allCount,
-            'dueCount' => $dueCount, 'by' => $by, 'codes' => $this->codes(), 'view' => $filters['view'] ?? 'all'];
+            'dueCount' => $dueCount, 'by' => $by, 'codes' => $this->codes(), 'view' => $filters['view'] ?? 'all',
+            'overdueActions' => $overdueActions];
     }
 
-    public function registerReport(Request $request): View
+    public function registerReport(Request $request): Response
     {
         abort_unless($this->team($request), 403);
-        $people = Apprentice::whereIn('id', SupportAccess::ids($request->user()))->get();
-        $concerns = SupportConcern::whereIn('apprentice_id', $people->pluck('id'))
-            ->get(['id','apprentice_id','code','status','action_due','next_review','acknowledged_at']);
-        $data = $this->registerData($request, $people, $concerns, []);
+        $people = Apprentice::whereIn('id', SupportAccess::ids($request->user()))->with('groupRecord')->get();
+        $concerns = SupportConcern::with('owner:id,name')->whereIn('apprentice_id', $people->pluck('id'))->get();
+        $plans = SupportPlan::whereIn('apprentice_id', $people->pluck('id'))->get(['id','apprentice_id','status','activities','reviews']);
+        $data = $this->registerData($request, $people, $concerns, $plans, []);
         $open = $concerns->where('status', '!=', 'Closed');
         $summary = $open->whereNotNull('code')->groupBy('code')->map(fn ($markers) => $markers->pluck('apprentice_id')->unique()->count());
-        $actions = $open->filter(fn ($marker) => $marker->action_due?->lt(today()))->pluck('apprentice_id')->unique()->count();
-
-        $plans = SupportPlan::whereIn('apprentice_id', $people->pluck('id'))->get(['activities','reviews']);
         $delivered = $plans->sum(fn ($plan) => count($plan->activities ?? []));
         $impact = $plans->sum(fn ($plan) => count($plan->reviews ?? []));
-        return view('reports.support', $data + ['summary' => $summary, 'overdueActions' => $actions, 'delivered' => $delivered, 'impact' => $impact]);
+        return response()->view('reports.support', $data + ['summary' => $summary, 'delivered' => $delivered, 'impact' => $impact], 200, self::PRIVATE_CACHE);
     }
 
     public function trackMarker(Request $request, Apprentice $apprentice): RedirectResponse
@@ -189,6 +231,9 @@ class SupportController extends Controller
             $this->version($request, $marker);
             $history = $marker->history ?? [];
             $previous = collect($history)->last(fn ($event) => ($event['event'] ?? '') === 'formal_marker_review');
+            if (SupportMarkerSchedule71::where('support_concern_id', $marker->id)->exists()) {
+                throw ValidationException::withMessages(['date' => 'Use the scheduled marker review on the support record.']);
+            }
             if ($marker->status === 'Closed' || !$marker->code || $data['date'] < $marker->created_at->toDateString()
                 || ($previous && $data['date'] < $previous['date'])) {
                 throw ValidationException::withMessages(['date' => 'Use a current open marker and a date within its review history.']);
@@ -251,13 +296,15 @@ class SupportController extends Controller
         return back()->with('status', 'Action completed.');
     }
 
-    public function index(Request $r, Apprentice $apprentice): View
+    public function index(Request $r, Apprentice $apprentice): Response
     {
         abort_unless($this->raiseAllowed($r, $apprentice), 403);
         $team = $this->team($r, $apprentice);
         $concerns = SupportConcern::with('owner')->where('apprentice_id', $apprentice->id)->when(! $team, fn ($q) => $q->where('raised_by', $r->user()->id))->orderByDesc('created_at')->get();
 
-        return view('support.index', ['apprentice' => $apprentice, 'team' => $team, 'lead' => $this->lead($r, $apprentice), 'concerns' => $concerns, 'codes' => $this->codes(), 'markers' => $team ? DB::table('apprentice_markers')->where('apprentice_id', $apprentice->id)->pluck('code')->all() : [], 'markerHistory' => $team ? DB::table('marker_change_events')->where('apprentice_id', $apprentice->id)->orderByDesc('id')->get() : collect(), 'owners' => $team ? SupportAccess::owners($apprentice) : collect(), 'instructionWriter' => SupportAccess::writer($r->user(), $apprentice) || ExecutiveAccess::enabled($r), 'instructionApprover' => SupportAccess::approver($r->user(), $apprentice) || ExecutiveAccess::enabled($r), 'instructions' => $team ? TeachingInstruction::where('apprentice_id', $apprentice->id)->get() : collect(), 'plans' => $team ? SupportPlan::where('apprentice_id', $apprentice->id)->get() : collect(), 'recipients' => $team ? User::whereIn('id', $this->recipients($apprentice))->where('active', true)->get() : collect()]);
+        $schedules = $team ? SupportMarkerSchedule71::where('apprentice_id', $apprentice->id)->get()->keyBy('support_concern_id') : collect();
+        $sharedActions = $team ? SupportSharedAction71::with('owner:id,name')->where('apprentice_id', $apprentice->id)->orderBy('due_date')->get() : collect();
+        return response()->view('support.index', ['apprentice' => $apprentice, 'schedules' => $schedules, 'sharedActions' => $sharedActions, 'team' => $team, 'lead' => $this->lead($r, $apprentice), 'concerns' => $concerns, 'codes' => $this->codes(), 'markers' => $team ? DB::table('apprentice_markers')->where('apprentice_id', $apprentice->id)->pluck('code')->all() : [], 'markerHistory' => $team ? DB::table('marker_change_events')->where('apprentice_id', $apprentice->id)->orderByDesc('id')->get() : collect(), 'owners' => $team ? SupportAccess::owners($apprentice) : collect(), 'instructionWriter' => SupportAccess::writer($r->user(), $apprentice) || ExecutiveAccess::enabled($r), 'instructionApprover' => SupportAccess::approver($r->user(), $apprentice) || ExecutiveAccess::enabled($r), 'instructions' => $team ? TeachingInstruction::where('apprentice_id', $apprentice->id)->get() : collect(), 'plans' => $team ? SupportPlan::where('apprentice_id', $apprentice->id)->get() : collect(), 'recipients' => $team ? User::whereIn('id', $this->recipients($apprentice))->where('active', true)->get() : collect()], 200, self::PRIVATE_CACHE);
     }
 
     public function raise(Request $r, Apprentice $apprentice): RedirectResponse
@@ -693,7 +740,7 @@ class SupportController extends Controller
             $this->audit($r, $p->apprentice_id, $p->id, 'delivered_support_recorded');
         });
 
-        return back()->with('status', 'Actual support activity recorded. Minutes are not automatically OTJ hours or an ALS funding claim; tasks and formal reviews remain separate.');
+        return back()->with('status', 'Support activity saved.');
     }
 
     public function uploadPlanEvidence(Request $r, SupportPlan $plan): RedirectResponse

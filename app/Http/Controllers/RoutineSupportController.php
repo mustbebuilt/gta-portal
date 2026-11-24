@@ -31,6 +31,11 @@ class RoutineSupportController extends Controller
             'review'=>['required','date_format:Y-m-d','after_or_equal:today'],
             'change_reason'=>['nullable','string','max:2000'],'funding'=>['prohibited'],'code'=>['prohibited'],'concern_ids'=>['prohibited']]);
         $p=RoutineSupport::save($r->user(),(int)$r->session()->get('auth_version'),$apprentice,$plan,$d);
+        if ($r->boolean('return_to_workspace')) {
+            return to_route('support.index', $apprentice)->withFragment('quick-support-log')
+                ->with('status', $p->status === 'Active' ? 'Routine support is active. You can now log a session.' : 'Routine support draft saved.');
+        }
+
         return to_route('routine-support.show',[$apprentice,$p])->with('status',$p->status==='Active'?'Routine support saved and active. No marker, funding claim, OTJ or employer sharing was created.':'Private draft saved. It is not active support.');
     }
 }

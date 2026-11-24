@@ -374,6 +374,7 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/tasks/{task}/original-pdf', [LearningTaskController::class, 'pdf'])->name('tasks.pdf');
     Route::get('/tasks/{task}/evidence/{evidence}', [LearningTaskController::class, 'download'])->name('tasks.evidence.download');
     Route::get('/maths-english', [EnglishMathsController::class, 'caseload'])->name('em.caseload');
+    Route::post('/apprentices/{apprentice}/maths-english/setup-assessments', [EnglishMathsController::class, 'saveSetupAssessments'])->name('em.setup-assessments.save');
     Route::post('/apprentices/{apprentice}/maths-english/requirements', [EnglishMathsController::class, 'saveRequirements'])->name('em.requirements.save');
     Route::get('/apprentices/{apprentice}/maths-english', [EnglishMathsController::class, 'index'])->name('em.index');
     Route::post('/apprentices/{apprentice}/topics', [EnglishMathsController::class, 'assign'])->name('topics.assign');

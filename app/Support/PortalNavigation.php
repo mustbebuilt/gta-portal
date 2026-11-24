@@ -12,7 +12,6 @@ class PortalNavigation
         $item=fn(string $label,string $route,array $parameters=[],array $patterns=[],?bool $current=null)=>[
             'label'=>$label,'href'=>route($route,$parameters),'current'=>$current??$request->routeIs(...($patterns?:[$route]))];
         $primary=[];$groups=[];
-        $primary[]=$item('Quick actions','quick-actions.index',[],['quick-actions.*']);
         if($u->role==='employer') {$primary[]=$item('Getting started','employer-start.index',[],['employer-start.*']);$primary[]=$item('My employer actions','employer-actions.index',[],['employer-actions.index','employer-actions.show','employer-actions.respond']);}
         if(StaffAttention::allowed($u)) {$primary[]=$item('Needs attention','attention.index');}
         if($u->role==='apprentice') {$primary[]=$item('My next step','experience.home');$primary[]=$item('Getting started','getting-started.index',[],['getting-started.*']);}
@@ -27,17 +26,23 @@ class PortalNavigation
         if ($reports) {
             $primary[] = $item('Reports','reports.index',[],['reports.index', ...array_keys($reports), 'visual-reports.pdf', 'historical-cohorts.*']);
         }
-        if(in_array($u->role,['admin','ceo','tutor','apprentice','employer','mentor'],true)||StaffDuties::has($u,'mentor')||($u->role==='manager'&&CentreManagerAccess::workspace($u))) {$primary[]=$item($u->role==='apprentice'?'My progress':'Progress reporting','progress66.index',[],['progress66.*']);}
+        if(in_array($u->role,['admin','ceo','tutor','apprentice','employer','mentor'],true)||StaffDuties::has($u,'mentor')||($u->role==='manager'&&CentreManagerAccess::workspace($u))) {$primary[]=$item($u->role==='apprentice'?'My progress':'View progress','progress66.index',[],['progress66.*']);}
         $links=[];
         if(Gate::forUser($u)->allows('viewAny',Apprentice::class)) {
-            $links[]=$item('Apprentices','apprentices.index',[],['apprentices.*','learning.*','tasks.*','blocks.*','plans.*','delivery.*','actions.*','otj.*','extra.*','scorecards.*']);
+            $primary[]=$item('Apprentices','apprentices.index',[],['apprentices.*','learning.*','tasks.*','blocks.*','plans.*','delivery.*','actions.*','otj.*','extra.*','scorecards.*']);
+        }
+        if(Gate::forUser($u)->allows('create', Apprentice::class)) {
+            $primary[]=$item('Add apprentice','setup68.index',[],['setup68.*']);
+            $primary[]=$item('Add or link employer','employer68.show',[],['employer68.*']);
         }
         if(TaskLibrary::allowed($u)) {$links[]=$item('Task library','task-library.index',[],['task-library.*']);}
         if(in_array($u->role,['admin','ceo','tutor','apprentice','functional_skills_tutor'],true)||StaffDuties::has($u,'maths_tutor')||StaffDuties::has($u,'english_tutor')) {
             $links[]=$item('Maths and English','em.caseload',[],['em.*','topics.*','qualifications.*']);
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)) {
-            $links[]=$item('Apprentice Register','attendance.index',[],['attendance.*']);$links[]=$item('Session operations','session-operations.index',[],['session-operations.*','session-changes.*','register-actions.*']);$links[]=$item('Work to mark','marking.index',[],['marking.*']);
+            $primary[]=$item('Apprentice register','attendance.index',[],['attendance.*']);
+            $primary[]=$item('Work to mark','marking.index',[],['marking.*']);
+            $links[]=$item('Register changes','session-operations.index',[],['session-operations.*','session-changes.*','register-actions.*']);
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)){$links[]=$item('Gateway preparation','gateway.index',[],['gateway.*']);}
         if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'Timetable','centre-planning.index',[],['centre-planning.*','work-moves.*','optimiser.*','timetable-duties.*','timetable-governance.*','timetable-management.*']);}
@@ -45,31 +50,33 @@ class PortalNavigation
         if($u->role==='apprentice'){$links[]=$item('My calendar','calendar.index',[],['calendar.*']);}
         if(CentreManagerAccess::workspace($u)){$links[]=$item('Centre oversight','centre-oversight.index',[],['centre-oversight.*']);}
         if(CentreFollowups::inbox($u)){$links[]=$item('Centre follow-ups','centre-followups.index',[],['centre-followups.*']);}
-        $group('training','Apprentices & training',$links);
+        $group('training','Training tools',$links);
         $links=[];
-        if(ReviewReminders::allowed($u)) {$links[]=$item('Reviews','reviews.index',[],['reviews.*']);}
+        if(ReviewReminders::allowed($u)) {$primary[]=$item('Reviews','reviews.index',[],['reviews.*','review-appointments.*','electronic-reviews.*','review-authority.*','review-workspace.*']);}
         if(in_array($u->role,['admin','ceo','apprentice'],true)||StaffDuties::has($u,'careers_adviser')) {$links[]=$item('Careers','careers.worklist',[],['careers.*']);}
-        if(in_array($u->role,['admin','ceo','tutor','apprentice','employer'],true)||StaffDuties::has($u,'mentor')){$links[]=$item('Review appointments','review-appointments.index',[],['review-appointments.*']);$links[]=$item('Review signing','electronic-reviews.index',[],['electronic-reviews.*','review-authority.*']);}
+        if(in_array($u->role,['apprentice','employer'],true)){$links[]=$item('Review appointments','review-appointments.index',[],['review-appointments.*']);$links[]=$item('Review signing','electronic-reviews.index',[],['electronic-reviews.*','review-authority.*']);}
         if(LeaverDestinations::allowed($u)) {$links[]=$item('Leaver follow-up','destinations.index',[],['destinations.*']);}
-        if(ReviewReminders::allowed($u)){$links[]=$item('Prepare reviews','review-workspace.index',[],['review-workspace.*']);}
         $group('reviews-careers','Reviews & Careers',$links);
         $links=[];
         if(SupportAccess::team($u)) {
-            $links[]=$item('Support and Retention Register','support.worklist',['view'=>'all'],[], $request->routeIs('support.*')&&!$request->routeIs('support.permissions','support.report'));
-            $links[]=$item('Support review reminders','support-review-reminders.index',[],['support-review-reminders.*']);
+            $primary[]=$item('Support and Retention Register','support.worklist',[],[],
+                $request->routeIs('support.*','support-register71.*','routine-support.*','support-review-reminders.*')
+                && !$request->routeIs('support.permissions','support.report'));
         }
         if(QuestionnaireLinks::canView($u)) {$links[]=$item('Questionnaires','questionnaires.index',[],['questionnaires.index','portal-questionnaires.*']);}
         if($u->role==='apprentice'||ApprenticeExperience::queueAllowed($u)) {$links[]=$item($u->role==='apprentice'?'My help & achievements':'Help & achievement responses','experience.index',[],['experience.index','experience.create','experience.respond']);}
         if(in_array($u->role,['apprentice','employer'],true)||SupportAccess::team($u)) {$links[]=$item('Workplace support sharing','workplace-support.index',[],['workplace-support.*']);}
         if(Gate::forUser($u)->allows('view-employer-resources')) {$links[]=$item('Employer & Mentor Resources','employer-resources.index',[],['employer-resources.*']);}
-        $group('support','Support',$links);
+        $group('support','Support tools',$links);
         $manage=Gate::forUser($u)->allows('manage-directories');$links=[];
         if(!in_array($u->role,['apprentice','employer'],true)) {$links[]=$item('Staff development','staff.index',[],['staff.*']);}
         if($u->role!=='apprentice') {$links[]=$item('Case studies','cases.index',[],['cases.*']);}
         if($manage) {$links[]=$item('Curriculum source checks','curriculum-sources.index',[],['curriculum-sources.*']);}
         if(StaffAttention::allowed($u)){$links[]=$item('Staff follow-up','operations-desk.index',[],['operations-desk.*']);}
         if(SavedPortalWork::allowed($u)){$links[]=$item('Saved work','saved-work.index',[],['saved-work.*']);}
-        $group('staff-quality','Staff & quality',$links);
+        if($u->role==='apprentice') {$primary[]=$item('Quick actions','quick-actions.index',[],['quick-actions.*']);}
+        else {$links[]=$item('Quick actions','quick-actions.index',[],['quick-actions.*']);}
+        $group('staff-quality','Other work',$links);
         $links=[];
         if($manage) {
             $links[]=$item('Portal setup','setup.index',[],['setup.*','assignment-checks.*']);
@@ -109,6 +116,27 @@ class PortalNavigation
         $links[]=$item('Confirm email','account.email',[],['account.email*']);$links[]=$item('Change password','account.password',[],['account.password*']);
         if($u->role==='apprentice'){$links[]=$item('My reminder status','communications.own');}
         $group('account','My account',$links);
+        // Creation stays on Home and the relevant list; keep occasional follow-up tools in their existing group.
+        $primary = array_values(array_filter($primary, fn ($link) => !in_array($link['label'], ['Add apprentice', 'Add or link employer'], true)));
+        $moveTo = ['Needs attention'=>'staff-quality','Staff handovers'=>'staff-quality','My responsibilities'=>'staff-quality',
+            'Quick actions'=>'support'];
+        foreach ($primary as $key => $link) {
+            if (!isset($moveTo[$link['label']])) { continue; }
+            foreach ($groups as &$section) {
+                if ($section['id'] !== $moveTo[$link['label']]) { continue; }
+                array_unshift($section['links'], $link);
+                $section['open'] = $section['open'] || $link['current'];
+                unset($primary[$key]);
+                break;
+            }
+            unset($section);
+        }
+        $primary = array_values($primary);
+        $daily = ['My next step', 'Dashboard', 'Apprentices', 'Add apprentice', 'Add or link employer',
+            'View progress', 'My progress', 'Apprentice register', 'Work to mark', 'Reviews', 'Support and Retention Register', 'Reports'];
+        $priority = array_flip($daily);
+        usort($primary, fn ($first, $second) =>
+            ($priority[$first['label']] ?? count($daily)) <=> ($priority[$second['label']] ?? count($daily)));
         return ['primary'=>$primary,'groups'=>$groups,'help'=>$item('Help and how to','help.index',[],['help.*'])];
     }
 }

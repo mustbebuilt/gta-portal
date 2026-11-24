@@ -386,3 +386,5 @@ Artisan::command('gta:weekly-retention {--record : Store the current weekly chec
     ->when(fn () => config('weekly_retention.scheduled'));
 
 require __DIR__.'/setup68-console.php';
+
+require __DIR__.'/pack82-console.php';

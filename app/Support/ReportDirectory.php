@@ -12,6 +12,9 @@ final class ReportDirectory
         if (in_array($user->role, ['admin', 'ceo', 'tutor', 'apprentice'], true)) {
             $links += ['visual-reports.index' => 'Visual reports', 'dashboard.report' => 'Operational report'];
         }
+        if (in_array($user->role, ['admin', 'ceo', 'tutor'], true)) {
+            $links['training-gaps72.index'] = 'Training gaps';
+        }
         if (LearningAccess::manager($user)) {
             $links += [
                 'retention.report' => 'Retention and Early Leaver Report',

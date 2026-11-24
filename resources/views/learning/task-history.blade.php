@@ -3,9 +3,9 @@
     @forelse(array_reverse($task->submissions ?? []) as $submission)
         @php($decision = $submission['decision'] ?? null)
         @php($sourceFields = $decision['source_fields'] ?? [])
-        @php($submittedAt = $submission['submitted_at'] ?? null)
         <details>
             <summary>Version {{ $submission['version'] }} · {{ $decision ? ($isKnowledge ? ($decision['status'] === 'Approved' ? 'Pass' : 'Refer') : $decision['status']) : 'Awaiting marking' }}</summary>
+            @php($submittedAt = $submission['submitted_at'] ?? null)
             <p>{{ $submittedAt ? 'Submitted '.$submittedAt : ($isKnowledge ? 'Paper assessment record' : 'Submission date not recorded') }}</p>
             @if($decision)
                 @if($isKnowledge && ($sourceFields['marks_available'] ?? 0) > 0)

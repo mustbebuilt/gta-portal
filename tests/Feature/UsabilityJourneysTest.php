@@ -33,7 +33,7 @@ class UsabilityJourneysTest extends TestCase
         $this->actingAs($member)->get('/support?apprentice_page=2&state=overdue')
             ->assertOk()->assertDontSee($outside->reference)->assertDontSee('Manage markers')
             ->assertViewHas('supportPeople', fn ($rows) => $rows->total() === 23 && count($rows->items()) === 3);
-        $this->get('/support?search='.$outside->reference)->assertViewHas('supportPeople', fn ($rows) => $rows->total() === 0);
+        $this->get('/support?view=all&search='.$outside->reference)->assertViewHas('rows', fn ($rows) => $rows->total() === 0);
         $this->get('/apprentices/'.$outside->id.'/support')->assertForbidden();
         $this->getJson('/support?apprentice_page=0')->assertUnprocessable();
         $this->getJson('/support?apprentice_page[]=2')->assertUnprocessable();

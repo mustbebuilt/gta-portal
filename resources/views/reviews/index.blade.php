@@ -1,12 +1,15 @@
 @extends('layout')
 @section('title','Progress reviews')
 @section('content')
-<p><a class="button primary" href="{{ route('review-workspace.index') }}">Prepare reviews and check saved drafts</a></p>
-<header class="page-heading"><div><h1>Progress reviews</h1><p>Prepare review content, check externally signed copies and follow the next tracked meeting date.</p></div></header>
+<header class="page-heading"><div><h1>Progress reviews</h1></div></header>
 @include('learning.errors')
 @include('employer-resources65.dashboard-link')
-<section class="panel"><h2>Start or continue a review</h2><p>Find the apprentice below. Open their review record to start a draft or continue saved work. Book the meeting through Review appointments. After checking and saving the content, prepare participant sign-off from a review marked Ready for signatures.</p><div class="toolbar"><a class="button" href="{{ route('review-appointments.index') }}">Review appointments</a><a class="button" href="{{ route('electronic-reviews.index') }}">Review signing</a></div><p>Booking an appointment or saving a draft does not complete a review.</p></section>
-<p class="test-notice">Tracked dates use independently checked actual meetings. Electronic signing, external sharing and whole-history compliance assurance remain separate. No review compliance percentage is calculated.</p>
+<details class="panel"><summary>Review tools</summary><ul>
+    <li><a href="{{ route('review-workspace.index') }}">Prepare reviews and check saved drafts</a></li>
+    <li><a href="{{ route('review-appointments.index') }}">Review appointments</a></li>
+    <li><a href="{{ route('electronic-reviews.index') }}">Review signing</a></li>
+</ul></details>
+<details class="panel"><summary>About review dates</summary><p>Dates use checked meeting records. Bookings and signatures are tracked separately.</p></details>
 @include('reviews.triage')
 @if($triageView)
 @include('reviews.triage-rows')

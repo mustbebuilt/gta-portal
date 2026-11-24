@@ -9,7 +9,7 @@ class PriorityWorkflows68Test extends TestCase {
  private function actor(string $role='admin'):User{$u=User::factory()->create();$u->role=$role;$u->save();return $u;}
  private function capture($response,string $name):void{if(getenv('GTA_SETUP68_CAPTURE_DIR'))file_put_contents(getenv('GTA_SETUP68_CAPTURE_DIR').'/'.$name.'.html',$response->getContent());}
  public function test_home_and_apprentices_open_same_setup_without_an_intermediate_screen():void{
-  $u=$this->actor();$this->actingAs($u);$home=$this->get(route('dashboard.index'))->assertOk()->assertSee('Start a task')->assertSee('Add apprentice')->assertSee('Add employer')->assertSee('View progress');$this->capture($home,'admin-home');
+  $u=$this->actor();$this->actingAs($u);$home=$this->get(route('dashboard.index'))->assertOk()->assertSee('Start a task')->assertSee('Add apprentice')->assertSee('Add or link employer')->assertSee('View progress');$this->capture($home,'admin-home');
   $this->get(route('apprentices.index'))->assertOk()->assertSee(route('setup68.create'));$r=$this->post(route('setup68.create'))->assertRedirect();$this->get($r->headers->get('Location'))->assertOk()->assertSee('Apprentice details');$this->assertDatabaseCount('apprentices',0);
  }
  public function test_standalone_employer_is_idempotent_and_duplicate_reference_is_not_recreated():void{

@@ -41,7 +41,7 @@ class DashboardPrioritiesTest extends TestCase
     }
     public function test_missing_dates_are_checks_empty_filter_is_not_claimed_as_completion_and_invalid_filters_refuse(): void
     {
-        $a=Apprentice::factory()->create();$this->task($a);$this->actingAs($this->actor());$r=$this->get(route('dashboard.index',['priority'=>'overdue']))->assertOk()->assertSee('Other modules and incomplete source information still need their own checks.');$this->assertSame(1,$r->viewData('priorities')['counts']['checks']);$this->assertSame(0,$r->viewData('priorityList')->total());$this->get(route('dashboard.index',['priority'=>'invented']))->assertStatus(422);$this->get(route('dashboard.index',['priority_page'=>'2bad']))->assertStatus(422);$this->get(route('dashboard.index',['priority_page'=>0]))->assertStatus(422);
+        $a=Apprentice::factory()->create();$this->task($a);$this->actingAs($this->actor());$r=$this->get(route('dashboard.index',['priority'=>'overdue']))->assertOk()->assertSee('No matching training work. Check other areas for outstanding work.')->assertDontSee('All work complete');$this->assertSame(1,$r->viewData('priorities')['counts']['checks']);$this->assertSame(0,$r->viewData('priorityList')->total());$this->get(route('dashboard.index',['priority'=>'invented']))->assertStatus(422);$this->get(route('dashboard.index',['priority_page'=>'2bad']))->assertStatus(422);$this->get(route('dashboard.index',['priority_page'=>0]))->assertStatus(422);
     }
     public function test_unsupported_roles_cannot_open_dashboard_and_existing_report_does_not_include_live_list(): void
     {

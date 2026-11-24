@@ -1,6 +1,6 @@
 <section class="panel priority-heading" id="training-priorities" aria-labelledby="training-priorities-title">
 <h2 id="training-priorities-title">{{ auth()->user()->role==='apprentice'?'Your next training steps':'Training work to follow up' }}</h2>
-<p>Overdue items first, then work due today and source, release or date checks. This list follows your selected group and apprentice scope.</p>
+<p>Overdue and due work in this view.</p>
 <div class="priority-summary" aria-label="Training work counts"><span><strong>{{ $priorities['counts']['overdue'] }}</strong> overdue</span><span><strong>{{ $priorities['counts']['today'] }}</strong> due today</span><span><strong>{{ $priorities['counts']['checks'] }}</strong> checks / Tutor follow-up</span></div>
 <form method="get" class="search">
 @foreach(['group','apprentice'] as $scopeField)@if(request()->filled($scopeField))<input type="hidden" name="{{ $scopeField }}" value="{{ request($scopeField) }}">@endif @endforeach
@@ -11,7 +11,7 @@
 @forelse($priorityList as $item)
 <li class="priority-row" data-priority-row="{{ $item['key'] }}"><div><span class="status {{ $item['bucket']==='overdue'?'red':'neutral' }}">{{ ['overdue'=>'Overdue','today'=>'Due today','checks'=>'Needs checking'][$item['bucket']] }} · {{ ['marking'=>'Marking','task'=>'Training task','action'=>'SMART action'][$item['kind']] }}</span><h3>{{ \Illuminate\Support\Str::limit($item['title'],140) }}</h3><p>{{ $item['apprentice'] }} · {{ $item['reference'] }}</p><p>Responsible: {{ $item['owner'] }} · {{ $item['kind']==='marking'?'Marking deadline':'Source deadline' }}: {{ $item['date']??'Needs checking' }}</p>@if($item['reason'])<p class="recorded-answer">{{ $item['reason'] }}</p>@endif</div><a class="button" href="{{ $item['url'] }}">Open {{ $item['kind']==='action'?'action':'task' }}<span class="sr-only">: {{ $item['reference'] }} · {{ $item['title'] }}</span></a></li>
 @empty
-<li><p>No matching training work is listed. Other modules and incomplete source information still need their own checks.</p></li>
+<li><p>No matching training work. Check other areas for outstanding work.</p></li>
 @endforelse
 </ol>
 @if($priorityList->hasPages())<nav class="pagination" aria-label="Training work pages">@if($priorityList->previousPageUrl())<a class="button" href="{{ $priorityList->previousPageUrl() }}#training-priorities">Previous work</a>@endif @if($priorityList->nextPageUrl())<a class="button" href="{{ $priorityList->nextPageUrl() }}#training-priorities">Next work</a>@endif</nav>@endif

@@ -31,7 +31,7 @@ class GuidedSetup68Test extends TestCase {
  public function test_two_complete_http_setups_feed_the_real_approved_plan_otj_and_training_source():void {
   foreach([false,true] as $partial){[$d,$author,$reviewer,$t]=$this->complete($partial);$a=Apprentice::findOrFail($d->apprentice_id);$expected=$partial?583.2:600.0;
    $this->assertEquals($expected,DeliveryPlan::approved($a)['details']['target_hours']);$this->assertEquals($expected,OtjPosition::forApprentice($a)['summary']['target_hours']);$this->assertEquals($expected,\App\Support\TrainingPlanSource::position(TrainingPlanWorkspace::where('apprentice_id',$a->id)->first())['remaining_hours']);
-   $this->assertEquals($expected,array_sum(array_column(DeliveryPlan::approved($a)['blocks'],'hours')));$this->assertDatabaseCount('apprentices',$partial?2:1);$this->get('/apprentice-setup/'.$d->id.'/7')->assertOk()->assertSee('Setup complete');$this->capture($d,7,$partial?'partial':'none');
+   $this->assertEquals($expected,array_sum(array_column(DeliveryPlan::approved($a)['blocks'],'hours')));$this->assertDatabaseCount('apprentices',$partial?2:1);$this->get('/apprentice-setup/'.$d->id.'/7')->assertOk()->assertSee('Setup complete');$this->capture($d,6,$partial?'partial':'none');
    $this->get('/apprentices/'.$a->id)->assertOk()->assertSee($a->reference);
    $this->get('/apprentices/'.$a->id.'/otj-ledger')->assertOk()->assertSee(number_format($expected,2));
    $this->get('/apprentices/'.$a->id.'/training-plan')->assertOk()->assertSee(number_format($expected,2));

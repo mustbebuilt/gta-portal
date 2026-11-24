@@ -1,0 +1,11 @@
+/* GTA-2026-11-23-02: scoped presentation only; no controls hidden globally. */
+.page-help{white-space:nowrap}
+.visual-controls>label{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.figure-help{font-size:.9rem;margin:.5rem 0}
+.figure-help summary{cursor:pointer;font-weight:600}
+.action-groups64{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.action-groups64 section{min-width:0}
+#quick-support-log>summary{font-size:1.1rem;font-weight:700;cursor:pointer}
+#dashboard-breakdown>summary{font-weight:700;cursor:pointer}
+.topbar .toolbar{flex-wrap:wrap}
+@media(max-width:600px){.action-groups64{grid-template-columns:1fr}.topbar{align-items:flex-start;gap:.5rem}.topbar .toolbar{gap:.35rem}.topbar .toolbar .button,.topbar .toolbar button{min-height:44px}}

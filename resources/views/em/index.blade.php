@@ -6,6 +6,15 @@
 @include('learning.errors')
 <p><a href="{{ route('em.caseload') }}">Back to Maths and English caseload</a></p>
 @if($editableSubjects)
+<details class="panel"><summary>Assessment information and follow-up</summary>
+@foreach($editableSubjects as $fsSubject)
+<form method="post" action="{{route('em.setup-assessments.save',$apprentice)}}">@csrf
+<input type="hidden" name="subject" value="{{$fsSubject}}"><input type="hidden" name="version" value="{{$entryRequirements?->version??0}}">
+@include('setup68.functional-skills',['fsInput'=>old('data',\App\Support\FunctionalSkillsSetup82::current($apprentice->id) ?: \App\Support\FunctionalSkillsSetup82::defaults(auth()->user())),'fsSubjects'=>[$fsSubject=>ucfirst($fsSubject)]])
+<button class="primary">Save {{ucfirst($fsSubject)}} assessment information</button></form>
+@endforeach</details>
+@endif
+@if($editableSubjects)
 <section class="panel" id="requirements-at-entry">
     <h2>Functional Skills requirements at entry</h2>
     <p>Record whether each subject was required when the apprentice started. These answers feed the Retention report.</p>
