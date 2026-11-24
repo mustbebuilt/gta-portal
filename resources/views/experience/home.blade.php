@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title','My next step')
 @section('content')
+@include('support.weekly-retention-banner')
 <header class="page-heading"><div><p class="eyebrow">Apprentice home</p><h1>My next step</h1>@if($apprentice)<p>{{ $apprentice->first_name }}, here is what you can work on next.</p>@endif</div></header>
 @if(!$apprentice)<section class="panel"><h2>Your profile needs linking</h2><p>Ask GTA to link one apprentice profile to your account. Your work will appear here once that is checked.</p></section>@else
 <section class="panel experience-next"><h2>{{ $position['next']['title']??'Check your next step with your tutor' }}</h2>@if($position['next'])<p>Due: {{ $position['next']['due']?\Carbon\Carbon::parse($position['next']['due'])->format('d/m/Y'):'No agreed deadline recorded' }}</p><a class="button primary" href="{{ $position['next']['url'] }}">{{ $position['next']['label'] }}</a>@else<p>{{ $position['awaiting'] }} task(s) awaiting marking. Paper assessments, unreleased blocks and tasks without loaded source content need your tutor.</p><a class="button primary" href="{{ route('learning.index',$apprentice) }}">Check my training tasks</a>@endif</section>

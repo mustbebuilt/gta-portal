@@ -160,12 +160,12 @@ class LearningTaskController extends Controller
                 return;
             }
             $this->version($r, $t);
-            foreach ($missing as $file) {
-                $entry = PrivateEvidence::store($file, 'task-evidence', $r->user()->id);
+            foreach ($missing as $upload) {
+                $entry = PrivateEvidence::store($upload['file'], 'task-evidence', $r->user()->id);
                 $entries[] = $entry;
                 TaskEvidence::create(['learning_task_id'=>$t->id,'uploaded_by'=>$r->user()->id,
                     ...array_intersect_key($entry,array_flip(['disk','path','name','mime','sha256','bytes'])),
-                    'kind'=>$r->input('kind'),'description'=>$r->input('description')]);
+                    'kind'=>$upload['kind'],'description'=>$upload['description']]);
                 $this->audit($r,$t->apprentice_id,$t->id,'evidence_added');
             }
             if ($r->input('intent') === 'submit') {
@@ -219,22 +219,36 @@ class LearningTaskController extends Controller
         $uploads = $request->file('files');
         $batchSupplied = ($uploads !== null && $uploads !== []) || filled($request->input('files'));
         $singleSupplied = $request->file('file') !== null || filled($request->input('file'));
-        if (!$batchSupplied && !$singleSupplied && $request->input('intent') !== 'upload') {
-            return [];
+        $cameraSupplied = $request->file('camera_photo') !== null || filled($request->input('camera_photo'));
+        $evidence = [];
+
+        if ($batchSupplied || $singleSupplied || (!$cameraSupplied && $request->input('intent') === 'upload')) {
+            $kind = $request->input('kind');
+            $extensions = $kind === 'workplace-photo' ? 'jpg,jpeg,png' : 'pdf,jpg,jpeg,png,docx';
+            $fileRules = ['required', 'file', 'mimes:'.$extensions, 'extensions:'.$extensions, 'max:15360'];
+            $limit = $cameraSupplied ? 4 : 5;
+            $fileInput = $batchSupplied
+                ? ['files' => ['required', 'array', 'list', 'min:1', 'max:'.$limit, 'prohibits:file'], 'files.*' => $fileRules]
+                : ['file' => $fileRules];
+            $request->validate($fileInput + [
+                'kind' => ['required', Rule::in(['supporting-evidence', 'inspection-checklist', 'workplace-photo'])],
+                'description' => ['nullable', 'required_if:kind,workplace-photo', 'string', 'max:5000'],
+            ]);
+            foreach ($request->file('files') ?? [$request->file('file')] as $file) {
+                $evidence[] = ['file' => $file, 'kind' => $kind, 'description' => $request->input('description')];
+            }
         }
 
-        $kind = $request->input('kind');
-        $extensions = $kind === 'workplace-photo' ? 'jpg,jpeg,png' : 'pdf,jpg,jpeg,png,docx';
-        $fileRules = ['required', 'file', 'mimes:'.$extensions, 'extensions:'.$extensions, 'max:15360'];
-        $fileInput = $batchSupplied
-            ? ['files'=>['required','array','list','min:1','max:5','prohibits:file'],'files.*'=>$fileRules]
-            : ['file'=>$fileRules];
-        $request->validate($fileInput + [
-            'kind'=>['required',Rule::in(['supporting-evidence','inspection-checklist','workplace-photo'])],
-            'description'=>['nullable','required_if:kind,workplace-photo','string','max:5000'],
-        ]);
+        if ($cameraSupplied) {
+            $request->validate([
+                'camera_photo' => ['required', 'file', 'mimes:jpg,jpeg,png', 'extensions:jpg,jpeg,png', 'max:15360'],
+                'camera_description' => ['required', 'string', 'max:5000'],
+            ]);
+            $evidence[] = ['file' => $request->file('camera_photo'), 'kind' => 'workplace-photo',
+                'description' => $request->input('camera_description')];
+        }
 
-        return $request->file('files') ?? [$request->file('file')];
+        return $evidence;
     }
 
     private function newEvidenceFiles(Request $request, LearningTask $task, array $files): array
@@ -242,15 +256,18 @@ class LearningTaskController extends Controller
         if (!$files) {
             return [];
         }
+
+        $key = fn ($kind, $description, $sha) => hash('sha256', serialize([$kind, $description, $sha]));
         $known = $task->evidence()->where('uploaded_by', $request->user()->id)
-            ->where('kind', $request->input('kind'))->where('description', $request->input('description'))
-            ->pluck('sha256')->flip();
+            ->get(['kind', 'description', 'sha256'])->mapWithKeys(fn ($item) =>
+                [$key($item->kind, $item->description, $item->sha256) => true]);
 
         $pending = [];
-        foreach ($files as $file) {
-            $sha = hash_file('sha256', $file->getRealPath());
-            if (!$known->has($sha)) {
-                $pending[$sha] ??= $file;
+        foreach ($files as $item) {
+            $sha = hash_file('sha256', $item['file']->getRealPath());
+            $id = $key($item['kind'], $item['description'], $sha);
+            if (!$known->has($id)) {
+                $pending[$id] ??= $item;
             }
         }
 

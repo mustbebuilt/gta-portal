@@ -43,7 +43,10 @@ class DashboardController extends Controller
                 $registerSummary=\App\Support\RegisterFollowup::for($visibleRegisters);
             }
         }
-        return view('dashboard.index',$data+['priorities'=>$priorities,'priorityFilter'=>$filter,'priorityList'=>$list,'reviewSummary'=>$reviewSummary,'registerSummary'=>$registerSummary]);
+        $weeklyReminderCount = in_array($r->user()->role, ['tutor', 'apprentice'], true)
+            ? \App\Support\WeeklyRetention::currentReminderCount($r->user(), $data['apprentices']->pluck('id')->all())
+            : 0;
+        return view('dashboard.index',$data+['priorities'=>$priorities,'priorityFilter'=>$filter,'priorityList'=>$list,'reviewSummary'=>$reviewSummary,'registerSummary'=>$registerSummary,'weeklyReminderCount'=>$weeklyReminderCount]);
     }
 
     public function report(Request $r): View

@@ -83,6 +83,19 @@ class EnglishMathsController extends Controller
         return view('em.index', ['apprentice' => $apprentice, 'subjects' => $subjects, 'topics' => $topics, 'topicRows' => $topics->filter(fn ($t) => match ($data['topics'] ?? '') { 'awaiting' => $t->evidence_stage === 'Awaiting review', 'referred' => $t->evidence_stage === 'Referred', default => true }), 'qualifications' => $quals, 'catalogue' => $this->catalogue(), 'canManage' => Access::manager($r->user()), 'entryRequirements' => $entryRequirements, 'editableSubjects' => $editableSubjects]);
     }
 
+    public function saveSetupAssessments(Request $request, Apprentice $apprentice): RedirectResponse
+    {
+        $subject = $request->validate(['subject' => ['required', Rule::in(['maths','english'])], 'version' => ['required','integer','min:0']])['subject'];
+        abort_unless(Access::subject($request->user(), $apprentice, $subject), 403);
+        $values = \App\Support\FunctionalSkillsSetup82::validate((array) $request->input('data', []), [$subject]);
+        DB::transaction(function () use ($request, $apprentice, $subject, $values) {
+            $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless(Access::subject($request->user(), $fresh, $subject), 403);
+            \App\Support\FunctionalSkillsSetup82::persist($fresh, $request->user(), $values, $request->integer('version'));
+        });
+        return to_route('em.index', $apprentice)->with('status', 'Assessment information and follow-up saved. Qualification results are unchanged.');
+    }
+
     public function saveRequirements(Request $request, Apprentice $apprentice): RedirectResponse
     {
         $actor = $request->user();

@@ -35,7 +35,7 @@ class PortalDesign50Test extends TestCase
   $u=User::factory()->create(['role'=>'admin']);$a=Apprentice::factory()->create();foreach([['No date50',null],['Earlier date50','2026-11-01'],['Later date50','2026-11-14']]as[$title,$date])LearningTask::factory()->create(['apprentice_id'=>$a->id,'reference'=>$title,'status'=>'Referred','title'=>$title,'due_date'=>$date,'template'=>['kind'=>'task']]);$html=$this->actingAs($u)->get('/dashboard')->getContent();$start=strpos($html,'<table class="visual-task-list">');$table=substr($html,$start,strpos($html,'</table>',$start)-$start);$this->assertLessThan(strpos($table,'Later date50'),strpos($table,'Earlier date50'));$this->assertLessThan(strpos($table,'No date50'),strpos($table,'Later date50'));
  }
  public function test_exact_tables_and_all_display_controls_remain_in_server_html():void{
-  $this->actingAs(User::factory()->create(['role'=>'admin']))->get('/visual-reports')->assertOk()->assertSee('data-visual-choice="charts"',false)->assertSee('data-visual-choice="table"',false)->assertSee('data-visual-choice="both"',false)->assertSee('data-visual-table',false)->assertSee('Print and PDF reports include charts and exact tables.');
+  $this->actingAs(User::factory()->create(['role'=>'admin']))->get('/visual-reports')->assertOk()->assertSee('data-visual-mode',false)->assertSee('value="charts"',false)->assertSee('value="table"',false)->assertSee('value="both"',false)->assertSee('data-visual-table',false)->assertDontSee('data-visual-choice=',false);
  }
  #[TestWith([0])] #[TestWith([-1])] #[TestWith(['bogus'])] #[TestWith([INF])] #[TestWith([25])]
  public function test_line_range_cannot_divide_by_zero_or_clip_known_points($max):void{
@@ -45,7 +45,7 @@ class PortalDesign50Test extends TestCase
   $s=C::svg(['title'=>'Hours','type'=>'bars','rows'=>[['label'=>'Known','value'=>6.5],['label'=>'Missing','value'=>null],['label'=>'Zero','value'=>0]]]);foreach(['class="chart-grid"','>6.5</text>','>Unknown</text>','>0</text>','class="chart-axis"']as$v)$this->assertStringContainsString($v,$s);
  }
  public function test_grouped_series_are_distinct_and_unknown_is_not_zero():void{
-  $s=C::svg(['title'=>'Topics','type'=>'grouped','rows'=>[['label'=>'Maths','value'=>2,'second'=>null],['label'=>'English','value'=>0,'second'=>0]]]);foreach(['fill="#777b81"','fill="#12833d"','>Unknown</text>']as$v)$this->assertStringContainsString($v,$s);
+  $s=C::svg(['title'=>'Topics','type'=>'grouped','rows'=>[['label'=>'Maths','value'=>2,'second'=>null],['label'=>'English','value'=>0,'second'=>0]]]);foreach(['fill="#7865d1"','fill="#147b9a"','>Unknown</text>']as$v)$this->assertStringContainsString($v,$s);
  }
  public function test_grouping_tail_does_not_lose_exact_table_rows():void{
   $chart=['key'=>'many','title'=>'Many','type'=>'bars','unit'=>'apprentices','note'=>'Current scope','rows'=>array_map(fn($i)=>['label'=>'Programme'.$i,'value'=>$i],range(1,18))];$s=view('visuals.panel',compact('chart'))->render();$this->assertStringContainsString('Further entries (see table)',$s);$this->assertStringContainsString('Programme18',$s);$this->assertSame(19,substr_count($s,'<tr>'));

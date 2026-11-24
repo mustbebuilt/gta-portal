@@ -9,6 +9,9 @@ use App\Models\TrainingSession;
 use App\Models\TutorGroup;
 use App\Models\User;
 use App\Support\ApprenticeReviewData;
+use App\Support\RetentionEarlyWarning;
+use App\Support\WeeklyRetention;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -74,7 +77,7 @@ class RetentionEarlyWarningTest extends TestCase
         $checkIn($active, '2026-09-30', 'Needs support');
         $checkIn($active, '2026-10-21', 'Needs support');
         $session($active, '2026-11-04', 'A');
-        $session($active, '2026-11-11', 'W');
+        $keptAtWork = $session($active, '2026-11-11', 'W');
         $session($missing, '2026-11-04', null);
         $checkIn($early, '2026-10-07', 'Needs support', '2026-10-20');
         $checkIn($achieved, '2026-11-04', 'Consistently demonstrated');
@@ -87,7 +90,7 @@ class RetentionEarlyWarningTest extends TestCase
 
         $response = $this->actingAs($admin)->get(route('retention.report'))->assertOk()
             ->assertSee('Evidence before early leaving and achievement')
-            ->assertSee('Application and effort')->assertSee('Non-attendance across two weeks')
+            ->assertSee('Application and effort')->assertSee('Two consecutive missed sessions')
             ->assertSee('Employment ended')->assertDontSee('Private tutor observation');
         $report = $response->viewData('earlyWarning');
         $this->assertSame(2, $report['active']);
@@ -101,11 +104,39 @@ class RetentionEarlyWarningTest extends TestCase
         $this->assertSame(1, $report['outcomes']['Achievers']['areas']['application']['consistent']);
         $this->assertSame(0, $report['outcomes']['Early leavers']['areas']['safety']['observed']);
 
+        $this->assertSame(WeeklyRetention::evidence($active, WeeklyRetention::monday())['attendance'], $evidence['current_attendance']);
+        $this->assertSame(['A', 'W'], array_column($evidence['current_attendance'], 'code'));
+
+        $keptAtWork->marks()->update(['code' => 'S']);
+        $sickness = $this->get(route('retention.report'))->assertOk()->viewData('earlyWarning');
+        $this->assertSame([], $sickness['warnings']->first()['early_warning']['current_attendance']);
+        $this->assertSame([], WeeklyRetention::evidence($active, WeeklyRetention::monday())['attendance']);
+
+        $keptAtWork->marks()->update(['code' => 'W']);
         $session($active, '2026-11-18', 'O');
+        $sameWeek = $this->get(route('retention.report'))->assertOk()->viewData('earlyWarning');
+        $this->assertSame(['A', 'W'], array_column($sameWeek['warnings']->first()['early_warning']['current_attendance'], 'code'));
+
+        $this->travelTo(CarbonImmutable::parse('2026-11-23 09:00:00', 'Europe/London'));
         $next = $this->get(route('retention.report'))->assertOk()->viewData('earlyWarning');
-        $this->assertNull($next['warnings']->first()['early_warning']['attendance']);
+        $this->assertSame([], $next['warnings']->first()['early_warning']['current_attendance']);
+        $this->assertSame([], WeeklyRetention::evidence($active, WeeklyRetention::monday())['attendance']);
 
         $this->actingAs(User::factory()->create(['role' => 'tutor']))
             ->get(route('retention.report'))->assertForbidden();
+    }
+
+    public function test_historical_non_attendance_measure_keeps_the_original_definition(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-11-23 09:00:00', 'Europe/London'));
+        $rows = [
+            ['id' => 1, 'date' => '2026-11-04', 'code' => 'S', 'cancelled' => false],
+            ['id' => 2, 'date' => '2026-11-11', 'code' => 'H', 'cancelled' => false],
+        ];
+        $history = RetentionEarlyWarning::evidence(collect(), $rows, ['active_retention' => []],
+            '2026-09-01', '2026-11-20', false);
+
+        $this->assertNotNull($history['attendance']);
+        $this->assertSame([], $history['current_attendance']);
     }
 }

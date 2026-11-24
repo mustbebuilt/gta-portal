@@ -374,6 +374,7 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/tasks/{task}/original-pdf', [LearningTaskController::class, 'pdf'])->name('tasks.pdf');
     Route::get('/tasks/{task}/evidence/{evidence}', [LearningTaskController::class, 'download'])->name('tasks.evidence.download');
     Route::get('/maths-english', [EnglishMathsController::class, 'caseload'])->name('em.caseload');
+    Route::post('/apprentices/{apprentice}/maths-english/setup-assessments', [EnglishMathsController::class, 'saveSetupAssessments'])->name('em.setup-assessments.save');
     Route::post('/apprentices/{apprentice}/maths-english/requirements', [EnglishMathsController::class, 'saveRequirements'])->name('em.requirements.save');
     Route::get('/apprentices/{apprentice}/maths-english', [EnglishMathsController::class, 'index'])->name('em.index');
     Route::post('/apprentices/{apprentice}/topics', [EnglishMathsController::class, 'assign'])->name('topics.assign');
@@ -431,6 +432,9 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::get('/staff-support-permissions', [SupportPermissionController::class, 'index'])->name('support.permissions');
     Route::post('/staff-support-permissions/{target}', [SupportPermissionController::class, 'save'])->name('support.permissions.save');
     Route::get('/support', [SupportController::class, 'worklist'])->name('support.worklist');
+    Route::get('/support/weekly-early-warnings', [\App\Http\Controllers\WeeklyRetentionController::class, 'index'])->name('weekly-retention.index');
+    Route::post('/support/weekly-early-warnings/{check}/reviewed', [\App\Http\Controllers\WeeklyRetentionController::class, 'reviewed'])->name('weekly-retention.reviewed');
+    Route::get('/weekly-training-reminders', [\App\Http\Controllers\WeeklyRetentionController::class, 'reminders'])->name('weekly-retention.reminders');
     Route::get('/apprentices/{apprentice}/support', [SupportController::class, 'index'])->name('support.index');
     Route::post('/apprentices/{apprentice}/support', [SupportController::class, 'raise'])->name('support.raise');
     Route::post('/apprentices/{apprentice}/markers', [SupportController::class, 'markers'])->name('support.markers');
@@ -549,6 +553,7 @@ Route::middleware(['auth', ActiveAccount::class, \App\Http\Middleware\RequireSec
     Route::post('/concerns/{concern}/complete-action', [SupportController::class, 'completeMarkerAction'])->name('support.complete-action');
     Route::get('/reports/achievers-and-leavers', [\App\Http\Controllers\AchieversAndLeaversController::class, 'index'])->name('achievers-leavers.index');
     Route::get('/reports/retention', [RetentionReportController::class, 'report'])->name('retention.report');
+    Route::get('/reports/retention/kept-at-work', \App\Http\Controllers\EmployerAttendanceReportController::class)->name('retention.employer-attendance');
     Route::get('/apprentice-archive', [\App\Http\Controllers\ApprenticeCloseDownController::class, 'archive'])->name('apprentices.archive');
     Route::get('/apprentices/{apprentice}/close-down', [\App\Http\Controllers\ApprenticeCloseDownController::class, 'show'])->name('apprentices.close-down');
     Route::get('/apprentices/{apprentice}/close-down/completion-pack', [\App\Http\Controllers\ApprenticeCloseDownController::class, 'downloadCompletionPack'])->name('apprentices.close-down.completion-pack');

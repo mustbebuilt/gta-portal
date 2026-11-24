@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 class ApprenticeExperienceController extends Controller {
  public function home(Request $r) {
-  $a=ApprenticeExperience::profile($r->user());$position=$a?ApprenticeExperience::home($a):null;$review=$a?\App\Support\ReviewNextStep::for($r->user(),$a):null;if($position){$position['review']=$review['cycle'];}return response()->view('experience.home',['apprentice'=>$a,'position'=>$position,'reviewSchedule'=>$review,'gatewaySummary'=>$a?\App\Support\GatewaySummary::for($r->user(),$a):null],$a?200:409)->header('Cache-Control','no-store, private');
+  $a=ApprenticeExperience::profile($r->user());$position=$a?ApprenticeExperience::home($a):null;$review=$a?\App\Support\ReviewNextStep::for($r->user(),$a):null;if($position){$position['review']=$review['cycle'];}return response()->view('experience.home',['apprentice'=>$a,'position'=>$position,'reviewSchedule'=>$review,'weeklyReminderCount'=>$a?\App\Support\WeeklyRetention::currentReminderCount($r->user(),[$a->id]):0,'gatewaySummary'=>$a?\App\Support\GatewaySummary::for($r->user(),$a):null],$a?200:409)->header('Cache-Control','no-store, private');
  }
  public function index(Request $r) {
   $u=$r->user();$learner=$u->role==='apprentice';$a=$learner?ApprenticeExperience::profile($u):null;

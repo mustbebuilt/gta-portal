@@ -98,13 +98,13 @@ class RplPlanDates73Test extends TestCase
             'data' => ['id' => $employer->id],
         ]);
 
-        $step6 = $this->get(route('setup68.show', [$draft->fresh(), 6]))->assertOk();
+        $step6 = $this->get(route('setup68.show', [$draft->fresh(), 7]))->assertOk();
         $step6->assertSee('Check the planned dates. You can amend them to reflect agreed delivery.')
             ->assertSee('Planned practical end date')
             ->assertSee('Planned apprenticeship end date (including assessment)')
             ->assertSee('Confirm and create apprentice');
 
-        // Reject invalid date order on Step 6 without creating apprentice
+        // Reject invalid date order on Step 7 without creating apprentice
         $this->post(route('setup68.confirm', $draft->fresh()), [
             'version' => $draft->fresh()->version,
             'confirmed' => '1',

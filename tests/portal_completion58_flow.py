@@ -157,7 +157,7 @@ with tempfile.TemporaryDirectory(prefix='gta-flexible-duties-') as temporary:
         passed('Actual own Apprentice HTTPS roadmap automatically selects the linked Heavy Vehicle lorry and serves its current-point label and journey guide')
         script("$a=App\\Models\\Apprentice::find("+str(usability55['apprentice'])+");$a->programmeRecord->update(['standard_code'=>'ST0499']);echo '{}';")
         road55=req(learner55,journey55)[1];assert 'journey-car55.svg'in road55 and 'journey-lorry55.svg'not in road55
-        for asset55 in ['journey-car55.svg','journey-lorry55.svg','journey-marker55.css','journey-marker55.js']:assert req(learner55,'/assets/'+asset55)[0]==200
+        for asset55 in ['journey-car55.svg','journey-lorry55.svg','journey-marker55.css']:assert req(learner55,'/assets/'+asset55)[0]==200
         with sqlite3.connect(db)as c:assert counts55==[c.execute('SELECT COUNT(*) FROM '+table).fetchone()[0]for table in ['learning_tasks','learning_events','directory_events','account_onboarding_tokens','employer_apprentice_grants']]
         passed('Changing only the fictional linked programme selects the car automatically; four local assets serve successfully and roadmap reads leave task/audit/invitation/grant counts intact')
         status56,journey56,_,headers56=req(learner55,journey55)

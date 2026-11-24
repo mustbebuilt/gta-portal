@@ -215,6 +215,7 @@ class RoutineWorkflowSimplificationTest extends TestCase
         $this->capture($page,'register');
     }
     public function test_today_registers_are_prominent_without_hiding_past_missing_counts():void {
+        $this->travelTo(now()->setTime(10,0));
         [$a,$old]=$this->register();$today=TrainingSession::factory()->create(['tutor_group_id'=>$old->tutor_group_id,'session_date'=>today(),'members'=>[$a->id],'name'=>'Fictional today session']);
         $r=$this->get(route('attendance.index'))->assertOk()->assertSee('Today’s sessions')->assertSee('Fictional today session')->assertSee('Other sessions, filters and follow-up');
         $this->assertCount(1,$r->viewData('todayRegisterRows'));$this->assertSame($today->id,$r->viewData('todayRegisterRows')->first()['session']->id);

@@ -74,6 +74,10 @@ final class SupportRegister71
 
         return DB::transaction(function () use ($actor, $apprentice, $code, $note, $interval, $owner) {
             $locked = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            abort_unless(SupportAccess::team($actor, $locked), 403);
+            if (SupportConcern::where('apprentice_id', $locked->id)->where('code', $code)->where('status', '!=', 'Closed')->exists()) {
+                throw ValidationException::withMessages(['code' => 'This marker already has an open review record.']);
+            }
             $today = today()->toDateString();
             $firstDue = self::addInterval($today, $interval);
 
@@ -136,8 +140,16 @@ final class SupportRegister71
             $note = trim((string) ($data['note'] ?? ''));
             $history = $s->history ?? [];
 
+            abort_unless(SupportAccess::team($actor, $s->apprentice), 403);
+            if (!$concern || $concern->status === 'Closed') {
+                throw ValidationException::withMessages(['kind' => 'Choose an open marker.']);
+            }
             if ($kind === 'formal_review') {
                 $reviewDate = (string) ($data['review_date'] ?? today()->toDateString());
+                $earliest = $s->last_formal_review_date?->toDateString() ?? $s->created_at->toDateString();
+                if ($reviewDate < $earliest || $reviewDate > today()->toDateString()) {
+                    throw ValidationException::withMessages(['review_date' => 'Use a date within this marker’s review history.']);
+                }
                 $interval = (string) ($data['interval_key'] ?? $s->interval_key);
                 if (! isset(self::INTERVALS[$interval])) {
                     throw ValidationException::withMessages(['interval_key' => 'Choose a valid review interval up to six-monthly.']);
@@ -310,7 +322,7 @@ final class SupportRegister71
         $codeFilter = trim((string) ($filters['code'] ?? ''));
 
         $visibleIds = SupportAccess::team($actor)
-            ? Apprentice::query()->pluck('id')->all()
+            ? SupportAccess::ids($actor)
             : Apprentice::visibleTo($actor)->pluck('id')->all();
 
         $apprentices = Apprentice::whereIn('id', $visibleIds)

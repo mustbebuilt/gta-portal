@@ -2,7 +2,7 @@
 namespace App\Support;
 class PortalCharts
 {
- public const COLOURS=['#12833d','#b67b00','#de3945','#777b81','#8e5ec4','#55595f'];
+ public const COLOURS=['#1789a6','#7965db','#ba5094','#4085cc','#9865c2','#788696'];
  public static function svg(array $chart):string
  {
   $rows=$chart['rows'];if(count($rows)>1000){throw new \InvalidArgumentException('Narrow the chart to1000 source rows.');}
@@ -20,15 +20,15 @@ class PortalCharts
    $knownMax=max([0,...array_map(fn($r)=>(float)($r['value']??0),$rows)]);$max=$chart['max']??max(1,$knownMax);
    if(!is_numeric($max)||!is_finite((float)$max)||(float)$max<=0||(float)$max>1e12||(float)$max<$knownMax){throw new \InvalidArgumentException('Chart maximum must be positive, finite and include every known value.');}
    $parts=self::grid(55,695,20,190,(float)$max,true);$segments=[];$points=[];$marks='';
-   foreach($rows as$i=>$row){$x=55+(count($rows)>1?640*$i/(count($rows)-1):320);if($row['value']===null){if($points){$segments[]=$points;$points=[];}$marks.='<text x="'.self::n($x).'" y="183" text-anchor="middle" font-size="10">?</text>';}else{$y=190-170*$row['value']/$max;$points[]=self::n($x).','.self::n($y);$marks.='<circle cx="'.self::n($x).'" cy="'.self::n($y).'" r="4" fill="#12833d"><title>'.e($row['label']).': '.e((string)$row['value']).'</title></circle>';}if($i%max(1,(int)ceil(count($rows)/8))===0||$i===count($rows)-1){$parts.='<text x="'.self::n($x).'" y="213" text-anchor="middle" font-size="11">'.e(mb_strimwidth($row['label'],0,12,'…')).'</text>';}}
-   if($points){$segments[]=$points;}foreach($segments as$p){$parts.='<polyline points="'.implode(' ',$p).'" fill="none" stroke="#12833d" stroke-width="3"/>';}
+   foreach($rows as$i=>$row){$x=55+(count($rows)>1?640*$i/(count($rows)-1):320);if($row['value']===null){if($points){$segments[]=$points;$points=[];}$marks.='<text x="'.self::n($x).'" y="183" text-anchor="middle" font-size="10">?</text>';}else{$y=190-170*$row['value']/$max;$points[]=self::n($x).','.self::n($y);$marks.='<circle cx="'.self::n($x).'" cy="'.self::n($y).'" r="4" fill="#147b9a"><title>'.e($row['label']).': '.e((string)$row['value']).'</title></circle>';}if($i%max(1,(int)ceil(count($rows)/8))===0||$i===count($rows)-1){$parts.='<text x="'.self::n($x).'" y="213" text-anchor="middle" font-size="11">'.e(mb_strimwidth($row['label'],0,12,'…')).'</text>';}}
+   if($points){$segments[]=$points;}foreach($segments as$p){$parts.='<polyline points="'.implode(' ',$p).'" fill="none" stroke="#147b9a" stroke-width="3"/>';}
    return self::wrap($title,720,240,$parts.$marks);
   }
   if(!in_array($type,['bars','grouped'],true)){throw new \InvalidArgumentException('Unknown chart type.');}
   if(count($rows)>14){$tail=array_slice($rows,13);$more=['label'=>'Further entries (see table)','value'=>collect($tail)->contains(fn($r)=>($r['value']??null)===null)?null:array_sum(array_column($tail,'value'))];if($type==='grouped'){$more['second']=collect($tail)->contains(fn($r)=>($r['second']??null)===null)?null:array_sum(array_column($tail,'second'));}$rows=[...array_slice($rows,0,13),$more];}
   $max=max([1,...array_map(fn($r)=>max((float)($r['value']??0),(float)($r['second']??0)),$rows)]);$step=$type==='grouped'?58:44;$height=max(115,count($rows)*$step+50);$parts=self::grid(245,645,15,$height-30,$max,false);
   foreach($rows as$i=>$row){$y=34+$i*$step;$parts.='<text x="4" y="'.$y.'">'.e(mb_strimwidth($row['label'],0,31,'…')).'</text>';
-   foreach($type==='grouped'?['value','second']:['value']as$j=>$key){$v=$row[$key]??null;$at=$y-14+$j*19;$colour=$type==='grouped'?['#777b81','#12833d'][$j]:self::COLOURS[0];if($v!==null){$width=400*$v/$max;$parts.='<rect x="245" y="'.$at.'" width="'.self::n($width).'" height="14" rx="3" fill="'.$colour.'"><title>'.e($row['label']).': '.e((string)$v).'</title></rect><text x="710" y="'.($at+12).'" text-anchor="end" font-size="12">'.e(self::n((float)$v)).'</text>';}else{$parts.='<text x="710" y="'.($at+12).'" text-anchor="end" font-size="11">Unknown</text>';}}
+   foreach($type==='grouped'?['value','second']:['value']as$j=>$key){$v=$row[$key]??null;$at=$y-14+$j*19;$colour=$type==='grouped'?['#7865d1','#147b9a'][$j]:self::COLOURS[0];if($v!==null){$width=400*$v/$max;$parts.='<rect x="245" y="'.$at.'" width="'.self::n($width).'" height="14" rx="3" fill="'.$colour.'"><title>'.e($row['label']).': '.e((string)$v).'</title></rect><text x="710" y="'.($at+12).'" text-anchor="end" font-size="12">'.e(self::n((float)$v)).'</text>';}else{$parts.='<text x="710" y="'.($at+12).'" text-anchor="end" font-size="11">Unknown</text>';}}
   }
   return self::wrap($title,720,$height,$parts);
  }

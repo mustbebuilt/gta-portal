@@ -150,7 +150,9 @@ final class RplPlanDates69
             if (!$timetable && (!isset($record['agreed_hours']) || round((float) $record['agreed_hours'], 2) !== round($calculation['revised_hours_unrounded'], 2))) {
                 throw new InvalidArgumentException('The revised OTJ hours differ from the agreed Training Plan. Reconcile the hours before requesting approval.');
             }
-            $schedule = self::schedule($calculation['blocks'], $start, $dates, $record['schedule'] ?? null, $timetable);
+            $schedule = $timetable
+                ? self::buildStep6Plan($template, $programme, $rpl, $calculation, $dates['practical_end'], $dates['programme_end'], $record['schedule'] ?? null)['blocks']
+                : self::schedule($calculation['blocks'], $start, $dates, $record['schedule'] ?? null, false);
 
             return ['proposed' => $proposed, 'timetable' => $timetable, 'approved' => [
                 ...$dates, 'source' => $record['source'], 'blocks' => $schedule,
@@ -233,6 +235,16 @@ final class RplPlanDates69
             throw new InvalidArgumentException('Planned apprenticeship end date (including assessment) must be after the planned practical end date.');
         }
 
+        if (!empty($calculation['unresolved']) || collect($calculation['blocks'])->contains(fn ($block) => (float) $block['hours'] < 0)) {
+            throw new InvalidArgumentException('Resolve block allocations before confirming training dates.');
+        }
+        $policy = self::policy($template);
+        if ($policy) {
+            $minimum = self::calculate($policy, $start, $calculation['revised_hours_unrounded']);
+            if ($practicalEnd < $minimum['practical_end']) {
+                throw new InvalidArgumentException('The practical end date does not allow enough training capacity for the revised OTJ hours. Check the agreed delivery rules.');
+            }
+        }
         $timetable = ($template['date_basis'] ?? null) === 'agreed_timetable';
         $dates = ['practical_end' => $practical->format('Y-m-d'), 'programme_end' => $programmeDate->format('Y-m-d')];
 

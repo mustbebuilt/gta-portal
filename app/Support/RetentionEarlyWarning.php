@@ -7,12 +7,13 @@ use Illuminate\Support\Collection;
 
 final class RetentionEarlyWarning
 {
-    public static function evidence(Collection $checkIns, array $registers, array $markerSummary, ?string $start, ?string $through): array
+    public static function evidence(Collection $checkIns, array $registers, array $markerSummary, ?string $start, ?string $through, bool $onProgramme): array
     {
         $latest = null;
         $months = 0;
         $areas = [];
         $pair = null;
+        $currentAttendance = [];
 
         if ($through !== null) {
             $asOf = CarbonImmutable::parse($through);
@@ -45,13 +46,20 @@ final class RetentionEarlyWarning
                 }
             }
 
-            $attendanceFrom = max($from, $asOf->subWeeks(6)->startOfWeek()->toDateString());
-            $weekStart = $asOf->startOfWeek()->toDateString();
-            $completedWeeks = array_filter($registers, fn ($row) => $row['date'] >= $attendanceFrom && $row['date'] < $weekStart);
-            $pair = collect(AttendanceMath::report($completedWeeks)['pairs'])->last();
-            if ($pair && collect($registers)->contains(fn ($row) => $row['date'] > $pair['to']
-                && $row['date'] <= $through && ! $row['cancelled'] && in_array($row['code'], ['O', 'T'], true))) {
-                $pair = null;
+            if ($onProgramme) {
+                if ($start !== null) {
+                    $recent = AttendanceMath::recentWarningSessions($registers, $start, WeeklyRetention::monday()->toDateString());
+                    $currentAttendance = AttendanceMath::missedWarningSessions($recent);
+                }
+            } else {
+                $attendanceFrom = max($from, $asOf->subWeeks(6)->startOfWeek()->toDateString());
+                $weekStart = $asOf->startOfWeek()->toDateString();
+                $completedWeeks = array_filter($registers, fn ($row) => $row['date'] >= $attendanceFrom && $row['date'] < $weekStart);
+                $pair = collect(AttendanceMath::report($completedWeeks)['pairs'])->last();
+                if ($pair && collect($registers)->contains(fn ($row) => $row['date'] > $pair['to']
+                    && $row['date'] <= $through && ! $row['cancelled'] && in_array($row['code'], ['O', 'T'], true))) {
+                    $pair = null;
+                }
             }
         }
 
@@ -60,8 +68,8 @@ final class RetentionEarlyWarning
 
         return [
             'latest' => $latest, 'months' => $months, 'areas' => $areas,
-            'needs_support' => $needsSupport, 'attendance' => $pair, 'markers' => $markers,
-            'signal_count' => (int) (bool) $needsSupport + (int) ($pair !== null) + (int) (bool) $markers,
+            'needs_support' => $needsSupport, 'attendance' => $pair, 'current_attendance' => $currentAttendance, 'markers' => $markers,
+            'signal_count' => (int) (bool) $needsSupport + (int) ($pair !== null || $currentAttendance !== []) + (int) (bool) $markers,
         ];
     }
 

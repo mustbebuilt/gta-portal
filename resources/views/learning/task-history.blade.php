@@ -5,7 +5,8 @@
         @php($sourceFields = $decision['source_fields'] ?? [])
         <details>
             <summary>Version {{ $submission['version'] }} · {{ $decision ? ($isKnowledge ? ($decision['status'] === 'Approved' ? 'Pass' : 'Refer') : $decision['status']) : 'Awaiting marking' }}</summary>
-            <p>{{ ($submission['submitted_at'] ?? null) ? 'Submitted '.$submission['submitted_at'] : 'Paper assessment record' }}</p>
+            @php($submittedAt = $submission['submitted_at'] ?? null)
+            <p>{{ $submittedAt ? 'Submitted '.$submittedAt : ($isKnowledge ? 'Paper assessment record' : 'Submission date not recorded') }}</p>
             @if($decision)
                 @if($isKnowledge && ($sourceFields['marks_available'] ?? 0) > 0)
                     <p><strong>Paper test score: {{ round(100 * $sourceFields['marks_achieved'] / $sourceFields['marks_available'], 1) }}%</strong></p>

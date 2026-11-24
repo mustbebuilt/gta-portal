@@ -1,0 +1,80 @@
+:root {
+    --gta-positive-fill: #e0f5e6;
+    --gta-positive-text: #14532d;
+    --gta-attention-fill: #fff1cf;
+    --gta-attention-text: #704500;
+    --gta-information-fill: #d9f1fa;
+    --gta-information-text: #075678;
+    --gta-overdue-text: #a11930;
+    --gta-overdue-fill: #fde4e8;
+    --gta-heading: #08657e;
+    --gta-operational-button: #076782;
+    --gta-operational-hover: #04536a;
+}
+html[data-theme="dark"] {
+    --gta-overdue-text: #ff9da9;
+    --gta-heading: #87d7ed;
+    --gta-operational-button: #076b86;
+    --gta-operational-hover: #087b94;
+}
+.portal-page .primary:not(:disabled) {
+    background: var(--gta-operational-button);
+    border-color: var(--gta-operational-button);
+    color: #fff;
+}
+.portal-page .primary:not(:disabled):hover { background: var(--gta-operational-hover); }
+.portal-page .page-heading h1,
+.portal-page .p66-heading h1,
+.portal-page .p67-roadmap h2,
+.portal-page .visual-panel h2,
+#marker-reviews h2,
+#support-actions h2,
+#quick-support-log h2 { color: var(--gta-heading); }
+.register-views { margin-block: 1rem; }
+.register-filter details { margin-top: .75rem; }
+.register-filter summary { width: fit-content; color: var(--gta-heading); }
+.register-filter .form-grid { margin-top: .75rem; }
+.register-filter .search > .button, .register-filter .search > button { min-height: 46px; margin: 0; }
+.register-row {
+    display: grid;
+    grid-template-columns: minmax(8rem, 1fr) minmax(8rem, .9fr) minmax(9rem, 1.4fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--line);
+    overflow-wrap: anywhere;
+}
+.register-row:last-of-type { border-bottom: 0; }
+.register-row h2 { margin: 0; font-size: 1.05rem; }
+.register-row p { margin: .15rem 0; }
+.register-badges { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .3rem; }
+.register-badges:empty { margin: 0; }
+.register-marker, .register-status {
+    display: inline-block;
+    border-radius: .4rem;
+    padding: .2rem .5rem;
+    font-size: .82rem;
+    font-weight: 650;
+}
+.register-marker { background: var(--gta-information-fill); color: var(--gta-information-text); }
+.register-status.is-positive { background: var(--gta-positive-fill); color: var(--gta-positive-text); }
+.register-status.is-attention { background: var(--gta-attention-fill); color: var(--gta-attention-text); }
+.register-status.is-overdue { background: var(--gta-overdue-fill); color: #86162a; }
+.register-overdue { color: var(--gta-overdue-text); font-weight: 700; }
+.support-item {
+    padding-block: .7rem;
+    border-bottom: 1px solid var(--line);
+    overflow-wrap: anywhere;
+}
+.support-item h3 { margin-block: 0 .25rem; font-size: 1rem; }
+.support-item p { margin-block: .25rem; }
+:where(#marker-reviews, #support-actions, #quick-support-log) details { padding-block: .45rem; }
+:where(#marker-reviews, #support-actions, #quick-support-log) textarea { width: 100%; }
+@media (max-width: 850px) {
+    .register-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .register-row > .button { justify-self: end; }
+}
+@media (max-width: 480px) {
+    .register-row { grid-template-columns: minmax(0, 1fr) auto; gap: .4rem .65rem; }
+    .register-row > div:first-child, .register-row > div:nth-child(2) { grid-column: 1 / -1; }
+}

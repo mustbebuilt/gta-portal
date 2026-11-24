@@ -8,8 +8,8 @@
 <p class="p66-note">{{ $roadmap['basis'] }}</p>
 <ol class="p67-road" aria-label="Apprenticeship stages">
 @foreach($roadmap['stops'] as $stop)
-<li class="{{ $stop['complete']?'p67-done':'' }} {{ $stop['current']?'p67-current':'' }} {{ $stop['pulse']?'p67-pulse':'' }}" @if($stop['current'])aria-current="step"@endif>
-<details><summary><span class="p67-stop" aria-hidden="true">{{ $stop['complete']?'✓':$stop['number'] }}</span><strong>{{ $stop['title'] }}</strong><span class="p66-cell-note">{{ $stop['current']?($stop['pulse']?'You are here':'Recorded achievement'):$stop['status'] }}</span></summary><p>{{ $stop['status'] }}</p><p class="p66-note">Training task completion and formal Gateway/EPA decisions are separate records.</p></details>
+<li class="{{ $stop['complete']?'p67-done':'' }} {{ $stop['current']?'p67-current':'' }}" @if($stop['current'])aria-current="step"@endif>
+<details><summary><span class="p67-stop" aria-hidden="true">{{ $stop['complete']?'✓':$stop['number'] }}</span><strong>{{ $stop['title'] }}</strong><span class="p66-cell-note">{{ $stop['current']?'You are here':$stop['status'] }}</span></summary><p>{{ $stop['status'] }}</p><p class="p66-note">Training task completion and formal Gateway/EPA decisions are separate records.</p></details>
 </li>
 @endforeach
 </ol>

@@ -99,7 +99,7 @@ class SupportWorkflowTest extends TestCase
     {
         $a = Apprentice::factory()->create();
         $this->actingAs($this->actor())->post('/apprentices/'.$a->id.'/markers', ['version' => 1, 'codes' => ['IM18', 'IM28'], 'confirmed' => 1])->assertRedirect()->assertSessionHasNoErrors();
-        $this->get('/apprentices/'.$a->id.'/support')->assertOk()->assertSee('No marker currently creates a support-plan requirement.');
+        $this->get('/apprentices/'.$a->id.'/support')->assertOk()->assertSee('No marker currently requires a support plan.');
     }
 
     public function test_weekly_followup_is_chronological_and_needs_measurable_target(): void

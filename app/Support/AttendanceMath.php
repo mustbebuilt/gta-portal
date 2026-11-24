@@ -55,6 +55,24 @@ return $parts;
 return false;
     }
 
+    public static function recentWarningSessions(array $rows, string $from, string $before): array
+    {
+        $sessions = array_filter($rows, fn ($row) => !$row['cancelled'] && $row['code'] !== 'C'
+            && $row['date'] >= $from && $row['date'] < $before);
+        usort($sessions, fn ($a, $b) => [$a['date'], $a['id']] <=> [$b['date'], $b['id']]);
+
+        return array_slice($sessions, -2);
+    }
+
+    public static function missedWarningSessions(array $sessions): array
+    {
+        if (count($sessions) !== 2 || array_diff(array_column($sessions, 'code'), ['A', 'W']) !== []) {
+            return [];
+        }
+
+        return array_map(fn ($row) => ['date' => $row['date'], 'code' => $row['code']], $sessions);
+    }
+
     public static function report(array $rows): array
     {
         $out = ['attended' => 0, 'missed' => 0, 'excluded' => 0, 'unmarked' => 0, 'cancelled' => 0, 'minutes' => 0, 'percent' => null, 'pairs' => []];

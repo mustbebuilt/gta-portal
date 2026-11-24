@@ -37,7 +37,7 @@ class DirectoryController extends Controller
     public function create(string $kind): View
     {
         Gate::authorize('manage-directories');
-        if($kind==='employers')return view('setup68.employer',['token'=>(string)Str::uuid(),'matches'=>collect()]);
+        if($kind==='employers')return view('setup68.employer',['token'=>old('token',(string)Str::uuid()),'matches'=>collect(),'employer'=>null]);
 
         return view('directories.form', ['kind' => $kind, 'title' => DirectoryCatalog::title($kind), 'record' => DirectoryCatalog::blank($kind), 'fields' => DirectoryCatalog::fields($kind)]);
     }

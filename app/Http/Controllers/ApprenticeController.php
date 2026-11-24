@@ -89,9 +89,16 @@ class ApprenticeController extends Controller
         ]);
     }
 
-    public function edit(Apprentice $apprentice): View
+    public function edit(Request $request, Apprentice $apprentice): View
     {
         Gate::authorize('update', $apprentice);
+
+        if ($request->filled('link_employer')) {
+            abort_if(\App\Models\ProgrammeOutcome::archived()->where('apprentice_id', $apprentice->id)->exists(), 404);
+            $target = $request->validate(['link_employer'=>['required','integer','min:1']]);
+            $employer = Employer::where('active', true)->findOrFail($target['link_employer']);
+            return view('setup68.link-employer', compact('apprentice', 'employer'));
+        }
 
         return view('apprentices.form', ['apprentice' => $apprentice, 'tutors' => $this->tutors($apprentice), 'linkedOptions' => $this->linkedOptions($apprentice)]);
     }

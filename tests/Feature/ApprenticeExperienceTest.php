@@ -115,6 +115,26 @@ class ApprenticeExperienceTest extends TestCase {
  public function test_camera_form_is_progressive_enhancement_with_no_script_dependency():void {
   [$u,$t,$a]=$this->fixture();$task=LearningTask::factory()->create(['apprentice_id'=>$a->id]);$this->actingAs($u)->get(route('tasks.show',$task))->assertOk()->assertSee('capture="environment"',false)->assertSee('accept="image/jpeg,image/png"',false)->assertSee('What did you do, and how does this photo support the task?');
  }
+ public function test_camera_photo_saves_with_a_separate_attachment_using_the_same_form(): void
+ {
+  [$user, , $apprentice] = $this->fixture();
+  Storage::fake('local');
+  $task = LearningTask::factory()->create(['apprentice_id' => $apprentice->id]);
+  $url = route('tasks.save', $task);
+  $payload = fn () => [
+   'version' => 1, 'intent' => 'upload', 'kind' => 'supporting-evidence',
+   'description' => 'Workshop handout', 'files' => [UploadedFile::fake()->image('handout.png')],
+   'camera_photo' => UploadedFile::fake()->image('camera.jpg'),
+  ];
+  $this->actingAs($user)->post($url, $payload())->assertSessionHasErrors('camera_description');
+  $this->assertDatabaseCount('task_evidence', 0);
+  $this->post($url, $payload() + ['camera_description' => 'Shows the vehicle check'])
+   ->assertRedirect()->assertSessionHasNoErrors();
+  $evidence = $task->evidence()->get()->keyBy('kind');
+  $this->assertSame('Workshop handout', $evidence['supporting-evidence']->description);
+  $this->assertSame('Shows the vehicle check', $evidence['workplace-photo']->description);
+  Storage::disk('local')->assertExists($evidence['workplace-photo']->path);
+ }
  public function test_migration_round_trip_keeps_legacy_task_and_file_records():void {
   [$u,$t,$a]=$this->fixture();$task=LearningTask::factory()->create(['apprentice_id'=>$a->id]);$task->answers=['saved'=>'kept'];$task->save();$m=require database_path('migrations/2026_11_14_210000_add_apprentice_experience.php');$m->down();$this->assertFalse(Schema::hasTable('apprentice_experience_entries'));$this->assertFalse(Schema::hasColumn('task_evidence','description'));$m->up();$this->assertTrue(Schema::hasColumn('task_evidence','description'));$this->assertSame(['saved'=>'kept'],$task->fresh()->answers);$this->assertTrue(Schema::hasTable('apprentice_mobile_challenges'));
  }

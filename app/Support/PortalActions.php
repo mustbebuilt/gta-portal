@@ -101,9 +101,9 @@ class PortalActions
     {
         $rows=[];$add=function($key,$title,$route,$body,$params=[])use(&$rows){$rows[$key]=['title'=>$title,'body'=>$body,'url'=>route($route,$params),'area'=>'Your portal'];};
         if(LearningAccess::manager($u)){
-            $add('new-apprentice','Add an apprentice','apprentices.create','Create the record, then check its staff, programme and account links.');
+            $add('new-apprentice','Add an apprentice','setup68.index','Start or resume the guided setup.');
             $add('new-staff','Add a member of staff','directories.create','Create a staff record and assign the authorised role and duties.',['staff']);
-            $add('new-employer','Add an employer','directories.create','Create the employer record before linking apprentices.',['employers']);
+            $add('new-employer','Add or link an employer','employer68.show','Search for the employer before creating a record.');
             $add('new-group','Add a tutor group','directories.create','Set up a group with the correct programme and tutor.',['groups']);
             $add('assignments','Check staff assignments','assignment-checks.index','Find missing, inactive or changed-role assignments.');
             $add('accounts','Manage account access','account-operations.index','Use the reviewed restriction, archive or restoration workflow.');

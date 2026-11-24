@@ -12,6 +12,13 @@ class SupportRegister71Controller extends Controller
     public function index(Request $r)
     {
         abort_unless(SupportRegister71::allowed($r->user()), 403);
+        if (SupportAccess::team($r->user())) {
+            $r->merge([
+                'view' => $r->input('view') === 'all' ? 'all' : 'needs-review',
+                'marker' => $r->query->get('code'),
+            ]);
+            return app(SupportController::class)->worklist($r);
+        }
         $data = SupportRegister71::query($r->user(), $r->only(['view', 'search', 'code']));
 
         $canManage = SupportAccess::team($r->user());
@@ -31,6 +38,9 @@ class SupportRegister71Controller extends Controller
     public function reports(Request $r)
     {
         abort_unless(SupportRegister71::allowed($r->user()), 403);
+        if (SupportAccess::team($r->user())) {
+            return app(SupportController::class)->registerReport($r);
+        }
         $data = SupportRegister71::query($r->user(), ['view' => 'all', ...$r->only(['search', 'code'])]);
 
         return response()->view('support71.reports', $data)
@@ -50,8 +60,7 @@ class SupportRegister71Controller extends Controller
         $apprentice = Apprentice::findOrFail($v['apprentice_id']);
         SupportRegister71::addMarker($r->user(), $apprentice, $v);
 
-        return to_route('support-register71.index', ['view' => 'needs_review'])
-            ->with('status', 'Marker added to Support and Retention Register with its initial review schedule. No support plan or funding claim was created automatically.');
+        return to_route('support.worklist', ['view' => 'needs-review'])->with('status', 'Marker added for review.');
     }
 
     public function review(Request $r, SupportMarkerSchedule71 $schedule): RedirectResponse
@@ -59,14 +68,14 @@ class SupportRegister71Controller extends Controller
         $v = $r->validate([
             'version' => ['required', 'integer'],
             'kind' => ['required', 'string'],
-            'review_date' => ['nullable', 'date_format:Y-m-d'],
+            'review_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
             'interval_key' => ['nullable', 'string', 'max:20'],
             'note' => ['nullable', 'string', 'max:2000'],
         ]);
         SupportRegister71::recordReview($r->user(), $schedule, $v);
 
         return back()->with('status', match ($v['kind']) {
-            'formal_review' => 'Formal review recorded (Register). Next review due date updated.',
+            'formal_review' => 'Review saved. Next review date updated.',
             'discussion_only' => 'Discussion logged. Formal review due date was not moved.',
             'change_frequency' => 'Review frequency updated with recorded reason.',
             'close_marker' => 'Marker episode closed and history retained.',
@@ -95,6 +104,6 @@ class SupportRegister71Controller extends Controller
         $v = $r->validate(['outcome' => ['nullable', 'string', 'max:1000']]);
         SupportRegister71::completeAction($r->user(), $action, $v);
 
-        return back()->with('status', 'Action marked complete. Marker review dates remain separate.');
+        return back()->with('status', 'Action completed.');
     }
 }

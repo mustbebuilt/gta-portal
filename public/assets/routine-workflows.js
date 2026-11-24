@@ -23,8 +23,6 @@ document.querySelectorAll('[data-evidence-kind]').forEach(select => {
   const update = () => {
     const photo = select.value === 'workplace-photo';
     file.accept = photo ? 'image/jpeg,image/png' : '.pdf,.jpg,.jpeg,.png,.docx';
-    if (photo) file.setAttribute('capture', 'environment');
-    else file.removeAttribute('capture');
     // The server validates the explanation when a photo is actually uploaded. Draft text remains saveable.
     description.placeholder = photo ? 'Explain how this photo supports the task.' : 'Optional evidence note';
   };
