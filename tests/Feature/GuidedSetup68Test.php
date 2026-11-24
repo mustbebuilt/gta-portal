@@ -24,14 +24,14 @@ class GuidedSetup68Test extends TestCase {
   $this->capture($d,3,$partial?'partial':'none');$d=$this->save($d,4,$partial?['mode'=>'applies','assessment_ref'=>'ASSESSMENT-68-B','adjustments'=>['K1'=>20,'K2'=>30,'K3'=>40,'K4'=>50],'remaining_confirmed'=>true]:['mode'=>'none']);
   $this->capture($d,4,$partial?'partial':'none');if($partial){$d=$this->save($d,5,['reference'=>'NEW68','name'=>'New Acceptance Workshop','contact_name'=>'Test workplace mentor','contact_email'=>'workshop@example.invalid','use_contact'=>true]);$d=$this->save($d,5,[...$d->payload['employer'],'agreement_ref'=>'EMPLOYER-AGREEMENT-68-B','agreement_verified'=>true]);}
   else {$e=Employer::create(['reference'=>'EXIST68','name'=>'Existing Acceptance Workshop']);$d=$this->save($d,5,['id'=>$e->id]);}
-  $this->capture($d,5,$partial?'partial':'none');$this->assertSame([],Setup::review($d)['issues']);$this->get('/apprentice-setup/'.$d->id.'/6')->assertOk()->assertSee('Check the setup');
+  $this->capture($d,5,$partial?'partial':'none');$this->assertSame([],Setup::review($d)['issues']);$this->get('/apprentice-setup/'.$d->id.'/7')->assertOk()->assertSee('Check the setup');
   if($submit)$this->post('/apprentice-setup/'.$d->id.'/submit',['version'=>$d->version,'confirmed'=>1])->assertRedirect()->assertSessionHasNoErrors();return [$d->fresh(),$author,$reviewer,$t];
  }
  private function complete(bool $partial=false):array {[$d,$author,$reviewer,$t]=$this->ready($partial, submit:false);$this->post('/apprentice-setup/'.$d->id.'/confirm',['version'=>$d->version,'confirmed'=>1])->assertRedirect()->assertSessionHasNoErrors();return [$d->fresh(),$author,$reviewer,$t];}
  public function test_two_complete_http_setups_feed_the_real_approved_plan_otj_and_training_source():void {
   foreach([false,true] as $partial){[$d,$author,$reviewer,$t]=$this->complete($partial);$a=Apprentice::findOrFail($d->apprentice_id);$expected=$partial?583.2:600.0;
    $this->assertEquals($expected,DeliveryPlan::approved($a)['details']['target_hours']);$this->assertEquals($expected,OtjPosition::forApprentice($a)['summary']['target_hours']);$this->assertEquals($expected,\App\Support\TrainingPlanSource::position(TrainingPlanWorkspace::where('apprentice_id',$a->id)->first())['remaining_hours']);
-   $this->assertEquals($expected,array_sum(array_column(DeliveryPlan::approved($a)['blocks'],'hours')));$this->assertDatabaseCount('apprentices',$partial?2:1);$this->get('/apprentice-setup/'.$d->id.'/6')->assertOk()->assertSee('Setup complete');$this->capture($d,6,$partial?'partial':'none');
+   $this->assertEquals($expected,array_sum(array_column(DeliveryPlan::approved($a)['blocks'],'hours')));$this->assertDatabaseCount('apprentices',$partial?2:1);$this->get('/apprentice-setup/'.$d->id.'/7')->assertOk()->assertSee('Setup complete');$this->capture($d,7,$partial?'partial':'none');
    $this->get('/apprentices/'.$a->id)->assertOk()->assertSee($a->reference);
    $this->get('/apprentices/'.$a->id.'/otj-ledger')->assertOk()->assertSee(number_format($expected,2));
    $this->get('/apprentices/'.$a->id.'/training-plan')->assertOk()->assertSee(number_format($expected,2));
@@ -47,7 +47,7 @@ class GuidedSetup68Test extends TestCase {
   [$d,$author]=$this->ready();
   $this->assertSame('Ready',$d->state);
   $url='/apprentice-setup/'.$d->id;
-  $this->get($url.'/6')->assertOk()->assertSee('Confirm and create apprentice')->assertDontSee('Submit for plan review');
+  $this->get($url.'/7')->assertOk()->assertSee('Confirm and create apprentice')->assertDontSee('Submit for plan review');
   $this->post($url.'/confirm',['version'=>$d->version,'confirmed'=>1])->assertRedirect()->assertSessionHasNoErrors();
   $d->refresh();
   $this->assertSame('Complete',$d->state);
@@ -205,7 +205,7 @@ class GuidedSetup68Test extends TestCase {
   $this->post($url.'/steps/4', ['version' => $draft->version, 'action' => 'save_plan_dates', 'data' => $record])
    ->assertRedirect()->assertSessionHasNoErrors();
   $draft->refresh();
-  $this->get($url.'/6')->assertOk()->assertSee('Fictional approved plan v1')->assertSee('Confirm and create apprentice');
+  $this->get($url.'/7')->assertOk()->assertSee('Fictional approved plan v1')->assertSee('Confirm and create apprentice');
   $this->post($url.'/confirm', ['version' => $draft->version, 'confirmed' => 1])->assertRedirect()->assertSessionHasNoErrors();
   $apprentice = Apprentice::findOrFail($draft->fresh()->apprentice_id);
   $this->assertSame($dates['programme_end'], $apprentice->planned_end_date->toDateString());

@@ -150,7 +150,12 @@ final class RplPlanDates69
             if (!$timetable && (!isset($record['agreed_hours']) || round((float) $record['agreed_hours'], 2) !== round($calculation['revised_hours_unrounded'], 2))) {
                 throw new InvalidArgumentException('The revised OTJ hours differ from the agreed Training Plan. Reconcile the hours before requesting approval.');
             }
-            $schedule = self::schedule($calculation['blocks'], $start, $dates, $record['schedule'] ?? null, $timetable);
+            $enteredSchedule = $record['schedule'] ?? null;
+            if ($timetable && ($enteredSchedule === null || trim($enteredSchedule) === '')) {
+                $schedule = self::buildStep6Plan($template, $programme, $rpl, $calculation, $dates['practical_end'], $dates['programme_end'])['blocks'];
+            } else {
+                $schedule = self::schedule($calculation['blocks'], $start, $dates, $enteredSchedule, $timetable);
+            }
 
             return ['proposed' => $proposed, 'timetable' => $timetable, 'approved' => [
                 ...$dates, 'source' => $record['source'], 'blocks' => $schedule,

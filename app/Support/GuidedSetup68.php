@@ -1,11 +1,11 @@
 <?php
 namespace App\Support;
-use App\Models\{Apprentice,ApprenticeSetupDraft68 as Draft,ProgrammeSetupTemplate68 as Template,Programme,Employer,TrainingPlanWorkspace,IndividualDeliveryPlan,User,TutorGroup,LearningTask};
+use App\Models\{Apprentice,ApprenticeSetupDraft68 as Draft,ProgrammeSetupTemplate68 as Template,Programme,ProgrammeOutcome,Employer,TrainingPlanWorkspace,IndividualDeliveryPlan,User,TutorGroup,LearningTask};
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\{DB,Gate,Validator};
 use Illuminate\Support\Str;
 class GuidedSetup68 {
- public const STEPS=[1=>'Apprentice details',2=>'Inclusion Markers',3=>'Apprenticeship',4=>'Prior learning',5=>'Employer',6=>'Review and confirm'];
+ public const STEPS=[1=>'Apprentice details',2=>'Inclusion Markers',3=>'Apprenticeship',4=>'Prior learning',5=>'Employer',6=>'Functional Skills',7=>'Review and confirm'];
  public static function actor(User $actor,int $auth):User {$u=User::whereKey($actor->id)->lockForUpdate()->firstOrFail();abort_unless(LearningAccess::manager($u)&&$u->auth_version===$auth&&$u->can('create',Apprentice::class),403);return $u;}
  public static function start(User $u,int $auth):Draft {return DB::transaction(function()use($u,$auth){self::actor($u,$auth);$d=new Draft();$d->id=(string)Str::uuid();$d->owner_id=$u->id;$d->payload=['authors'=>[$u->id],'step'=>1];$d->history=[];$d->save();return $d;});}
  public static function event(Draft $d,User $u,string $event,array $meta=[]):void {$d->history=[...($d->history??[]),['event'=>$event,'actor'=>$u->id,'at'=>now()->toIso8601String(),'revision'=>$d->version,...$meta]];}
@@ -26,7 +26,20 @@ class GuidedSetup68 {
    elseif($step===5){$v=Validator::make($input,['id'=>['nullable','integer'],'reference'=>['nullable','string','max:40','regex:/^[A-Za-z0-9][A-Za-z0-9_-]*$/'],'name'=>['nullable','string','max:200'],'contact_name'=>['nullable','string','max:150'],'contact_email'=>['nullable','email:rfc','max:254'],'contact_phone'=>['nullable','string','max:50'],'size_band'=>['nullable',\Illuminate\Validation\Rule::in(['1–9','10–49','50–249','250+','Unknown'])],'use_contact'=>['nullable','boolean'],'agreement_ref'=>['nullable','string','max:1000'],'agreement_verified'=>['nullable','boolean'],'duplicate_reason'=>['nullable','string','max:500']])->validate();if(!empty($v['id'])){$e=Employer::find($v['id']);if(!$e?->active)Rpl68::fail('Choose an active employer.');$v=array_intersect_key($v,array_flip(['id','use_contact','agreement_ref','agreement_verified']));$v['record_version']=$e->record_version;}else $v['reference']=strtoupper(trim($v['reference']??''));
     if(self::employerKey($p['employer']??[])!==self::employerKey($v)||($p['employer']['record_version']??null)!==($v['record_version']??null))$v['agreement_verified']=false;
     if(!empty($v['agreement_verified']))$v['agreement_binding']=Rpl68::hash([self::employerKey($v),$v['record_version']??null,$p['rpl']??[],$v['agreement_ref']??null]);$p['employer']=$v;
-   }else Rpl68::fail('Choose a setup step from one to five.');
+   }elseif($step===6){
+    $v=Validator::make($input,[
+     'maths'=>['nullable',\Illuminate\Validation\Rule::in(ProgrammeOutcome::REQUIREMENT_CHOICES)],
+     'english'=>['nullable',\Illuminate\Validation\Rule::in(ProgrammeOutcome::REQUIREMENT_CHOICES)],
+     'maths_tutor_id'=>['nullable','integer'],
+     'english_tutor_id'=>['nullable','integer'],
+    ])->validate();
+    $p['functional_skills']=[
+     'maths'=>$v['maths']??'Unknown',
+     'english'=>$v['english']??'Unknown',
+    ];
+    if(array_key_exists('maths_tutor_id',$input)){$p['programme']['maths_tutor_id']=$v['maths_tutor_id']??null;}
+    if(array_key_exists('english_tutor_id',$input)){$p['programme']['english_tutor_id']=$v['english_tutor_id']??null;}
+   }else Rpl68::fail('Choose a setup step from one to six.');
    if($d->apprentice_id&&!isset($p['apprentice_version']))$p['apprentice_version']=Apprentice::findOrFail($d->apprentice_id)->version;
    $p['step']=$step;$p['authors']=array_values(array_unique([...($p['authors']??[]),$u->id]));$d->payload=$p;$d->version++;self::event($d,$u,'step_saved',['step'=>$step,...($step===4?['rpl_before'=>$before['rpl']??[],'rpl_after'=>$p['rpl']??[]]:[])]);$d->save();return $d;
   });
@@ -50,7 +63,7 @@ class GuidedSetup68 {
     'programme_end' => ['required', 'date_format:Y-m-d', 'after:practical_end'],
     'pause_start' => ['nullable', 'required_with:pause_end', 'date_format:Y-m-d'],
     'pause_end' => ['nullable', 'required_with:pause_start', 'date_format:Y-m-d'],
-    'schedule' => [$timetable ? 'required' : 'nullable', 'string', 'max:1000'],
+    'schedule' => ['nullable', 'string', 'max:1000'],
    ])->validate();
    $dates['binding'] = RplPlanDates69::binding($p['programme'], $p['rpl'] ?? [], $policy);
    $old = $p['plan_dates69'] ?? [];
@@ -92,7 +105,7 @@ class GuidedSetup68 {
  public static function confirm(User $u,int $auth,Draft $draft,int $version,?string $practicalEnd=null,?string $programmeEnd=null):Draft {
   return DB::transaction(function()use($u,$auth,$draft,$version,$practicalEnd,$programmeEnd){$u=self::actor($u,$auth);DB::table('setup68_locks')->where('key','commit')->lockForUpdate()->first();$d=Draft::whereKey($draft->id)->lockForUpdate()->firstOrFail();if($d->state==='Complete')return $d;$d=self::lock($d,$version);abort_unless(in_array($d->state,['Draft','Ready'],true),409);$p=$d->payload;
    $view=self::review($d);
-   if($view['issues'])Rpl68::fail($d->state==='Ready'?'Reopen the setup and resolve the items listed in Step 6.':'Resolve the items listed in Step 6 before confirming the setup.');$t=$view['template'];$calc=$view['calculation'];$e=$p['employer'];$employer=$view['employer'];
+   if($view['issues'])Rpl68::fail($d->state==='Ready'?'Reopen the setup and resolve the items listed in Review and confirm.':'Resolve the items listed in Review and confirm before confirming the setup.');$t=$view['template'];$calc=$view['calculation'];$e=$p['employer'];$employer=$view['employer'];
    $dates69=$view['dates69']??[];
    $chosenPractical=filled($practicalEnd)?$practicalEnd:($dates69['selected']['practical_end']??null);
    $chosenProgramme=filled($programmeEnd)?$programmeEnd:($dates69['selected']['programme_end']??null);
@@ -110,6 +123,19 @@ class GuidedSetup68 {
    // Reuse the full current apprentice request rules for linked roles/groups and all original field constraints.
    $req=new \App\Http\Requests\SaveApprenticeRequest();$req->merge($fields);$rules=$req->rules();unset($rules['version']);$rules['reference']=['required','string','max:40','regex:/^[A-Z0-9][A-Z0-9_-]*$/',\Illuminate\Validation\Rule::unique('apprentices','reference')->ignore($a->id)];$fields=Validator::make($fields,$rules)->validate();
    $before=$a->exists?$a->only(AssignmentHistory::KEYS):null;$a->fill($fields);$a->inclusion_status68=$p['markers']['state'];if($a->exists)$a->version++;$a->save();AssignmentHistory::record($a,$u->id,$before);
+   $fs=$p['functional_skills']??[];
+   if(isset($fs['maths'])||isset($fs['english'])){
+    $outcome=ProgrammeOutcome::where('apprentice_id',$a->id)->lockForUpdate()->first()??new ProgrammeOutcome(['apprentice_id'=>$a->id]);
+    $beforeContext=$outcome->context??[];
+    $updatedContext=array_replace($beforeContext,array_intersect_key($fs,array_flip(['maths','english'])));
+    if($updatedContext!==$beforeContext||!$outcome->exists){
+     $outcome->history=[...($outcome->history??[]),['before'=>$outcome->context,'by'=>$u->id,'at'=>now()->toIso8601String(),'source'=>'guided_setup68']];
+     $outcome->context=$updatedContext;
+     if($outcome->exists)$outcome->version++;
+     $outcome->save();
+     DB::table('learning_events')->insert(['user_id'=>$u->id,'apprentice_id'=>$a->id,'kind'=>'outcome_context','record_id'=>$outcome->id,'event'=>'entry_requirements_recorded','created_at'=>now()]);
+    }
+   }
    abort_unless(SupportAccess::lead($u,$a),403);$old=MarkerHistory::codes($a->id);$markers=$p['markers'];if($markers['state']!=='pending'){$selected=$markers['state']==='none'?[]:$markers['codes'];DB::table('apprentice_markers')->where('apprentice_id',$a->id)->whereNotIn('code',$selected)->delete();foreach(array_diff($selected,$old) as $code)DB::table('apprentice_markers')->insert(['apprentice_id'=>$a->id,'code'=>$code,'recorded_by'=>$u->id,'created_at'=>now(),'updated_at'=>now()]);MarkerHistory::record($a->id,$u->id,'guided_setup68',$old,'Recorded during apprentice setup');}
    $w=TrainingPlanWorkspace::firstOrNew(['apprentice_id'=>$a->id]);$previousRpl=$w->setup_rpl;$rpl=[...$p['rpl'],'remaining_confirmed'=>true,'template_id'=>$t->id,'template_hash'=>$t->source_hash,'calculation'=>$calc,'assessment_ref'=>$p['rpl']['assessment_ref']??null,'employer_id'=>$employer->id,'employer_agreement_ref'=>$e['agreement_ref']??null,'approved_by'=>$u->id,'approved_at'=>now()->toIso8601String()];$w->setup_rpl=$rpl;$w->source_hash=$t->source_hash;$w->proposal=$w->proposal??[];$w->rpl=$w->rpl??[];$w->history=[...($w->history??[]),['event'=>'setup68_rpl_confirmed','by'=>$u->id,'at'=>now()->toIso8601String(),'draft'=>$d->id,'reason'=>$p['correction_reason']??null]];if($w->exists)$w->version++;$w->save();
    $blocks=[];foreach($calc['blocks'] as $b)$blocks[]=['number'=>$b['number'],'title'=>$b['title'],'hours'=>(string)$b['hours'],'start'=>CarbonImmutable::parse($a->start_date)->addDays($b['start_day'])->toDateString(),'end'=>CarbonImmutable::parse($a->start_date)->addDays($b['end_day'])->toDateString()];
