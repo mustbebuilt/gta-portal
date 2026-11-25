@@ -41,8 +41,11 @@ class PortalNavigation
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)) {
             $primary[]=$item('Apprentice register','attendance.index',[],['attendance.*']);
-            $primary[]=$item('Work to mark','marking.index',[],['marking.*']);
             $links[]=$item('Register changes','session-operations.index',[],['session-operations.*','session-changes.*','register-actions.*']);
+        }
+        if(MarkingReminders::allowed($u) || SubjectMarkingQueue::allowedSubjects($u)) {
+            $primary[]=$item('Work to mark','marking.index',[],['marking.*'],
+                $request->routeIs('marking.*') || ($request->routeIs('topics.show') && $request->boolean('from_marking')));
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)){$links[]=$item('Gateway preparation','gateway.index',[],['gateway.*']);}
         if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'Timetable','centre-planning.index',[],['centre-planning.*','work-moves.*','optimiser.*','timetable-duties.*','timetable-governance.*']);}

@@ -6,15 +6,32 @@ use App\Models\MarkingReminder;
 use App\Support\LearningAccess;
 use App\Support\MarkingReminders;
 use App\Support\MarkingQueueViews;
+use App\Support\SubjectMarkingQueue;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class MarkingQueueController extends Controller
 {
     public function index(Request $request): View
     {
+        $kind = $request->validate(['kind' => ['nullable', Rule::in(['vocational', 'skills'])]])['kind'] ?? null;
+        $canMarkTasks = MarkingReminders::allowed($request->user());
+        $subjects = SubjectMarkingQueue::allowedSubjects($request->user());
+        abort_unless($canMarkTasks || $subjects, 403);
+
+        if ($kind === 'skills' || (!$canMarkTasks && $kind === null)) {
+            abort_unless($subjects, 403);
+            $filters = SubjectMarkingQueue::filters($request->query());
+            $topics = SubjectMarkingQueue::query($request->user(), $subjects, $filters)
+                ->paginate(25, ['id', 'apprentice_id', 'subject', 'topic', 'level'])->withQueryString();
+
+            return view('marking.subjects', compact('canMarkTasks', 'subjects', 'filters', 'topics'));
+        }
+
+        abort_unless($canMarkTasks, 403);
         $base = MarkingReminders::query($request->user());
         $input=$request->validate(['view'=>['nullable','string','max:30'],'search'=>['nullable','string','max:250'],'tutor'=>['nullable','string','max:30']]);
         $manager=LearningAccess::manager($request->user());
@@ -42,7 +59,7 @@ class MarkingQueueController extends Controller
         }
         $reminders = MarkingReminder::whereIn('source_key', array_filter(array_column($sources, 'source_key')))->get()->keyBy('source_key');
 
-        return view('marking.index', ['nextTask83'=>MarkingQueueViews::next($request->user(),['view'=>$filter,'search'=>$search,'tutor'=>$tutorFilter],0),'reminderScheduleEnabled'=>(bool)config('portal_reminders.scheduled',false),'lastReminderRun'=>LearningAccess::manager($request->user()) ? \Illuminate\Support\Facades\DB::table('portal_reminder_runs')->latest('id')->first() : null,'tasks' => $tasks, 'counts' => $counts, 'sources' => $sources, 'reminders' => $reminders, 'manager' => LearningAccess::manager($request->user()), 'filter' => $filter, 'search' => $search,'tutorFilter'=>$tutorFilter,'tutorOptions'=>$tutorOptions]);
+        return view('marking.index', ['hasSubjectMarking' => (bool) $subjects, 'nextTask83'=>MarkingQueueViews::next($request->user(),['view'=>$filter,'search'=>$search,'tutor'=>$tutorFilter],0),'reminderScheduleEnabled'=>(bool)config('portal_reminders.scheduled',false),'lastReminderRun'=>LearningAccess::manager($request->user()) ? \Illuminate\Support\Facades\DB::table('portal_reminder_runs')->latest('id')->first() : null,'tasks' => $tasks, 'counts' => $counts, 'sources' => $sources, 'reminders' => $reminders, 'manager' => LearningAccess::manager($request->user()), 'filter' => $filter, 'search' => $search,'tutorFilter'=>$tutorFilter,'tutorOptions'=>$tutorOptions]);
     }
 
     public function record(Request $request): RedirectResponse

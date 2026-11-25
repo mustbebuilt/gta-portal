@@ -29,6 +29,10 @@ class GroupedNavigationTest extends TestCase
    $expected[] = route('reports.index');
   }
   if(in_array($u->role,['tutor','apprentice'],true)){$expected[]=route('weekly-retention.reminders');}
+  if (!in_array($u->role, ['admin', 'ceo', 'tutor'], true)
+      && (StaffDuties::has($u, 'maths_tutor') || StaffDuties::has($u, 'english_tutor'))) {
+   $expected[] = route('marking.index');
+  }
   sort($expected);$this->assertSame($expected,$this->links($new),'Unexpected href inventory changed for '.$u->role);
  }
  public function test_daily_and_secondary_navigation_destinations_for_all_primary_roles():void {
@@ -37,7 +41,7 @@ class GroupedNavigationTest extends TestCase
  public function test_added_duties_preserve_links_and_show_only_relevant_sections():void {
   $admin=User::factory()->create(['role'=>'admin']);$u=User::factory()->create(['role'=>'staff']);StaffDuties::save($u,$admin,$admin->auth_version,$u->record_version,0,['careers_adviser'=>true,'mentor'=>true,'maths_tutor'=>true]);$this->parity($u->fresh());
   $menu=PortalNavigation::build($u->fresh(),$this->requestFor('em.index'));$groups=collect($menu['groups'])->keyBy('id');$this->assertArrayNotHasKey('administration',$groups->all());$this->assertArrayNotHasKey('system',$groups->all());$this->assertTrue($groups['training']['open']);
-  $labels=collect($groups['training']['links'])->pluck('label')->all();$this->assertContains('Maths and English',$labels);$this->assertNotContains('Work to mark',$labels);
+  $labels=collect($groups['training']['links'])->pluck('label')->all();$this->assertContains('Maths and English',$labels);$this->assertNotContains('Work to mark',$labels);$this->assertContains('Work to mark',array_column($menu['primary'],'label'));
  }
  public function test_empty_groups_are_omitted_and_help_stays_outside_disclosures():void {
   $u=User::factory()->create(['role'=>'apprentice']);$menu=PortalNavigation::build($u,$this->requestFor('help.index'));

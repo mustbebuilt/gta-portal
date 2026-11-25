@@ -23,17 +23,25 @@ class EnglishMathsFollowup
         $quals = Qualification::whereIn('apprentice_id', $people->pluck('id'))->get(['id', 'apprentice_id', 'subject', 'status', 'start_date'])->groupBy('apprentice_id');
         $topics = TrainingTopic::whereIn('apprentice_id', $people->pluck('id'))->get(['id', 'apprentice_id', 'subject', 'planned_hours', 'status', 'evidence_stage'])->groupBy('apprentice_id');
         $rows = collect();
+        $staffSubjects = SubjectMarkingQueue::allowedSubjects($user);
+        $manager = LearningAccess::manager($user);
         foreach ($people as $a) {
-            $subjects = self::subjects($user, $a);
+            $editable = $manager ? $staffSubjects : array_filter($staffSubjects, fn ($s) => $a->{$s.'_tutor_id'} === $user->id);
+            $subjects = LearningAccess::training($user, $a) ? ['maths', 'english'] : $editable;
             if ($subject !== 'all') { $subjects = array_values(array_intersect($subjects, [$subject])); }
             if (! $subjects) { continue; }
             $summary = [];
             foreach ($subjects as $s) {
                 $q = $quals->get($a->id, collect())->where('subject', $s);
                 $t = $topics->get($a->id, collect())->where('subject', $s);
-                $positions = $q->map(fn ($item) => $item->position());
+                $positions = $q->keyBy('id')->map(fn ($item) => $item->position());
+                $canUpdate = in_array($s, $editable, true);
+                $nextResult = $canUpdate ? $q->filter(fn ($record) => in_array($positions->get($record->id), ['Overdue', 'Due today'], true))
+                    ->sortBy('start_date')->first() : null;
                 $planned = $t->filter(fn ($item) => (float) $item->planned_hours > 0);
                 $summary[$s] = [
+                    'next_result' => $nextResult?->id,
+                    'next_review' => $canUpdate ? $t->where('evidence_stage', 'Awaiting review')->sortBy('id')->first()?->id : null,
                     'qualifications' => $q->count(),
                     'overdue' => $positions->filter(fn ($p) => $p === 'Overdue')->count(),
                     'today' => $positions->filter(fn ($p) => $p === 'Due today')->count(),

@@ -9,6 +9,7 @@ use App\Models\TrainingTopic;
 use App\Support\LearningAccess as Access;
 use App\Support\PrivateEvidence;
 use App\Support\EnglishMathsFollowup;
+use App\Support\SubjectMarkingQueue;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
@@ -51,7 +52,7 @@ class EnglishMathsController extends Controller
         $rows = $summary['rows']->filter(fn ($row) => $view === 'all' || $row['flags'][$view])->values();
         $page = min((int) ($data['page'] ?? 1), max(1, (int) ceil($rows->count() / 20)));
         $paginator = new LengthAwarePaginator($rows->slice(($page - 1) * 20, 20)->values(), $rows->count(), 20, $page, ['path' => $r->url(), 'query' => $r->except('page')]);
-        return view('em.caseload', ['followupRows' => $paginator, 'followupCounts' => $summary['counts'], 'selectedSubject' => $subject, 'selectedView' => $view, 'search' => $search]);
+        return view('em.caseload', ['followupRows' => $paginator, 'followupCounts' => $summary['counts'], 'selectedSubject' => $subject, 'selectedView' => $view, 'search' => $search, 'canMarkSubjects' => (bool) SubjectMarkingQueue::allowedSubjects($u)]);
     }
 
     private function subjects(Request $r, Apprentice $a): array
@@ -167,7 +168,10 @@ class EnglishMathsController extends Controller
     {
         abort_unless(in_array($topic->subject, $this->subjects($r, $topic->apprentice), true), 403);
 
-        return view('em.topic', ['topic' => $topic, 'apprentice' => $topic->apprentice, 'canReview' => Access::subject($r->user(), $topic->apprentice, $topic->subject), 'learner' => Access::learner($r->user(), $topic->apprentice)]);
+        $canReview = Access::subject($r->user(), $topic->apprentice, $topic->subject);
+        $queue = $canReview && $r->boolean('from_marking') ? SubjectMarkingQueue::filters($r->query()) : null;
+
+        return view('em.topic', ['queue' => $queue, 'topic' => $topic, 'apprentice' => $topic->apprentice, 'canReview' => $canReview, 'learner' => Access::learner($r->user(), $topic->apprentice)]);
     }
 
     public function evidence(Request $r, TrainingTopic $topic): RedirectResponse
@@ -223,7 +227,10 @@ class EnglishMathsController extends Controller
     public function updateTopic(Request $r, TrainingTopic $topic): RedirectResponse
     {
         abort_unless(Access::subject($r->user(), $topic->apprentice, $topic->subject), 403);
-        $data = $r->validate(['version' => ['required', 'integer'], 'status' => ['required', Rule::in(['Not Started', 'In Progress', 'Completed', 'Secure'])], 'completion_date' => ['nullable', 'required_if:status,Completed', 'date_format:Y-m-d', 'before_or_equal:today'], 'feedback' => ['required', 'string', 'max:20000'], 'decision' => ['nullable', Rule::in(['Accepted', 'Referred'])]]);
+        $data = $r->validate(['version' => ['required', 'integer'], 'status' => ['required', Rule::in(['Not Started', 'In Progress', 'Completed', 'Secure'])], 'completion_date' => ['nullable', 'required_if:status,Completed', 'date_format:Y-m-d', 'before_or_equal:today'], 'feedback' => ['required', 'string', 'max:20000'], 'decision' => ['nullable', 'required_if:after_save,next', Rule::in(['Accepted', 'Referred'])],
+            'after_save' => ['nullable', Rule::in(['next'])], 'queue' => ['nullable', 'array']]);
+        $filters = ($data['after_save'] ?? null) === 'next'
+            ? SubjectMarkingQueue::filters($data['queue'] ?? []) : null;
         DB::transaction(function () use ($r, $topic, $data): void {
             $t = TrainingTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $t);
@@ -253,6 +260,14 @@ class EnglishMathsController extends Controller
             $t->save();
             $this->audit($r, $t->apprentice_id, 'topic', $t->id, 'tutor_updated');
         });
+
+        if ($filters !== null) {
+            $subjects = SubjectMarkingQueue::allowedSubjects($r->user());
+            $next = SubjectMarkingQueue::query($r->user(), $subjects, $filters)->whereKeyNot($topic->id)->value('id');
+
+            return redirect($next ? SubjectMarkingQueue::url((int) $next, $filters) : SubjectMarkingQueue::indexUrl($filters))
+                ->with('status', $next ? 'Evidence decision saved.' : 'Evidence decision saved. No further submissions in this view.');
+        }
 
         return back()->with('status', 'Topic update saved. Evidence acceptance alone does not complete training or a qualification.');
     }

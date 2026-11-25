@@ -3,6 +3,9 @@
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">{{ $manager?'Management oversight':'Your current apprentices' }}</p><h1>Work to mark</h1></div></header>
 @include('learning.errors')
+@if($hasSubjectMarking)
+    @include('marking.switch')
+@endif
 @if($nextTask83)<p><a class="button primary" href="{{route('tasks.show',['task'=>$nextTask83,'from_marking'=>1,'view'=>$filter,'search'=>$search,'tutor'=>$tutorFilter])}}">Start next submission</a></p>@endif
 <details class="panel" @if($search!=='' || $tutorFilter!=='' || $filter!=='all') open @endif><summary>Filter submitted work</summary><form class="search" method="get">
 @if($manager)<div><label for="marking-tutor">Main tutor</label><select id="marking-tutor" name="tutor"><option value="">All current assignments</option><option value="unassigned" @selected($tutorFilter==='unassigned')>No main tutor assigned</option>@foreach($tutorOptions as $tutor)<option value="{{ $tutor->id }}" @selected($tutorFilter===(string)$tutor->id)>{{ $tutor->name }}{{ !$tutor->active?' (inactive)':($tutor->role!=='tutor'?' (assignment needs checking)':'') }}</option>@endforeach</select></div>@endif
