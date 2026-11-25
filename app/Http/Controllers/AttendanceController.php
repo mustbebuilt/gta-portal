@@ -19,13 +19,17 @@ use App\Support\RegisterCreation;
 use App\Support\RegisterFollowup;
 use App\Support\RegisterPayload;
 use App\Support\RegisterTraining;
+use App\Support\SessionPlanning;
 use App\Support\Workday83;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -47,7 +51,7 @@ class AttendanceController extends Controller
         $visible = RegisterFollowup::visible($r->user(), includeInactive: true);
         $groups = $visible['groups'];
         $sessions = $visible['sessions'];
-        $input = $r->validate(['view' => ['nullable', 'string', Rule::in(RegisterFollowup::VIEWS)], 'group' => ['nullable', 'integer', 'min:1'], 'apprentice' => ['nullable', 'integer', 'min:1'], 'search' => ['nullable', 'string', 'max:250']]);
+        $input = $r->validate(['view' => ['nullable', 'string', Rule::in(RegisterFollowup::VIEWS)], 'group' => ['nullable', 'integer', 'min:1'], 'apprentice' => ['nullable', 'integer', 'min:1'], 'search' => ['nullable', 'string', 'max:250'], 'plan_date' => ['nullable', 'date_format:Y-m-d']]);
         if ($r->filled('group')) {
             abort_unless($groups->contains('id', (int) $input['group']), 404);
             $sessions = $sessions->where('tutor_group_id', (int) $input['group']);
@@ -85,12 +89,104 @@ class AttendanceController extends Controller
                     ->sortBy(fn ($row) => [$row['occurrence']['date'], $row['occurrence']['settings']['start'], $row['group']->name])->values();
             }
         }
-        return view('attendance.index', ['scheduledThisWeek' => $scheduledThisWeek, 'nextScope83' => Workday83::registerScope($input), 'nextRegister83' => Workday83::nextRegister($r->user(), null, $input), 'groups' => $groups, 'sessions' => $registerRows->getCollection()->pluck('session'), 'weeklyGroupSessions' => $sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'), 'monthlyOutstanding' => $monthlyOutstanding, 'todayRegisterRows' => $followup['rows']->filter(fn ($row) => $row['session']->session_date->isToday())->values(), 'registerRows' => $registerRows, 'registerCounts' => $followup['counts'], 'registerView' => $view, 'registerSearch' => $search]);
+        $plannerGroup = $groups->firstWhere('id', (int) $r->old('tutor_group_id', $input['group'] ?? 0));
+        $plannerDate = $r->old('session_date', $input['plan_date'] ?? today()->toDateString());
+        $plannerDate = is_string($plannerDate) ? $plannerDate : '';
+        $plannerOptions = $plannerGroup?->active && RegisterCreation::allowed($r->user(), $plannerGroup)
+            ? $this->sessionOptions($plannerGroup, preg_match('/^\d{4}-\d{2}-\d{2}$/D', $plannerDate) && strtotime($plannerDate) ? $plannerDate : null)
+            : ['subjects' => [], 'timing' => null];
+
+        return view('attendance.index', ['plannerDate' => $plannerDate, 'plannerOptions' => $plannerOptions, 'scheduledThisWeek' => $scheduledThisWeek, 'nextScope83' => Workday83::registerScope($input), 'nextRegister83' => Workday83::nextRegister($r->user(), null, $input), 'groups' => $groups, 'sessions' => $registerRows->getCollection()->pluck('session'), 'weeklyGroupSessions' => $sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'), 'monthlyOutstanding' => $monthlyOutstanding, 'todayRegisterRows' => $followup['rows']->filter(fn ($row) => $row['session']->session_date->isToday())->values(), 'registerRows' => $registerRows, 'registerCounts' => $followup['counts'], 'registerView' => $view, 'registerSearch' => $search]);
+    }
+
+    public function planOptions(Request $r, TutorGroup $group): JsonResponse
+    {
+        abort_unless($group->active && RegisterCreation::allowed($r->user(), $group), 403);
+        $date = $r->validate(['date' => ['nullable', 'date_format:Y-m-d']])['date'] ?? null;
+        return response()->json($this->sessionOptions($group, $date))
+            ->header('Cache-Control', 'no-store, private');
+    }
+
+    private function sessionOptions(TutorGroup $group, ?string $date): array
+    {
+        $members = Apprentice::where('tutor_group_id', $group->id)->get();
+        $timing = $date ? SessionPlanning::weekly($group, $date)['settings'] ?? null : null;
+
+        return [
+            'subjects' => array_values(SessionPlanning::options($members, $group)),
+            'timing' => $timing ? Arr::only($timing, ['start', 'end', 'breaks']) : null,
+        ];
+    }
+
+    private function planFromSubjects(Request $r): RedirectResponse
+    {
+        $data = $r->validate([
+            'tutor_group_id' => ['required', 'integer'],
+            'session_date' => ['required', 'date_format:Y-m-d'],
+            'subjects' => ['required_without:other_subject', 'nullable', 'array', 'list', 'min:1', 'max:50'],
+            'other_subject' => ['required_without:subjects', 'nullable', 'string', 'max:250'],
+            'subjects.*' => ['required', 'string', 'distinct', 'max:120'],
+            'timing' => ['required', Rule::in(['weekly', 'custom'])],
+            'start_time' => ['exclude_unless:timing,custom', 'required', 'date_format:H:i'],
+            'end_time' => ['exclude_unless:timing,custom', 'required', 'date_format:H:i', 'after:start_time'],
+            'breaks_checked' => ['exclude_unless:timing,custom', 'accepted'],
+            'breaks' => ['exclude_unless:timing,custom', 'nullable', 'array', 'max:10'],
+            'breaks.*.start' => ['nullable', 'required_with:breaks.*.end', 'date_format:H:i'],
+            'breaks.*.end' => ['nullable', 'required_with:breaks.*.start', 'date_format:H:i'],
+        ]);
+
+        $session = DB::transaction(function () use ($r, $data) {
+            $actor = User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();
+            $group = TutorGroup::whereKey($data['tutor_group_id'])->lockForUpdate()->firstOrFail();
+            $auth = (int) $r->session()->get('auth_version');
+            abort_unless($actor->auth_version === $auth && $group->active && RegisterCreation::allowed($actor, $group), 403);
+            $members = Apprentice::where('tutor_group_id', $group->id)->orderBy('id')->lockForUpdate()->get();
+            $options = SessionPlanning::options($members, $group);
+            $ids = $data['subjects'] ?? [];
+            if (array_diff($ids, array_keys($options))) {
+                throw ValidationException::withMessages(['subjects' => 'Select subjects from this group’s current scheme of work or training plan.']);
+            }
+            $subjects = array_map(fn ($id) => Arr::only($options[$id], ['subjectId', 'label', 'area']), $ids);
+            $labels = array_column($subjects, 'label');
+            if (filled($data['other_subject'] ?? null)) {
+                $labels[] = $data['other_subject'];
+            }
+
+            $weekly = $data['timing'] === 'weekly' ? SessionPlanning::weekly($group, $data['session_date']) : null;
+            if ($data['timing'] === 'weekly' && !$weekly) {
+                throw ValidationException::withMessages(['timing' => 'Weekly times are unavailable for this date. Check the schedule or use different times.']);
+            }
+            $timing = $weekly['settings'] ?? ['start' => $data['start_time'], 'end' => $data['end_time']];
+            $breaks = $weekly ? $timing['breaks'] : array_values(array_filter($data['breaks'] ?? [], fn ($break) => filled($break['start'] ?? null)));
+            if ($weekly && TrainingSession::where('tutor_group_id', $group->id)->where('regular_week', $weekly['week'])->exists()) {
+                throw ValidationException::withMessages(['session_date' => 'A weekly register already exists. Open it from Weekly group registers.']);
+            }
+            $session = RegisterCreation::store($actor, $auth, $group, [
+                'name' => Str::limit($labels[0].(count($labels) > 1 ? ' + '.(count($labels) - 1).' more' : ''), 250),
+                'planned_learning' => implode("\n", $labels),
+                'session_date' => $data['session_date'],
+                'start_time' => $timing['start'],
+                'end_time' => $timing['end'],
+            ], $breaks);
+            $session->history = [[
+                'event' => 'session_planned_subjects', 'at' => now()->toIso8601String(),
+                'by' => $actor->id, 'subjects' => $subjects,
+            ]];
+            $session->regular_week = $weekly['week'] ?? null;
+            $session->save();
+
+            return $session;
+        }, 3);
+
+        return to_route('attendance.show', $session)->with('status', 'Session planned.');
     }
 
     public function create(Request $r): RedirectResponse
     {
         abort_unless(Access::manager($r->user()) || $r->user()->role === 'tutor', 403);
+        if ($r->input('planner') === 'subjects') {
+            return $this->planFromSubjects($r);
+        }
         $data = $r->validate(['repeat_weeks' => ['nullable', 'integer', 'min:1', 'max:52'], 'tutor_group_id' => ['required', 'integer', Rule::exists('tutor_groups', 'id')->where('active', true)], 'name' => ['required', 'string', 'max:250'], 'session_date' => ['required', 'date_format:Y-m-d'], 'start_time' => ['required', 'date_format:H:i'], 'end_time' => ['required', 'date_format:H:i', 'after:start_time'], 'planned_learning' => ['required', 'string', 'max:10000'], 'breaks_checked' => ['accepted'], 'breaks' => ['nullable', 'array', 'max:10'], 'breaks.*.start' => ['nullable', 'required_with:breaks.*.end', 'date_format:H:i'], 'breaks.*.end' => ['nullable', 'required_with:breaks.*.start', 'date_format:H:i']]);
         $group = TutorGroup::findOrFail($data['tutor_group_id']);
         abort_unless($this->groupAllowed($r, $group), 403);
@@ -147,13 +243,16 @@ class AttendanceController extends Controller
         $month = $session->session_date->format('Y-m');
         $monthlyCards = MonthlyScorecard::whereIn('apprentice_id', $members->pluck('id'))->where('month', $month)->get()->keyBy('apprentice_id');
         $training = RegisterTrainingRecord::find($session->id)?->details ?? [];
+        $deliveryDraft = !$training && $session->marks->isEmpty() && $session->delivered_learning === null
+            ? ($session->planned_subjects ?? []) : [];
 
         return view('attendance.session', [
             'session' => $session,
             'nextScope83' => Workday83::registerScope($r->query()),
             'nextRegister83' => Workday83::nextRegister($r->user(), $session->id, Workday83::registerScope($r->query())),
             'structuredTraining' => $training,
-            'trainingOptions' => RegisterTraining::options($members, $training),
+            'trainingOptions' => SessionPlanning::deliveryOptions($session, $members, $training),
+            'deliveryDraft' => $deliveryDraft,
             'members' => $members,
             'registerReadiness' => $readiness,
             'monthlyCards' => $monthlyCards,
@@ -228,7 +327,7 @@ class AttendanceController extends Controller
                 $training['topic_exceptions'] = array_map(fn ($topics) => array_intersect_key($topics, $selections), $prior);
             }
             $details = $training === null ? $trainingRecord?->details : RegisterTraining::details($training, $ids, empty($training['subjects']) ? []
-                : RegisterTraining::options($apprentices, $trainingRecord?->details ?? []));
+                : SessionPlanning::deliveryOptions($s, $apprentices, $trainingRecord?->details ?? []));
             $trainingChanged = $details !== null && ($trainingRecord
                 ? $trainingRecord->details !== $details : (bool) $details['items']);
             if ($trainingChanged && $s->regular_week === null) {

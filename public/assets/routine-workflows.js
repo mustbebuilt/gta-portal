@@ -1,19 +1,66 @@
 // Progressive enhancement only. All attendance inputs remain available without JavaScript.
 document.querySelectorAll('[data-compact-register]').forEach(form => {
+  const candidates = [];
+  const setFullSession = (row, openDetails) => {
+    row.querySelector('select[name$="[code]"]').value = 'O';
+    row.querySelector('input[name$="[arrival]"]').value = form.dataset.start;
+    row.querySelector('input[name$="[departure]"]').value = form.dataset.end;
+    row.querySelector('input[name$="[otj_confirmed]"]').checked = false;
+    row.querySelector('[data-full-session-status]').textContent = 'Full-session attendance entered. Check the times and confirm any eligible OTJ separately.';
+    const details = row.querySelector('details:has(input[name$="[arrival]"])');
+    if (details && openDetails) details.open = true;
+  };
+
+  const bulk = form.querySelector('[data-register-bulk]');
+  const apply = bulk.querySelector('[data-apply-full-session]');
+  const selectUnmarked = bulk.querySelector('[data-select-unmarked]');
+  const status = bulk.querySelector('[data-bulk-attendance-status]');
+  const update = () => {
+    candidates.forEach(({checkbox, label, row}) => {
+      checkbox.disabled = Boolean(row.querySelector('select').value ||
+        row.querySelector('input[name$="[arrival]"]').value ||
+        row.querySelector('input[name$="[departure]"]').value ||
+        row.querySelector('input[name$="[otj_confirmed]"]').checked ||
+        row.querySelector('input[name$="[minutes]"]').value ||
+        row.querySelector('textarea[name$="[adjustment]"]').value ||
+        row.querySelector('textarea[name$="[comment]"]').value);
+      if (checkbox.disabled) checkbox.checked = false;
+      label.hidden = checkbox.disabled;
+    });
+    const selected = candidates.filter(({checkbox}) => checkbox.checked).length;
+    selectUnmarked.disabled = candidates.every(({checkbox}) => checkbox.disabled);
+    apply.disabled = selected === 0;
+    status.textContent = selected + ' selected';
+  };
+
   form.querySelectorAll('[data-register-person]').forEach(row => {
     const button = row.querySelector('[data-full-session]');
-    if (!button) return;
     button.hidden = false;
     button.addEventListener('click', () => {
-      row.querySelector('select[name$="[code]"]').value = 'O';
-      row.querySelector('input[name$="[arrival]"]').value = form.dataset.start;
-      row.querySelector('input[name$="[departure]"]').value = form.dataset.end;
-      row.querySelector('input[name$="[otj_confirmed]"]').checked = false;
-      row.querySelector('[data-full-session-status]').textContent = 'Full-session attendance selected. Check the actual times and separately confirm any eligible OTJ. Save the register to record this change.';
-      const details = row.querySelector('details:has(input[name$="[arrival]"])');
-      if (details) details.open = true;
+      setFullSession(row, true);
+      update();
     });
+    const checkbox = row.querySelector('[data-bulk-select]');
+    if (checkbox) {
+      candidates.push({checkbox, row, label: row.querySelector('[data-bulk-row]')});
+      row.addEventListener('input', update);
+      row.addEventListener('change', update);
+    }
   });
+
+  selectUnmarked.addEventListener('click', () => {
+    candidates.forEach(({checkbox}) => { checkbox.checked = !checkbox.disabled; });
+    update();
+  });
+  apply.addEventListener('click', () => {
+    update();
+    const selected = candidates.filter(({checkbox}) => checkbox.checked);
+    selected.forEach(({row}) => setFullSession(row, false));
+    update();
+    if (selected.length) status.textContent = 'Attendance entered for ' + selected.length + '. Confirm eligible OTJ separately, then save.';
+  });
+  bulk.hidden = candidates.length === 0;
+  update();
 });
 // Workplace photos use the same answer-saving form, rather than an independent upload form.
 document.querySelectorAll('[data-evidence-kind]').forEach(select => {

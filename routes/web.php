@@ -479,6 +479,7 @@ Route::middleware(['auth', ActiveAccount::class, RequireSecondFactor::class, Req
     Route::post('/sessions/{session}/follow-up/decision', [SessionOperationsController::class, 'caseDecide'])->name('register-actions.decide');
     Route::get('/sessions', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::post('/sessions', [AttendanceController::class, 'create'])->name('attendance.create');
+    Route::get('/sessions/plan-options/{group}', [AttendanceController::class, 'planOptions'])->whereNumber('group')->name('attendance.plan-options');
     Route::post('/register-groups/{group}/schedule', [WeeklyRegisterController::class, 'configure'])->name('attendance.weekly.configure');
     Route::post('/register-groups/{group}/open', [WeeklyRegisterController::class, 'open'])->name('attendance.weekly.open');
     Route::post('/register-groups/{group}/close', [WeeklyRegisterController::class, 'close'])->name('attendance.weekly.close');

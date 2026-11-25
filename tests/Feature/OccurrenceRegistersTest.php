@@ -37,4 +37,91 @@ class OccurrenceRegistersTest extends TestCase {
  public function test_stale_link_hash_or_delivery_version_rejected():void {$f=$this->fixture();[$p,$e,$s]=$this->delivered($f);$this->reject(fn()=>O::reconcile($f['admin'],1,$e,3,str_repeat('0',64),1,I::source($s)['hash'],'Stale'));$this->reject(fn()=>O::reconcile($f['admin'],1,$e,3,ReviewedImports::hash($e->link_proof),99,I::source($s)['hash'],'Stale'));}
  public function test_reconciliation_event_failure_keeps_original_proof():void {$f=$this->fixture();[$p,$e,$s]=$this->delivered($f);$before=$e->link_proof;AuditFault::install('reconcile_fault','timetable_planning_events','Fictional failure','delivered_link_reconciled');try{$this->reconcile($f,$p,$e,$s);$this->fail('Expected fault');}catch(\Illuminate\Database\QueryException){$this->assertSame($before,$e->fresh()->link_proof);}}
  public function test_new_forms_render_and_require_confirmation():void {$f=$this->fixture();$p=$this->plan($f);$e=Entry::where('plan_id',$p->id)->first();$this->actingAs($f['admin'])->get('/centre-planning/plans/'.$p->id)->assertOk()->assertSee('Create and link register');$this->post('/centre-planning/entries/'.$e->id.'/create-register',['version'=>3,'planned_learning'=>'Checked','breaks_checked'=>1])->assertSessionHasErrors('confirmed');}
+
+ public function test_assigned_tutor_opens_existing_register_from_own_timetable(): void
+ {
+     $f = $this->fixture();
+     [$plan, $entry, $register] = $this->created($f);
+     $url = route('attendance.show', $register);
+     $board = route('centre-planning.index', ['week' => $f['date']]);
+     $this->actingAs($f['tutor'])->get($board)->assertOk()
+         ->assertSee('Open matching register')->assertSee($url);
+     $this->get($url)->assertOk();
+     $this->actingAs($f['other'])->get($board)->assertOk()->assertDontSee($url);
+     $this->get($url)->assertForbidden();
+     $this->actingAs($f['tutor'])->get($board.'&scope=staff')->assertOk()->assertDontSee($url);
+     $this->actingAs($f['admin'])->get(route('centre-planning.show', $plan))
+         ->assertOk()->assertSee($url)->assertDontSee(route('occurrence-register.create', $entry));
+     $this->assertDatabaseCount('training_sessions', 1);
+     $this->assertDatabaseCount('attendance_marks', 0);
+ }
+
+ public function test_multiple_overlaps_or_changed_roster_need_review(): void
+ {
+     $f = $this->fixture();
+     [$plan, $entry, $register] = $this->created($f);
+     $other = TrainingSession::factory()->create([
+         'tutor_group_id' => $f['group']->id, 'session_date' => $f['date'],
+         'start_time' => '10:00', 'end_time' => '14:00', 'members' => [$f['a']->id],
+     ]);
+     $board = route('centre-planning.index', ['week' => $f['date']]);
+     $series = route('centre-planning.show', $plan);
+     $this->actingAs($f['admin'])->get($series)->assertOk()
+         ->assertSee('Review register')->assertDontSee(route('occurrence-register.create', $entry));
+     $this->get($board)->assertOk()->assertDontSee('Open matching register');
+     $other->delete();
+     Apprentice::factory()->create(['tutor_group_id' => $f['group']->id, 'tutor_id' => $f['tutor']->id]);
+     $this->get($series)->assertOk()->assertSee('Review register')->assertDontSee('Open matching register');
+     $this->get($board)->assertOk()->assertDontSee('Open matching register');
+     $this->assertDatabaseCount('training_sessions', 1);
+ }
+
+ public function test_weekly_schedule_prefills_timetable_create_and_both_menus_open_the_same_register(): void
+ {
+     $f = $this->fixture();
+     $f['group']->forceFill(['weekly_register' => ['revisions' => [[
+         'first_day' => $f['date'], 'start' => '09:00', 'end' => '16:00',
+         'planned_learning' => 'Fictional weekly learning',
+         'breaks' => [['start' => '12:00', 'end' => '13:00']],
+     ]]]])->save();
+     $plan = $this->plan($f);
+     $entry = Entry::where('plan_id', $plan->id)->orderBy('work_date')->firstOrFail();
+     $series = route('centre-planning.show', $plan);
+     $create = route('occurrence-register.create', $entry);
+     $this->actingAs($f['admin'])->get($series)->assertOk()
+         ->assertSee($create)->assertSee('Fictional weekly learning')->assertSee('value="12:00"', false);
+     $data = [
+         'version' => $plan->version, 'confirmed' => 1, 'planned_learning' => 'Fictional weekly learning',
+         'breaks' => [['start' => '12:00', 'end' => '13:00']],
+     ];
+     $this->from($series)->post($create, $data)->assertSessionHasErrors('breaks_checked');
+     $this->assertDatabaseCount('training_sessions', 0);
+     $response = $this->post($create, $data + ['breaks_checked' => 1]);
+     $register = TrainingSession::sole();
+     $response->assertRedirect(route('attendance.show', $register));
+     $this->assertSame($data['breaks'], $register->breaks);
+     $this->assertNotNull($register->regular_week);
+     $this->actingAs($f['tutor'])->post(route('attendance.weekly.open', $f['group']), [
+         'date' => $f['date'], 'week' => $register->regular_week,
+     ])->assertRedirect(route('attendance.show', $register));
+     $this->assertDatabaseCount('training_sessions', 1);
+     $this->assertDatabaseCount('attendance_marks', 0);
+ }
+
+ public function test_opening_unlinked_exact_register_requires_no_planning_link_or_data_changes(): void
+ {
+     $f = $this->fixture();
+     $plan = $this->plan($f);
+     $entry = Entry::where('plan_id', $plan->id)->orderBy('work_date')->firstOrFail();
+     $register = TrainingSession::factory()->create([
+         'tutor_group_id' => $f['group']->id, 'session_date' => $f['date'],
+         'start_time' => '09:00', 'end_time' => '16:00', 'members' => [$f['a']->id],
+     ]);
+     $this->actingAs($f['admin'])->get(route('centre-planning.show', $plan))->assertOk()
+         ->assertSee('Open matching register')->assertSee(route('attendance.show', $register))
+         ->assertDontSee(route('occurrence-register.create', $entry));
+     $this->assertNull($entry->fresh()->training_session_id);
+     $this->assertDatabaseCount('training_sessions', 1);
+     $this->assertDatabaseCount('attendance_marks', 0);
+ }
 }

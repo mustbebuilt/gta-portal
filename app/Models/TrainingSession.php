@@ -21,6 +21,13 @@ class TrainingSession extends Model
         return ['session_date' => 'date', 'breaks' => 'array', 'members' => 'array', 'history' => 'array', 'version' => 'integer'];
     }
 
+    public function getPlannedSubjectsAttribute(): array
+    {
+        $plan = collect($this->history ?? [])->firstWhere('event', 'session_planned_subjects');
+
+        return $plan['subjects'] ?? [];
+    }
+
     public function group(): BelongsTo
     {
         return $this->belongsTo(TutorGroup::class, 'tutor_group_id');

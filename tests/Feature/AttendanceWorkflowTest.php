@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Apprentice;
 use App\Models\AttendanceMark;
+use App\Models\Programme;
+use App\Models\RegisterTrainingRecord;
 use App\Models\TrainingSession;
 use App\Models\TutorGroup;
 use App\Models\User;
@@ -167,5 +169,113 @@ class AttendanceWorkflowTest extends TestCase
         $this->travelTo(Carbon::parse('2026-11-11'));
         $rows = [['date' => '2026-10-19', 'code' => 'A', 'cancelled' => false, 'minutes' => 0], ['date' => '2026-11-09', 'code' => 'A', 'cancelled' => false, 'minutes' => 0]];
         $this->assertCount(0, AttendanceMath::report($rows)['pairs']);
+    }
+
+    public function test_subject_planner_uses_weekly_times_and_prefills_actual_delivery_as_a_draft(): void
+    {
+        $this->travelTo(Carbon::parse('2026-12-01 08:00'));
+        $tutor = $this->actor('tutor');
+        $group = TutorGroup::factory()->create(['tutor_id' => $tutor->id]);
+        $programme = Programme::factory()->create(['standard_code' => 'ST0499', 'version' => '1.3', 'active' => true]);
+        $member = Apprentice::factory()->create(['programme_id' => $programme->id, 'tutor_id' => $tutor->id, 'tutor_group_id' => $group->id]);
+        $group->forceFill(['weekly_register' => ['revisions' => [[
+            'first_day' => '2026-12-01', 'start' => '09:00', 'end' => '16:00',
+            'planned_learning' => 'Previous generic weekly text',
+            'breaks' => [['start' => '12:00', 'end' => '13:00']],
+        ]]]])->save();
+        $subjects = ['voc-autocare-b1-t3', 'voc-autocare-b1-t4'];
+        $this->actingAs($tutor)->get('/sessions?group='.$group->id.'&plan_date=2026-12-01')
+            ->assertOk()->assertSee('Subject from the scheme of work')
+            ->assertSee('Using the weekly schedule, 09:00–16:00')->assertSee('Vehicle safety inspection');
+        $options = route('attendance.plan-options', ['group' => $group, 'date' => '2026-12-01']);
+        $this->getJson($options)->assertOk()->assertJsonPath('timing.start', '09:00')->assertJsonFragment(['subjectId' => $subjects[0]]);
+        $data = ['planner' => 'subjects', 'tutor_group_id' => $group->id, 'session_date' => '2026-12-01', 'timing' => 'weekly', 'subjects' => $subjects];
+        $this->post('/sessions', array_replace($data, ['subjects' => ['voc-panel-b1-t3']]))->assertSessionHasErrors('subjects');
+        $this->post('/sessions', array_replace($data, ['session_date' => '2026-12-02']))->assertSessionHasErrors('timing');
+        $this->assertDatabaseCount('training_sessions', 0);
+        $result = $this->post('/sessions', $data);
+        $session = TrainingSession::sole();
+        $result->assertRedirect(route('attendance.show', $session));
+        $this->assertSame($subjects, array_column($session->planned_subjects, 'subjectId'));
+        $this->assertSame([['start' => '12:00', 'end' => '13:00']], $session->breaks);
+        $this->assertSame('2026-11-30', $session->regular_week);
+        $this->assertDatabaseCount('attendance_marks', 0);
+        $this->assertDatabaseCount('register_training_records', 0);
+        $this->get(route('attendance.show', $session))->assertOk()->assertSee('Planned subjects are filled in below')
+            ->assertSee('Vehicle safety inspection')->assertSee('Basic brake and tyre condition check');
+        $this->actingAs($this->actor('tutor'))->getJson($options)->assertForbidden();
+        $this->post('/sessions', $data)->assertForbidden();
+
+        $this->travelTo(Carbon::parse('2026-12-01 17:00'));
+        $this->actingAs($tutor)->post(route('attendance.save', $session), [
+            'version' => $session->version, 'weekly_confirmed' => 1,
+            'delivered_learning' => 'Vehicle safety inspection was delivered.',
+            'marks' => [$member->id => ['code' => 'O', 'arrival' => '09:00', 'departure' => '16:00']],
+            'training' => ['subjects' => [$subjects[0]]],
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame([$subjects[0]], array_column(RegisterTrainingRecord::sole()->details['items'], 'subjectId'));
+        $this->assertNull(AttendanceMark::sole()->otj_minutes);
+        $this->get(route('attendance.show', $session))->assertOk()->assertDontSee('Planned subjects are filled in below');
+    }
+
+    public function test_subject_planner_only_requires_manual_times_when_no_schedule_applies(): void
+    {
+        $tutor = $this->actor('tutor');
+        $group = TutorGroup::factory()->create(['tutor_id' => $tutor->id]);
+        $programme = Programme::factory()->create(['standard_code' => 'ST0499', 'version' => '1.3', 'active' => true]);
+        Apprentice::factory()->create(['programme_id' => $programme->id, 'tutor_id' => $tutor->id, 'tutor_group_id' => $group->id]);
+        $date = today()->addDay()->toDateString();
+        $data = ['planner' => 'subjects', 'tutor_group_id' => $group->id, 'session_date' => $date,
+            'timing' => 'custom', 'subjects' => ['voc-autocare-b1-t3']];
+        $this->actingAs($tutor)->getJson(route('attendance.plan-options', ['group' => $group, 'date' => $date]))
+            ->assertOk()->assertJsonPath('timing', null);
+        $this->post('/sessions', $data)->assertSessionHasErrors(['start_time', 'end_time', 'breaks_checked']);
+        $this->post('/sessions', $data + ['start_time' => '10:00', 'end_time' => '14:00', 'breaks_checked' => 1])
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame('10:00', TrainingSession::sole()->start_time);
+        $this->assertNull(TrainingSession::sole()->regular_week);
+    }
+
+    public function test_group_without_mapped_scheme_can_plan_an_other_subject(): void
+    {
+        $tutor = $this->actor('tutor');
+        $group = TutorGroup::factory()->create(['tutor_id' => $tutor->id]);
+        Apprentice::factory()->create(['tutor_id' => $tutor->id, 'tutor_group_id' => $group->id]);
+        $this->actingAs($tutor)->post('/sessions', [
+            'planner' => 'subjects', 'tutor_group_id' => $group->id, 'session_date' => today()->toDateString(),
+            'timing' => 'custom', 'other_subject' => 'Fictional site induction',
+            'start_time' => '10:00', 'end_time' => '14:00', 'breaks_checked' => 1,
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $session = TrainingSession::sole();
+        $this->assertSame('Fictional site induction', $session->planned_learning);
+        $this->assertSame([], $session->planned_subjects);
+        $this->assertDatabaseCount('register_training_records', 0);
+    }
+
+    public function test_delivery_register_accepts_dropdown_subjects_and_custom_notes_together(): void
+    {
+        [$session, $member, $tutor] = $this->fixtureSession();
+        $programme = Programme::factory()->create(['standard_code' => 'ST0499', 'version' => '1.3', 'active' => true]);
+        $member->forceFill(['programme_id' => $programme->id])->save();
+        $url = route('attendance.show', $session);
+        $this->actingAs($tutor)->get($url)->assertOk()
+            ->assertSee('Vocational training subject')->assertSee('English and maths subject')
+            ->assertSee('Equality, diversity, British Values and Prevent subject')
+            ->assertSee('Vehicle safety inspection')->assertSee('Number and calculations')
+            ->assertSee('Safeguarding and Prevent')->assertSee('British Values')->assertSee('Custom');
+        $data = $this->mark($member->id, ['otj_confirmed' => 0]);
+        $data['weekly_confirmed'] = 1;
+        $data['training'] = [
+            'subjects' => ['voc-autocare-b1-t3', 'fs-maths-number', 'cc-british-values'],
+            'vocational' => 'Fictional partial inspection',
+            'functional_skills' => 'Fictional maths recap',
+            'themes' => 'Fictional discussion',
+        ];
+        $this->post($url, $data)->assertRedirect()->assertSessionHasNoErrors();
+        $items = collect(RegisterTrainingRecord::sole()->details['items']);
+        $this->assertSame($data['training']['subjects'], $items->take(3)->pluck('subjectId')->all());
+        $this->assertSame(['vocational', 'functional_skills', 'themes'], $items->skip(3)->pluck('area')->all());
+        $this->assertNull(AttendanceMark::sole()->otj_minutes);
+        $this->get($url)->assertOk()->assertSee('Fictional partial inspection')->assertSee('Fictional maths recap')->assertSee('Fictional discussion');
     }
 }

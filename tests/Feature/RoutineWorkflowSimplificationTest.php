@@ -221,4 +221,24 @@ class RoutineWorkflowSimplificationTest extends TestCase
         $this->assertCount(1,$r->viewData('todayRegisterRows'));$this->assertSame($today->id,$r->viewData('todayRegisterRows')->first()['session']->id);
         $this->assertSame(1,$r->viewData('registerCounts')['needs-register']);
     }
+
+    public function test_full_session_attendance_without_confirmation_does_not_credit_otj(): void
+    {
+        [$apprentice, $session, $data] = $this->register();
+        $exception = Apprentice::factory()->create(['tutor_group_id' => $session->tutor_group_id]);
+        $session->forceFill(['members' => [$apprentice->id, $exception->id]])->save();
+        $this->get(route('attendance.show', $session))->assertOk()
+            ->assertSee('Select unmarked')->assertSee('data-bulk-select', false);
+        unset($data['marks'][$apprentice->id]['otj_confirmed']);
+        $data['marks'][$exception->id] = ['code' => 'A'];
+        $this->post(route('attendance.save', $session), $data)->assertRedirect()->assertSessionHasNoErrors();
+        $marks = AttendanceMark::where('training_session_id', $session->id)->get()->keyBy('apprentice_id');
+        $this->assertSame('O', $marks[$apprentice->id]->code);
+        $this->assertFalse($marks[$apprentice->id]->otj_confirmed);
+        $this->assertNull($marks[$apprentice->id]->otj_minutes);
+        $this->assertSame('A', $marks[$exception->id]->code);
+        $this->assertNull($marks[$exception->id]->arrival);
+        $this->get(route('attendance.show', $session))->assertOk()
+            ->assertDontSee('data-bulk-select', false);
+    }
 }
