@@ -25,6 +25,9 @@
                     @endforeach
                 </select>
             @endif
+            @if($topic->evidence_stage === 'Awaiting review')
+                @include('shared.staff-template-picker', ['pickerLabel'=>'Feedback template','family'=>'marking_feedback','fieldNames'=>['feedback'],'focusToken'=>\App\Support\MarkingFeedback::DETAIL])
+            @endif
             <label for="topic-feedback">Feedback / basis for the training update</label>
             <textarea id="topic-feedback" name="feedback" required>{{ old('feedback') }}</textarea>
             <details open>

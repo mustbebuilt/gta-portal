@@ -69,11 +69,14 @@ class SubjectMarkingQueueTest extends TestCase
         $this->get(SubjectMarkingQueue::url($older->id, $filters))->assertOk()
             ->assertSee('The submitted version needs checking')->assertDontSee('Save decision and open next');
         $this->get($review)->assertOk()->assertSee('Save decision and open next')->assertSee('Back to Work to mark')
-            ->assertSee('FICTIONAL PRIVATE WORK')->assertDontSee('LATER EDIT OUTSIDE THE SUBMITTED VERSION')
+            ->assertSee('Feedback template')->assertSee('Missing evidence')->assertSee('FICTIONAL PRIVATE WORK')->assertDontSee('LATER EDIT OUTSIDE THE SUBMITTED VERSION')
             ->assertDontSee('name="status"', false)->assertDontSee('name="completion_date"', false);
         $data = ['version' => $first->version, 'evidence_only' => 1, 'feedback' => 'Fictional checked feedback',
             'after_save' => 'next', 'queue' => $filters];
         $this->from($review)->post(route('topics.update', $first), $data)->assertSessionHasErrors('decision');
+        $this->from($review)->post(route('topics.update', $first), [
+            ...$data, 'decision' => 'Referred', 'feedback' => 'Explain [[ADD DETAIL]] before resubmitting.',
+        ])->assertSessionHasErrors('feedback');
         $this->assertSame('Awaiting review', $first->fresh()->evidence_stage);
         $this->from($review)->post(route('topics.update', $first), $data + ['decision' => 'Accepted', 'status' => 'Completed'])
             ->assertSessionHasErrors('status');

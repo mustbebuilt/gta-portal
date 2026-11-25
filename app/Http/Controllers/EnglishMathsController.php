@@ -256,6 +256,7 @@ class EnglishMathsController extends Controller
             'after_save' => ['nullable', Rule::in(['next'])],
             'queue' => ['nullable', 'array'],
         ]);
+        \App\Support\MarkingFeedback::requireSpecificDetail($data['feedback']);
         $filters = ($data['after_save'] ?? null) === 'next'
             ? SubjectMarkingQueue::filters($data['queue'] ?? []) : null;
         DB::transaction(function () use ($r, $topic, $data, $evidenceOnly): void {

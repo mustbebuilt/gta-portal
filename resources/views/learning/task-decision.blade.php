@@ -25,6 +25,9 @@
                 </select>
             </div>
             <div><label for="decision-date">Assessment date</label><input id="decision-date" name="decision_date" type="date" value="{{ old('decision_date', $markingFocus ? today()->toDateString() : null) }}" required max="{{ today()->toDateString() }}"></div>
+            <div class="full">
+                @include('shared.staff-template-picker', ['pickerLabel'=>'Feedback template','family'=>'marking_feedback','fieldNames'=>['feedback'],'focusToken'=>\App\Support\MarkingFeedback::DETAIL])
+            </div>
             <div class="full"><label for="feedback">Feedback (required when returning work)</label><textarea id="feedback" name="feedback" rows="4">{{ old('feedback') }}</textarea></div>
         </div>
         <label class="check"><input name="confirmed" value="1" type="checkbox" @checked(old('confirmed')) required> I confirm this decision as {{ auth()->user()->name }}.</label>

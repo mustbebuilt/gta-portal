@@ -2,6 +2,7 @@ for (const picker of document.querySelectorAll('[data-staff-template]')) {
     const form = picker.closest('form');
     const select = picker.querySelector('[data-staff-template-choice]');
     const status = picker.querySelector('[data-staff-template-status]');
+    const token = picker.dataset.staffTemplateToken;
     const applied = new Map();
     if (!form) continue;
 
@@ -12,6 +13,7 @@ for (const picker of document.querySelectorAll('[data-staff-template]')) {
 
         const values = JSON.parse(selected.dataset.fill);
         let kept = false;
+        let tokenField;
         for (const name of new Set([...applied.keys(), ...Object.keys(values)])) {
             const input = form.elements.namedItem(name);
             if (!input || (!applied.has(name) && values[name] === input.value)) continue;
@@ -25,6 +27,12 @@ for (const picker of document.querySelectorAll('[data-staff-template]')) {
             input.value = values[name] ?? '';
             applied.set(name, input.value);
             input.dispatchEvent(new Event('change', { bubbles: true }));
+            if (token && input.value.includes(token)) tokenField = input;
+        }
+        if (tokenField) {
+            const start = tokenField.value.indexOf(token);
+            tokenField.focus();
+            tokenField.setSelectionRange(start, start + token.length);
         }
         status.textContent = kept ? 'Existing entries were kept. Check and edit them as needed.' : '';
     });

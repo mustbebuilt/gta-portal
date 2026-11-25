@@ -1,4 +1,4 @@
-<div data-staff-template hidden>
+<div data-staff-template @isset($focusToken) data-staff-template-token="{{ $focusToken }}" @endisset hidden>
     <label>{{ $pickerLabel }}
         <select data-staff-template-choice>
             <option value="">Choose a template</option>
@@ -13,6 +13,9 @@
             @endforeach
         </select>
     </label>
+    @isset($focusToken)
+        <p class="muted">Replace {{ $focusToken }} with the specific point in this apprentice’s work.</p>
+    @endisset
     <p class="muted" data-staff-template-status role="status"></p>
 </div>
 @once

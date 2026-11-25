@@ -91,6 +91,10 @@ class Pack81TaskWorkflowTest extends TestCase
         $this->actingAs($tutor)->get($route)->assertOk()->assertSee('first.pdf')->assertSee('Save and open next');
         $decision = ['version'=>3,'decision'=>'Referred','decision_date'=>today()->toDateString(),'confirmed'=>1];
         $this->post(route('tasks.decide',$task), $decision)->assertSessionHasErrors('feedback');
+        $this->get(route('tasks.show', $task))->assertOk()->assertSee('Feedback template')->assertSee('Correct a specific point');
+        $this->post(route('tasks.decide', $task), $decision + ['feedback' => 'Correct [[add detail]] before resubmitting.'])
+            ->assertSessionHasErrors('feedback');
+        $this->assertSame('Awaiting marking', $task->fresh()->status);
         $this->post(route('tasks.decide',$task), $decision + ['feedback'=>'Supply the missing measured value.'])
             ->assertSessionHasNoErrors();
         $this->actingAs($learner)->get($route)->assertOk()->assertSee('Supply the missing measured value.');

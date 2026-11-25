@@ -328,6 +328,7 @@ class LearningTaskController extends Controller
     {
         abort_unless(Access::tutor($r->user(), $task->apprentice) || Access::manager($r->user()), 403);
         $r->validate(['version' => ['required', 'integer'], 'decision' => ['required', Rule::in(['Approved', 'Referred'])], 'decision_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'feedback' => ['nullable', 'required_if:decision,Referred', 'string'], 'confirmed' => ['accepted'], 'after_save' => ['nullable', Rule::in(['stay', 'next'])]]);
+        \App\Support\MarkingFeedback::requireSpecificDetail($r->input('feedback'));
         DB::transaction(function () use ($r, $task): void {
             $apprentice = Apprentice::whereKey($task->apprentice_id)->lockForUpdate()->firstOrFail();
             $t = LearningTask::whereKey($task->id)->lockForUpdate()->firstOrFail();

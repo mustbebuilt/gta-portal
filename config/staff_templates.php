@@ -43,6 +43,24 @@ return [
             'Progress review follow-up' => ['Complete the specific action agreed at the progress review and bring the evidence to the next check.', 'The responsible tutor checks the agreed evidence and records the outcome.', 'discussion', 'review'],
         ],
     ],
+    'marking_feedback' => [
+        'Evidence and corrections' => [
+            'Missing evidence' => ['Add the missing evidence for [[add detail]], then resubmit.'],
+            'Clearer photo or file' => ['Provide a clearer photo or file showing [[add detail]] so it can be checked.'],
+            'Explain your own contribution' => ['Explain what you personally did for [[add detail]] and which part of the evidence shows it.'],
+            'Complete an unanswered part' => ['Complete the unanswered part covering [[add detail]], then resubmit.'],
+            'Correct a specific point' => ['Correct [[add detail]] and explain what you changed before resubmitting.'],
+            'Explain your method' => ['Show the working or explain the steps you took for [[add detail]].'],
+            'Check against the instructions' => ['Compare your work with the requirement for [[add detail]] and update the submission.'],
+            'Add an observation or job record' => ['Add the agreed observation or job record for [[add detail]].'],
+        ],
+        'Strengths and next steps' => [
+            'Recognise what went well' => ['Your submission clearly shows [[add detail]]. Keep using this approach in similar work.'],
+            'Build on a strength' => ['Build on this piece of work by practising [[add detail]] in your next activity.'],
+            'Discuss at the next session' => ['Bring [[add detail]] to the next session so we can check it together.'],
+            'Record the feedback discussion' => ['We discussed the work and agreed this next step: [[add detail]].'],
+        ],
+    ],
     'review_outcomes' => [
         'Marker review' => [
             'Monitor at the next review' => ['Keep the marker open and check progress at the next agreed review.'],
