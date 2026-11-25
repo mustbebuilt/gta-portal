@@ -78,10 +78,11 @@ class SupportRegister71Controller extends Controller
             'review_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
             'interval_key' => ['nullable', 'string', 'max:20'],
             'note' => ['nullable', 'string', 'max:2000'],
+            ...SupportRegister71::reviewTargetRules(),
         ]);
         SupportRegister71::recordReview($r->user(), $schedule, $v);
 
-        return back()->with('status', match ($v['kind']) {
+        return SupportRegister71::reviewReturn($r, $v)->with('status', match ($v['kind']) {
             'formal_review' => 'Review saved. Next review date updated.',
             'discussion_only' => 'Discussion logged. Formal review due date was not moved.',
             'change_frequency' => 'Review frequency updated with recorded reason.',

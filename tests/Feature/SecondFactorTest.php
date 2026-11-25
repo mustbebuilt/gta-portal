@@ -70,7 +70,7 @@ class SecondFactorTest extends TestCase
     {
         $user = $this->user();
         $this->assertFalse(SecondFactor::mayEnrol($user));
-        $this->password($user)->assertRedirect('/apprentices');
+        $this->password($user)->assertRedirect('/needs-attention');
         $this->assertAuthenticatedAs($user);
         $this->get('/account/two-step')->assertForbidden();
     }
@@ -143,14 +143,14 @@ class SecondFactorTest extends TestCase
         $this->post('/two-step', ['code' => $this->code()])->assertRedirect('/help');$this->assertAuthenticatedAs($user);
         $this->get('/help')->assertOk();
         $this->signOut();$this->password($user);$this->post('/two-step', ['code' => $this->code()])->assertSessionHasErrors('code');$this->assertGuest();
-        $this->travel(31)->seconds();$this->post('/two-step', ['code' => $this->code()])->assertRedirect('/apprentices');
+        $this->travel(31)->seconds();$this->post('/two-step', ['code' => $this->code()])->assertRedirect('/needs-attention');
     }
 
     public function test_single_use_recovery_code_works_with_password_and_cannot_be_reused(): void
     {
         $user = $this->user();$factor = $this->confirmed($user);$codes = SecondFactor::recoveryCodes($factor);
         $this->post('/two-step', ['code' => $codes[0]])->assertSessionHasErrors('code');$this->assertGuest();
-        $this->password($user);$this->post('/two-step', ['code' => $codes[0]])->assertRedirect('/apprentices');
+        $this->password($user);$this->post('/two-step', ['code' => $codes[0]])->assertRedirect('/needs-attention');
         $this->assertCount(9, $factor->fresh()->recovery_hashes);
         $this->signOut();$this->password($user);$this->post('/two-step', ['code' => $codes[0]])->assertSessionHasErrors('code');$this->assertGuest();
     }
@@ -180,7 +180,7 @@ class SecondFactorTest extends TestCase
             $this->password($user);$this->post('/two-step', ['code' => 'invalid'])->assertSessionHasErrors('code');
         }
         $this->password($user);$this->post('/two-step', ['code' => $this->code()])->assertSessionHasErrors('code');$this->assertGuest();
-        $this->travel(301)->seconds();$this->password($user);$this->post('/two-step', ['code' => $this->code()])->assertRedirect('/apprentices');
+        $this->travel(301)->seconds();$this->password($user);$this->post('/two-step', ['code' => $this->code()])->assertRedirect('/needs-attention');
     }
 
     public function test_config_off_does_not_bypass_confirmed_factors_or_password_only_old_sessions(): void
@@ -202,7 +202,7 @@ class SecondFactorTest extends TestCase
         $this->assertNotContains(hash('sha256', $old[1]), $factor->fresh()->recovery_hashes);
         $this->post('/account/two-step', ['action' => 'disable', 'current_password' => self::PASSWORD, 'code' => $new[0]])->assertRedirect('/help');
         $this->assertDatabaseCount('account_second_factors', 0);$this->get('/help')->assertOk();
-        $this->signOut();$this->password($user)->assertRedirect('/apprentices');
+        $this->signOut();$this->password($user)->assertRedirect('/needs-attention');
     }
 
     public function test_corrupted_secret_fails_closed_without_exposing_ciphertext_or_accepting_recovery(): void

@@ -29,7 +29,7 @@ class InitialAdminTest extends TestCase
         $form=$this->get('https://staging.example.test/login')->assertOk()->assertSee('Staging portal');
         preg_match('/name="_token" value="([^"]+)"/',$form->getContent(),$match);$this->assertNotEmpty($match[1]??null);
         $session=$form->getCookie(config('session.cookie'));$this->assertNotNull($session);
-        $login=$this->withCookie(config('session.cookie'),$session->getValue())->post('https://staging.example.test/login',['_token'=>$match[1],'email'=>$user->email,'password'=>self::PASSWORD])->assertRedirect('https://staging.example.test/apprentices');
+        $login=$this->withCookie(config('session.cookie'),$session->getValue())->post('https://staging.example.test/login',['_token'=>$match[1],'email'=>$user->email,'password'=>self::PASSWORD])->assertRedirect('https://staging.example.test/needs-attention');
         $this->assertAuthenticatedAs($user);$currentSession=$login->getCookie(config('session.cookie'));$this->assertNotNull($currentSession);
         $this->withCookie(config('session.cookie'),$currentSession->getValue())->get('https://staging.example.test/apprentices')->assertOk()->assertSee('Staging portal');Mail::assertNothingSent();Mail::assertNothingQueued();
     }

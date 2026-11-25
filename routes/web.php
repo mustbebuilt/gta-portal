@@ -104,7 +104,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/privacy-information', [PortalPrivacyController::class, 'public'])->name('privacy.public');
-Route::get('/', fn (Request $r) => $r->user() ? SessionController::destination($r, $r->user()) : redirect()->route('apprentices.index'));
+Route::get('/', fn (Request $r) => $r->user() ? SessionController::destination($r, $r->user()) : redirect()->route('login'));
 Route::middleware('guest')->group(function () {
     Route::get('/apprentice-invitation/{user}/{token}', [ApprenticeOnboardingController::class, 'acceptForm'])->whereNumber('user')->where('token', '[A-Za-z0-9]{64}')->name('apprentice-invitation.accept');
     Route::post('/apprentice-invitation/{user}/{token}', [ApprenticeOnboardingController::class, 'accept'])->whereNumber('user')->where('token', '[A-Za-z0-9]{64}')->name('apprentice-invitation.activate');

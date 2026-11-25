@@ -128,4 +128,50 @@ class WorkflowSimplification83Test extends TestCase
         $this->assertSame($t->id,$page->viewData('nextTask83'));$this->assertSame($before,$t->fresh()->getAttributes());
         $this->get(route('tasks.show',['task'=>$t,'from_marking'=>1,'search'=>$a->reference,'view'=>'overdue']))->assertOk()->assertSee('Save and open next');
     }
+
+    public function test_meeting_saves_one_shared_target_and_advances_without_reopening_the_list(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $first = Apprentice::factory()->create(['first_name' => 'Alex', 'last_name' => 'A']);
+        $next = Apprentice::factory()->create(['first_name' => 'Jordan', 'last_name' => 'Z']);
+        $schedule = SupportRegister71::addMarker($admin, $first, ['code' => 'IM34', 'interval_key' => 'monthly', 'owner_id' => $admin->id]);
+        SupportRegister71::addMarker($admin, $next, ['code' => 'IM34', 'interval_key' => 'monthly', 'owner_id' => $admin->id]);
+        $url = route('support.worklist', ['view' => 'needs-review', 'meeting' => $first->id]);
+        $this->actingAs($admin)->get($url)->assertOk()->assertSee('Save review and open next apprentice');
+        $data = ['version' => $schedule->version, 'kind' => 'formal_review', 'review_date' => today()->toDateString(),
+            'interval_key' => 'monthly', 'note' => 'Fictional meeting outcome', 'summary' => 'Bring inspection checklist',
+            'owner_id' => $admin->id, 'due_date' => today()->addDays(7)->toDateString(), 'request_uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'after_review' => 'next', 'next_meeting' => $next->id, 'meeting_filters' => ['view' => 'needs-review']];
+        $this->from($url)->post(route('support-register71.review', $schedule), $data)->assertSessionHasErrors('measure');
+        $this->assertFalse($schedule->fresh()->first_review_completed);
+        $this->assertDatabaseCount('support_shared_actions71', 0);
+        $this->post(route('support-register71.review', $schedule), $data + ['measure' => 'Tutor checks one completed checklist'])
+            ->assertRedirect(route('support.worklist', ['meeting' => $next->id, 'view' => 'needs-review']))->assertSessionHasNoErrors();
+        $this->assertTrue($schedule->fresh()->first_review_completed);
+        $target = \App\Models\SupportSharedAction71::sole();
+        $this->assertSame($schedule->support_concern_id, $target->support_concern_id);
+        $this->get(route('support.index', $first))->assertOk()->assertSee('Bring inspection checklist');
+        $this->get(route('support.worklist', ['view' => 'all', 'meeting' => $first->id]))->assertOk()->assertSee('Bring inspection checklist');
+    }
+
+    public function test_new_review_shows_recorded_progress_and_existing_targets_without_writing(): void
+    {
+        [$tutor, $group, $apprentice] = $this->fixture();
+        LearningTask::factory()->create(['apprentice_id' => $apprentice->id, 'status' => 'Approved']);
+        SmartAction::factory()->create(['apprentice_id' => $apprentice->id, 'title' => 'Fictional open workplace target']);
+        $this->actingAs($tutor)->get(route('reviews.create', $apprentice))->assertOk()
+            ->assertSee('Recorded facts for the draft')->assertSee('1 of 1 loaded tasks approved')
+            ->assertSee('Fictional open workplace target')->assertSee('Actual meeting date');
+        $this->assertDatabaseCount('progress_review_drafts', 0);
+        $this->assertDatabaseCount('smart_actions', 1);
+    }
+
+    public function test_operational_home_uses_attention_and_reports_link_back(): void
+    {
+        foreach (['admin', 'ceo', 'tutor'] as $role) {
+            $this->actingAs(User::factory()->create(['role' => $role]))->get('/')->assertRedirect(route('attention.index'));
+        }
+        $this->get(route('attention.index'))->assertOk()->assertSee('Who needs attention today?');
+        $this->get(route('dashboard.report'))->assertOk()->assertSee(route('attention.index'));
+    }
 }

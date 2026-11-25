@@ -10,10 +10,10 @@ class ExampleTest extends TestCase
     /**
      * A basic test example.
      */
-    public function test_root_redirects_to_apprentice_records(): void
+    public function test_guest_root_redirects_to_sign_in(): void
     {
         $response = $this->get('/');
 
-        $response->assertRedirect('/apprentices');
+        $response->assertRedirect('/login');
     }
 }

@@ -120,7 +120,7 @@ class PortalNavigation
         $group('account','My account',$links);
         // Creation stays on Home and the relevant list; keep occasional follow-up tools in their existing group.
         $primary = array_values(array_filter($primary, fn ($link) => !in_array($link['label'], ['Add apprentice', 'Add or link employer'], true)));
-        $moveTo = ['Needs attention'=>'staff-quality','Staff handovers'=>'staff-quality','My responsibilities'=>'staff-quality',
+        $moveTo = ['Staff handovers'=>'staff-quality','My responsibilities'=>'staff-quality',
             'Quick actions'=>'support'];
         foreach ($primary as $key => $link) {
             if (!isset($moveTo[$link['label']])) { continue; }
@@ -134,7 +134,7 @@ class PortalNavigation
             unset($section);
         }
         $primary = array_values($primary);
-        $daily = ['My next step', 'Dashboard', 'Apprentices', 'Add apprentice', 'Add or link employer',
+        $daily = ['My next step', 'Needs attention', 'Dashboard', 'Apprentices', 'Add apprentice', 'Add or link employer',
             'View progress', 'My progress', 'Apprentice register', 'Work to mark', 'Reviews', 'Support and Retention Register', 'Reports'];
         $priority = array_flip($daily);
         usort($primary, fn ($first, $second) =>

@@ -3,6 +3,7 @@
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">Staff follow-up · {{ today()->format('d M Y') }}</p><h1>Who needs attention today?</h1><p>One row per apprentice with recorded reasons and links. Current management, main tutor and review-mentor scope only.</p></div></header>
 @include('learning.errors')
+@include('setup68.home-actions')
 <p><a class="button" href="{{ route('operations-desk.index', ['q' => $q]) }}">Recorded staff follow-ups</a></p>
 <p class="notice">A follow-up list, not a risk score or full compliance judgement. Missing data is shown as a check. Private Support/Careers/HR content and private help counts are excluded; use the protected queues separately.</p>
 <div class="kpi-grid">@foreach($position['counts'] as $key=>$count)<section class="panel"><strong>{{ $count }}</strong><p>{{ ucfirst($key) }} · apprentices</p></section>@endforeach</div><p>Counts are for the full permitted scope before filters; one apprentice can have several types of reason. {{ $position['scope_count'] }} profiles checked.</p>

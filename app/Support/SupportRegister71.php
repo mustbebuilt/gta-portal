@@ -154,6 +154,7 @@ final class SupportRegister71
                 if (! isset(self::INTERVALS[$interval])) {
                     throw ValidationException::withMessages(['interval_key' => 'Choose a valid review interval up to six-monthly.']);
                 }
+                self::saveReviewTarget($actor, $concern, $data, $reviewDate);
                 $nextDue = self::addInterval($reviewDate, $interval);
                 $s->interval_key = $interval;
                 $s->first_review_completed = true;
@@ -234,6 +235,55 @@ final class SupportRegister71
 
             return $s;
         });
+    }
+
+    public static function reviewTargetRules(): array
+    {
+        return [
+            'summary' => ['nullable', 'required_with:measure,owner_id,due_date', 'string', 'max:2000'],
+            'measure' => ['nullable', 'required_with:summary', 'string', 'max:1000'],
+            'owner_id' => ['nullable', 'required_with:summary', 'integer'],
+            'due_date' => ['nullable', 'required_with:summary', 'date_format:Y-m-d'],
+            'request_uuid' => ['nullable', 'required_with:summary', 'uuid'],
+            'after_review' => ['nullable', 'in:next'],
+            'next_meeting' => ['nullable', 'required_if:after_review,next', 'integer', 'min:1'],
+            'meeting_filters' => ['nullable', 'array:view,search,by,marker'],
+            'meeting_filters.view' => ['nullable', 'in:all,needs-review'],
+            'meeting_filters.search' => ['nullable', 'string', 'max:100'],
+            'meeting_filters.by' => ['nullable', 'date_format:Y-m-d'],
+            'meeting_filters.marker' => ['nullable', 'string', 'max:8'],
+        ];
+    }
+
+    public static function saveReviewTarget(User $actor, SupportConcern $marker, array $data, string $date): void
+    {
+        if (!filled($data['summary'] ?? null)) {
+            return;
+        }
+        if (($data['due_date'] ?? '') < $date) {
+            throw ValidationException::withMessages(['due_date' => 'Choose a target date on or after the review date.']);
+        }
+        if (!SupportAccess::owners($marker->apprentice)->contains('id', (int) $data['owner_id'])) {
+            throw ValidationException::withMessages(['owner_id' => 'Choose an eligible owner for this apprentice.']);
+        }
+        $target = self::createAction($actor, $marker->apprentice, $data + ['support_concern_id' => $marker->id]);
+        if ($target->support_concern_id !== $marker->id || $target->created_by !== $actor->id
+            || $target->owner_id !== (int) $data['owner_id'] || $target->due_date->toDateString() !== $data['due_date']
+            || ($target->details['summary'] ?? null) !== trim($data['summary'])
+            || ($target->details['measure'] ?? null) !== $data['measure']) {
+            throw ValidationException::withMessages(['summary' => 'This target request was already used. Reload the review before trying again.']);
+        }
+    }
+
+    public static function reviewReturn(\Illuminate\Http\Request $request, array $data): \Illuminate\Http\RedirectResponse
+    {
+        if (($data['after_review'] ?? null) === 'next' && isset($data['next_meeting'])
+            && ($data['kind'] ?? 'formal_review') === 'formal_review') {
+            return to_route('support.worklist', ['meeting' => $data['next_meeting']] +
+                ($data['meeting_filters'] ?? []));
+        }
+
+        return back();
     }
 
     public static function createAction(User $actor, Apprentice $apprentice, array $data): SupportSharedAction71

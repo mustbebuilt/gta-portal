@@ -28,7 +28,7 @@ class WeeklyRegisterTest extends TestCase
         $this->actingAs($tutor)->post($base.'/schedule',$settings)->assertForbidden();
         $this->actingAs($manager)->post($base.'/schedule',$settings)->assertSessionHasNoErrors();
         $this->actingAs($tutor)->get(route('attendance.index'))->assertOk()
-            ->assertSeeInOrder(['Your next register','Open weekly register','Weekly groups and schedules'])
+            ->assertSeeInOrder(['Your next register',"Open this week’s register",'Weekly groups and schedules'])
             ->assertSee(route('attendance.weekly.open', $group));
         $this->assertDatabaseCount('training_sessions', 0);
         $this->post($base.'/open',['date'=>'2026-11-24','week'=>'2026-11-23'])->assertRedirect();

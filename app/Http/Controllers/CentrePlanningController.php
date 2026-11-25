@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\{User,TutorGroup,TimetableRoom as Room,TimetablePlan as Plan,TimetablePlannerAccess as Access,TimetablePlanEntry as Entry,TrainingSession,TimetableDeliveryRecord};
-use App\Support\{CentrePlanning as P,CentreTimetable as T,LearningAccess,OccurrenceRegisters,RegisterCreation,RegisterFollowup,ReviewedImports};
+use App\Support\{CentrePlanning as P,CentreTimetable as T,LearningAccess,OccurrenceRegisters,RegisterCreation,RegisterFollowup,ReviewedImports,WeeklyRegisters};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -20,15 +20,25 @@ class CentrePlanningController extends Controller {
          ->whereIn(DB::raw('DATE(work_date)'), $board['dates'])->get()
          ->keyBy(fn (Entry $entry) => 'p'.$entry->plan_id.':'.$entry->work_date->toDateString());
      $nearby = OccurrenceRegisters::nearbyRegisters($entries);
+     $groups = TutorGroup::whereIn('id', $entries->pluck('group_id'))->get()->keyBy('id');
      $board['registerLinks'] = [];
+     $board['weeklyRegisterEntries'] = [];
      foreach ($planned as $item) {
          $entry = $entries->get($item['key']);
          if (!$entry) {
              continue;
          }
-         $session = OccurrenceRegisters::matchingRegister($r->user(), $entry, $plans[$entry->plan_id], OccurrenceRegisters::overlaps($entry, $nearby));
+         $overlaps = OccurrenceRegisters::overlaps($entry, $nearby);
+         $group = $groups->get($entry->group_id);
+         $weekly = $group ? OccurrenceRegisters::weeklyDefaults($entry, $group) : null;
+         $thisWeek = $weekly && $weekly['date'] === (WeeklyRegisters::thisWeek($group)['date'] ?? null);
+         $session = OccurrenceRegisters::matchingRegister($r->user(), $entry, $plans[$entry->plan_id], $overlaps);
          if ($session) {
              $board['registerLinks'][$item['key']] = route('attendance.show', $session);
+         }
+         if ($thisWeek && ($session || ($overlaps->isEmpty() && !$entry->training_session_id && !$entry->link_proof
+             && RegisterCreation::allowed($r->user(), $group)))) {
+             $board['weeklyRegisterEntries'][$item['key']] = $weekly + ['group' => $group];
          }
      }
 

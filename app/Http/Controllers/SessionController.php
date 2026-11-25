@@ -67,7 +67,7 @@ class SessionController extends Controller
     public static function destination(Request $request, User $user): RedirectResponse
     {
         $route = match ($user->role) {
-            'employer' => 'employer-actions.index','apprentice' => 'experience.home','manager','staff' => 'staff.index','mentor' => 'reviews.index','functional_skills_tutor' => 'em.caseload','careers_adviser' => 'careers.worklist', 'inclusion_lead','inclusion_member' => SupportAccess::team($user) ? 'support.worklist' : 'help.index',default => 'apprentices.index'
+            'admin', 'ceo', 'tutor' => 'attention.index', 'employer' => 'employer-actions.index','apprentice' => 'experience.home','manager','staff' => 'staff.index','mentor' => 'reviews.index','functional_skills_tutor' => 'em.caseload','careers_adviser' => 'careers.worklist', 'inclusion_lead','inclusion_member' => SupportAccess::team($user) ? 'support.worklist' : 'help.index',default => 'apprentices.index'
         };
         if (! LearningAccess::manager($user) && CentreManagerAccess::workspace($user)) {
             $route = 'centre-oversight.index';

@@ -1,7 +1,7 @@
 @extends('layout')
 @section('title','Apprentice Register')
 @section('content')
-<header class="page-heading"><div><h1>Apprentice Register</h1><div class="toolbar"><a class="button" href="#session-planner">Plan a new session</a><a class="button" href="{{ route('training-gaps72.index') }}">Training gaps report</a></div></div></header>
+<header class="page-heading"><div><h1>Apprentice Register</h1><div class="toolbar"><a class="button" href="{{ route('training-gaps72.index') }}">Training gaps report</a></div></div></header>
 @include('learning.errors')
 @include('attendance.next-register83')
 <details class="panel"><summary>Weekly groups and schedules</summary>@include('attendance.weekly-groups')</details>

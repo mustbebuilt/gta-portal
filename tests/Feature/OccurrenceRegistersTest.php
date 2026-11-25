@@ -124,4 +124,28 @@ class OccurrenceRegistersTest extends TestCase {
      $this->assertDatabaseCount('training_sessions', 1);
      $this->assertDatabaseCount('attendance_marks', 0);
  }
+
+ public function test_both_workspaces_open_one_weekly_register_after_scheduled_day(): void
+ {
+     $f = $this->fixture();
+     $date = \Carbon\CarbonImmutable::parse($f['date']);
+     $f['group']->forceFill(['weekly_register' => ['revisions' => [[
+         'first_day' => $f['date'], 'start' => '09:00', 'end' => '16:00',
+         'planned_learning' => 'Fictional weekly learning', 'breaks' => [],
+     ]]]])->save();
+     $this->plan($f);
+     $this->travelTo($date->addDay()->setTime(8, 0));
+     $open = route('attendance.weekly.open', $f['group']);
+     $board = route('centre-planning.index');
+     $this->actingAs($f['tutor'])->get($board)->assertOk()->assertSee($open)->assertSee("Open this week’s register");
+     $this->get(route('attendance.index'))->assertOk()->assertSee($open)->assertSee("Open this week’s register");
+     $this->assertDatabaseCount('training_sessions', 0);
+     $params = ['date' => $f['date'], 'week' => $date->startOfWeek()->toDateString()];
+     $this->post($open, $params)->assertRedirect();
+     $session = TrainingSession::sole();
+     $this->post($open, $params)->assertRedirect(route('attendance.show', $session));
+     $this->get($board)->assertOk()->assertSee(route('attendance.show', $session));
+     $this->assertDatabaseCount('training_sessions', 1);
+     $this->assertDatabaseCount('attendance_marks', 0);
+ }
 }

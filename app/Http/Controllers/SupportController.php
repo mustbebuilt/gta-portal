@@ -17,6 +17,7 @@ use App\Support\PortalPdf;
 use App\Support\PrivateEvidence;
 use App\Support\SupportAccess;
 use App\Support\SupportFollowup;
+use App\Support\SupportRegister71;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
@@ -238,6 +239,7 @@ class SupportController extends Controller
             'action' => ['nullable','string','max:1000'],
             'owner' => ['nullable','required_with:action,due','integer'],
             'due' => ['nullable','required_with:action,owner','date_format:Y-m-d','after_or_equal:date'],
+            ...SupportRegister71::reviewTargetRules(),
         ]);
         DB::transaction(function () use ($request, $concern, $data): void {
             $marker = SupportConcern::whereKey($concern->id)->lockForUpdate()->firstOrFail();
@@ -257,6 +259,10 @@ class SupportController extends Controller
                 'weekly' => $date->addWeek(), 'fortnightly' => $date->addWeeks(2), 'monthly' => $date->addMonthNoOverflow(),
                 'quarterly' => $date->addMonthsNoOverflow(3), 'six-monthly' => $date->addMonthsNoOverflow(6),
             };
+            if (filled($data['action'] ?? null) && filled($data['summary'] ?? null)) {
+                throw ValidationException::withMessages(['summary' => 'Choose one follow-up action.']);
+            }
+            SupportRegister71::saveReviewTarget($request->user(), $marker, $data, $data['date']);
             if (filled($data['action'] ?? null)) {
                 if (!SupportAccess::owners($marker->apprentice)->contains('id', (int) $data['owner'])) {
                     throw ValidationException::withMessages(['owner' => 'Choose an eligible owner for this apprentice.']);
@@ -283,7 +289,7 @@ class SupportController extends Controller
             $this->audit($request, $marker->apprentice_id, $marker->id, 'formal_marker_review');
         });
 
-        return back()->with('status', 'Formal marker review saved.');
+        return SupportRegister71::reviewReturn($request, $data)->with('status', 'Formal marker review saved.');
     }
 
     public function completeMarkerAction(Request $request, SupportConcern $concern): RedirectResponse

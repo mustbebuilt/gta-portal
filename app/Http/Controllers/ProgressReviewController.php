@@ -85,7 +85,11 @@ class ProgressReviewController extends Controller
         $signedConfirmed=$signedRecords->contains(fn($r)=>$r->checked_at && \App\Support\SignedReviews::intact($r));
 
         $simple83=!$review?->exists || $review->state==='Draft' || ($review->fields['format83']??null)==='simple83';
-        return view($simple83?'reviews.simple83':'reviews.form', ['automatedDefaults'=>\App\Support\ReviewAutomation::defaults($apprentice),'preparation'=>($review?->exists&&$review->state==='Draft')?\App\Support\ReviewPreparation::inspect([...($review->fields??[]),'format83'=>'simple83'],$review->source_snapshot??[],DeliveryPlan::approved($apprentice)):null,'signedConfirmed'=>$signedConfirmed,'hasSignedSource'=>$signedRecords->isNotEmpty(),'apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $review?->source_snapshot ?? \App\Support\ReviewSnapshot::capture($apprentice, []), 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
+        $defaults = \App\Support\ReviewAutomation::defaults($apprentice);
+        $snapshot = $review?->source_snapshot ?? \App\Support\ReviewSnapshot::capture($apprentice,
+            \Illuminate\Support\Arr::only($defaults, ['trainingFrom']));
+        $recordedFacts = !$review?->exists ? \App\Support\ReviewFacts83::fill([], $snapshot) : [];
+        return view($simple83?'reviews.simple83':'reviews.form', ['recordedFacts' => $recordedFacts, 'automatedDefaults'=>$defaults,'preparation'=>($review?->exists&&$review->state==='Draft')?\App\Support\ReviewPreparation::inspect([...($review->fields??[]),'format83'=>'simple83'],$review->source_snapshot??[],DeliveryPlan::approved($apprentice)):null,'signedConfirmed'=>$signedConfirmed,'hasSignedSource'=>$signedRecords->isNotEmpty(),'apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $snapshot, 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
     }
 
     public function pdf(Request $r, Apprentice $apprentice, ProgressReviewDraft $review): Response

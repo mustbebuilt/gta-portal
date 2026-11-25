@@ -56,7 +56,24 @@
                                 @foreach($intervals as $value=>$label)<option value="{{ $value }}" @selected(($restore ? old($frequencyKey) : $frequency) === $value)>{{ $label }}</option>@endforeach
                             </select></label></details>
                         <label>Review outcome <textarea name="{{ $outcomeKey }}" required maxlength="1000">{{ $restore ? old($outcomeKey) : '' }}</textarea></label>
+                        <details @if($restore && (old('summary') || $errors->hasAny(['summary', 'measure', 'owner_id', 'due_date']))) open @endif>
+                            <summary>Add an agreed SMART target</summary>
+                            <input type="hidden" name="request_uuid" value="{{ $restore && old('request_uuid') ? old('request_uuid') : (string) \Illuminate\Support\Str::uuid() }}">
+                            <label>SMART target <input name="summary" maxlength="2000" value="{{ $restore ? old('summary') : '' }}"></label>
+                            <label>How will we know it’s done? <input name="measure" maxlength="1000" value="{{ $restore ? old('measure') : '' }}"></label>
+                            <label>Owner <select name="owner_id"><option value="">Choose owner if adding a target</option>
+                                @foreach($owners as $owner)<option value="{{ $owner->id }}" @selected($restore && (int) old('owner_id') === $owner->id)>{{ $owner->name }}</option>@endforeach
+                            </select></label>
+                            <label>Due date <input type="date" name="due_date" value="{{ $restore ? old('due_date') : '' }}"></label>
+                        </details>
                         <button class="primary">Save review</button>
+                        @if(!empty($inMeeting) && $nextMeeting && $selected['due']->count() === 1 && $selected['due']->contains('id', $marker->id) && $selected['unlinked']->isEmpty())
+                            @foreach(request()->only(['view','search','by','marker']) as $key => $value)
+                                <input type="hidden" name="meeting_filters[{{ $key }}]" value="{{ $value }}">
+                            @endforeach
+                            <input type="hidden" name="next_meeting" value="{{ $nextMeeting['person']->id }}">
+                            <button name="after_review" value="next">Save review and open next apprentice</button>
+                        @endif
                     </form>
                 </details>
                 @if($schedule)

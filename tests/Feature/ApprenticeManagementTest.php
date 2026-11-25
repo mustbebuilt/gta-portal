@@ -225,7 +225,7 @@ class ApprenticeManagementTest extends TestCase
         $u->save();
         $this->post('/login', ['email' => $u->email, 'password' => 'wrong'])->assertSessionHasErrors('email');
         $this->assertGuest();
-        $this->post('/login', ['email' => $u->email, 'password' => 'Fictional-test-password-382!'])->assertRedirect('/apprentices');
+        $this->post('/login', ['email' => $u->email, 'password' => 'Fictional-test-password-382!'])->assertRedirect('/needs-attention');
         $this->assertAuthenticatedAs($u);
         $this->post('/logout')->assertRedirect('/login');
         $this->assertGuest();

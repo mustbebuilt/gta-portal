@@ -13,6 +13,16 @@ final class ReviewFacts83
         if (!filled($fields['progressDiscussion']??null)) {
             $lines=[];
             if (!empty($snapshot['assigned_tasks'])) $lines[]=$snapshot['approved_tasks'].' of '.$snapshot['assigned_tasks'].' loaded tasks approved. Task approval only; check progress against the agreed plan.';
+            foreach (['Maths', 'English'] as $subject) {
+                $position = $snapshot['review_summary']['progress'][$subject] ?? [];
+                if (!empty($position['total'])) {
+                    $lines[] = $subject.': '.$position['done'].' of '.$position['total'].' assigned topics completed.';
+                }
+            }
+            $attendance = $snapshot['review_summary']['attendance'] ?? null;
+            if ($attendance && ($attendance['attended'] || $attendance['missed'] || $attendance['unmarked'])) {
+                $lines[] = 'Review-period records: '.$attendance['attended'].' attended, '.$attendance['missed'].' missed, '.$attendance['unmarked'].' unmarked.';
+            }
             $otj=$snapshot['otj_position']??null;
             if ($otj) $lines[]='Recorded OTJ subtotal: '.number_format($otj['recorded_minutes']/60,2).' hours. Loaded records only; historical completeness not verified.';
             if($lines)$fields['progressDiscussion']=implode("\n",$lines);
