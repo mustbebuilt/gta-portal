@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Apprentice, RegisterTrainingRecord, TrainingSession, TutorGroup, User};
+use App\Models\Apprentice;
+use App\Models\RegisterTrainingRecord;
+use App\Models\TrainingSession;
+use App\Models\TutorGroup;
+use App\Models\User;
 use App\Support\TrainingJourney72;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -42,15 +46,14 @@ class TutorRegister72Test extends TestCase
         ]);
 
         $this->actingAs($tutor)->withSession(['auth_version' => $tutor->auth_version]);
-        $this->get(route('attendance.show', $session1))->assertOk()->assertSee('Structured training delivery for personal training bank');
+        $this->get(route('attendance.show', $session1))->assertOk()->assertSee('Training delivered to the group');
 
         // Save attendance + structured subjects in one request: Alex attended, Sam absent
         $this->post(route('attendance.save', $session1), [
             'version' => 1,
+            'weekly_confirmed' => '1',
             'delivered_learning' => 'Block 1 workshop inspection',
-            'training_subjects' => ['autocare:block-1', 'cc-safeguarding'],
-            'training_coverage' => ['autocare:block-1' => 'delivered', 'cc-safeguarding' => 'delivered'],
-            'training_confirmed' => '1',
+            'training' => ['vocational' => 'Block 1 workshop inspection', 'themes' => 'Safeguarding and Prevent'],
             'marks' => [
                 $alex->id => ['code' => 'O', 'arrival' => '09:00', 'departure' => '12:00'],
                 $sam->id => ['code' => 'A'],
@@ -62,7 +65,8 @@ class TutorRegister72Test extends TestCase
 
         $alexJourney = TrainingJourney72::forApprentice($alex);
         $samJourney = TrainingJourney72::forApprentice($sam);
-        $this->assertSame(1, $alexJourney['counts']['delivered']);
+        $this->assertCount(2, $alexJourney['receipts']);
+        $this->assertSame(0, $alexJourney['counts']['delivered']); // No approved requirements: do not infer block completion.
         $this->assertSame(0, $samJourney['counts']['delivered']);
 
         // Catch-up session in a different group delivers block 1 to Sam
@@ -82,17 +86,18 @@ class TutorRegister72Test extends TestCase
 
         $this->post(route('attendance.save', $session2), [
             'version' => 1,
+            'weekly_confirmed' => '1',
             'delivered_learning' => 'Block 1 catch-up',
-            'training_subjects' => ['autocare:block-1'],
-            'training_coverage' => ['autocare:block-1' => 'delivered'],
-            'training_confirmed' => '1',
+            'training' => ['vocational' => 'Block 1 workshop inspection'],
             'marks' => [
                 $sam->id => ['code' => 'O', 'arrival' => '13:00', 'departure' => '16:00'],
             ],
         ])->assertRedirect()->assertSessionHasNoErrors();
 
         $samAfter = TrainingJourney72::forApprentice($sam);
-        $this->assertSame(1, $samAfter['counts']['delivered']);
+        $this->assertCount(1, $samAfter['receipts']);
+        $this->assertSame('Block 1 workshop inspection', $samAfter['receipts'][0]['label']);
+        $this->assertSame(0, $samAfter['counts']['delivered']); // A receipt is not an approved whole-block requirement.
         $this->assertSame('Friday catch-up', $session2->name);
 
         // Journey view and Gaps report stay strictly scoped to assigned apprentices

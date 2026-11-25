@@ -6,3 +6,7 @@
 </div>
 @if($overview83['next'])<p><strong>Next action:</strong> {{$overview83['next']['title']}} <a class="button primary" href="{{$overview83['next']['url']}}">Open next action</a></p>@else<p>No due training actions in this view.</p>@endif
 </section>
+
+@if(\App\Support\LearningAccess::manager(auth()->user()) && !\App\Support\DeliveryPlan::approved($apprentice))
+<details class="panel"><summary>Training plan setup incomplete</summary><form method="post" action="{{route('setup68.resume-existing',$apprentice)}}">@csrf<button>Complete apprentice setup</button></form><a href="{{route('delivery.show',$apprentice)}}">Open individual delivery plan</a></details>
+@endif

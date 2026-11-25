@@ -45,7 +45,8 @@ class ReferenceHelpTest extends TestCase
         $a = Apprentice::factory()->create(['user_id' => $u->id]);
         $task = LearningTask::factory()->create(['apprentice_id' => $a->id, 'reference' => 'b9-t3', 'template' => TaskCatalogue::template('b9-t3')]);
         $this->actingAs($u)->get('/apprentices/'.$a->id.'/curriculum-reference')->assertOk();
-        $this->get('/tasks/'.$task->id)->assertOk()->assertSee('inclusive communication scenario')->assertSee('adds no tasks, hours or achievement');
+        $this->get('/tasks/'.$task->id)->assertOk()->assertSee('inclusive communication scenario')->assertSee('Activities carried out');
+        $this->assertDatabaseCount('learning_tasks', 1);
         $this->assertSame(TaskCatalogue::template('b9-t3')['sha256'], $task->fresh()->template['sha256']);
     }
 

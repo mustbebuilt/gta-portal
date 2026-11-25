@@ -2,13 +2,16 @@ import { test, expect } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
-// Configuration: uses the live Cloud URL by default
-const BASE_URL = process.env.BASE_URL || 'https://gta-portal-production-pvjtnz.laravel.cloud';
+import { testBaseUrl } from './safe-target.mjs';
 
-// Test credentials (default fictional demo accounts from gta:demo)
-const TUTOR_EMAIL = process.env.TUTOR_EMAIL || 'tutor@example.test';
-const APPRENTICE_EMAIL = process.env.APPRENTICE_EMAIL || 'apprentice@example.test';
-const PASSWORD = process.env.GTA_PASSWORD || ';}8R]/Er9PmyE|DtR5f1Qyt4';
+// Fictional local accounts only. Every credential must be supplied explicitly.
+const BASE_URL = testBaseUrl();
+const TUTOR_EMAIL = process.env.TUTOR_EMAIL;
+const APPRENTICE_EMAIL = process.env.APPRENTICE_EMAIL;
+const PASSWORD = process.env.GTA_PASSWORD;
+if (!TUTOR_EMAIL || !APPRENTICE_EMAIL || !PASSWORD) {
+    throw new Error('Supply TUTOR_EMAIL, APPRENTICE_EMAIL and GTA_PASSWORD for disposable local accounts.');
+}
 
 test.describe.serial('Feature 1: Learning Tasks and Portfolio Workflow', () => {
 

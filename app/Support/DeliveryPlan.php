@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Apprentice;
 use App\Models\IndividualDeliveryPlan;
 use App\Models\LearningTask;
+use App\Models\ProgrammeSetupTemplate68;
 use App\Models\TrainingPlanWorkspace;
 use Carbon\CarbonImmutable;
 
@@ -12,7 +13,7 @@ class DeliveryPlan
 {
     public static function identity(Apprentice $a): array
     {
-        $p = $a->programmeRecord()->first();
+        $p = ReportRead85::programme($a);
 
         return ['programme_id' => $a->programme_id, 'catalogue' => TaskCatalogue::keyFor($a), 'code' => $p?->standard_code, 'version' => $p?->version, 'active' => $p?->active, 'start' => $a->start_date?->toDateString(), 'employer_id' => $a->employer_id, 'employer' => $a->employerLabel()];
     }
@@ -29,14 +30,14 @@ class DeliveryPlan
 
     public static function approved(Apprentice $a): ?array
     {
-        $row = IndividualDeliveryPlan::where('apprentice_id', $a->id)->first();
-        if (! $row?->active || ! $row->approved || !self::identityMatches($a, $row->approved['identity'] ?? null)) {
+        $row = ReportRead85::rows(IndividualDeliveryPlan::class, $a->id, fn () => IndividualDeliveryPlan::where('apprentice_id', $a->id)->get())->first();
+        if (! $row?->active || ! $row->approved || ! self::identityMatches($a, $row->approved['identity'] ?? null)) {
             return null;
         }
 
         if ($binding = $row->approved['rpl_binding'] ?? null) {
             $position = self::rplPosition($a, $binding);
-            if (!$position || !self::targetMatches($position, $row->approved['details']['target_hours'] ?? null)) {
+            if (! $position || ! self::targetMatches($position, $row->approved['details']['target_hours'] ?? null)) {
                 return null;
             }
         }
@@ -49,23 +50,25 @@ class DeliveryPlan
     {
         $query = TrainingPlanWorkspace::where('apprentice_id', $apprentice->id);
         $workspace = ($lock ? $query->lockForUpdate() : $query)->first();
-        if (!$workspace) {
+        if (! $workspace) {
             return null;
         }
         // Guided setup and the earlier assessed Autocare workflow issue different bindings.
         if (class_exists(Rpl68::class) && $workspace->getRawOriginal('setup_rpl') !== null) {
             $setup = $workspace->setup_rpl;
             if (is_array($setup) && hash_equals($binding, Rpl68::hash($setup))) {
-                $template = \App\Models\ProgrammeSetupTemplate68::find($setup['template_id'] ?? 0);
-                if (!$template || $template->programme_id !== $apprentice->programme_id) {
+                $template = ProgrammeSetupTemplate68::find($setup['template_id'] ?? 0);
+                if (! $template || $template->programme_id !== $apprentice->programme_id) {
                     return null;
                 }
                 $position = Rpl68::position($workspace);
+
                 return $position['approved'] ? $position : null;
             }
         }
 
         $position = TrainingPlanSource::position($workspace);
+
         return $position['approved'] && hash_equals($binding, $position['binding']) ? $position : null;
     }
 

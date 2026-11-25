@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Apprentice, SupportMarkerSchedule71, SupportSharedAction71, User};
-use App\Support\{SupportAccess, SupportRegister71};
-use Illuminate\Http\{RedirectResponse, Request};
+use App\Models\Apprentice;
+use App\Models\SupportMarkerSchedule71;
+use App\Models\SupportSharedAction71;
+use App\Models\User;
+use App\Support\SupportAccess;
+use App\Support\SupportRegister71;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class SupportRegister71Controller extends Controller
@@ -17,6 +22,7 @@ class SupportRegister71Controller extends Controller
                 'view' => $r->input('view') === 'all' ? 'all' : 'needs-review',
                 'marker' => $r->query->get('code'),
             ]);
+
             return app(SupportController::class)->worklist($r);
         }
         $data = SupportRegister71::query($r->user(), $r->only(['view', 'search', 'code']));
@@ -50,6 +56,7 @@ class SupportRegister71Controller extends Controller
 
     public function addMarker(Request $r): RedirectResponse
     {
+        $this->authoriseInput85($r);
         $v = $r->validate([
             'apprentice_id' => ['required', 'integer', 'exists:apprentices,id'],
             'code' => ['required', 'string', 'max:12'],
@@ -84,6 +91,7 @@ class SupportRegister71Controller extends Controller
 
     public function addAction(Request $r): RedirectResponse
     {
+        $this->authoriseInput85($r);
         $v = $r->validate([
             'apprentice_id' => ['required', 'integer', 'exists:apprentices,id'],
             'owner_id' => ['required', 'integer', 'exists:users,id'],
@@ -107,5 +115,14 @@ class SupportRegister71Controller extends Controller
         SupportRegister71::completeAction($r->user(), $action, $v);
 
         return back()->with('status', 'Action completed.');
+    }
+
+    private function authoriseInput85(Request $request): void
+    {
+        abort_unless(SupportAccess::team($request->user()), 403);
+        $id = $request->input('apprentice_id');
+        abort_unless(is_scalar($id) && ctype_digit((string) $id), 403);
+        $apprentice = Apprentice::whereKey((int) $id)->first();
+        abort_unless($apprentice && SupportAccess::team($request->user(), $apprentice), 403);
     }
 }

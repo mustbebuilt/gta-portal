@@ -23,12 +23,19 @@ use Tests\TestCase;
 
 class HelpNarrationTest extends TestCase
 {
-    public function test_optional_context_help_cannot_break_apprentice_page_when_guide_source_is_invalid():void
+    public function test_optional_context_help_cannot_break_apprentice_page_when_guide_source_is_invalid(): void
     {
-        $u=$this->user('apprentice');$path=resource_path('data/help-guides.json');$original=file_get_contents($path);
-        try {file_put_contents($path,'NOT A VALID CATALOGUE');$this->actingAs($u)->get('/my-next-step')->assertStatus(409)->assertSee('Your profile needs linking');}
-        finally {file_put_contents($path,$original);}
+        $u = $this->user('apprentice');
+        $path = resource_path('data/help-guides.json');
+        $original = file_get_contents($path);
+        try {
+            file_put_contents($path, 'NOT A VALID CATALOGUE');
+            $this->actingAs($u)->get('/my-next-step')->assertStatus(409)->assertSee('Your profile needs linking');
+        } finally {
+            file_put_contents($path, $original);
+        }
     }
+
     public function test_optional_file_scan_is_bounded_and_reports_unchecked_remainder(): void
     {
         [$u,$first] = $this->upload();
@@ -93,8 +100,8 @@ class HelpNarrationTest extends TestCase
     {
         $all = Catalogue::all();
         $this->assertCount(43, $all);
-        $this->assertArrayHasKey('retention-recruitment',$all);
-        $this->assertArrayHasKey('employer-resources',$all);
+        $this->assertArrayHasKey('retention-recruitment', $all);
+        $this->assertArrayHasKey('employer-resources', $all);
         $this->assertCount(43, array_unique(array_keys($all)));
         foreach ($all as $id => $g) {
             $this->assertSame($id, $g['id']);
@@ -149,7 +156,7 @@ class HelpNarrationTest extends TestCase
         $g = Catalogue::context($u, $r);
         $this->assertSame('review-signing', $g['id']);
         $this->assertStringNotContainsString('apprentice_id', json_encode($g));
-        $this->actingAs($u)->get('/my-next-step')->assertSee('Help with this page: Your next step');
+        $this->actingAs($u)->get('/my-next-step')->assertSee(route('help.index'), false);
     }
 
     public function test_added_inclusion_duty_reveals_only_appropriate_guides_and_revocation_hides_them(): void

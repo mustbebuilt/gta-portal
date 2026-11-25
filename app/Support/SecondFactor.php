@@ -19,9 +19,22 @@ class SecondFactor
         return AccountSecondFactor::whereKey($user->id)->whereNotNull('confirmed_at')->exists();
     }
 
+    public static function policyRequired(User $user): bool
+    {
+        return config('second_factor.required_for_support') === true && $user->active
+            && (in_array($user->role, ['admin', 'ceo', 'inclusion_lead', 'inclusion_member'], true)
+                || SupportAccess::team($user));
+    }
+
     public static function mayEnrol(User $user): bool
     {
+        if (self::policyRequired($user)) {
+            return $user->email_verified_at !== null
+                && (app()->environment(['local', 'testing']) || StagingAccess::errors() === [])
+                && User::whereRaw('LOWER(email) = ?', [strtolower($user->email)])->count() === 1;
+        }
         $emails = config('second_factor.pilot_emails');
+
         return config('second_factor.enrolment_enabled') === true
             && (app()->environment(['local', 'testing']) || StagingAccess::errors() === [])
             && is_array($emails) && count($emails) >= 1 && count($emails) <= 10
@@ -72,6 +85,7 @@ class SecondFactor
     public static function pending(Request $request): ?array
     {
         $pending = $request->session()->get('mfa_pending');
+
         return is_array($pending) && is_int($pending['id'] ?? null) && is_int($pending['expires'] ?? null)
             && $pending['expires'] > now()->timestamp ? $pending : null;
     }
@@ -87,6 +101,7 @@ class SecondFactor
         if ($step !== null) {
             $factor->last_step = $step;
             $factor->save();
+
             return true;
         }
         if ($recovery && preg_match('/^[A-F0-9]{8}(?:-[A-F0-9]{8}){3}$/D', $code)) {
@@ -96,10 +111,12 @@ class SecondFactor
                     unset($hashes[$index]);
                     $factor->recovery_hashes = array_values($hashes);
                     $factor->save();
+
                     return true;
                 }
             }
         }
+
         return false;
     }
 
@@ -111,6 +128,7 @@ class SecondFactor
         }
         $factor->recovery_hashes = array_map(fn ($code) => hash('sha256', $code), $codes);
         $factor->save();
+
         return $codes;
     }
 
@@ -120,11 +138,15 @@ class SecondFactor
         $codes = DB::transaction(function () use ($request, $action, $password, $code) {
             $user = User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
             abort_unless($user->active && $user->auth_version === $request->session()->get('auth_version'), 403);
-            if (! Hash::check($password, $user->password)) { self::fail(); }
+            if (! Hash::check($password, $user->password)) {
+                self::fail();
+            }
             $factor = AccountSecondFactor::whereKey($user->id)->lockForUpdate()->first();
             if ($action === 'start') {
                 abort_unless(self::mayEnrol($user), 403);
-                if ($factor?->confirmed_at) { self::fail(); }
+                if ($factor?->confirmed_at) {
+                    self::fail();
+                }
                 $factor ??= new AccountSecondFactor(['user_id' => $user->id]);
                 $factor->secret = Crypt::encryptString(AuthenticatorCode::secret());
                 $factor->setup_expires_at = now()->addMinutes(15);
@@ -135,29 +157,40 @@ class SecondFactor
                 $factor->last_step = null;
                 $factor->save();
                 self::event($user, 'mfa_setup_started');
+
                 return null;
             }
-            if (! $factor) { self::fail(); }
+            if (! $factor) {
+                self::fail();
+            }
             if ($action === 'confirm') {
                 abort_unless(self::mayEnrol($user), 403);
                 if ($factor->confirmed_at || ! $factor->setup_expires_at?->isFuture()
                     || ! hash_equals($factor->setup_binding ?? '', hash('sha256', $request->session()->get('mfa_setup_binding', '')))
-                    || ! self::consume($factor, $code, false)) { self::fail(); }
+                    || ! self::consume($factor, $code, false)) {
+                    self::fail();
+                }
                 $factor->confirmed_at = now();
                 $factor->setup_expires_at = null;
                 $factor->setup_binding = null;
                 $factor->save();
                 $codes = self::recoveryCodes($factor);
             } else {
-                if (! $factor->confirmed_at || ! self::consume($factor, $code)) { self::fail(); }
+                if (! $factor->confirmed_at || ! self::consume($factor, $code)) {
+                    self::fail();
+                }
                 if ($action === 'disable') {
+                    abort_if(self::policyRequired($user), 403, 'Two-step sign-in is required for this account.');
                     $factor->delete();
                     $codes = null;
                 } elseif ($action === 'regenerate') {
                     $codes = self::recoveryCodes($factor);
-                } else { self::fail(); }
+                } else {
+                    self::fail();
+                }
             }
             AccountAccess::invalidate($user, $user->id, 'mfa_'.$action, 'second_factor');
+
             return $codes;
         });
         if ($action !== 'start') {

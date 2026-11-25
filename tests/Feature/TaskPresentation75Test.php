@@ -2,8 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Apprentice, LearningBlockControl, LearningTask, Programme, User};
-use App\Support\{TaskCatalogue, TaskPresentation};
+use App\Models\Apprentice;
+use App\Models\LearningBlockControl;
+use App\Models\LearningTask;
+use App\Models\Programme;
+use App\Models\User;
+use App\Support\TaskCatalogue;
+use App\Support\TaskPresentation;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -82,27 +87,27 @@ class TaskPresentation75Test extends TestCase
         $this->actingAs($learnerUser)->withSession(['auth_version' => $learnerUser->auth_version]);
         $this->get(route('tasks.show', $task1))
             ->assertOk()
-            ->assertSee('Practical activity checklist')
-            ->assertSee('Source KSB links');
+            ->assertSee('Activities carried out')
+            ->assertSee('Linked knowledge, skills and behaviours (KSBs)');
 
         $this->post(route('tasks.save', $task1), [
             'version' => 1,
             'intent' => 'draft',
-            'checklist75_present' => '1',
-            'checklist75' => ['activity-01'],
+            'activities_present' => '1',
+            'activities' => ['activity-01'],
             'answers' => [],
         ])->assertRedirect()->assertSessionHasNoErrors();
 
-        $this->assertSame(['activity-01'], $task1->fresh()->answers['_checklist75']['steps']);
+        $this->assertSame(['activity-01'], array_column($task1->fresh()->answers['_activities'], 'id'));
 
         // Reject invalid checklist ID
         $this->post(route('tasks.save', $task1->fresh()), [
             'version' => $task1->fresh()->version,
             'intent' => 'draft',
-            'checklist75_present' => '1',
-            'checklist75' => ['not-a-real-step'],
+            'activities_present' => '1',
+            'activities' => ['not-a-real-step'],
             'answers' => [],
-        ])->assertSessionHasErrors('checklist75');
+        ])->assertSessionHasErrors('activities');
 
         // Move task1 to Awaiting marking and test tutor Save and open next -> redirects to task2
         $task1 = $task1->fresh();
@@ -124,8 +129,8 @@ class TaskPresentation75Test extends TestCase
             'decision_date' => today()->toDateString(),
             'feedback' => 'Good practical work.',
             'confirmed' => '1',
-            'after_decide' => 'next',
-        ])->assertRedirect(route('tasks.show', $task2));
+            'after_save' => 'next',
+        ])->assertRedirect(route('tasks.show', [$task2, 'from_marking' => 1, 'view' => 'all', 'search' => '', 'tutor' => '']));
 
         $this->assertSame('Approved', $task1->fresh()->status);
     }

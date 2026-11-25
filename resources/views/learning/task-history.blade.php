@@ -4,18 +4,18 @@
         @php($decision = $submission['decision'] ?? null)
         @php($sourceFields = $decision['source_fields'] ?? [])
         <details>
-            <summary>Version {{ $submission['version'] }} · {{ $decision ? ($isKnowledge ? ($decision['status'] === 'Approved' ? 'Pass' : 'Refer') : $decision['status']) : 'Awaiting marking' }}</summary>
+            <summary>Version {{ ($submission['version'] ?? 'Not recorded') }} · {{ $decision ? ($isKnowledge ? (($decision['status'] ?? 'Decision not recorded') === 'Approved' ? 'Pass' : 'Refer') : ($decision['status'] ?? 'Decision not recorded')) : 'Awaiting marking' }}</summary>
             @php($submittedAt = $submission['submitted_at'] ?? null)
             <p>{{ $submittedAt ? 'Submitted '.$submittedAt : ($isKnowledge ? 'Paper assessment record' : 'Submission date not recorded') }}</p>
             @if($decision)
                 @if($isKnowledge && ($sourceFields['marks_available'] ?? 0) > 0)
                     <p><strong>Paper test score: {{ round(100 * $sourceFields['marks_achieved'] / $sourceFields['marks_available'], 1) }}%</strong></p>
                 @endif
-                <p>{{ $decision['tutor_name'] }} · {{ $decision['date'] }}</p>
+                <p>{{ $decision['tutor_name'] ?? 'Tutor not recorded' }} · {{ $decision['date'] ?? 'Date not recorded' }}</p>
                 @if(filled($decision['feedback'] ?? null))<p class="recorded-answer">{{ $decision['feedback'] }}</p>@endif
                 <dl class="details-grid">
                     @foreach($sourceFields as $key => $value)
-                        @php($field = collect($task->template['fields'])->firstWhere('name', $key))
+                        @php($field = collect(($task->template['fields'] ?? []))->firstWhere('name', $key))
                         <div><dt>{{ $field['label'] ?? ucfirst(str_replace('_', ' ', $key)) }}</dt>
                             <dd>{{ ($field['type'] ?? null) === 'checkbox' && in_array($value, ['on','1',1,true], true) ? 'Confirmed' : ($value ?? 'Not recorded') }}</dd></div>
                     @endforeach

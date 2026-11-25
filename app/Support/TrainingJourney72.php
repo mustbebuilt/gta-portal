@@ -2,7 +2,11 @@
 
 namespace App\Support;
 
-use App\Models\{Apprentice, AttendanceMark, RegisterTrainingRecord, TrainingSession, User};
+use App\Models\Apprentice;
+use App\Models\AttendanceMark;
+use App\Models\RegisterTrainingRecord;
+use App\Models\TrainingSession;
+use App\Models\User;
 use Illuminate\Validation\ValidationException;
 
 /** Scoped Pack 72 adapter: structured session training delivery, personal bank & gap reports. */
@@ -162,7 +166,7 @@ final class TrainingJourney72
         ];
 
         if (! $record) {
-            $record = new RegisterTrainingRecord();
+            $record = new RegisterTrainingRecord;
             $record->training_session_id = $session->id;
             $record->version = 1;
             $record->history = [];
@@ -247,6 +251,7 @@ final class TrainingJourney72
                         'delivered_learning' => $session->delivered_learning,
                     ];
                 }
+
                 continue;
             }
 
@@ -282,9 +287,9 @@ final class TrainingJourney72
             ];
         }
 
-        $receipts = TrainingCoverage::receipts((string) $apprentice->id, $dtos, $today);
-        $requirements = self::requirementsFor($apprentice);
-        $journey = TrainingCoverage::journey($requirements, $receipts, $today);
+        // The personal bank and profile use the same current register source and approved requirements.
+        $receipts = RegisterTraining::receipts($apprentice->id, $today);
+        $journey = RegisterTraining::coverage($apprentice, $receipts, DeliveryPlan::approved($apprentice), $today);
 
         $counts = ['delivered' => 0, 'overdue' => 0, 'partial' => 0, 'due' => 0, 'planned' => 0, 'unscheduled' => 0];
         foreach ($journey as $row) {

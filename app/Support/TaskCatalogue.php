@@ -20,7 +20,7 @@ class TaskCatalogue
         if (! $apprentice->programme_id) {
             return 'autocare';
         }
-        $p = $apprentice->programmeRecord()->first();
+        $p = ReportRead85::programme($apprentice);
         if (! $p || ! $p->active) {
             return null;
         }

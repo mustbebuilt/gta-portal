@@ -17,39 +17,45 @@ class SupportAccess
 
     public static function settings(User $user): array
     {
-        $u = User::whereKey($user->id)->when(DB::transactionLevel() > 0, fn ($q) => $q->lockForUpdate())->first();
-        if (! $u || ! in_array($u->role, [...DirectoryCatalog::STAFF_ROLES, 'admin', 'ceo'], true)) {
-            return ['duty' => 'staff', 'scope' => 'assigned', 'apprentice_ids' => [], 'group_ids' => [], 'version' => 0, 'eligible' => false, 'admin' => false];
-        }
-        $row = SupportCapability::where('user_id', $u->id)->when(DB::transactionLevel() > 0, fn ($q) => $q->lockForUpdate())->first();
-        $duty = $row?->duty ?? match ($u->role) {
-            'inclusion_lead' => 'lead','inclusion_member' => 'member',default => 'staff'
-        };
-        $scope = $row?->scope ?? (in_array($u->role, ['admin', 'ceo', 'inclusion_lead', 'inclusion_member'], true) ? 'all' : 'assigned');
-        if (! array_key_exists($duty, self::DUTIES) || ! array_key_exists($scope, self::SCOPES)) {
-            $duty = 'staff';
-            $scope = 'assigned';
-        }
+        return ReportRead85::remember('support-settings:'.$user->id, function () use ($user) {
+            $u = User::whereKey($user->id)->when(DB::transactionLevel() > 0, fn ($q) => $q->lockForUpdate())->first();
+            if (! $u || ! in_array($u->role, [...DirectoryCatalog::STAFF_ROLES, 'admin', 'ceo'], true)) {
+                return ['duty' => 'staff', 'scope' => 'assigned', 'apprentice_ids' => [], 'group_ids' => [], 'version' => 0, 'eligible' => false, 'admin' => false];
+            }
+            $row = SupportCapability::where('user_id', $u->id)->when(DB::transactionLevel() > 0, fn ($q) => $q->lockForUpdate())->first();
+            $duty = $row?->duty ?? match ($u->role) {
+                'inclusion_lead' => 'lead','inclusion_member' => 'member',default => 'staff'
+            };
+            $scope = $row?->scope ?? (in_array($u->role, ['admin', 'ceo', 'inclusion_lead', 'inclusion_member'], true) ? 'all' : 'assigned');
+            if (! array_key_exists($duty, self::DUTIES) || ! array_key_exists($scope, self::SCOPES)) {
+                $duty = 'staff';
+                $scope = 'assigned';
+            }
 
-        return ['duty' => $duty, 'scope' => $scope, 'apprentice_ids' => $row?->apprentice_ids ?? [], 'group_ids' => $row?->group_ids ?? [], 'version' => $row?->version ?? 0, 'eligible' => (bool) $u->active, 'admin' => in_array($u->role, ['admin', 'ceo'], true)];
+            return ['duty' => $duty, 'scope' => $scope, 'apprentice_ids' => $row?->apprentice_ids ?? [], 'group_ids' => $row?->group_ids ?? [], 'version' => $row?->version ?? 0, 'eligible' => (bool) $u->active, 'admin' => in_array($u->role, ['admin', 'ceo'], true)];
+
+        });
     }
 
     public static function ids(User $u): array
     {
-        $s = self::settings($u);
-        if (! $s['eligible'] || (! $s['admin'] && ! in_array($s['duty'], ['member', 'lead'], true))) {
-            return [];
-        }
-        if ($s['admin'] || $s['scope'] === 'all') {
-            return Apprentice::pluck('id')->all();
-        }
+        return ReportRead85::remember('support-ids:'.$u->id, function () use ($u) {
+            $s = self::settings($u);
+            if (! $s['eligible'] || (! $s['admin'] && ! in_array($s['duty'], ['member', 'lead'], true))) {
+                return [];
+            }
+            if ($s['admin'] || $s['scope'] === 'all') {
+                return Apprentice::pluck('id')->all();
+            }
 
-        return Apprentice::where(function ($q) use ($u, $s): void {
-            $q->whereIn('id', $s['apprentice_ids'])->orWhereIn('tutor_group_id', $s['group_ids']);
-            foreach (['tutor_id', 'maths_tutor_id', 'english_tutor_id', 'mentor_id', 'careers_adviser_id'] as $key) {
-                $q->orWhere($key, $u->id);
-            }$q->orWhereHas('groupRecord', fn ($g) => $g->where('tutor_id', $u->id));
-        })->pluck('id')->all();
+            return Apprentice::where(function ($q) use ($u, $s): void {
+                $q->whereIn('id', $s['apprentice_ids'])->orWhereIn('tutor_group_id', $s['group_ids']);
+                foreach (['tutor_id', 'maths_tutor_id', 'english_tutor_id', 'mentor_id', 'careers_adviser_id'] as $key) {
+                    $q->orWhere($key, $u->id);
+                }$q->orWhereHas('groupRecord', fn ($g) => $g->where('tutor_id', $u->id));
+            })->pluck('id')->all();
+
+        });
     }
 
     public static function team(User $u, ?Apprentice $a = null): bool

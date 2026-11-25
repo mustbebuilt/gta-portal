@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test';
+import { testBaseUrl } from './tests/e2e/safe-target.mjs';
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -7,11 +8,11 @@ export default defineConfig({
     timeout: 10 * 1000,
   },
   use: {
-    baseURL: process.env.BASE_URL || 'https://gta-portal-production-pvjtnz.laravel.cloud',
-    screenshot: 'on',
-    video: 'retain-on-failure',
-    trace: 'on-first-retry',
-    ignoreHTTPSErrors: true,
+    baseURL: testBaseUrl(),
+    screenshot: 'off',
+    video: 'off',
+    trace: 'off',
+    ignoreHTTPSErrors: false,
   },
   reporter: [['list'], ['html', { open: 'never' }]],
 });

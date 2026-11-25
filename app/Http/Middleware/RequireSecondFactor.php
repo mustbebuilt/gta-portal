@@ -15,8 +15,15 @@ class RequireSecondFactor
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+
             return to_route('login')->withErrors(['email' => 'Please sign in with your password and security code.']);
         }
+        if (SecondFactor::policyRequired($request->user()) && ! SecondFactor::required($request->user())
+            && ! $request->routeIs('second-factor.settings', 'second-factor.change', 'account.email*', 'logout', 'portal-privacy.*', 'privacy.public')) {
+            return to_route($request->user()->email_verified_at ? 'second-factor.settings' : 'account.email')
+                ->with('status', 'Verify your email and set up two-step sign-in before opening apprentice records.');
+        }
+
         return $next($request);
     }
 }

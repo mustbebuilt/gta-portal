@@ -28,7 +28,7 @@
 @elseif($step===6)
 @include('setup68.functional-skills')
 @elseif($step===5)
-<label for="employer">Link an existing employer</label><select id="employer" name="data[id]"><option value="">Add a new employer below</option>@foreach($employers as $e)<option value="{{$e->id}}" @selected(($p['employer']['id']??null)===$e->id)>{{$e->reference}} — {{$e->name}}@if($e->contact_name) · {{$e->contact_name}}@endif</option>@endforeach</select><p>Use the employer search below. The saved contact will be reused.</p>
+<label for="employer">Link an existing employer</label><select id="employer" name="data[id]"><option value="">Add a new employer below</option>@foreach($employers as $e)<option value="{{$e->id}}" @selected((string)($p['employer']['id']??'')===(string)$e->id)>{{$e->reference}} — {{$e->name}}@if($e->contact_name) · {{$e->contact_name}}@endif</option>@endforeach</select><p>Use the employer search below. The saved contact will be reused.</p>
 @include('setup68.employer-fields',['employerFields'=>$p['employer']??[]])
 <label><input type="checkbox" name="data[use_contact]" value="1" @checked($p['employer']['use_contact']??false)>Use the linked employer's workplace contact / mentor</label>
 @if(($p['rpl']['mode']??null)==='applies')<label for="agreement">Employer agreement reference</label><input id="agreement" name="data[agreement_ref]" value="{{$p['employer']['agreement_ref']??''}}" maxlength="1000"><label><input type="checkbox" name="data[agreement_verified]" value="1" @checked($p['employer']['agreement_verified']??false)>I have verified this agreement against the linked employer and current RPL record.</label><p>Save the employer link first, then verify the agreement. Changing the employer or RPL clears verification.</p>@endif

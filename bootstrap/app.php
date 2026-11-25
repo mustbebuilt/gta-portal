@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\LocalTestOnly;
+use App\Http\Middleware\SensitiveAccess85;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,10 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [LocalTestOnly::class]);
+        $middleware->web(append: [LocalTestOnly::class, SensitiveAccess85::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->dontFlash(['sealed','token', 'code', 'current_password','privacy_concern','privacy_reason','privacy_body']);
+        $exceptions->dontFlash(['sealed', 'token', 'code', 'current_password', 'privacy_concern', 'privacy_reason', 'privacy_body']);
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

@@ -5,18 +5,26 @@ namespace App\Http\Controllers;
 use App\Models\Apprentice;
 use App\Models\AttendanceMark;
 use App\Models\ExtraTraining;
+use App\Models\MonthlyScorecard;
 use App\Models\RegisterTrainingRecord;
 use App\Models\TrainingSession;
 use App\Models\TutorGroup;
+use App\Models\User;
+use App\Support\ApprenticeReviewData;
 use App\Support\AttendanceLedger;
 use App\Support\AttendanceMath as Math;
 use App\Support\LearningAccess as Access;
 use App\Support\MonthlyDevelopment;
+use App\Support\RegisterCreation;
 use App\Support\RegisterFollowup;
+use App\Support\RegisterPayload;
 use App\Support\RegisterTraining;
+use App\Support\Workday83;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -36,18 +44,33 @@ class AttendanceController extends Controller
 
     public function index(Request $r): View
     {
-        $visible=\App\Support\RegisterFollowup::visible($r->user(), includeInactive: true);$groups=$visible['groups'];$sessions=$visible['sessions'];
-        $input=$r->validate(['view'=>['nullable','string',Rule::in(\App\Support\RegisterFollowup::VIEWS)],'group'=>['nullable','integer','min:1'],'apprentice'=>['nullable','integer','min:1'],'search'=>['nullable','string','max:250']]);
-        if($r->filled('group')){abort_unless($groups->contains('id',(int)$input['group']),404);$sessions=$sessions->where('tutor_group_id',(int)$input['group']);}
-        if($r->filled('apprentice')){abort_unless(Apprentice::visibleTo($r->user())->whereKey((int)$input['apprentice'])->exists(),404);$sessions=$sessions->filter(fn($s)=>in_array((int)$input['apprentice'],\App\Support\RegisterFollowup::roster($s)['ids'],true));}
+        $visible = RegisterFollowup::visible($r->user(), includeInactive: true);
+        $groups = $visible['groups'];
+        $sessions = $visible['sessions'];
+        $input = $r->validate(['view' => ['nullable', 'string', Rule::in(RegisterFollowup::VIEWS)], 'group' => ['nullable', 'integer', 'min:1'], 'apprentice' => ['nullable', 'integer', 'min:1'], 'search' => ['nullable', 'string', 'max:250']]);
+        if ($r->filled('group')) {
+            abort_unless($groups->contains('id', (int) $input['group']), 404);
+            $sessions = $sessions->where('tutor_group_id', (int) $input['group']);
+        }
+        if ($r->filled('apprentice')) {
+            abort_unless(Apprentice::visibleTo($r->user())->whereKey((int) $input['apprentice'])->exists(), 404);
+            $sessions = $sessions->filter(fn ($s) => in_array((int) $input['apprentice'], RegisterFollowup::roster($s)['ids'], true));
+        }
         $monthlyOutstanding = MonthlyDevelopment::outstanding(
             $r->user(), $groups, $visible['sessions'], isset($input['group']) ? (int) $input['group'] : null,
             isset($input['apprentice']) ? (int) $input['apprentice'] : null
         );
-        $search=trim($input['search']??'');if($search!==''){$sessions=$sessions->filter(fn($s)=>mb_stripos($s->name,$search)!==false || mb_stripos($s->group->name,$search)!==false);}
-        $followup=\App\Support\RegisterFollowup::for($sessions);$view=$input['view']??'all';$filtered=($view==='all'?$followup['rows']:$followup['rows']->where('bucket',$view))->values();$page=min(\Illuminate\Pagination\Paginator::resolveCurrentPage(),max(1,(int)ceil($filtered->count()/25)));
-        $registerRows=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,25)->values(),$filtered->count(),25,$page,['path'=>$r->url(),'query'=>$r->except('page')]);
-        return view('attendance.index',['nextScope83'=>\App\Support\Workday83::registerScope($input),'nextRegister83'=>\App\Support\Workday83::nextRegister($r->user(),null,$input),'groups'=>$groups,'sessions'=>$registerRows->getCollection()->pluck('session'),'weeklyGroupSessions'=>$sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'),'monthlyOutstanding'=>$monthlyOutstanding,'todayRegisterRows'=>$followup['rows']->filter(fn($row)=>$row['session']->session_date->isToday())->values(),'registerRows'=>$registerRows,'registerCounts'=>$followup['counts'],'registerView'=>$view,'registerSearch'=>$search]);
+        $search = trim($input['search'] ?? '');
+        if ($search !== '') {
+            $sessions = $sessions->filter(fn ($s) => mb_stripos($s->name, $search) !== false || mb_stripos($s->group->name, $search) !== false);
+        }
+        $followup = RegisterFollowup::for($sessions);
+        $view = $input['view'] ?? 'all';
+        $filtered = ($view === 'all' ? $followup['rows'] : $followup['rows']->where('bucket', $view))->values();
+        $page = min(Paginator::resolveCurrentPage(), max(1, (int) ceil($filtered->count() / 25)));
+        $registerRows = new LengthAwarePaginator($filtered->forPage($page, 25)->values(), $filtered->count(), 25, $page, ['path' => $r->url(), 'query' => $r->except('page')]);
+
+        return view('attendance.index', ['nextScope83' => Workday83::registerScope($input), 'nextRegister83' => Workday83::nextRegister($r->user(), null, $input), 'groups' => $groups, 'sessions' => $registerRows->getCollection()->pluck('session'), 'weeklyGroupSessions' => $sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'), 'monthlyOutstanding' => $monthlyOutstanding, 'todayRegisterRows' => $followup['rows']->filter(fn ($row) => $row['session']->session_date->isToday())->values(), 'registerRows' => $registerRows, 'registerCounts' => $followup['counts'], 'registerView' => $view, 'registerSearch' => $search]);
     }
 
     public function create(Request $r): RedirectResponse
@@ -70,8 +93,8 @@ class AttendanceController extends Controller
             }
         }
         $s = DB::transaction(function () use ($r, $data, $breaks, $group) {
-            $currentActor = \App\Models\User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();
-            abort_unless($currentActor->active && $currentActor->auth_version === (int)$r->session()->get('auth_version'), 403);
+            $currentActor = User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();
+            abort_unless($currentActor->active && $currentActor->auth_version === (int) $r->session()->get('auth_version'), 403);
             $locked = TutorGroup::whereKey($group->id)->lockForUpdate()->firstOrFail();
             abort_unless($locked->active && $this->groupAllowed($r, $locked), 403);
             $current = Apprentice::where('tutor_group_id', $group->id)->orderBy('id')->lockForUpdate()->get();
@@ -84,7 +107,7 @@ class AttendanceController extends Controller
                 if (TrainingSession::where('tutor_group_id', $group->id)->whereDate('session_date', $date)->where('state', '!=', 'Cancelled')->where('start_time', '<', $data['end_time'])->where('end_time', '>', $data['start_time'])->exists()) {
                     throw ValidationException::withMessages(['session_date' => 'A planned session already overlaps this group on '.$date.'. No sessions in this request were saved.']);
                 }
-                $s = \App\Support\RegisterCreation::store($r->user(), (int)$r->session()->get('auth_version'), $locked, array_merge($data, ['session_date'=>$date]), $breaks);
+                $s = RegisterCreation::store($r->user(), (int) $r->session()->get('auth_version'), $locked, array_merge($data, ['session_date' => $date]), $breaks);
                 $first ??= $s;
             }
 
@@ -96,48 +119,54 @@ class AttendanceController extends Controller
 
     public function show(Request $r, TrainingSession $session): View
     {
-        if(!\App\Support\RegisterFollowup::roster($session)['shape']){abort_unless(Access::manager($r->user()),403);abort(422,'The saved roster needs an administrator source check before this register can open.');}
+        if (! RegisterFollowup::roster($session)['shape']) {
+            abort_unless(Access::manager($r->user()), 403);
+            abort(422, 'The saved roster needs an administrator source check before this register can open.');
+        }
         abort_unless($this->sessionAllowed($r, $session), 403);
 
-        $session->load('marks');$readiness=\App\Support\RegisterFollowup::readiness($session);
-        abort_unless($readiness['can_open'],422,'The saved session timing needs an administrator source check before this register can open.');
-        $members = Apprentice::whereIn('id',$session->members)->orderBy('last_name')->get();
+        $session->load('marks');
+        $readiness = RegisterFollowup::readiness($session);
+        abort_unless($readiness['can_open'], 422, 'The saved session timing needs an administrator source check before this register can open.');
+        $members = Apprentice::whereIn('id', $session->members)->orderBy('last_name')->get();
         $month = $session->session_date->format('Y-m');
-        $monthlyCards = \App\Models\MonthlyScorecard::whereIn('apprentice_id', $members->pluck('id'))->where('month', $month)->get()->keyBy('apprentice_id');
+        $monthlyCards = MonthlyScorecard::whereIn('apprentice_id', $members->pluck('id'))->where('month', $month)->get()->keyBy('apprentice_id');
         $training = RegisterTrainingRecord::find($session->id)?->details ?? [];
+
         return view('attendance.session', [
-            'session'=>$session,
-            'nextScope83'=>\App\Support\Workday83::registerScope($r->query()),
-            'nextRegister83'=>\App\Support\Workday83::nextRegister($r->user(),$session->id,\App\Support\Workday83::registerScope($r->query())),
-            'structuredTraining'=>$training,
-            'trainingOptions'=>RegisterTraining::options($members, $training),
-            'members'=>$members,
-            'registerReadiness'=>$readiness,
-            'monthlyCards'=>$monthlyCards,
-            'monthlyDevelopment'=>$monthlyCards,
-            'sessionMonth'=>$month,
+            'session' => $session,
+            'nextScope83' => Workday83::registerScope($r->query()),
+            'nextRegister83' => Workday83::nextRegister($r->user(), $session->id, Workday83::registerScope($r->query())),
+            'structuredTraining' => $training,
+            'trainingOptions' => RegisterTraining::options($members, $training),
+            'members' => $members,
+            'registerReadiness' => $readiness,
+            'monthlyCards' => $monthlyCards,
+            'monthlyDevelopment' => $monthlyCards,
+            'sessionMonth' => $month,
         ]);
     }
 
     public function save(Request $r, TrainingSession $session): RedirectResponse
     {
         abort_unless($this->sessionAllowed($r, $session), 403);
-        $nextScope83=\App\Support\Workday83::registerScope($r->input('next_scope',[]));
+        $nextScope83 = Workday83::registerScope($r->input('next_scope', []));
         $data = $r->validate(['version' => ['required', 'integer'], 'correction_reason' => ['nullable', 'string', 'max:2000'], 'delivered_learning' => ['nullable', 'string', 'max:10000'], 'marks' => ['required', 'array'], 'marks.*.code' => ['nullable', Rule::in(array_keys(Math::CODES))], 'marks.*.arrival' => ['nullable', 'date_format:H:i'], 'marks.*.departure' => ['nullable', 'date_format:H:i'], 'marks.*.otj_confirmed' => ['nullable', 'boolean'], 'marks.*.minutes' => ['nullable', 'integer', 'min:0'], 'marks.*.comment' => ['nullable', 'string', 'max:2000'], 'marks.*.adjustment' => ['nullable', 'string', 'max:2000'], 'monthly_dev' => ['nullable', 'array']]);
+        $r->validate(array_fill_keys(['training_subjects', 'training_coverage', 'training_confirmed', 'training_custom', 'training_custom_coverage', 'training_note', 'training_exceptions'], ['prohibited']));
         $training = $r->validate([
-            'training'=>['sometimes','array:vocational,functional_skills,themes,exceptions,subjects,topic_exceptions,topic_exceptions_present'],
-            'training.subjects'=>['nullable','array','list','max:300'],
-            'training.subjects.*'=>['required','string','max:120'],
-            'training.topic_exceptions_present'=>['nullable','boolean'],
-            'training.topic_exceptions'=>['nullable','array'],
-            'training.topic_exceptions.*'=>['array','max:300'],
-            'training.topic_exceptions.*.*'=>['nullable','in:missed,partial'],
-            'training.vocational'=>['nullable','string','max:3000'],
-            'training.functional_skills'=>['nullable','string','max:3000'],
-            'training.themes'=>['nullable','string','max:3000'],
-            'training.exceptions'=>['nullable','array'],
-            'training.exceptions.*'=>['array:vocational,functional_skills,themes'],
-            'training.exceptions.*.*'=>['nullable','in:missed,partial'],
+            'training' => ['sometimes', 'array:vocational,functional_skills,themes,exceptions,subjects,topic_exceptions,topic_exceptions_present'],
+            'training.subjects' => ['nullable', 'array', 'list', 'max:300'],
+            'training.subjects.*' => ['required', 'string', 'max:120'],
+            'training.topic_exceptions_present' => ['nullable', 'boolean'],
+            'training.topic_exceptions' => ['nullable', 'array'],
+            'training.topic_exceptions.*' => ['array', 'max:300'],
+            'training.topic_exceptions.*.*' => ['nullable', 'in:missed,partial'],
+            'training.vocational' => ['nullable', 'string', 'max:3000'],
+            'training.functional_skills' => ['nullable', 'string', 'max:3000'],
+            'training.themes' => ['nullable', 'string', 'max:3000'],
+            'training.exceptions' => ['nullable', 'array'],
+            'training.exceptions.*' => ['array:vocational,functional_skills,themes'],
+            'training.exceptions.*.*' => ['nullable', 'in:missed,partial'],
         ])['training'] ?? null;
         $selection = $r->validate([
             'development' => ['nullable', 'array'],
@@ -150,14 +179,14 @@ class AttendanceController extends Controller
                 throw ValidationException::withMessages(['development' => 'A snapshot was supplied for someone outside this roster.']);
             }
             $prefix = 'development.'.$id.'.';
-            $areas = array_keys(\App\Support\ApprenticeReviewData::DEVELOPMENT_AREAS);
+            $areas = array_keys(ApprenticeReviewData::DEVELOPMENT_AREAS);
             $rules = [
                 $prefix.'version' => ['required', 'integer', 'min:0'],
                 $prefix.'ratings' => ['required', 'array:'.implode(',', $areas)],
                 $prefix.'comment' => ['nullable', 'string', 'max:1000'],
             ];
             foreach ($areas as $area) {
-                $rules[$prefix.'ratings.'.$area] = ['required', Rule::in(\App\Support\ApprenticeReviewData::RATINGS)];
+                $rules[$prefix.'ratings.'.$area] = ['required', Rule::in(ApprenticeReviewData::RATINGS)];
             }
             $monthly[$id] = $r->validate($rules)['development'][$id];
         }
@@ -178,7 +207,7 @@ class AttendanceController extends Controller
             }
             abort_unless($this->sessionAllowed($r, $s), 403);
             $trainingRecord = RegisterTrainingRecord::whereKey($s->id)->lockForUpdate()->first();
-            if ($training !== null && empty($training['topic_exceptions_present']) && !isset($training['topic_exceptions'])) {
+            if ($training !== null && empty($training['topic_exceptions_present']) && ! isset($training['topic_exceptions'])) {
                 $prior = $trainingRecord?->details['topicExceptions'] ?? [];
                 $selections = array_flip($training['subjects'] ?? []);
                 $training['topic_exceptions'] = array_map(fn ($topics) => array_intersect_key($topics, $selections), $prior);
@@ -188,19 +217,19 @@ class AttendanceController extends Controller
             $trainingChanged = $details !== null && ($trainingRecord
                 ? $trainingRecord->details !== $details : (bool) $details['items']);
             if ($trainingChanged && $s->regular_week === null) {
-                $r->validate(['weekly_confirmed'=>['accepted']]);
+                $r->validate(['weekly_confirmed' => ['accepted']]);
             }
             $before = $s->marks()->get()->toArray();
-            $writes=[];
+            $writes = [];
             foreach ($ids as $id) {
                 $v = $data['marks'][$id] ?? [];
                 $code = $v['code'] ?? null;
                 $confirmed = (bool) ($v['otj_confirmed'] ?? false);
                 $parts = [];
                 $minutes = null;
-                if ($confirmed && $details && array_diff(array_column($details['items'],'area'), ['vocational'])
-                    && !isset($v['minutes'])) {
-                    throw ValidationException::withMessages(['marks.'.$id.'.minutes'=>'Enter eligible OTJ minutes separately for mixed training.']);
+                if ($confirmed && $details && array_diff(array_column($details['items'], 'area'), ['vocational'])
+                    && ! isset($v['minutes'])) {
+                    throw ValidationException::withMessages(['marks.'.$id.'.minutes' => 'Enter eligible OTJ minutes separately for mixed training.']);
                 }
                 if (in_array($code, ['O', 'T'], true)) {
                     if (! filled($v['arrival'] ?? null) || ! filled($v['departure'] ?? null) || $v['departure'] <= $v['arrival']) {
@@ -239,17 +268,17 @@ class AttendanceController extends Controller
                         throw ValidationException::withMessages(['marks' => 'This attendance code cannot generate OTJ hours.']);
                     }$minutes = $code ? 0 : null;
                 }
-                $writes[$id]=['code' => $code, 'arrival' => in_array($code, ['O', 'T'], true) ? $v['arrival'] : null, 'departure' => in_array($code, ['O', 'T'], true) ? $v['departure'] : null, 'parts' => $parts, 'otj_minutes' => $minutes, 'otj_confirmed' => $confirmed, 'recorded_by' => $r->user()->id, 'comment' => $v['comment'] ?? null, 'adjustment' => $v['adjustment'] ?? null];
+                $writes[$id] = ['code' => $code, 'arrival' => in_array($code, ['O', 'T'], true) ? $v['arrival'] : null, 'departure' => in_array($code, ['O', 'T'], true) ? $v['departure'] : null, 'parts' => $parts, 'otj_minutes' => $minutes, 'otj_confirmed' => $confirmed, 'recorded_by' => $r->user()->id, 'comment' => $v['comment'] ?? null, 'adjustment' => $v['adjustment'] ?? null];
             }
             if ($s->regular_week !== null) {
                 foreach ($writes as $id => $mark) {
-                    if (!$mark['code']) {
+                    if (! $mark['code']) {
                         throw ValidationException::withMessages(['marks.'.$id.'.code' => 'Mark every apprentice before submitting the weekly register.']);
                     }
                 }
                 $r->validate(['weekly_confirmed' => ['accepted']]);
             }
-            $unchanged = !$trainingChanged && $before && \App\Support\RegisterPayload::same($before, $writes, $s->delivered_learning, $data['delivered_learning'] ?? null);
+            $unchanged = ! $trainingChanged && $before && RegisterPayload::same($before, $writes, $s->delivered_learning, $data['delivered_learning'] ?? null);
             if (! $unchanged) {
                 if ($before && ! filled($data['correction_reason'] ?? null)) {
                     throw ValidationException::withMessages(['correction_reason' => 'Explain the correction to this saved register.']);
@@ -271,7 +300,7 @@ class AttendanceController extends Controller
             foreach ($ids as $id) {
                 if (isset($monthly[$id])) {
                     $entry = $monthly[$id];
-                    \App\Support\MonthlyDevelopment::save($r->user(), $apprentices[$id], $s, (int) $entry['version'], $entry['ratings'], $entry['comment'] ?? '');
+                    MonthlyDevelopment::save($r->user(), $apprentices[$id], $s, (int) $entry['version'], $entry['ratings'], $entry['comment'] ?? '');
                 }
             }
             foreach ((array) ($data['monthly_dev'] ?? []) as $aid => $payload) {
@@ -280,7 +309,7 @@ class AttendanceController extends Controller
                 }
                 $target = Apprentice::findOrFail((int) $aid);
                 try {
-                    \App\Support\MonthlyDevelopment::save(
+                    MonthlyDevelopment::save(
                         $r->user(),
                         $target,
                         $s,
@@ -295,9 +324,11 @@ class AttendanceController extends Controller
         });
 
         if ($r->input('after_save') === 'next') {
-            $next=\App\Support\Workday83::nextRegister($r->user(),$session->id,$nextScope83);
-            return $next ? to_route('attendance.show',['session'=>$next['session'],...$nextScope83])->with('status','Register saved.') : to_route('attendance.index',$nextScope83)->with('status','Register saved. No further due registers.');
+            $next = Workday83::nextRegister($r->user(), $session->id, $nextScope83);
+
+            return $next ? to_route('attendance.show', ['session' => $next['session'], ...$nextScope83])->with('status', 'Register saved.') : to_route('attendance.index', $nextScope83)->with('status', 'Register saved. No further due registers.');
         }
+
         return back()->with('status', 'Register saved. Only explicitly confirmed eligible minutes enter the session OTJ subtotal.');
     }
 

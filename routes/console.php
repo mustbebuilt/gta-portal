@@ -2,12 +2,58 @@
 
 use App\Models\Apprentice;
 use App\Models\Employer;
+use App\Models\EvidenceCopyPlan;
+use App\Models\EvidenceRestoreRun;
 use App\Models\Programme;
 use App\Models\TutorGroup;
 use App\Models\User;
+use App\Models\WeeklyRetentionReminder;
+use App\Support\AcceptanceSource;
+use App\Support\AccountAccess;
+use App\Support\AccountOnboarding;
+use App\Support\ApprenticeNotificationDelivery;
+use App\Support\CareersPrompts;
+use App\Support\CloudReadiness;
+use App\Support\CurriculumSources;
+use App\Support\DestinationMilestones;
+use App\Support\EvidenceCopies;
+use App\Support\EvidenceInventory;
+use App\Support\EvidenceRestore;
+use App\Support\EvidenceStorage;
+use App\Support\HelpNarration;
+use App\Support\InitialAdmin;
+use App\Support\MarkingReminders;
+use App\Support\MobileVerification;
+use App\Support\PrivateEvidence;
+use App\Support\QuestionnaireLinks;
+use App\Support\RecoveryDelivery;
+use App\Support\Release46Check;
+use App\Support\Release47Check;
+use App\Support\Release48Check;
+use App\Support\Release49Check;
+use App\Support\Release50Check;
+use App\Support\Release51Check;
+use App\Support\Release52Check;
+use App\Support\Release53Check;
+use App\Support\Release54Check;
+use App\Support\Release55Check;
+use App\Support\Release56Check;
+use App\Support\Release57Check;
+use App\Support\Release58Check;
+use App\Support\Release59Check;
+use App\Support\ReleaseSourceCheck;
+use App\Support\ReminderDelivery;
+use App\Support\ReviewReminders;
+use App\Support\SupportPlanReminders;
+use App\Support\TaskCatalogue;
+use App\Support\WeeklyRegisters;
+use App\Support\WeeklyRetention;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 
 Artisan::command('gta:demo', function () {
     if (! app()->environment('local')) {
@@ -20,12 +66,17 @@ Artisan::command('gta:demo', function () {
 
         return 1;
     }
-    $password = Str::password(24);
-    DB::transaction(function () use ($password) {
-        $make = fn ($name, $email, $role) => tap(new User(['name' => $name, 'email' => $email, 'password' => $password]), function ($user) use ($role) {
-            $user->role = $role;
-            $user->save();
-        });
+    $credentials85 = [];
+    DB::transaction(function () use (&$credentials85) {
+        $make = function ($name, $email, $role) use (&$credentials85) {
+            $password = Str::password(24);
+            $credentials85[$email] = $password;
+
+            return tap(new User(['name' => $name, 'email' => $email, 'password' => $password]), function ($user) use ($role) {
+                $user->role = $role;
+                $user->save();
+            });
+        };
         $make('Demo Administrator', 'admin@example.test', 'admin');
         $make('Demo CEO', 'ceo@example.test', 'ceo');
         $make('Demo Inclusion Lead', 'inclusion-lead@example.test', 'inclusion_lead');
@@ -55,8 +106,10 @@ Artisan::command('gta:demo', function () {
     $this->line('Maths and English: maths@example.test, english@example.test');
     $this->line('Careers: careers@example.test; Inclusion: inclusion-lead@example.test, inclusion@example.test; CEO: ceo@example.test');
     $this->line('Mentor record (review module pending): mentor@example.test');
-    $this->line('Local test password for these accounts: '.$password);
-    $this->warn('Keep this password locally. Never use this database for real apprentice information.');
+    foreach ($credentials85 as $email => $password) {
+        $this->line('Local credential '.$email.': '.$password);
+    }
+    $this->warn('Keep these separate passwords locally. Never use this database for real apprentice information.');
 
     return 0;
 })->purpose('Create fictional records in an empty local database');
@@ -76,7 +129,7 @@ Artisan::command('gta:local-password {email}', function () {
     $password = Str::password(24);
     DB::transaction(function () use ($user, $password): void {
         $fresh = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
-        \App\Support\AccountAccess::setPassword($fresh, $password, null, 'local_command');
+        AccountAccess::setPassword($fresh, $password, null, 'local_command');
     });
     $this->line('New local test password: '.$password);
     $this->warn('Keep it locally. No message was sent; role and active status are unchanged.');
@@ -86,305 +139,565 @@ Artisan::command('gta:local-password {email}', function () {
 
 Artisan::command('gta:evidence-check', function () {
     try {
-        $current = \App\Support\PrivateEvidence::diskName();
-        $legacy = \App\Support\PrivateEvidence::diskName([]);
+        $current = PrivateEvidence::diskName();
+        $legacy = PrivateEvidence::diskName([]);
         foreach (array_unique([$current, $legacy, ...config('evidence.private_disks', [])]) as $disk) {
-            \App\Support\PrivateEvidence::diskName(['disk' => $disk]);
+            PrivateEvidence::diskName(['disk' => $disk]);
             $driver = config('filesystems.disks.'.$disk.'.driver');
-            if ($driver === 's3' && ! class_exists(\League\Flysystem\AwsS3V3\AwsS3V3Adapter::class)) {
-                throw new \RuntimeException('The configured S3 evidence disk requires the Flysystem AWS S3 adapter in this application.');
+            if ($driver === 's3' && ! class_exists(AwsS3V3Adapter::class)) {
+                throw new RuntimeException('The configured S3 evidence disk requires the Flysystem AWS S3 adapter in this application.');
             }
         }
         $this->info('Private evidence configuration passed.');
         $this->line('New uploads: '.$current.'; legacy files without disk metadata: '.$legacy.'.');
         $this->line('No network or bucket-visibility check was performed. Test actual storage and authorised downloads in staging.');
+
         return 0;
-    } catch (\Throwable $error) {
+    } catch (Throwable $error) {
         $this->error($error->getMessage());
+
         return 1;
     }
 })->purpose('Check evidence disk configuration without accessing private files or credentials');
 
 Artisan::command('gta:marking-reminders {--record : Record deduplicated in-portal reminders}', function () {
-    $result = \App\Support\MarkingReminders::generate((bool) $this->option('record'));
+    $result = MarkingReminders::generate((bool) $this->option('record'));
     $this->line(json_encode(['mode' => $this->option('record') ? 'record' : 'preview', ...$result, 'email_sent' => false], JSON_THROW_ON_ERROR));
+
     return 0;
 })->purpose('Preview or record current overdue marking reminders; never sends email');
 
 Artisan::command('gta:portal-reminders {--record : Persist deduplicated in-portal marking, careers and review prompts}', function () {
-    $record=(bool)$this->option('record');
-    $run=function() use($record): array {
-        $counts=['marking'=>\App\Support\MarkingReminders::generate($record),'careers'=>\App\Support\CareersPrompts::generate($record),'reviews'=>\App\Support\ReviewReminders::generate($record)];
-        if($record){DB::table('portal_reminder_runs')->insert(['counts'=>json_encode($counts,JSON_THROW_ON_ERROR),'created_at'=>now()]);}
+    $record = (bool) $this->option('record');
+    $run = function () use ($record): array {
+        $counts = ['marking' => MarkingReminders::generate($record), 'careers' => CareersPrompts::generate($record), 'reviews' => ReviewReminders::generate($record)];
+        if ($record) {
+            DB::table('portal_reminder_runs')->insert(['counts' => json_encode($counts, JSON_THROW_ON_ERROR), 'created_at' => now()]);
+        }
+
         return $counts;
     };
-    $counts=$record ? DB::transaction($run) : $run();
-    $this->line(json_encode(['mode'=>$record?'record':'preview','counts'=>$counts,'external_messages_sent'=>false],JSON_THROW_ON_ERROR));
+    $counts = $record ? DB::transaction($run) : $run();
+    $this->line(json_encode(['mode' => $record ? 'record' : 'preview', 'counts' => $counts, 'external_messages_sent' => false], JSON_THROW_ON_ERROR));
+
     return 0;
 })->purpose('Preview or record source-bound marking/careers/review prompts without external messages');
 
-\Illuminate\Support\Facades\Schedule::command('gta:portal-reminders --record')
+Schedule::command('gta:portal-reminders --record')
     ->dailyAt('09:00')->timezone(config('app.timezone'))->withoutOverlapping(30)
-    ->when(fn()=>config('portal_reminders.scheduled',false));
+    ->when(fn () => config('portal_reminders.scheduled', false));
 
 Artisan::command('gta:cloud-check {--database : Check the actual staging MySQL/MariaDB connection, migrations and required schema names read-only}', function () {
-    $result=\App\Support\CloudReadiness::inspect((bool)$this->option('database'));
-    $this->line(json_encode($result,JSON_THROW_ON_ERROR));
+    $result = CloudReadiness::inspect((bool) $this->option('database'));
+    $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
     return $result['blocking_checks'] ? 1 : 0;
 })->purpose('Report Cloud configuration blockers without changing records, files or environment values');
 
 Artisan::command('gta:initial-admin {--create : Create once on an empty staging application} {--name= : Administrator display name} {--email= : Administrator email} {--password-stdin : Read bounded JSON credentials from private standard input}', function () {
     try {
-        if(!app()->environment('staging')){$this->error('Initial administrator setup is restricted to staging.');return 1;}
-        $preview=\App\Support\InitialAdmin::preview();
-        if(!$this->option('create')){$this->line(json_encode(['mode'=>'preview',...$preview],JSON_THROW_ON_ERROR));return $preview['available']?0:1;}
-        if(!$preview['available']){$this->error('Initial setup is disabled, already used or the application is not empty. No account created.');return 1;}
-        $name=$this->option('name');$email=$this->option('email');
-        if(!$name || !$email){$this->error('Supply --name and --email. No account created.');return 1;}
-        if($this->option('password-stdin')){
-            $stream=fopen('php://stdin','rb');try{$input=stream_get_contents($stream,2049);}finally{fclose($stream);}
-            $credentials=\App\Support\InitialAdmin::credentialsFromJson($input);
-            $password=$credentials['password'];$confirmation=$credentials['password_confirmation'];
-        }else{
-            if(!$this->input->isInteractive()){$this->error('Use a private interactive terminal or private JSON standard input. Password arguments are not accepted.');return 1;}
-            $password=$this->secret('Administrator password',false);$confirmation=$this->secret('Confirm administrator password',false);
+        if (! app()->environment('staging')) {
+            $this->error('Initial administrator setup is restricted to staging.');
+
+            return 1;
         }
-        $user=\App\Support\InitialAdmin::create((string)$name,(string)$email,(string)$password,(string)$confirmation);
+        $preview = InitialAdmin::preview();
+        if (! $this->option('create')) {
+            $this->line(json_encode(['mode' => 'preview', ...$preview], JSON_THROW_ON_ERROR));
+
+            return $preview['available'] ? 0 : 1;
+        }
+        if (! $preview['available']) {
+            $this->error('Initial setup is disabled, already used or the application is not empty. No account created.');
+
+            return 1;
+        }
+        $name = $this->option('name');
+        $email = $this->option('email');
+        if (! $name || ! $email) {
+            $this->error('Supply --name and --email. No account created.');
+
+            return 1;
+        }
+        if ($this->option('password-stdin')) {
+            $stream = fopen('php://stdin', 'rb');
+            try {
+                $input = stream_get_contents($stream, 2049);
+            } finally {
+                fclose($stream);
+            }
+            $credentials = InitialAdmin::credentialsFromJson($input);
+            $password = $credentials['password'];
+            $confirmation = $credentials['password_confirmation'];
+        } else {
+            if (! $this->input->isInteractive()) {
+                $this->error('Use a private interactive terminal or private JSON standard input. Password arguments are not accepted.');
+
+                return 1;
+            }
+            $password = $this->secret('Administrator password', false);
+            $confirmation = $this->secret('Confirm administrator password', false);
+        }
+        $user = InitialAdmin::create((string) $name, (string) $email, (string) $password, (string) $confirmation);
         $this->info('Initial staging administrator created. Account ID '.$user->id.'. No email sent; verification status was not inferred. Disable GTA_ALLOW_INITIAL_ADMIN after setup.');
+
         return 0;
-    }catch(\Throwable){$this->error('No account created. Check the staging configuration, empty application, input and audit/migration state privately. No password is printed.');return 1;}
+    } catch (Throwable) {
+        $this->error('No account created. Check the staging configuration, empty application, input and audit/migration state privately. No password is printed.');
+
+        return 1;
+    }
 })->purpose('Preview or create the first staging administrator without exposing credentials or overwriting existing accounts');
 
 Artisan::command('gta:evidence-storage {--probe : Explicitly write, hash-read, anonymously check and delete a fictional temporary S3 object}', function () {
-    $result=$this->option('probe')?\App\Support\EvidenceStorage::probe():\App\Support\EvidenceStorage::inspect();
-    $this->line(json_encode($result,JSON_THROW_ON_ERROR));
-    return in_array($result['result'],['configuration_present','passed'],true)?0:1;
+    $result = $this->option('probe') ? EvidenceStorage::probe() : EvidenceStorage::inspect();
+    $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
+    return in_array($result['result'], ['configuration_present', 'passed'], true) ? 0 : 1;
 })->purpose('Inspect evidence configuration by default; explicit nonproduction probe uses synthetic bytes and creates no learner records');
 
 Artisan::command('gta:evidence-inventory {--verify-files : Explicitly read and SHA-256/size-check registered private files} {--details : Include internal record locators and issue codes, excluding paths, filenames and notes}', function () {
-    try{$result=\App\Support\EvidenceInventory::run((bool)$this->option('verify-files'),(bool)$this->option('details'));}
-    catch(\Throwable){$result=['result'=>'inventory_failed','writes_performed'=>false,'migration_authorised'=>false,'action'=>'Check the database/schema and private server configuration; no credential or source-document details are printed.'];}
-    $this->line(json_encode($result,JSON_THROW_ON_ERROR));
-    return in_array($result['result'],['references_scanned','verified_referenced_objects'],true)?0:1;
+    try {
+        $result = EvidenceInventory::run((bool) $this->option('verify-files'), (bool) $this->option('details'));
+    } catch (Throwable) {
+        $result = ['result' => 'inventory_failed', 'writes_performed' => false, 'migration_authorised' => false, 'action' => 'Check the database/schema and private server configuration; no credential or source-document details are printed.'];
+    }
+    $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
+    return in_array($result['result'], ['references_scanned', 'verified_referenced_objects'], true) ? 0 : 1;
 })->purpose('Inventory known upload references without moving files or changing records; explicit verification reads private bytes');
 
 Artisan::command('gta:evidence-copy-plan {--source=} {--target=} {--record : Persist an exact preview in staging} {--expected-proposal=} {--reference=}', function () {
-    try{
-        $source=(string)$this->option('source');$target=(string)$this->option('target');
-        if($this->option('record')){$plan=\App\Support\EvidenceCopies::prepare($source,$target,(string)$this->option('expected-proposal'),(string)$this->option('reference'));$result=\App\Support\EvidenceCopies::summary($plan);}
-        else{$preview=\App\Support\EvidenceCopies::proposal($source,$target);$result=collect($preview)->except('private_manifest')->all()+['mode'=>'preview','file_reads'=>false,'writes_performed'=>false,'cutover_approved'=>false];}
-        $this->line(json_encode($result,JSON_THROW_ON_ERROR));return 0;
-    }catch(\Throwable){$this->line(json_encode(['result'=>'plan_needs_checks','action'=>'Recheck the inventory, approved distinct disks, current preview hash and staging reference. No files copied.']));return 1;}
+    try {
+        $source = (string) $this->option('source');
+        $target = (string) $this->option('target');
+        if ($this->option('record')) {
+            $plan = EvidenceCopies::prepare($source, $target, (string) $this->option('expected-proposal'), (string) $this->option('reference'));
+            $result = EvidenceCopies::summary($plan);
+        } else {
+            $preview = EvidenceCopies::proposal($source, $target);
+            $result = collect($preview)->except('private_manifest')->all() + ['mode' => 'preview', 'file_reads' => false, 'writes_performed' => false, 'cutover_approved' => false];
+        }
+        $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
+        return 0;
+    } catch (Throwable) {
+        $this->line(json_encode(['result' => 'plan_needs_checks', 'action' => 'Recheck the inventory, approved distinct disks, current preview hash and staging reference. No files copied.']));
+
+        return 1;
+    }
 })->purpose('Preview counts/hash without file I/O; explicitly record a protected staging manifest and technical audit');
 
 Artisan::command('gta:evidence-copy {plan} {--copy : Explicitly execute a once-only staging copy plan} {--expected-version=} {--expected-hash=}', function () {
-    try{
-        $plan=\App\Models\EvidenceCopyPlan::findOrFail($this->argument('plan'));
-        if($this->option('copy')){$plan=\App\Support\EvidenceCopies::execute($plan,(int)$this->option('expected-version'),(string)$this->option('expected-hash'));}
-        $result=\App\Support\EvidenceCopies::summary($plan);$this->line(json_encode($result,JSON_THROW_ON_ERROR));
-        return $result['integrity']==='intact' && (!$this->option('copy') || $plan->state==='Verified staging copies')?0:1;
-    }catch(\Throwable){$this->line(json_encode(['result'=>'copy_needs_checks','action'=>'Inspect the retained plan/state/audit privately. Staging keys may remain after a failed/interrupted copy. Originals and application links are not changed.']));return 1;}
+    try {
+        $plan = EvidenceCopyPlan::findOrFail($this->argument('plan'));
+        if ($this->option('copy')) {
+            $plan = EvidenceCopies::execute($plan, (int) $this->option('expected-version'), (string) $this->option('expected-hash'));
+        }
+        $result = EvidenceCopies::summary($plan);
+        $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
+        return $result['integrity'] === 'intact' && (! $this->option('copy') || $plan->state === 'Verified staging copies') ? 0 : 1;
+    } catch (Throwable) {
+        $this->line(json_encode(['result' => 'copy_needs_checks', 'action' => 'Inspect the retained plan/state/audit privately. Staging keys may remain after a failed/interrupted copy. Originals and application links are not changed.']));
+
+        return 1;
+    }
 })->purpose('Inspect a protected plan by default; explicit opt-in staging execution copies without overwriting or cutting over');
 
 Artisan::command('gta:recovery-check', function () {
-    $result=\App\Support\RecoveryDelivery::inspect();
-    $this->line(json_encode($result,JSON_THROW_ON_ERROR));
+    $result = RecoveryDelivery::inspect();
+    $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
     return $result['blockers'] ? 1 : 0;
 })->purpose('Check controlled staging recovery configuration without sending email or exposing recipients/secrets');
 
 Artisan::command('gta:onboarding-check', function () {
-    $result = \App\Support\AccountOnboarding::inspect();
+    $result = AccountOnboarding::inspect();
     $this->line(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
     return $result['blockers'] ? 1 : 0;
 })->purpose('Check restricted staging onboarding configuration without sending or writing');
 
 Artisan::command('gta:reminder-mail-check', function () {
-    $result=\App\Support\ReminderDelivery::inspect();$this->line(json_encode($result,JSON_THROW_ON_ERROR));return ($result['blockers']||($result['history']['result']??null)==='blocked')?1:0;
+    $result = ReminderDelivery::inspect();
+    $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
+    return ($result['blockers'] || ($result['history']['result'] ?? null) === 'blocked') ? 1 : 0;
 })->purpose('Check staging reminder-mail configuration without sending or writing');
 Artisan::command('gta:reminder-mail {--send= : Explicit reviewed delivery ID to attempt once}', function () {
-    $id=$this->option('send');
-    if($id!==null){
-        if(!is_string($id) || !preg_match('/^[1-9][0-9]{0,17}$/',$id)){$this->line('{"result":"invalid_id","mail_attempted":false}');return 1;}
-        $result=\App\Support\ReminderDelivery::dispatch((int)$id);$this->line(json_encode($result,JSON_THROW_ON_ERROR));return $result['result']==='accepted'?0:1;
+    $id = $this->option('send');
+    if ($id !== null) {
+        if (! is_string($id) || ! preg_match('/^[1-9][0-9]{0,17}$/', $id)) {
+            $this->line('{"result":"invalid_id","mail_attempted":false}');
+
+            return 1;
+        }
+        $result = ReminderDelivery::dispatch((int) $id);
+        $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
+        return $result['result'] === 'accepted' ? 0 : 1;
     }
-    $preview=\App\Support\ReminderDelivery::preview();
-    $this->line(json_encode(['mode'=>'preview','configuration'=>\App\Support\ReminderDelivery::available()?'checked':'blocked','pilot_accounts'=>count($preview),'current_candidates'=>count(array_filter($preview,fn($row)=>$row['snapshot']!==null)),'existing_delivery_records'=>count(array_filter($preview,fn($row)=>$row['existing']!==null)),'sends_performed'=>false,'writes_performed'=>false],JSON_THROW_ON_ERROR));return 0;
+    $preview = ReminderDelivery::preview();
+    $this->line(json_encode(['mode' => 'preview', 'configuration' => ReminderDelivery::available() ? 'checked' : 'blocked', 'pilot_accounts' => count($preview), 'current_candidates' => count(array_filter($preview, fn ($row) => $row['snapshot'] !== null)), 'existing_delivery_records' => count(array_filter($preview, fn ($row) => $row['existing'] !== null)), 'sends_performed' => false, 'writes_performed' => false], JSON_THROW_ON_ERROR));
+
+    return 0;
 })->purpose('Preview or explicitly attempt one reviewed staging reminder; never automatically retries');
 
 Artisan::command('gta:evidence-backup {plan} {--verify : Explicitly hash-read retained staging copies only}', function () {
-    try{
-        $plan=\App\Models\EvidenceCopyPlan::findOrFail($this->argument('plan'));
-        $result=$this->option('verify') ? \App\Support\EvidenceRestore::verifyBackup($plan) : \App\Support\EvidenceRestore::backupSummary($plan);
-        $this->line(json_encode($result,JSON_THROW_ON_ERROR));return !$this->option('verify') || ($result['result']??null)==='verified_retained_copies'?0:1;
-    }catch(\Throwable){$this->line('{"result":"backup_needs_checks","writes_performed":false,"cutover_approved":false}');return 1;}
+    try {
+        $plan = EvidenceCopyPlan::findOrFail($this->argument('plan'));
+        $result = $this->option('verify') ? EvidenceRestore::verifyBackup($plan) : EvidenceRestore::backupSummary($plan);
+        $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
+        return ! $this->option('verify') || ($result['result'] ?? null) === 'verified_retained_copies' ? 0 : 1;
+    } catch (Throwable) {
+        $this->line('{"result":"backup_needs_checks","writes_performed":false,"cutover_approved":false}');
+
+        return 1;
+    }
 })->purpose('Inspect a verified retained copy plan; explicit verification reads backup bytes without original-file access');
 Artisan::command('gta:evidence-restore-plan {plan} {--target=} {--record : Record the exact recovery rehearsal preview} {--expected-hash=} {--reference=}', function () {
-    try{
-        $plan=\App\Models\EvidenceCopyPlan::findOrFail($this->argument('plan'));$target=(string)$this->option('target');
-        if($this->option('record')){$run=\App\Support\EvidenceRestore::prepare($plan,$target,(string)$this->option('expected-hash'),(string)$this->option('reference'));$result=\App\Support\EvidenceRestore::summary($run);}
-        else{$proposal=\App\Support\EvidenceRestore::proposal($plan,$target);$result=collect($proposal)->except('private_manifest')->all()+['mode'=>'preview','file_reads'=>false,'writes_performed'=>false,'originals_read'=>false,'cutover_approved'=>false];}
-        $this->line(json_encode($result,JSON_THROW_ON_ERROR));return 0;
-    }catch(\Throwable){$this->line('{"result":"restore_plan_needs_checks","cutover_approved":false}');return 1;}
+    try {
+        $plan = EvidenceCopyPlan::findOrFail($this->argument('plan'));
+        $target = (string) $this->option('target');
+        if ($this->option('record')) {
+            $run = EvidenceRestore::prepare($plan, $target, (string) $this->option('expected-hash'), (string) $this->option('reference'));
+            $result = EvidenceRestore::summary($run);
+        } else {
+            $proposal = EvidenceRestore::proposal($plan, $target);
+            $result = collect($proposal)->except('private_manifest')->all() + ['mode' => 'preview', 'file_reads' => false, 'writes_performed' => false, 'originals_read' => false, 'cutover_approved' => false];
+        }
+        $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
+        return 0;
+    } catch (Throwable) {
+        $this->line('{"result":"restore_plan_needs_checks","cutover_approved":false}');
+
+        return 1;
+    }
 })->purpose('Preview a dedicated private restore rehearsal; explicit recording saves a protected manifest only');
 Artisan::command('gta:evidence-restore {run} {--restore : Explicitly execute one prepared recovery rehearsal} {--verify : Explicitly recheck completed rehearsal bytes without writes} {--expected-version=} {--expected-hash=}', function () {
-    try{
-        if($this->option('restore') && $this->option('verify')){throw new \RuntimeException('Choose one explicit operation.');}
-        $run=\App\Models\EvidenceRestoreRun::findOrFail($this->argument('run'));
-        if($this->option('restore')){$run=\App\Support\EvidenceRestore::execute($run,(int)$this->option('expected-version'),(string)$this->option('expected-hash'));}
-        $result=$this->option('verify') ? \App\Support\EvidenceRestore::verify($run) : \App\Support\EvidenceRestore::summary($run);
-        $this->line(json_encode($result,JSON_THROW_ON_ERROR));
-        return $this->option('verify') ? (($result['result']??null)==='verified_rehearsal_objects'?0:1) : (($result['integrity']??null)==='intact' && (!$this->option('restore') || $run->state==='Verified restore rehearsal')?0:1);
-    }catch(\Throwable){$this->line('{"result":"restore_needs_checks","action":"Retain protected manifests and any partial rehearsal files. Originals and application links are unchanged. No automatic retry or cleanup.","cutover_approved":false}');return 1;}
+    try {
+        if ($this->option('restore') && $this->option('verify')) {
+            throw new RuntimeException('Choose one explicit operation.');
+        }
+        $run = EvidenceRestoreRun::findOrFail($this->argument('run'));
+        if ($this->option('restore')) {
+            $run = EvidenceRestore::execute($run, (int) $this->option('expected-version'), (string) $this->option('expected-hash'));
+        }
+        $result = $this->option('verify') ? EvidenceRestore::verify($run) : EvidenceRestore::summary($run);
+        $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
+        return $this->option('verify') ? (($result['result'] ?? null) === 'verified_rehearsal_objects' ? 0 : 1) : (($result['integrity'] ?? null) === 'intact' && (! $this->option('restore') || $run->state === 'Verified restore rehearsal') ? 0 : 1);
+    } catch (Throwable) {
+        $this->line('{"result":"restore_needs_checks","action":"Retain protected manifests and any partial rehearsal files. Originals and application links are unchanged. No automatic retry or cleanup.","cutover_approved":false}');
+
+        return 1;
+    }
 })->purpose('Inspect by default; explicitly restore exclusively to a separate staging namespace or recheck its bytes');
 
 Artisan::command('gta:curriculum-source-check {--programme= : Limit to one loaded catalogue key}', function () {
-    try{
-        $key=$this->option('programme');$keys=$key===null?array_keys(\App\Support\TaskCatalogue::PROGRAMMES):[$key];$results=[];
-        foreach($keys as$key){$results[]=\App\Support\CurriculumSources::safeRelease(\App\Support\CurriculumSources::release($key));}
-        $ok=collect($results)->every(fn($row)=>$row['technical_ok']);$this->line(json_encode(['result'=>$ok?'technical_checks_passed':'needs_checks','releases'=>$results,'writes_performed'=>false,'curriculum_approval'=>false],JSON_THROW_ON_ERROR));return $ok?0:1;
-    }catch(\Throwable){$this->line('{"result":"source_check_failed","writes_performed":false,"curriculum_approval":false}');return 1;}
+    try {
+        $key = $this->option('programme');
+        $keys = $key === null ? array_keys(TaskCatalogue::PROGRAMMES) : [$key];
+        $results = [];
+        foreach ($keys as $key) {
+            $results[] = CurriculumSources::safeRelease(CurriculumSources::release($key));
+        }
+        $ok = collect($results)->every(fn ($row) => $row['technical_ok']);
+        $this->line(json_encode(['result' => $ok ? 'technical_checks_passed' : 'needs_checks', 'releases' => $results, 'writes_performed' => false, 'curriculum_approval' => false], JSON_THROW_ON_ERROR));
+
+        return $ok ? 0 : 1;
+    } catch (Throwable) {
+        $this->line('{"result":"source_check_failed","writes_performed":false,"curriculum_approval":false}');
+
+        return 1;
+    }
 })->purpose('Read bundled blank-task catalogues, source receipts and PDF hashes without changing apprentice records');
 
 Artisan::command('gta:questionnaire-check', function () {
-    $result = \App\Support\QuestionnaireLinks::inspect();
+    $result = QuestionnaireLinks::inspect();
     $this->line(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
     return $result['all_ready'] ? 0 : 1;
 })->purpose('Read questionnaire link configuration and candidate hashes without fetching forms, sending messages or recording completion');
 
 Artisan::command('gta:support-plan-reminders {--record : Persist deduplicated private in-portal support-plan prompts}', function () {
     $record = (bool) $this->option('record');
-    $counts = \App\Support\SupportPlanReminders::generate($record);
-    $this->line(json_encode(['mode'=>$record?'record':'preview','counts'=>$counts,'external_messages_sent'=>false], JSON_THROW_ON_ERROR));
+    $counts = SupportPlanReminders::generate($record);
+    $this->line(json_encode(['mode' => $record ? 'record' : 'preview', 'counts' => $counts, 'external_messages_sent' => false], JSON_THROW_ON_ERROR));
+
     return 0;
 })->purpose('Preview or record due approved-plan coordinator prompts; no email or plan review is performed');
-\Illuminate\Support\Facades\Schedule::command('gta:support-plan-reminders --record')
+Schedule::command('gta:support-plan-reminders --record')
     ->dailyAt('09:05')->timezone(config('app.timezone'))->withoutOverlapping(30)
-    ->when(fn()=>config('portal_reminders.support_plan_scheduled')===true);
+    ->when(fn () => config('portal_reminders.support_plan_scheduled') === true);
 
-Artisan::command('gta:mobile-verification-check {--history : Read aggregate stored states without contacts or codes}', function () { $result=\App\Support\MobileVerification::inspect();if($this->option('history')){$result['history']=\App\Support\MobileVerification::history();}$this->line(json_encode($result,JSON_THROW_ON_ERROR));return ($result['blockers']||($result['history']['result']??null)==='blocked')?1:0; })->purpose('Inspect apprentice mobile-verification pilot configuration without sending or connecting');
+Artisan::command('gta:mobile-verification-check {--history : Read aggregate stored states without contacts or codes}', function () {
+    $result = MobileVerification::inspect();
+    if ($this->option('history')) {
+        $result['history'] = MobileVerification::history();
+    }$this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
+    return ($result['blockers'] || ($result['history']['result'] ?? null) === 'blocked') ? 1 : 0;
+})->purpose('Inspect apprentice mobile-verification pilot configuration without sending or connecting');
 
 Artisan::command('gta:apprentice-alerts {--preview : Read source counts only} {--prepare : Store current eligible digests without sending} {--send : Attempt prepared current-cycle reminders} {--run : Prepare then attempt current reminders} {--limit=20 : Up to250 profiles prepared or50 messages attempted}', function () {
- $mode=array_filter(['preview'=>$this->option('preview'),'prepare'=>$this->option('prepare'),'send'=>$this->option('send'),'run'=>$this->option('run')]);
- if(count($mode)>1||!ctype_digit((string)$this->option('limit'))||(int)$this->option('limit')<1||(int)$this->option('limit')>250){$this->line('{"result":"invalid_mode_or_limit","sends_performed":false}');return 1;}
- try {
-  $service=\App\Support\ApprenticeNotificationDelivery::class;$limit=(int)$this->option('limit');$result=['configuration'=>$service::inspect(),'sends_performed'=>false,'writes_performed'=>false];
-  if($this->option('preview')){$p=$service::preview();$result['counts']=$p['counts'];$result['operations']=$service::control();unset($result['operations']['history']);}
-  elseif($this->option('prepare')){$result['prepared']=$service::prepare($limit);$result['writes_performed']=true;}
-  elseif($this->option('send')){$result['attempt_outcomes']=$service::sendPrepared($limit);$result['sends_performed']='see_attempt_outcomes';$result['writes_performed']=true;}
-  elseif($this->option('run')){$result['prepared']=$service::prepare($limit);$result['attempt_outcomes']=$service::sendPrepared($limit);$result['sends_performed']='see_attempt_outcomes';$result['writes_performed']=true;}
-  $this->line(json_encode($result,JSON_THROW_ON_ERROR));return ($service::errors('email')&&$service::errors('sms'))?1:0;
- }catch(\Throwable){$this->line('{"result":"needs_reconciliation","action":"Inspect saved attempt states. No automatic retry. No contact or provider error is printed."}');return 1;}
-})->purpose('Configuration-only by default; explicitly preview, prepare or dispatch bounded apprentice reminders');
-\Illuminate\Support\Facades\Schedule::command('gta:apprentice-alerts --prepare --limit=250')->dailyAt('09:10')->timezone(config('app.timezone'))->withoutOverlapping(30)->when(fn()=>config('apprentice_notifications.enabled')===true&&config('apprentice_notifications.scheduled')===true);
-\Illuminate\Support\Facades\Schedule::command('gta:apprentice-alerts --send --limit=20')->everyMinute()->between('09:15','10:00')->timezone(config('app.timezone'))->withoutOverlapping(30)->when(fn()=>config('apprentice_notifications.enabled')===true&&config('apprentice_notifications.scheduled')===true);
+    $mode = array_filter(['preview' => $this->option('preview'), 'prepare' => $this->option('prepare'), 'send' => $this->option('send'), 'run' => $this->option('run')]);
+    if (count($mode) > 1 || ! ctype_digit((string) $this->option('limit')) || (int) $this->option('limit') < 1 || (int) $this->option('limit') > 250) {
+        $this->line('{"result":"invalid_mode_or_limit","sends_performed":false}');
 
-Artisan::command('gta:help-check {--records : Read narration readiness in staging} {--verify-files : Verify bounded stored recording bytes, also requiring records} {--limit=50 : Up to250 stored files verified}',function(){
- if($this->option('verify-files')&&!$this->option('records')){$this->line('{"result":"records_option_required","writes_performed":false}');return 1;}
- if($this->option('records')&&!app()->environment('staging')){$this->line('{"result":"staging_required","writes_performed":false}');return 1;}
- if(!ctype_digit((string)$this->option('limit'))||(int)$this->option('limit')<1||(int)$this->option('limit')>250){$this->line('{"result":"invalid_verification_limit","writes_performed":false}');return 1;}
- try{$r=\App\Support\HelpNarration::inspect((bool)$this->option('records'),(bool)$this->option('verify-files'),(int)$this->option('limit'));$r['result']='report';$this->line(json_encode($r,JSON_THROW_ON_ERROR));return isset($r['counts'])&&($r['counts']['integrity_checks']||$r['counts']['file_checks'])?1:0;}
- catch(\Throwable){$this->line('{"result":"help_source_needs_checking","writes_performed":false,"private_error_printed":false}');return 1;}
+        return 1;
+    }
+    try {
+        $service = ApprenticeNotificationDelivery::class;
+        $limit = (int) $this->option('limit');
+        $result = ['configuration' => $service::inspect(), 'sends_performed' => false, 'writes_performed' => false];
+        if ($this->option('preview')) {
+            $p = $service::preview();
+            $result['counts'] = $p['counts'];
+            $result['operations'] = $service::control();
+            unset($result['operations']['history']);
+        } elseif ($this->option('prepare')) {
+            $result['prepared'] = $service::prepare($limit);
+            $result['writes_performed'] = true;
+        } elseif ($this->option('send')) {
+            $result['attempt_outcomes'] = $service::sendPrepared($limit);
+            $result['sends_performed'] = 'see_attempt_outcomes';
+            $result['writes_performed'] = true;
+        } elseif ($this->option('run')) {
+            $result['prepared'] = $service::prepare($limit);
+            $result['attempt_outcomes'] = $service::sendPrepared($limit);
+            $result['sends_performed'] = 'see_attempt_outcomes';
+            $result['writes_performed'] = true;
+        }
+        $this->line(json_encode($result, JSON_THROW_ON_ERROR));
+
+        return ($service::errors('email') && $service::errors('sms')) ? 1 : 0;
+    } catch (Throwable) {
+        $this->line('{"result":"needs_reconciliation","action":"Inspect saved attempt states. No automatic retry. No contact or provider error is printed."}');
+
+        return 1;
+    }
+})->purpose('Configuration-only by default; explicitly preview, prepare or dispatch bounded apprentice reminders');
+Schedule::command('gta:apprentice-alerts --prepare --limit=250')->dailyAt('09:10')->timezone(config('app.timezone'))->withoutOverlapping(30)->when(fn () => config('apprentice_notifications.enabled') === true && config('apprentice_notifications.scheduled') === true);
+Schedule::command('gta:apprentice-alerts --send --limit=20')->everyMinute()->between('09:15', '10:00')->timezone(config('app.timezone'))->withoutOverlapping(30)->when(fn () => config('apprentice_notifications.enabled') === true && config('apprentice_notifications.scheduled') === true);
+
+Artisan::command('gta:help-check {--records : Read narration readiness in staging} {--verify-files : Verify bounded stored recording bytes, also requiring records} {--limit=50 : Up to250 stored files verified}', function () {
+    if ($this->option('verify-files') && ! $this->option('records')) {
+        $this->line('{"result":"records_option_required","writes_performed":false}');
+
+        return 1;
+    }
+    if ($this->option('records') && ! app()->environment('staging')) {
+        $this->line('{"result":"staging_required","writes_performed":false}');
+
+        return 1;
+    }
+    if (! ctype_digit((string) $this->option('limit')) || (int) $this->option('limit') < 1 || (int) $this->option('limit') > 250) {
+        $this->line('{"result":"invalid_verification_limit","writes_performed":false}');
+
+        return 1;
+    }
+    try {
+        $r = HelpNarration::inspect((bool) $this->option('records'), (bool) $this->option('verify-files'), (int) $this->option('limit'));
+        $r['result'] = 'report';
+        $this->line(json_encode($r, JSON_THROW_ON_ERROR));
+
+        return isset($r['counts']) && ($r['counts']['integrity_checks'] || $r['counts']['file_checks']) ? 1 : 0;
+    } catch (Throwable) {
+        $this->line('{"result":"help_source_needs_checking","writes_performed":false,"private_error_printed":false}');
+
+        return 1;
+    }
 })->purpose('Read-only help catalogue and optional staging narration readiness; no speech provider request');
 
 Artisan::command('gta:acceptance-source-check', function () {
-    $source=app(\App\Support\AcceptanceSource::class)->capture();
-    $this->line(json_encode(\App\Support\AcceptanceSource::summary($source),JSON_THROW_ON_ERROR));
-    return $source['status']==='captured'?0:1;
+    $source = app(AcceptanceSource::class)->capture();
+    $this->line(json_encode(AcceptanceSource::summary($source), JSON_THROW_ON_ERROR));
+
+    return $source['status'] === 'captured' ? 0 : 1;
 })->purpose('Read-only source/configuration fingerprint summary; no database probe, secret export or deployment approval');
 
-Artisan::command('gta:release-check45 {--environment : Include staging configuration checks without printing values} {--database : Read actual MySQL schema names without writing}',function(){ $report=\App\Support\ReleaseSourceCheck::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($report,JSON_THROW_ON_ERROR));return $report['status']==='needs_attention'?1:0;})->purpose('Read-only Pack45 source and optional staging/schema-name readiness checks; never deployment approval');
+Artisan::command('gta:release-check45 {--environment : Include staging configuration checks without printing values} {--database : Read actual MySQL schema names without writing}', function () {
+    $report = ReleaseSourceCheck::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($report, JSON_THROW_ON_ERROR));
 
-Artisan::command('gta:release-check46 {--environment : Include staging configuration checks without values} {--database : Inspect supported native schema names without writing}',function(){ $report=\App\Support\Release46Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($report,JSON_THROW_ON_ERROR));return $report['status']==='needs_attention'?1:0;})->purpose('Read-only Pack46 source/configuration/schema-name checks, not actual release approval');
+    return $report['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only Pack45 source and optional staging/schema-name readiness checks; never deployment approval');
 
-\Illuminate\Support\Facades\Artisan::command('gta:release-check47 {--environment} {--database}',function(){ $r=\App\Support\Release47Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));return $r['status']==='needs_attention'?1:0; })->purpose('Read-only Pack47 source/configuration/schema-name checks; no target acceptance');
+Artisan::command('gta:release-check46 {--environment : Include staging configuration checks without values} {--database : Inspect supported native schema names without writing}', function () {
+    $report = Release46Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($report, JSON_THROW_ON_ERROR));
 
-\Illuminate\Support\Facades\Artisan::command('gta:release-check48 {--environment} {--database}',function(){ $r=\App\Support\Release48Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return $r['status']==='needs_attention'?1:0; })->purpose('Read-only Pack48 source/configuration/schema-name checks, not actual target acceptance');
+    return $report['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only Pack46 source/configuration/schema-name checks, not actual release approval');
 
-\Illuminate\Support\Facades\Artisan::command('gta:release-check49 {--environment} {--database}',function(){ $r=\App\Support\Release49Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return $r['status']==='needs_attention'?1:0; })->purpose('Read-only Pack49 source/configuration/schema-name checks, not actual target acceptance');
+Artisan::command('gta:release-check47 {--environment} {--database}', function () {
+    $r = Release47Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-\Illuminate\Support\Facades\Artisan::command('gta:release-check50 {--environment} {--database}',function(){ $r=\App\Support\Release50Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return $r['status']==='needs_attention'?1:0; })->purpose('Read-only cumulative source/configuration/schema-name and solid-colour theme checks; not rendered acceptance');
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only Pack47 source/configuration/schema-name checks; no target acceptance');
 
-\Illuminate\Support\Facades\Artisan::command('gta:release-check51 {--environment} {--database}',function(){$r=\App\Support\Release51Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return $r['status']==='needs_attention'?1:0;})->purpose('Read-only cumulative source/theme and bounded nearby-date capability checks; no target acceptance');
+Artisan::command('gta:release-check48 {--environment} {--database}', function () {
+    $r = Release48Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
 
-\Illuminate\Support\Facades\Artisan::command('gta:release-check52 {--environment} {--database}',function(){$r=\App\Support\Release52Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return $r['status']==='needs_attention'?1:0;})->purpose('Read-only cumulative source/configuration/schema-name and historical comparison capability checks; no target acceptance');
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only Pack48 source/configuration/schema-name checks, not actual target acceptance');
 
-\Illuminate\Support\Facades\Artisan::command('gta:release-check53 {--environment} {--database}',function(){$r=\App\Support\Release53Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return $r['status']==='needs_attention'?1:0;})->purpose('Read-only cumulative source and v2 theme token checks; no rendered or target acceptance');
+Artisan::command('gta:release-check49 {--environment} {--database}', function () {
+    $r = Release49Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
 
-\Illuminate\Support\Facades\Artisan::command('gta:release-check54 {--environment} {--database}',function(){$r=\App\Support\Release54Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return$r['status']==='needs_attention'?1:0;})->purpose('Read-only annual planning, workload shortcut and contextual help checks; no target acceptance');
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only Pack49 source/configuration/schema-name checks, not actual target acceptance');
 
-\Illuminate\Support\Facades\Artisan::command('gta:release-check55 {--environment} {--database}',function(){$r=\App\Support\Release55Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return$r['status']==='needs_attention'?1:0;})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
+Artisan::command('gta:release-check50 {--environment} {--database}', function () {
+    $r = Release50Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
 
-Artisan::command('gta:release-check56 {--environment} {--database}',function(){$r=\App\Support\Release56Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return$r['status']==='needs_attention'?1:0;})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only cumulative source/configuration/schema-name and solid-colour theme checks; not rendered acceptance');
 
-Artisan::command('gta:release-check57 {--environment} {--database}',function(){$r=\App\Support\Release57Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return$r['status']==='needs_attention'?1:0;})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
+Artisan::command('gta:release-check51 {--environment} {--database}', function () {
+    $r = Release51Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
 
-Artisan::command('gta:release-check58 {--environment} {--database}',function(){$r=\App\Support\Release58Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return$r['status']==='needs_attention'?1:0;})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only cumulative source/theme and bounded nearby-date capability checks; no target acceptance');
 
-Artisan::command('gta:release-check59 {--environment} {--database}',function(){$r=\App\Support\Release59Check::report((bool)$this->option('environment'),(bool)$this->option('database'));$this->line(json_encode($r,JSON_THROW_ON_ERROR));return$r['status']==='needs_attention'?1:0;})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
+Artisan::command('gta:release-check52 {--environment} {--database}', function () {
+    $r = Release52Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
 
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only cumulative source/configuration/schema-name and historical comparison capability checks; no target acceptance');
 
-Artisan::command('gta:retention-followups',function(){
- $count=0;\App\Models\Apprentice::query()->orderBy('id')->chunkById(200,function($people)use(&$count){foreach($people as $a){\App\Support\DestinationMilestones::sync($a);$count++;}});
- $this->line(json_encode(['profiles_checked'=>$count,'messages_sent'=>0,'historical_facts_inferred'=>false]));
+Artisan::command('gta:release-check53 {--environment} {--database}', function () {
+    $r = Release53Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
+
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only cumulative source and v2 theme token checks; no rendered or target acceptance');
+
+Artisan::command('gta:release-check54 {--environment} {--database}', function () {
+    $r = Release54Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
+
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only annual planning, workload shortcut and contextual help checks; no target acceptance');
+
+Artisan::command('gta:release-check55 {--environment} {--database}', function () {
+    $r = Release55Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
+
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
+
+Artisan::command('gta:release-check56 {--environment} {--database}', function () {
+    $r = Release56Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
+
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
+
+Artisan::command('gta:release-check57 {--environment} {--database}', function () {
+    $r = Release57Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
+
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
+
+Artisan::command('gta:release-check58 {--environment} {--database}', function () {
+    $r = Release58Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
+
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
+
+Artisan::command('gta:release-check59 {--environment} {--database}', function () {
+    $r = Release59Check::report((bool) $this->option('environment'), (bool) $this->option('database'));
+    $this->line(json_encode($r, JSON_THROW_ON_ERROR));
+
+    return $r['status'] === 'needs_attention' ? 1 : 0;
+})->purpose('Read-only cumulative source and usability/help checks; no rendered or actual target acceptance');
+
+Artisan::command('gta:retention-followups', function () {
+    $count = 0;
+    Apprentice::query()->orderBy('id')->chunkById(200, function ($people) use (&$count) {
+        foreach ($people as $a) {
+            DestinationMilestones::sync($a);
+            $count++;
+        }
+    });
+    $this->line(json_encode(['profiles_checked' => $count, 'messages_sent' => 0, 'historical_facts_inferred' => false]));
 })->purpose('Reconcile 3/6/12-month portal tasks with sourced exit dates; no messages');
-\Illuminate\Support\Facades\Schedule::command('gta:retention-followups')->dailyAt('07:00')->timezone('Europe/London')->withoutOverlapping();
+Schedule::command('gta:retention-followups')->dailyAt('07:00')->timezone('Europe/London')->withoutOverlapping();
 
 Artisan::command('gta:weekly-registers', function () {
     $prepared = 0;
     $needsCheck = [];
-    \App\Models\TutorGroup::where('active', true)->whereNotNull('weekly_register')->each(function ($group) use (&$prepared, &$needsCheck) {
-        $next = \App\Support\WeeklyRegisters::next($group);
-        if (!$next || $next['date'] !== today(config('app.timezone'))->toDateString()) {
+    TutorGroup::where('active', true)->whereNotNull('weekly_register')->each(function ($group) use (&$prepared, &$needsCheck) {
+        $next = WeeklyRegisters::next($group);
+        if (! $next || $next['date'] !== today(config('app.timezone'))->toDateString()) {
             return;
         }
-        $actor = \App\Models\User::find($next['settings']['configured_by']);
+        $actor = User::find($next['settings']['configured_by']);
         try {
-            if (!$actor) {
-                throw new \RuntimeException('The schedule owner is unavailable.');
+            if (! $actor) {
+                throw new RuntimeException('The schedule owner is unavailable.');
             }
-            \App\Support\WeeklyRegisters::open($actor, $actor->auth_version, $group, $next);
+            WeeklyRegisters::open($actor, $actor->auth_version, $group, $next);
             $prepared++;
-        } catch (\Illuminate\Validation\ValidationException | \Symfony\Component\HttpKernel\Exception\HttpException | \RuntimeException $error) {
+        } catch (ValidationException|\Symfony\Component\HttpKernel\Exception\HttpException|RuntimeException $error) {
             $needsCheck[] = $group->id;
             report($error);
         }
     });
     $this->line(json_encode(['ready' => $prepared, 'groups_to_check' => $needsCheck], JSON_THROW_ON_ERROR));
+
     return $needsCheck ? 1 : 0;
 })->purpose('Prepare today’s weekly registers from agreed group schedules');
 
-\Illuminate\Support\Facades\Schedule::command('gta:weekly-registers')
+Schedule::command('gta:weekly-registers')
     ->hourly()->timezone('Europe/London')->withoutOverlapping();
 
 Artisan::command('gta:weekly-retention {--record : Store the current weekly checks} {--send : Send the current week’s prepared emails}', function () {
-    $monday = \App\Support\WeeklyRetention::monday();
-    if (!$this->option('record') && !$this->option('send')) {
+    $monday = WeeklyRetention::monday();
+    if (! $this->option('record') && ! $this->option('send')) {
         $this->info('Week of '.$monday->toDateString().'. Use --record to prepare portal reminders.');
+
         return 0;
     }
 
     $week = $monday->toDateString();
     if ($this->option('record')) {
-        \App\Models\Apprentice::where('start_date', '<', $week)->eachById(
-            fn ($apprentice) => \App\Support\WeeklyRetention::capture($apprentice, $monday));
+        Apprentice::where('start_date', '<', $week)->eachById(
+            fn ($apprentice) => WeeklyRetention::capture($apprentice, $monday));
     }
     if ($this->option('send')) {
-        \App\Models\WeeklyRetentionReminder::whereIn('email_state', ['pending', 'held'])
+        WeeklyRetentionReminder::whereIn('email_state', ['pending', 'held'])
             ->whereHas('check', fn ($q) => $q->where('week_of', $week))
             ->with('check.apprentice')->eachById(
-                fn ($reminder) => \App\Support\WeeklyRetention::send($reminder, $reminder->check->apprentice));
+                fn ($reminder) => WeeklyRetention::send($reminder, $reminder->check->apprentice));
     }
 
-    $reminders = \App\Models\WeeklyRetentionReminder::whereHas('check', fn ($q) => $q->where('week_of', $week));
+    $reminders = WeeklyRetentionReminder::whereHas('check', fn ($q) => $q->where('week_of', $week));
     $this->info('Week of '.$week.' · '.(clone $reminders)->count().' portal reminders · '
         .$reminders->where('email_state', 'sent')->count().' emails sent.');
+
     return 0;
 })->purpose('Prepare and deliver weekly Support and Retention training reminders');
 
-\Illuminate\Support\Facades\Schedule::command('gta:weekly-retention --record --send')
+Schedule::command('gta:weekly-retention --record --send')
     ->mondays()->at('09:00')->timezone('Europe/London')->withoutOverlapping(30)
     ->when(fn () => config('weekly_retention.scheduled'));
 
 require __DIR__.'/setup68-console.php';
 
 require __DIR__.'/pack82-console.php';
+
+require __DIR__.'/audit85-console.php';
