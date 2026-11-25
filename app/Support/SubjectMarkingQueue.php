@@ -57,6 +57,21 @@ final class SubjectMarkingQueue
         return $query->orderBy('updated_at')->orderBy('id');
     }
 
+    public static function pendingSubmission(TrainingTopic $topic): ?array
+    {
+        $submission = collect($topic->submissions ?? [])->last();
+
+        return is_array($submission) && $submission !== [] && ($submission['decision'] ?? null) === null
+            ? $submission
+            : null;
+    }
+
+    public static function next(User $user, array $subjects, array $filters): ?int
+    {
+        return self::query($user, $subjects, $filters)->select('id', 'submissions')->cursor()
+            ->first(fn (TrainingTopic $topic) => self::pendingSubmission($topic) !== null)?->id;
+    }
+
     public static function url(int $topic, array $filters): string
     {
         return route('topics.show', ['topic' => $topic, 'from_marking' => 1] + $filters);

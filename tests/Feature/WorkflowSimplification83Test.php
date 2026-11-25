@@ -126,7 +126,9 @@ class WorkflowSimplification83Test extends TestCase
         $before=$t->fresh()->getAttributes();
         $page=$this->actingAs($u)->get(route('marking.index',['search'=>$a->reference,'view'=>'overdue']))->assertOk()->assertSee('Start next submission');
         $this->assertSame($t->id,$page->viewData('nextTask83'));$this->assertSame($before,$t->fresh()->getAttributes());
-        $this->get(route('tasks.show',['task'=>$t,'from_marking'=>1,'search'=>$a->reference,'view'=>'overdue']))->assertOk()->assertSee('Save and open next');
+        $this->get(route('tasks.show',['task'=>$t,'from_marking'=>1,'search'=>$a->reference,'view'=>'overdue']))->assertOk()->assertSee('Save and open next')
+            ->assertSee('Review this submission')->assertSee('href="#task-decision"', false)
+            ->assertSee('value="'.today()->toDateString().'"', false);
     }
 
     public function test_meeting_saves_one_shared_target_and_advances_without_reopening_the_list(): void

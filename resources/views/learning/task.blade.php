@@ -1,6 +1,7 @@
 @extends('layout')
 @section('title', $task->title)
 @section('content')
+@php($markingFocus = $queue !== null && $tutor && $task->status === 'Awaiting marking')
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }} · Block {{ $task->block }}</p><h1>{{ $task->title }}</h1><p>{{ $task->theme }}</p><span class="status {{ $task->status==='Approved'?'achieved':($task->markingOverdue()?'red':'neutral') }}">{{ $task->markingOverdue()?'Overdue marking':$task->status }}</span></div><div class="toolbar">
     @if($queue !== null)
         <a class="button" href="{{ route('marking.index', $queue) }}">Back to Work to mark</a>
@@ -21,10 +22,17 @@
     </details>
 </div></header>
 @include('learning.errors')
-@include('learning.next-step')
+@if($markingFocus)
+    <nav class="toolbar" aria-label="Review this submission">
+        <a href="#task-work">Submitted work</a>
+        <a href="#task-decision">Record decision</a>
+    </nav>
+@else
+    @include('learning.next-step')
+@endif
 @if(!$release['open'])<p class="notice">{{ $release['label'] }}. Saved work remains available to read. An administrator can record an exception from the training-task list.</p>@endif
-@if($planning->isNotEmpty())<section class="panel"><h2>Approved Block 9 planning guidance</h2><p class="muted">Use the existing answer fields for this guidance.</p>@foreach($planning as $activity)<p><strong>{{ $activity['code'] }}:</strong> {{ $activity['instruction'] }}</p>@endforeach</section>@endif
-<details class="panel" @if($presentation || (isset($task->template['catalogueId']) && $task->template['catalogueId']!=='autocare'))open @endif><summary>Task instructions and source</summary><p class="recorded-answer">{{ $task->template['instructions'] }}</p><p class="muted">Source: {{ $task->template['filename'] }} · Version {{ $task->template['version'] }}. </p></details>
+@if($planning->isNotEmpty())<details class="panel" @unless($markingFocus) open @endunless><summary>Approved Block 9 planning guidance</summary><p class="muted">Use the existing answer fields for this guidance.</p>@foreach($planning as $activity)<p><strong>{{ $activity['code'] }}:</strong> {{ $activity['instruction'] }}</p>@endforeach</details>@endif
+<details class="panel" @if(!$markingFocus && ($presentation || (isset($task->template['catalogueId']) && $task->template['catalogueId']!=='autocare')))open @endif><summary>Task instructions and source</summary><p class="recorded-answer">{{ $task->template['instructions'] }}</p><p class="muted">Source: {{ $task->template['filename'] }} · Version {{ $task->template['version'] }}. </p></details>
 @if($presentation)
 <details class="panel">
     <summary>Linked knowledge, skills and behaviours (KSBs)</summary>

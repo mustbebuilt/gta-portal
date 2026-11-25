@@ -56,26 +56,41 @@ class SubjectMarkingQueueTest extends TestCase
         $tutor = User::factory()->create(['role' => 'functional_skills_tutor', 'subject_scope' => 'maths']);
         $person = Apprentice::factory()->create(['maths_tutor_id' => $tutor->id, 'last_name' => 'FictionalFiltered']);
         $outside = Apprentice::factory()->create(['maths_tutor_id' => $tutor->id, 'last_name' => 'AnotherFamily']);
+        $older = $this->topic($person, 'maths', 'Check the missing submitted version');
+        $older->forceFill(['submissions' => [], 'updated_at' => now()->subHour()])->save();
         $first = $this->topic($person, 'maths', 'Fractions');
         $second = $this->topic($person, 'maths', 'Circles');
+        $first->forceFill(['draft' => 'LATER EDIT OUTSIDE THE SUBMITTED VERSION'])->save();
         $this->topic($outside, 'maths', 'Outside the search');
         $filters = ['subject' => 'maths', 'search' => 'FictionalFiltered'];
         $review = SubjectMarkingQueue::url($first->id, $filters);
         $this->actingAs($tutor)->get(SubjectMarkingQueue::indexUrl($filters))->assertOk()
-            ->assertSee($review)->assertDontSee('Outside the search');
-        $this->get($review)->assertOk()->assertSee('Save decision and open next')->assertSee('Back to Work to mark');
-        $data = ['version' => $first->version, 'status' => 'Not Started', 'feedback' => 'Fictional checked feedback',
+            ->assertSee($review)->assertDontSee('Outside the search')->assertViewHas('nextTopic', $first->id);
+        $this->get(SubjectMarkingQueue::url($older->id, $filters))->assertOk()
+            ->assertSee('The submitted version needs checking')->assertDontSee('Save decision and open next');
+        $this->get($review)->assertOk()->assertSee('Save decision and open next')->assertSee('Back to Work to mark')
+            ->assertSee('FICTIONAL PRIVATE WORK')->assertDontSee('LATER EDIT OUTSIDE THE SUBMITTED VERSION')
+            ->assertDontSee('name="status"', false)->assertDontSee('name="completion_date"', false);
+        $data = ['version' => $first->version, 'evidence_only' => 1, 'feedback' => 'Fictional checked feedback',
             'after_save' => 'next', 'queue' => $filters];
         $this->from($review)->post(route('topics.update', $first), $data)->assertSessionHasErrors('decision');
         $this->assertSame('Awaiting review', $first->fresh()->evidence_stage);
+        $this->from($review)->post(route('topics.update', $first), $data + ['decision' => 'Accepted', 'status' => 'Completed'])
+            ->assertSessionHasErrors('status');
         $this->post(route('topics.update', $first), $data + ['decision' => 'Accepted'])
             ->assertRedirect(SubjectMarkingQueue::url($second->id, $filters))->assertSessionHasNoErrors();
         $first->refresh();
         $this->assertSame('Accepted', $first->evidence_stage);
         $this->assertSame('Not Started', $first->status);
         $this->assertNull($first->completion_date);
+        $this->assertEmpty($first->history);
+        $this->assertSame('Fictional checked feedback', $first->submissions[0]['decision']['feedback']);
+        $this->from($review)->post(route('topics.update', $first), $data + ['decision' => 'Referred'])
+            ->assertSessionHasErrors('version');
         $this->post(route('topics.update', $second), $data + ['decision' => 'Referred'])
             ->assertRedirect(SubjectMarkingQueue::indexUrl($filters))->assertSessionHasNoErrors();
-        $this->get(SubjectMarkingQueue::indexUrl($filters))->assertOk()->assertSee('No evidence awaiting review in this view');
+        $this->get(SubjectMarkingQueue::indexUrl($filters))->assertOk()->assertSee($older->topic)
+            ->assertDontSee('Start evidence review');
+        $this->assertSame('Awaiting review', $older->fresh()->evidence_stage);
     }
 }

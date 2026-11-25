@@ -185,7 +185,11 @@ class EnglishMathsController extends Controller
         $canReview = Access::subject($r->user(), $topic->apprentice, $topic->subject);
         $queue = $canReview && $r->boolean('from_marking') ? SubjectMarkingQueue::filters($r->query()) : null;
 
-        return view('em.topic', ['queue' => $queue, 'topic' => $topic, 'apprentice' => $topic->apprentice, 'canReview' => $canReview, 'learner' => Access::learner($r->user(), $topic->apprentice)]);
+        $submission = $queue !== null && $topic->evidence_stage === 'Awaiting review'
+            ? SubjectMarkingQueue::pendingSubmission($topic)
+            : null;
+
+        return view('em.topic', ['queue' => $queue, 'submission' => $submission, 'topic' => $topic, 'apprentice' => $topic->apprentice, 'canReview' => $canReview, 'learner' => Access::learner($r->user(), $topic->apprentice)]);
     }
 
     public function evidence(Request $r, TrainingTopic $topic): RedirectResponse
@@ -241,49 +245,61 @@ class EnglishMathsController extends Controller
     public function updateTopic(Request $r, TrainingTopic $topic): RedirectResponse
     {
         abort_unless(Access::subject($r->user(), $topic->apprentice, $topic->subject), 403);
-        $data = $r->validate(['version' => ['required', 'integer'], 'status' => ['required', Rule::in(['Not Started', 'In Progress', 'Completed', 'Secure'])], 'completion_date' => ['nullable', 'required_if:status,Completed', 'date_format:Y-m-d', 'before_or_equal:today'], 'feedback' => ['required', 'string', 'max:20000'], 'decision' => ['nullable', 'required_if:after_save,next', Rule::in(['Accepted', 'Referred'])],
-            'after_save' => ['nullable', Rule::in(['next'])], 'queue' => ['nullable', 'array']]);
+        $evidenceOnly = $r->boolean('evidence_only');
+        $data = $r->validate([
+            'version' => ['required', 'integer'],
+            'evidence_only' => ['sometimes', 'accepted'],
+            'status' => [$evidenceOnly ? 'prohibited' : 'required', Rule::in(['Not Started', 'In Progress', 'Completed', 'Secure'])],
+            'completion_date' => ['nullable', Rule::prohibitedIf($evidenceOnly), 'required_if:status,Completed', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'feedback' => ['required', 'string', 'max:20000'],
+            'decision' => ['nullable', Rule::requiredIf($evidenceOnly || $r->input('after_save') === 'next'), Rule::in(['Accepted', 'Referred'])],
+            'after_save' => ['nullable', Rule::in(['next'])],
+            'queue' => ['nullable', 'array'],
+        ]);
         $filters = ($data['after_save'] ?? null) === 'next'
             ? SubjectMarkingQueue::filters($data['queue'] ?? []) : null;
-        DB::transaction(function () use ($r, $topic, $data): void {
+        DB::transaction(function () use ($r, $topic, $data, $evidenceOnly): void {
             $t = TrainingTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
             $this->version($r, $t);
             $fresh=Apprentice::whereKey($t->apprentice_id)->lockForUpdate()->firstOrFail();
             abort_unless(Access::subject($r->user(),$fresh,$t->subject),403);
-            if (((float) $t->planned_hours === 0.0) !== ($data['status'] === 'Secure')) {
+            if (! $evidenceOnly && ((float) $t->planned_hours === 0.0) !== ($data['status'] === 'Secure')) {
                 throw ValidationException::withMessages(['status' => 'Zero-hour areas must remain Secure; only areas with planned training can be marked Completed.']);
             }
             $history = $t->submissions ?? [];
             $decision = $data['decision'] ?? null;
             if ($decision) {
-                if ($t->evidence_stage !== 'Awaiting review' || ! count($history)) {
+                if ($t->evidence_stage !== 'Awaiting review' || SubjectMarkingQueue::pendingSubmission($t) === null) {
                     throw ValidationException::withMessages(['decision' => 'There is no current submission awaiting review.']);
-                }$history[count($history) - 1]['decision'] = ['outcome' => $decision, 'feedback' => $data['feedback'], 'tutor_id' => $r->user()->id, 'recorded_at' => now()->toIso8601String()];
+                }
+                $history[array_key_last($history)]['decision'] = ['outcome' => $decision, 'feedback' => $data['feedback'], 'tutor_id' => $r->user()->id, 'recorded_at' => now()->toIso8601String()];
                 $t->evidence_stage = $decision;
             }
-            if ($data['status'] === 'Completed' && in_array($t->evidence_stage, ['Referred', 'Awaiting review'], true)) {
-                throw ValidationException::withMessages(['status' => 'Resolve the pending or referred evidence before recording completion.']);
+            if (! $evidenceOnly) {
+                if ($data['status'] === 'Completed' && in_array($t->evidence_stage, ['Referred', 'Awaiting review'], true)) {
+                    throw ValidationException::withMessages(['status' => 'Resolve the pending or referred evidence before recording completion.']);
+                }
+                $updates = $t->history ?? [];
+                $updates[] = ['before' => $t->status, 'after' => $data['status'], 'feedback' => $data['feedback'], 'tutor_id' => $r->user()->id, 'completion_date' => $data['completion_date'] ?? null, 'at' => now()->toIso8601String()];
+                $t->history = $updates;
+                $t->status = $data['status'];
+                $t->completion_date = $data['status'] === 'Completed' ? $data['completion_date'] : null;
             }
-            $updates = $t->history ?? [];
-            $updates[] = ['before' => $t->status, 'after' => $data['status'], 'feedback' => $data['feedback'], 'tutor_id' => $r->user()->id, 'completion_date' => $data['completion_date'] ?? null, 'at' => now()->toIso8601String()];
-            $t->history = $updates;
             $t->submissions = $history;
-            $t->status = $data['status'];
-            $t->completion_date = $data['status'] === 'Completed' ? $data['completion_date'] : null;
             $t->version++;
             $t->save();
-            $this->audit($r, $t->apprentice_id, 'topic', $t->id, 'tutor_updated');
+            $this->audit($r, $t->apprentice_id, 'topic', $t->id, $evidenceOnly ? 'evidence_reviewed' : 'tutor_updated');
         });
 
         if ($filters !== null) {
             $subjects = SubjectMarkingQueue::allowedSubjects($r->user());
-            $next = SubjectMarkingQueue::query($r->user(), $subjects, $filters)->whereKeyNot($topic->id)->value('id');
+            $next = SubjectMarkingQueue::next($r->user(), $subjects, $filters);
 
             return redirect($next ? SubjectMarkingQueue::url((int) $next, $filters) : SubjectMarkingQueue::indexUrl($filters))
-                ->with('status', $next ? 'Evidence decision saved.' : 'Evidence decision saved. No further submissions in this view.');
+                ->with('status', $next ? 'Evidence decision saved.' : 'Evidence decision saved. No further submissions ready to review.');
         }
 
-        return back()->with('status', 'Topic update saved. Evidence acceptance alone does not complete training or a qualification.');
+        return back()->with('status', $evidenceOnly ? 'Evidence decision saved.' : 'Topic update saved.');
     }
 
     public function upload(Request $r, TrainingTopic $topic): RedirectResponse

@@ -8,8 +8,8 @@
 <section class="panel">
     <h2>Maths and English evidence</h2>
     <p>{{ $topics->total() }} {{ \Illuminate\Support\Str::plural('submission', $topics->total()) }} awaiting review</p>
-    @if($topics->count())
-        <a class="button primary" href="{{ \App\Support\SubjectMarkingQueue::url($topics->first()->id, $filters) }}">Start evidence review</a>
+    @if($nextTopic)
+        <a class="button primary" href="{{ \App\Support\SubjectMarkingQueue::url($nextTopic, $filters) }}">Start evidence review</a>
     @endif
     <details @if($filters['subject'] !== 'all' || $filters['search'] !== '') open @endif>
         <summary>Filter submissions</summary>

@@ -28,7 +28,9 @@ class MarkingQueueController extends Controller
             $topics = SubjectMarkingQueue::query($request->user(), $subjects, $filters)
                 ->paginate(25, ['id', 'apprentice_id', 'subject', 'topic', 'level'])->withQueryString();
 
-            return view('marking.subjects', compact('canMarkTasks', 'subjects', 'filters', 'topics'));
+            $nextTopic = SubjectMarkingQueue::next($request->user(), $subjects, $filters);
+
+            return view('marking.subjects', compact('canMarkTasks', 'subjects', 'filters', 'topics', 'nextTopic'));
         }
 
         abort_unless($canMarkTasks, 403);

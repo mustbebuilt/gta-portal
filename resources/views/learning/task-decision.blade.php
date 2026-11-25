@@ -1,4 +1,4 @@
-<section class="panel">
+<section class="panel" id="task-decision">
     <h2>{{ $isKnowledge ? 'Record paper test result' : 'GTA tutor decision' }}</h2>
     <form method="post" action="{{ route('tasks.decide', $task) }}">
         @csrf
@@ -24,7 +24,7 @@
                     <option value="Referred" @selected(old('decision') === 'Referred')>{{ $isKnowledge ? 'Refer' : 'Return for changes' }}</option>
                 </select>
             </div>
-            <div><label for="decision-date">Assessment date</label><input id="decision-date" name="decision_date" type="date" value="{{ old('decision_date') }}" required max="{{ today()->toDateString() }}"></div>
+            <div><label for="decision-date">Assessment date</label><input id="decision-date" name="decision_date" type="date" value="{{ old('decision_date', $markingFocus ? today()->toDateString() : null) }}" required max="{{ today()->toDateString() }}"></div>
             <div class="full"><label for="feedback">Feedback (required when returning work)</label><textarea id="feedback" name="feedback" rows="4">{{ old('feedback') }}</textarea></div>
         </div>
         <label class="check"><input name="confirmed" value="1" type="checkbox" @checked(old('confirmed')) required> I confirm this decision as {{ auth()->user()->name }}.</label>
