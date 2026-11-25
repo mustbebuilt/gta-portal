@@ -1,7 +1,23 @@
 @extends('layout')
 @section('title','My reminders')
-@section('content')<h1>My reminders</h1><p>Your saved daily digests from the last 60 days. Email and text share one digest here. Records may have changed since capture; open your live work for the current position.</p><div class="toolbar"><a class="button primary" href="{{ route('experience.home') }}">My next step</a><a class="button" href="{{ route('alerts.index') }}">Change alert preferences</a></div>@include('learning.errors')<p>Only eligible channels have delivery records. Contact verification, service setup or budgets can hold a channel. Accepted means the provider accepted the attempt; it is not proof you received/read it. An attempt already underway may finish after a preference change.</p>
-@forelse($groups as $date=>$records)@php($first=$records->first())<section class="panel"><h2>{{ $date }} · {{ $records->contains(fn($d)=>!$d->seen_at)?'Unread':'Read' }}</h2>@foreach($records as $d)<p>{{ $d->channel==='sms'?'Text':'Email' }} · {{ $d->state }}</p>@endforeach
-@if(\App\Support\ReviewedImports::hash($first->source)===$first->source_hash && ($first->source['apprentice_id']??null)===$apprentice->id && ($first->source['recipient_id']??null)===auth()->id())<ul>@foreach($first->source['items'] as $item)<li>{{ \App\Support\ApprenticeReminderSources::LABELS[$item['kind']]??'Portal item' }} · {{ $item['date']??'Date not set' }} <a href="{{ \App\Support\ApprenticeReminderSources::link($apprentice,$item) }}">Open live source</a></li>@endforeach</ul>@else<p>Saved source needs checking. Open My next step for current work.</p>@endif
-<form method="post" action="{{ route('apprentice-reminders.seen',$first) }}">@csrf<button>Mark this saved digest read</button></form><p>Reading a reminder does not complete a task or confirm attendance/review participation.</p></section>@empty<section class="panel"><h2>No saved digests yet</h2><p>Check your next step and alert preferences. An empty reminder history does not mean there is no outstanding work.</p></section>@endforelse
+@section('content')
+<header class="page-heading">
+    <h1>My reminders</h1>
+    <a class="button primary" href="{{ route('experience.home') }}">My next step</a>
+</header>
+@include('learning.errors')
+@php([$unread, $read] = $groups->partition(fn ($records) => $records->contains(fn ($delivery) => !$delivery->seen_at)))
+@if($unread->isNotEmpty())
+    <section aria-labelledby="unread-digests">
+        <h2 id="unread-digests">Unread reminders</h2>
+        @foreach($unread as $date => $records)@include('apprentice-notifications.digest')@endforeach
+    </section>
+@endif
+@if($read->isNotEmpty())
+    <details class="panel" @if($unread->isEmpty()) open @endif><summary>Read reminders · {{ $read->count() }}</summary>
+        @foreach($read as $date => $records)@include('apprentice-notifications.digest')@endforeach
+    </details>
+@endif
+@if($groups->isEmpty())<p>No saved reminders in the last 60 days.</p>@endif
+<p><a href="{{ route('alerts.index') }}">Change alert preferences</a></p>
 @endsection

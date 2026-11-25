@@ -5,6 +5,7 @@
 @include('apprentices.overview83')
 <nav aria-label="Common apprentice actions" class="toolbar">
 <a @class(['button','primary'=>!$overview83['next']]) href="{{ route('progress66.index',['apprentice'=>$apprentice->id]) }}">View progress</a>
+<a class="button" href="{{ route('journey.show', $apprentice) }}">Apprenticeship journey</a>
 <a class="button" href="{{ route('learning.index',$apprentice) }}">{{ auth()->user()->role==='apprentice'?'My training tasks':(auth()->user()->role==='tutor'?'Open training tasks':'Training tasks') }}</a>
 <a class="button" href="{{ route('attendance.apprentice',$apprentice) }}">Attendance and OTJ</a>
 @if(auth()->user()->role!=='apprentice' && ($overview83['next']['kind']??null)!=='review')<a class="button" href="{{ \App\Support\PortalActions::destination(auth()->user(),$apprentice,'reviews') }}">Progress reviews</a>@endif

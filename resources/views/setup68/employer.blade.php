@@ -21,7 +21,7 @@
                 <div><label for="find-employer">Employer name or reference</label><input id="find-employer" name="search" value="{{ request('search') }}" maxlength="100" required></div>
                 <button class="primary">Find employer</button>
             </form>
-            @if(request('search') && $matches->isEmpty())<p>No matching employers.</p>@endif
+            @if(request('search') && $matches->isEmpty())<p>No matching employers. You can add a new employer below.</p>@endif
             @foreach($matches as $match)
                 <div class="work-row">
                     <p><a href="{{ route('directories.show',['employers',$match]) }}">{{ $match->name }}</a> · {{ $match->reference }} @unless($match->active) · Inactive @endunless</p>
@@ -29,7 +29,7 @@
                 </div>
             @endforeach
         </section>
-        <details class="panel" @if(old('data')) open @endif>
+        <details class="panel" @if(old('data') || (request()->filled('search') && $matches->isEmpty())) open @endif>
             <summary>Add a new employer</summary>
             <form method="post" action="{{ route('employer68.store') }}">
                 @csrf<input type="hidden" name="token" value="{{ $token }}">

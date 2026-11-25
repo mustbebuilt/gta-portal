@@ -40,6 +40,25 @@ class SmartActionWorkflowTest extends TestCase
         $this->get('/apprentices/'.$a->id.'/actions/'.$row->id.'/edit')->assertOk();
     }
 
+    public function test_action_plan_prioritises_own_work_and_keeps_completed_targets_accessible(): void
+    {
+        $user = $this->actor('apprentice');
+        $person = Apprentice::factory()->create(['user_id' => $user->id]);
+        SmartAction::factory()->create(['apprentice_id' => $person->id, 'title' => 'Tutor action first in the database', 'owner' => 'Tutor']);
+        SmartAction::factory()->create(['apprentice_id' => $person->id, 'title' => 'Completed target', 'status' => 'Completed']);
+        $target = SmartAction::factory()->create(['apprentice_id' => $person->id, 'title' => 'My current target', 'owner' => 'Apprentice']);
+        $response = $this->actingAs($user)->get(route('actions.index', $person))->assertOk()
+            ->assertSeeInOrder(['Open actions', 'My current target', 'Tutor action first in the database', 'Completed actions', 'Completed target'])
+            ->assertSee('id="action-'.$target->id.'"', false);
+
+        $document = new \DOMDocument();
+        @$document->loadHTML($response->getContent());
+        $xpath = new \DOMXPath($document);
+        $this->assertSame(1, $xpath->query('//details[@data-reveal-on-link and not(@open)]')->length);
+        $this->get(route('actions.index', [$person, 'state' => 'Completed']))->assertOk()
+            ->assertSee('Completed target')->assertDontSee('My current target');
+    }
+
     public function test_missing_measures_agreement_support_and_deadline_are_rejected(): void
     {
         $a = Apprentice::factory()->create();

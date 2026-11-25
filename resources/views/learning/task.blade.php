@@ -1,11 +1,26 @@
 @extends('layout')
 @section('title', $task->title)
 @section('content')
-<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }} · Block {{ $task->block }}</p><h1>{{ $task->title }}</h1><p>{{ $task->theme }}</p><span class="status {{ $task->status==='Approved'?'achieved':($task->markingOverdue()?'red':'neutral') }}">{{ $task->markingOverdue()?'Overdue marking':$task->status }}</span></div><div class="toolbar">@if($task->template['kind']!=='source-pending')<a class="button" href="{{ route('tasks.recorded.pdf',$task) }}">Download recorded work PDF</a>@endif<button type="button" data-print>Print task / Save PDF</button><a class="button" href="{{ route('learning.index',$apprentice) }}">Back to training tasks</a>@if(str_ends_with($task->template['sourcePdfFilename']??$task->template['filename'],'.pdf'))<a class="button" href="{{ route('tasks.pdf',$task) }}">Download original PDF</a>@endif</div></header>
+<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }} · Block {{ $task->block }}</p><h1>{{ $task->title }}</h1><p>{{ $task->theme }}</p><span class="status {{ $task->status==='Approved'?'achieved':($task->markingOverdue()?'red':'neutral') }}">{{ $task->markingOverdue()?'Overdue marking':$task->status }}</span></div><div class="toolbar">
+    @if($queue !== null)
+        <a class="button" href="{{ route('marking.index', $queue) }}">Back to Work to mark</a>
+    @else
+        <a class="button" href="{{ route('learning.index', $apprentice) }}">Back to training tasks</a>
+    @endif
+    <details class="action-disclosure64">
+        <summary>Print or download</summary>
+        <ul>
+            @if($task->template['kind'] !== 'source-pending')
+                <li><a href="{{ route('tasks.recorded.pdf', $task) }}">Download recorded work PDF</a></li>
+            @endif
+            @if(str_ends_with($task->template['sourcePdfFilename'] ?? $task->template['filename'], '.pdf'))
+                <li><a href="{{ route('tasks.pdf', $task) }}">Download original PDF</a></li>
+            @endif
+            <li><button type="button" data-print>Print task / Save PDF</button></li>
+        </ul>
+    </details>
+</div></header>
 @include('learning.errors')
-@if($queue !== null)
-<p><a class="button" href="{{ route('marking.index', $queue) }}">Back to Work to mark</a></p>
-@endif
 @include('learning.next-step')
 @if(!$release['open'])<p class="notice">{{ $release['label'] }}. Saved work remains available to read. An administrator can record an exception from the training-task list.</p>@endif
 @if($planning->isNotEmpty())<section class="panel"><h2>Approved Block 9 planning guidance</h2><p class="muted">Use the existing answer fields for this guidance.</p>@foreach($planning as $activity)<p><strong>{{ $activity['code'] }}:</strong> {{ $activity['instruction'] }}</p>@endforeach</section>@endif
@@ -31,7 +46,7 @@
 @php($fields = \App\Support\TaskPresentation::apprenticeFields($task, $presentation))
 @php($isKnowledge = $task->template['kind'] === 'knowledge')
 @php($isEditing = !$isKnowledge && $learner && $task->editable())
-<section class="panel">
+<section class="panel" id="task-work">
     <h2>{{ $task->status === 'Awaiting marking' ? 'Submitted apprentice work' : 'Apprentice work' }}</h2>
     @if($isKnowledge)
         <p>This assessment is completed on paper. The tutor records the result and feedback below.</p>
@@ -45,6 +60,7 @@
                 <summary>Add evidence files</summary>
                 <label for="task-combined-file">Choose files (PDF, JPEG, PNG or DOCX). Up to five uploads per save, including any photo taken below. 15 MB each.</label>
                 <input id="task-combined-file" data-evidence-file name="files[]" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.docx">
+                <div data-file-details @if($errors->hasAny(['kind','description','files.*'])) data-keep-open @endif>
                 <label for="task-combined-kind">Evidence type for these files</label>
                 <select id="task-combined-kind" data-evidence-kind name="kind">
                     <option value="supporting-evidence" @selected(old('kind') === 'supporting-evidence')>Supporting evidence</option>
@@ -53,10 +69,13 @@
                 </select>
                 <label for="task-photo-description">Evidence note (required for workplace photos)</label>
                 <textarea id="task-photo-description" data-photo-description name="description" rows="3" maxlength="5000">{{ old('description') }}</textarea>
+                </div>
                 <label for="task-camera-photo">Take a workplace photo</label>
                 <input id="task-camera-photo" name="camera_photo" type="file" accept="image/jpeg,image/png" capture="environment">
+                <div data-camera-details @if($errors->hasAny(['camera_photo','camera_description'])) data-keep-open @endif>
                 <label for="task-camera-description">What did you do, and how does this photo support the task?</label>
                 <textarea id="task-camera-description" name="camera_description" rows="3" maxlength="5000">{{ old('camera_description') }}</textarea>
+                </div>
                 <button name="intent" value="upload">Save answers and add evidence</button>
             </details>
             <label class="check"><input type="checkbox" name="own_work" value="1" @checked(old('own_work'))> I confirm this is my own work.</label>
@@ -90,5 +109,5 @@
     @include('learning.task-decision')
 @endif
 @include('learning.task-history')
-<script src="{{ asset('assets/routine-workflows.js') }}" defer></script>
+<script src="{{ asset('assets/routine-workflows.js') }}?v=evidence-details" defer></script>
 @endsection

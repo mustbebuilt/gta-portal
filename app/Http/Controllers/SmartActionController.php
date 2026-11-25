@@ -28,7 +28,16 @@ class SmartActionController extends Controller
             'overdue' => $a->overdue(),'today' => $a->deadline()?->isToday() && $a->currentStatus() !== 'Completed','checks' => ! $a->deadline(),default => true
         });
 
-        return view('actions.index', ['apprentice' => $apprentice, 'actions' => $filtered, 'all' => $actions, 'manage' => $this->manage($r, $apprentice)]);
+        $manage = $this->manage($r, $apprentice);
+        $counts = $actions->countBy(fn (SmartAction $action) => $action->currentStatus());
+        [$completed, $open] = $filtered->partition(fn (SmartAction $action) => $action->currentStatus() === 'Completed');
+        $open = $open->sortBy(fn (SmartAction $action) => [
+            $manage ? ($action->currentStatus() !== 'With tutor') : ($action->owner !== 'Apprentice' || $action->currentStatus() !== 'To do'),
+            $action->deadline()?->toDateString() ?? '9999-12-31',
+            $action->id,
+        ]);
+
+        return view('actions.index', compact('apprentice', 'open', 'completed', 'counts', 'manage'));
     }
 
     public function proposals(Request $r, Apprentice $apprentice): View

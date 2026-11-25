@@ -235,13 +235,13 @@ return $t;
     {
         $p = $d->payload;
         $issues = [];
-        $add = function (int $step, string $text) use (&$issues) {
-            $issues[] = ['step' => $step, 'message' => $text];
+        $add = function (int $step, string $text, ?string $field = null) use (&$issues) {
+            $issues[] = ['step' => $step, 'message' => $text, 'field' => $field];
         };
         $details = $p['details'] ?? [];
         foreach (['reference', 'first_name', 'last_name'] as $k) {
             if (! filled($details[$k] ?? null)) {
-                $add(1, 'Enter '.$k.'.');
+                $add(1, 'Enter '.str_replace('_', ' ', $k).'.', $k);
             }
         }
         $matches = self::matches($details, $d->apprentice_id);
@@ -254,33 +254,33 @@ return $t;
         }
         $markers = $p['markers'] ?? [];
         if (! in_array($markers['state'] ?? null, ['selected', 'none', 'pending'], true)) {
-            $add(2, 'Choose markers, none or pending.');
+            $add(2, 'Choose markers, none or pending.', 'marker-state');
         }if (($markers['state'] ?? null) === 'selected' && ! count($markers['codes'] ?? [])) {
-            $add(2, 'Select at least one marker, or choose none/pending.');
+            $add(2, 'Select at least one marker, or choose none/pending.', 'marker-state');
         }if (in_array('IM40', $markers['codes'] ?? [], true) && ! filled($markers['other'] ?? null)) {
-            $add(2, 'Briefly specify the Other marker.');
+            $add(2, 'Briefly specify the Other marker.', 'other');
         }
         $t = self::template($p);
         $calc = null;
         if (! $t) {
-            $add(3, 'Select an active controlled programme template.');
+            $add(3, 'Select an active controlled programme template.', 'template');
         } elseif (! TaskCatalogue::keyFor(new Apprentice(['programme_id' => $t->programme_id]))) {
             $add(3, 'This programme has no loaded task catalogue. Load its controlled source before confirming.');
         } elseif ($t->source_hash !== ($p['programme']['template_hash'] ?? null)) {
-            $add(3, 'The template changed. Reselect the apprenticeship and confirm RPL again.');
+            $add(3, 'The template changed. Reselect the apprenticeship and confirm RPL again.', 'template');
         }
         if (! empty($p['programme']['tutor_group_id']) && $t) {
             $group = TutorGroup::find($p['programme']['tutor_group_id']);
             if (! $group?->active || ($group->programme_id && (int) $group->programme_id !== $t->programme_id)) {
-                $add(3, 'Choose an active tutor group for the selected programme.');
+                $add(3, 'Choose an active tutor group for the selected programme.', 'group');
             }
         }
         if (! filled($p['programme']['start_date'] ?? null)) {
-            $add(3, 'Enter the first day in learning.');
+            $add(3, 'Enter the first day in learning.', 'start');
         }
         $r = $p['rpl'] ?? [];
         if (! in_array($r['mode'] ?? null, ['none', 'applies'], true)) {
-            $add(4, 'Confirm no relevant prior learning or enter the approved RPL outcomes.');
+            $add(4, 'Confirm no relevant prior learning or enter the approved RPL outcomes.', 'rpl-mode');
         }
         if ($t) {
             try {
@@ -290,10 +290,10 @@ return $t;
             }
         }
         if (($r['mode'] ?? null) === 'applies' && ! filled($r['assessment_ref'] ?? null)) {
-            $add(4, 'Enter the completed assessment reference once.');
+            $add(4, 'Enter the completed assessment reference once.', 'assessment');
         }
         if (! ($r['remaining_confirmed'] ?? false) || ($t && ($r['confirmation_hash'] ?? null) !== Rpl68::hash([$t->source_hash, $r['mode'] ?? null, $r['assessment_ref'] ?? null, $r['adjustments'] ?? []]))) {
-            $add(4, 'Confirm the remaining KSBs have no reduction.');
+            $add(4, 'Confirm the remaining KSBs have no reduction.', 'rpl-mode');
         }
         if ($calc && $calc['unresolved']) {
             $affected = [];
@@ -310,23 +310,23 @@ return $t;
         if (! empty($e['id'])) {
             $employer = Employer::find($e['id']);
             if (! $employer?->active || $employer->record_version !== ($e['record_version'] ?? null)) {
-                $add(5, 'Employer changed or is inactive. Reselect and verify its agreement.');
+                $add(5, 'Employer changed or is inactive. Reselect and verify its agreement.', 'employer-search');
             }
         } else {
             if (! filled($e['reference'] ?? null) || ! filled($e['name'] ?? null)) {
-                $add(5, 'Select an existing employer or enter the new employer reference and name.');
+                $add(5, 'Select an existing employer or enter the new employer reference and name.', 'employer-search');
             } else {
                 foreach (Employer::where(fn ($q) => $q->whereRaw('UPPER(reference)=?', [strtoupper($e['reference'])])->orWhereRaw('LOWER(name)=?', [mb_strtolower(trim($e['name']))]))->get() as $candidate) {
                     if (strtoupper($candidate->reference) === strtoupper($e['reference'])) {
-                        $add(5, 'Employer reference already exists; select its existing record.');
+                        $add(5, 'Employer reference already exists; select its existing record.', 'employer-search');
                     } elseif (! filled($e['duplicate_reason'] ?? null)) {
-                        $add(5, 'Possible employer name match: '.$candidate->name.'. Select it or explain the separate organisation.');
+                        $add(5, 'Possible employer name match: '.$candidate->name.'. Select it or explain the separate organisation.', 'employer-duplicate');
                     }
                 }
             }
         }
         if (($r['mode'] ?? null) === 'applies' && (! filled($e['agreement_ref'] ?? null) || empty($e['agreement_verified']) || ($e['agreement_binding'] ?? null) !== Rpl68::hash([self::employerKey($e), $e['record_version'] ?? null, $r, $e['agreement_ref'] ?? null]))) {
-            $add(5, 'Verify the employer agreement reference against this linked employer and RPL revision.');
+            $add(5, 'Verify the employer agreement reference against this linked employer and RPL revision.', 'agreement');
         }
         $dates = $t ? RplPlanDates69::step6Dates($t->template, $p['programme'] ?? [], $r, $calc, $p['plan_dates69'] ?? []) : null;
 

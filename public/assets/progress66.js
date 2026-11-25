@@ -29,3 +29,19 @@ for(const roadmap of document.querySelectorAll('[data-p67-roadmap]')){
   const empty=roadmap.querySelector('[data-p67-empty]');if(empty)empty.hidden=visible>0;
  });
 }
+
+// Reveal any collapsed report section addressed by a direct link.
+function revealReportSection() {
+  const target = document.getElementById(window.location.hash.slice(1));
+  if (!target?.closest('.progress66')) return;
+  let revealed = false;
+  for (let element = target; element; element = element.parentElement) {
+    if (element instanceof HTMLDetailsElement && !element.open) {
+      element.open = true;
+      revealed = true;
+    }
+  }
+  if (revealed) target.scrollIntoView();
+}
+window.addEventListener('hashchange', revealReportSection);
+revealReportSection();

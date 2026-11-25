@@ -49,10 +49,20 @@ class ApprenticeExperience
         return $rows;
     }
 
+    public static function nextTask(\Illuminate\Support\Collection $tasks): ?LearningTask
+    {
+        $candidates = $tasks->filter(fn ($task) => $task->editable()
+            && !in_array($task->template['kind'] ?? 'source-pending', ['source-pending', 'knowledge'], true));
+        $release = BlockRelease::states($candidates);
+        return $candidates->filter(fn ($task) => $release[$task->id]['open'])
+            ->sortBy(fn ($task) => [$task->due_date?->toDateString() ?? '9999-12-31', $task->block, $task->reference])
+            ->first();
+    }
+
     public static function home(Apprentice $a): array
     {
         $tasks = LearningTask::where('apprentice_id', $a->id)->orderBy('block')->orderBy('reference')->get();
-        $task = $tasks->filter(fn ($t) => $t->editable() && ! in_array($t->template['kind'] ?? 'source-pending', ['source-pending', 'knowledge'], true) && BlockRelease::state($t)['open'])->sortBy(fn ($t) => ($t->due_date?->toDateString() ?? '9999-12-31').'-'.str_pad((string) $t->block, 2, '0', STR_PAD_LEFT).'-'.$t->reference)->first();
+        $task = self::nextTask($tasks);
         $actions = SmartAction::with('task')->where('apprentice_id', $a->id)->where('owner', 'Apprentice')->get()->filter(fn ($x) => $x->currentStatus() === 'To do')->sortBy(fn ($x) => $x->deadline()?->toDateString() ?? '9999-12-31')->values();
         $next = $task ? ['title' => $task->title, 'label' => $task->status === 'Referred' ? 'Make your task changes' : 'Continue your next task', 'url' => route('tasks.show', $task), 'due' => $task->due_date?->toDateString()] : null;
         $action = $actions->first(fn ($x) => ! $x->learning_task_id || ($x->task && $x->task->editable() && ! in_array($x->task->template['kind'] ?? 'source-pending', ['source-pending', 'knowledge'], true) && BlockRelease::state($x->task)['open']));

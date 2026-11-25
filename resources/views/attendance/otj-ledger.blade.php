@@ -2,7 +2,8 @@
 @section('title','Recorded OTJ ledger')
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }} · {{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Recorded OTJ ledger</h1><p>Current source records · {{ $summary['date'] }}</p></div><div class="toolbar"><a class="button" href="{{ route('attendance.apprentice',$apprentice) }}">Attendance</a><a class="button" href="{{ route('delivery.show',$apprentice) }}">Individual delivery plan</a><a class="button" href="{{ route('otj.pdf',$apprentice) }}">Download ledger PDF</a></div></header>
-<section class="panel"><h2>Recorded hours and plan comparison</h2>@include('attendance.otj-summary')</section>
+<section class="panel"><h2>Recorded hours and plan comparison</h2>@include('attendance.otj-headline', ['otjHeadline' => \App\Support\OtjPosition::headline(['summary' => $summary, 'rows' => $rows])])
+<details><summary>Hours by source and pace calculation</summary>@include('attendance.otj-summary')</details></section>
 @if($needsAttention->isNotEmpty())
 <section class="panel" id="pending-otj">
     <h2>OTJ records to check</h2>

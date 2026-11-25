@@ -105,7 +105,7 @@ class ApprenticeReminderSources
     public static function link(Apprentice $a, array $item): string
     {
         return match ($item['kind']) {
-            'review_signing' => route('electronic-reviews.show',$item['id']),'questionnaire_due' => route('portal-questionnaires.show',$item['id']),'task_referred','task_overdue','task_due' => route('tasks.show', $item['id']),'action_overdue','action_due' => route('actions.index', $a).'#action-'.$item['id'],default => route('experience.home')
+            'review_due' => route('review-appointments.index'), 'training_tomorrow' => route('calendar.index'), 'review_signing' => route('electronic-reviews.show',$item['id']),'questionnaire_due' => route('portal-questionnaires.show',$item['id']),'task_referred','task_overdue','task_due' => route('tasks.show', $item['id']),'action_overdue','action_due' => route('actions.index', $a).'#action-'.$item['id'],default => route('experience.home')
         };
     }
 

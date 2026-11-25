@@ -31,6 +31,40 @@ class EnglishMathsWorkflowTest extends TestCase
         return ['subject' => 'maths', 'type' => 'Functional Skills', 'title' => 'Functional Skills Maths', 'level' => 'Level 2', 'status' => 'Working towards', 'start_date' => '2026-11-01'];
     }
 
+    public function test_learner_submits_a_file_and_note_together_and_tutor_records_completion_from_topics(): void
+    {
+        Storage::fake(config('evidence.disk'));
+        $learner = $this->actor('apprentice');
+        $admin = $this->actor();
+        $apprentice = Apprentice::factory()->create(['user_id' => $learner->id]);
+        $topic = TrainingTopic::factory()->create(['apprentice_id' => $apprentice->id, 'subject' => 'maths', 'planned_hours' => 2]);
+        $topicUrl = route('topics.show', $topic);
+        $post = route('topics.evidence', $topic);
+        $this->actingAs($learner)->get($topicUrl)->assertOk()->assertSee('combined-topic-file')->assertDontSee('Save tutor update');
+        $this->from($topicUrl)->post($post, [
+            'version' => $topic->version, 'intent' => 'submit', 'draft' => 'Practice notes', 'own_work' => 1,
+            'file' => UploadedFile::fake()->create('topic-work.pdf', 1, 'application/pdf'),
+        ])->assertRedirect($topicUrl)->assertSessionHasNoErrors();
+        $topic->refresh();
+        $this->assertCount(1, $topic->files);
+        $this->assertSame('Practice notes', $topic->submissions[0]['comment']);
+        $this->assertSame($topic->files, $topic->submissions[0]['files']);
+        $this->assertSame('Awaiting review', $topic->evidence_stage);
+        $this->assertNotSame('Completed', $topic->status);
+        $this->actingAs($admin)->post(route('topics.update', $topic), [
+            'version' => $topic->version, 'status' => 'In Progress', 'decision' => 'Accepted', 'feedback' => 'Evidence checked',
+        ])->assertSessionHasNoErrors();
+        $topic->refresh();
+        $list = route('em.index', $apprentice);
+        $this->get($list)->assertOk()->assertSee('Record topic completion');
+        $this->from($list)->post(route('topics.update', $topic), [
+            'version' => $topic->version, 'status' => 'Completed', 'completion_date' => today()->toDateString(), 'feedback' => 'Topic delivered',
+        ])->assertRedirect($list)->assertSessionHasNoErrors();
+        $this->assertSame('Completed', $topic->fresh()->status);
+        $this->assertDatabaseCount('qualifications', 0);
+        $this->actingAs($learner)->get($list)->assertOk()->assertDontSee('Record topic completion');
+    }
+
     public function test_qualification_create_reopen_and_twelve_month_target_are_individual(): void
     {
         $a = Apprentice::factory()->create(['start_date' => '2025-01-01']);

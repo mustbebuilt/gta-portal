@@ -21,10 +21,10 @@ class PortalNavigation
         };
         if(StaffHandover::recipientAllowed($u)) {$primary[]=$item('Staff handovers','incoming-handovers.index',[],['incoming-handovers.*']);}
         if(MyResponsibilities::allowed($u)) {$primary[]=$item('My responsibilities','responsibilities.index',[],['responsibilities.*']);}
-        if(in_array($u->role,['admin','ceo','tutor','apprentice'],true)) {$primary[]=$item('Dashboard','dashboard.index',[],['dashboard.*']);}
+        if(in_array($u->role,['admin','ceo','tutor','apprentice'],true)) {$primary[]=$item('Dashboard','dashboard.index',[],['dashboard.index']);}
         $reports = ReportDirectory::links($u);
         if ($reports) {
-            $primary[] = $item('Reports','reports.index',[],['reports.index', ...array_keys($reports), 'visual-reports.pdf', 'historical-cohorts.*']);
+            $primary[] = $item('Reports','reports.index',[],['reports.index', ...array_keys($reports), 'dashboard.pdf', 'visual-reports.pdf', 'historical-cohorts.*', ... (isset($reports['timetable-management.index']) ? ['timetable-management.*'] : [])]);
         }
         if(in_array($u->role,['admin','ceo','tutor','apprentice','employer','mentor'],true)||StaffDuties::has($u,'mentor')||($u->role==='manager'&&CentreManagerAccess::workspace($u))) {$primary[]=$item($u->role==='apprentice'?'My progress':'View progress','progress66.index',[],['progress66.*']);}
         $links=[];
@@ -45,7 +45,7 @@ class PortalNavigation
             $links[]=$item('Register changes','session-operations.index',[],['session-operations.*','session-changes.*','register-actions.*']);
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)){$links[]=$item('Gateway preparation','gateway.index',[],['gateway.*']);}
-        if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'Timetable','centre-planning.index',[],['centre-planning.*','work-moves.*','optimiser.*','timetable-duties.*','timetable-governance.*','timetable-management.*']);}
+        if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'Timetable','centre-planning.index',[],['centre-planning.*','work-moves.*','optimiser.*','timetable-duties.*','timetable-governance.*']);}
         if(\App\Support\ApprenticeRecordChecks::allowed($u)){$links[]=$item('Record checks','record-checks.index',[],['record-checks.*']);}
         if($u->role==='apprentice'){$links[]=$item('My calendar','calendar.index',[],['calendar.*']);}
         if(CentreManagerAccess::workspace($u)){$links[]=$item('Centre oversight','centre-oversight.index',[],['centre-oversight.*']);}

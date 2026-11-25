@@ -2,7 +2,6 @@
 <section><h2>Learning and progress</h2><ul>
 <li><a href="{{ route('delivery.show',$apprentice) }}">Individual delivery plan and block calendar</a></li>
 <li><a href="{{ route('plans.show',$apprentice) }}">Training-plan preparation</a></li>
-<li><a href="{{ route('journey.show',$apprentice) }}">Apprenticeship journey</a></li>
 <li><a href="{{ route('training-journey72.show',$apprentice) }}">Personal training bank and gaps</a></li>
 <li><a href="{{ route('progress-review74.show',$apprentice) }}">Apprentice Progress Review summary</a></li>
 <li><a href="{{ route('em.index',$apprentice) }}">Maths and English</a></li>

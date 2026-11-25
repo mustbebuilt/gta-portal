@@ -384,6 +384,44 @@ class ProgressDashboard66Test extends TestCase
         $this->assertSame(1, collect($j['metrics'])->firstWhere('key', 'awaiting')['value']);
     }
 
+    public function test_personal_summary_links_to_returned_work_before_reporting_detail():void
+    {
+     [$user,$apprentice]=$this->fixture('apprentice');
+     $task=LearningTask::factory()->create([
+      'apprentice_id'=>$apprentice->id,
+      'title'=>'Update your inspection evidence',
+      'status'=>'Referred',
+      'due_date'=>today()->addDays(3),
+      'template'=>['kind'=>'portfolio'],
+     ]);
+
+     $response=$this->actingAs($user)->get('/progress-dashboard')->assertOk()
+      ->assertSeeInOrder(['My next step','Update your inspection evidence','Make your task changes','At a glance','Coming up','Progress detail and reports'])
+      ->assertSee(route('tasks.show',$task))->assertSee('Target to date unavailable');
+     $dom=new \DOMDocument();
+     @$dom->loadHTML($response->getContent());
+     $xpath=new \DOMXPath($dom);
+     $this->assertSame(1,$xpath->query('//details[@id="p66-full-report" and not(@open)]')->length);
+     $this->get(route('journey.show',$apprentice))->assertOk();
+
+     $task->forceFill(['status'=>'Awaiting marking','submitted_at'=>now()])->save();
+     $this->get('/progress-dashboard')->assertOk()->assertSee('With your tutor for marking')
+      ->assertDontSee('Make your task changes')->assertDontSee('Open my next step');
+     $filtered=$this->get('/progress-dashboard?metric=awaiting')->assertOk();
+     @$dom->loadHTML($filtered->getContent());
+     $this->assertSame(1,(new \DOMXPath($dom))->query('//details[@id="p66-full-report" and @open]')->length);
+    }
+
+    public function test_tutor_progress_shows_their_marking_link_ahead_of_charts():void
+    {
+     [$user,$apprentice]=$this->fixture('tutor');
+     $task=LearningTask::factory()->create(['apprentice_id'=>$apprentice->id,'status'=>'Awaiting marking','submitted_at'=>now()]);
+     $outside=Apprentice::factory()->create();
+     $hidden=LearningTask::factory()->create(['apprentice_id'=>$outside->id,'status'=>'Awaiting marking','submitted_at'=>now()]);
+     $this->actingAs($user)->get('/progress-dashboard')->assertOk()
+      ->assertSeeInOrder(['Next to mark','Open submission','At a glance','What needs attention','Progress and trends'])
+      ->assertSee(route('tasks.show',$task))->assertDontSee(route('tasks.show',$hidden));
+    }
     public function test_guest_cannot_read_live_or_demo_exports(): void
     {
         foreach (['/progress-dashboard', '/progress-dashboard/export/json', '/progress-dashboard/demo/admin', '/progress-dashboard/demo/admin/export/csv'] as $path) {

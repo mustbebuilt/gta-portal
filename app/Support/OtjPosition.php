@@ -14,9 +14,14 @@ class OtjPosition
         $rows = [];
         $pending = 0;
         $invalid = 0;
-        $sessions = TrainingSession::with(['marks' => fn ($q) => $q->where('apprentice_id', $a->id)])->whereJsonContains('members', $a->id)->orderBy('session_date')->orderBy('id')->get();
+        $sessions = TrainingSession::with(['marks' => fn ($q) => $q->where('apprentice_id', $a->id)])->where(fn ($query) => $query->whereJsonContains('members', $a->id)->orWhereJsonContains('members', (string) $a->id))->orderBy('session_date')->orderBy('id')->get();
         foreach ($sessions as $s) {
             if (! $s->ended()) {
+                continue;
+            }
+            $roster = RegisterFollowup::roster($s);
+            if (!$roster['shape'] || $roster['duplicates']) {
+                $invalid++;
                 continue;
             }
             $mark = $s->marks->first();
@@ -74,6 +79,19 @@ class OtjPosition
         $summary['progressive_basis'] = 'Indicative pace by elapsed calendar days within each dated training block. Includes time up to the start of today.';
 
         return ['summary' => $summary, 'rows' => $rows];
+    }
+
+    /** Common read-only headline for the register history, progress and OTJ ledger. */
+    public static function headline(array $position): array
+    {
+        $summary = $position['summary'];
+        return [
+            'recorded_hours' => $position['rows'] ? round($summary['recorded_minutes'] / 60, 2) : null,
+            'expected_hours' => $summary['progressive_expected_hours'],
+            'gap_hours' => $position['rows'] ? $summary['progressive_gap_hours'] : null,
+            'target_hours' => $summary['target_hours'],
+            'needs_check' => $summary['pending_sources'] > 0 || $summary['invalid_sources'] > 0,
+        ];
     }
 
     public static function progressiveHours(?array $plan, string $date): ?float

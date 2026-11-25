@@ -10,5 +10,5 @@
             <a class="button" href="{{ route('reviews.index', request()->only('group','apprentice','search')) }}">All in scope</a>
         @endif
     </div>
-    <p class="muted">A reported meeting can move to sign-off follow-up while the checked review date stays in place until the signed record is checked.</p>
+
 </section>

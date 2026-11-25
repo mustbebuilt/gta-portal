@@ -41,6 +41,14 @@ final class WeeklyRegisters
         return null;
     }
 
+    public static function thisWeek(TutorGroup $group): ?array
+    {
+        $week = CarbonImmutable::today(config('app.timezone'))->startOfWeek(CarbonImmutable::MONDAY);
+        $occurrence = self::next($group);
+
+        return ($occurrence['week'] ?? null) === $week->toDateString() ? $occurrence : null;
+    }
+
     public static function open(User $actor, int $auth, TutorGroup $group, array $occurrence): TrainingSession
     {
         return DB::transaction(function () use ($actor, $auth, $group, $occurrence): TrainingSession {

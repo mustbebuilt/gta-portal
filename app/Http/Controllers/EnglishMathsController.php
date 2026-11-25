@@ -80,7 +80,7 @@ class EnglishMathsController extends Controller
             ? ProgrammeOutcome::where('apprentice_id', $apprentice->id)->first()
             : null;
 
-        return view('em.index', ['apprentice' => $apprentice, 'subjects' => $subjects, 'topics' => $topics, 'topicRows' => $topics->filter(fn ($t) => match ($data['topics'] ?? '') { 'awaiting' => $t->evidence_stage === 'Awaiting review', 'referred' => $t->evidence_stage === 'Referred', default => true }), 'qualifications' => $quals, 'catalogue' => $this->catalogue(), 'canManage' => Access::manager($r->user()), 'entryRequirements' => $entryRequirements, 'editableSubjects' => $editableSubjects]);
+        return view('em.index', ['apprentice' => $apprentice, 'learner' => Access::learner($r->user(), $apprentice), 'subjects' => $subjects, 'topics' => $topics, 'topicRows' => $topics->filter(fn ($t) => match ($data['topics'] ?? '') { 'awaiting' => $t->evidence_stage === 'Awaiting review', 'referred' => $t->evidence_stage === 'Referred', default => true }), 'qualifications' => $quals, 'catalogue' => $this->catalogue(), 'canManage' => Access::manager($r->user()), 'entryRequirements' => $entryRequirements, 'editableSubjects' => $editableSubjects]);
     }
 
     public function saveSetupAssessments(Request $request, Apprentice $apprentice): RedirectResponse
@@ -173,27 +173,49 @@ class EnglishMathsController extends Controller
     public function evidence(Request $r, TrainingTopic $topic): RedirectResponse
     {
         abort_unless(Access::learner($r->user(), $topic->apprentice), 403);
-        $data = $r->validate(['version' => ['required', 'integer'], 'intent' => ['required', Rule::in(['draft', 'submit'])], 'draft' => ['nullable', 'string', 'max:50000'], 'own_work' => ['sometimes', 'accepted']]);
-        DB::transaction(function () use ($r, $topic, $data): void {
-            $t = TrainingTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
-            $this->version($r, $t);
-            $fresh=Apprentice::whereKey($t->apprentice_id)->lockForUpdate()->firstOrFail();
-            abort_unless(Access::learner($r->user(),$fresh),403);
-            if (! $t->editable()) {
-                throw ValidationException::withMessages(['intent' => 'This topic evidence is locked.']);
-            }if ($data['intent'] === 'submit') {
-                $r->validate(['own_work' => ['accepted']]);
-                if (! filled($data['draft'] ?? null) && ! $t->files) {
-                    throw ValidationException::withMessages(['draft' => 'Add a comment, evidence reference or file before submitting.']);
-                }$history = $t->submissions ?? [];
-                $history[] = ['version' => count($history) + 1, 'comment' => $data['draft'] ?? null, 'files' => $t->files ?? [], 'submitted_at' => now()->toIso8601String(), 'own_work' => true, 'decision' => null];
-                $t->submissions = $history;
-                $t->evidence_stage = 'Awaiting review';
-            }$t->draft = $data['draft'] ?? null;
-            $t->version++;
-            $t->save();
-            $this->audit($r, $t->apprentice_id, 'topic', $t->id, $data['intent'] === 'submit' ? 'submitted' : 'draft_saved');
-        });
+        $data = $r->validate([
+            'version' => ['required', 'integer'], 'intent' => ['required', Rule::in(['draft', 'submit'])],
+            'draft' => ['nullable', 'string', 'max:50000'], 'own_work' => ['sometimes', 'accepted'],
+            'file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,docx', 'extensions:pdf,jpg,jpeg,png,docx', 'max:15360'],
+        ]);
+        if ($data['intent'] === 'submit') {
+            $r->validate(['own_work' => ['accepted']]);
+        }
+
+        $entry = null;
+        try {
+            DB::transaction(function () use ($r, $topic, $data, &$entry): void {
+                $t = TrainingTopic::whereKey($topic->id)->lockForUpdate()->firstOrFail();
+                $this->version($r, $t);
+                $fresh = Apprentice::whereKey($t->apprentice_id)->lockForUpdate()->firstOrFail();
+                abort_unless(Access::learner($r->user(), $fresh), 403);
+                if (!$t->editable()) {
+                    throw ValidationException::withMessages(['intent' => 'This topic evidence is locked.']);
+                }
+                if ($r->hasFile('file')) {
+                    $entry = $this->attachTopicEvidence($r, $t);
+                    $this->audit($r, $t->apprentice_id, 'topic', $t->id, 'evidence_added');
+                }
+                if ($data['intent'] === 'submit') {
+                    if (!filled($data['draft'] ?? null) && !$t->files) {
+                        throw ValidationException::withMessages(['draft' => 'Add a comment, evidence reference or file before submitting.']);
+                    }
+                    $history = $t->submissions ?? [];
+                    $history[] = ['version' => count($history) + 1, 'comment' => $data['draft'] ?? null, 'files' => $t->files ?? [], 'submitted_at' => now()->toIso8601String(), 'own_work' => true, 'decision' => null];
+                    $t->submissions = $history;
+                    $t->evidence_stage = 'Awaiting review';
+                }
+                $t->draft = $data['draft'] ?? null;
+                $t->version++;
+                $t->save();
+                $this->audit($r, $t->apprentice_id, 'topic', $t->id, $data['intent'] === 'submit' ? 'submitted' : 'draft_saved');
+            });
+        } catch (\Throwable $exception) {
+            if ($entry) {
+                PrivateEvidence::delete($entry);
+            }
+            throw $exception;
+        }
 
         return back()->with('status', 'Topic evidence saved. Training completion and qualification results remain separate.');
     }
@@ -248,10 +270,8 @@ class EnglishMathsController extends Controller
                 abort_unless(Access::learner($r->user(),$fresh)||Access::subject($r->user(),$fresh,$t->subject),403);
                 if (! $t->editable()) {
                     throw ValidationException::withMessages(['file' => 'Save is locked while evidence awaits review or training is complete.']);
-                }$entry = PrivateEvidence::store($r->file('file'), 'topic-evidence', $r->user()->id);
-                $files = $t->files ?? [];
-                $files[] = [...$entry, 'by' => $r->user()->id];
-                $t->files = $files;
+                }
+                $entry = $this->attachTopicEvidence($r, $t);
                 $t->version++;
                 $t->save();
                 $this->audit($r, $t->apprentice_id, 'topic', $t->id, 'evidence_added');
@@ -263,6 +283,14 @@ class EnglishMathsController extends Controller
         }
 
         return back()->with('status', 'Topic evidence uploaded privately.');
+    }
+
+    private function attachTopicEvidence(Request $request, TrainingTopic $topic): array
+    {
+        $entry = PrivateEvidence::store($request->file('file'), 'topic-evidence', $request->user()->id);
+        $topic->files = [...($topic->files ?? []), [...$entry, 'by' => $request->user()->id]];
+
+        return $entry;
     }
 
     public function download(Request $r, TrainingTopic $topic, string $file): StreamedResponse

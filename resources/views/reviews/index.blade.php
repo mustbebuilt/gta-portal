@@ -4,24 +4,30 @@
 <header class="page-heading"><div><h1>Progress reviews</h1></div></header>
 @include('learning.errors')
 @include('employer-resources65.dashboard-link')
-<details class="panel"><summary>Review tools</summary><ul>
-    <li><a href="{{ route('review-workspace.index') }}">Prepare reviews and check saved drafts</a></li>
-    <li><a href="{{ route('review-appointments.index') }}">Review appointments</a></li>
-    <li><a href="{{ route('electronic-reviews.index') }}">Review signing</a></li>
-</ul></details>
-<details class="panel"><summary>About review dates</summary><p>Dates use checked meeting records. Bookings and signatures are tracked separately.</p></details>
 @include('reviews.triage')
+@include('reviews.followup-controls')
 @if($triageView)
 @include('reviews.triage-rows')
 @else
-@include('reviews.followup-controls')
 <section class="panel"><h2>Apprentices in your scope</h2>
+<p>{{ $reviewRows->total() }} matching apprentices @if($reviewRows->lastPage() > 1) · Page {{ $reviewRows->currentPage() }} of {{ $reviewRows->lastPage() }} @endif</p>
 @forelse($reviewRows as $reviewRow)
 @php($a=$reviewRow['apprentice'])
 @php($position=$positions[$a->id])
 @php($cycle=$position['cycle'])
-<article class="work-row" data-review-apprentice="{{ $a->id }}">@if(\App\Support\ReviewAppointments::staff(auth()->user(),$a))<p><a href="{{ route('review-appointments.form',$a) }}">Book review appointment</a></p>@endif<div><h3>{{ $a->first_name }} {{ $a->last_name }} · {{ $a->reference }}</h3><p>Mentor: {{ $a->mentor?->name??'Not assigned' }} · Tutor: {{ $a->tutor?->name??'Not assigned' }}</p>
-<p><strong>{{ ['overdue'=>'Overdue checked reference','today'=>'Due today','checks'=>'Status or history needs checking','upcoming'=>'Upcoming checked reference','paused'=>'Paused or non-active programme'][$reviewRow['bucket']] }}</strong> · Last checked meeting {{ $cycle['last_meeting']??'Unknown' }} · Next tracked review {{ $cycle['next_due']??'Unknown — history to check' }}.</p><p>{{ $cycle['confirmed_count'] }} independently checked copies · {{ $cycle['basis'] }}.</p>
+<article class="work-row" data-review-apprentice="{{ $a->id }}">
+<div>
+    <h3>{{ $a->first_name }} {{ $a->last_name }} · {{ $a->reference }}</h3>
+    <p><strong>{{ ['overdue'=>'Review overdue','today'=>'Due today','checks'=>'History or status to check','upcoming'=>'Upcoming review','paused'=>'Paused or non-active programme'][$reviewRow['bucket']] }}</strong>
+        @if($cycle['next_due']) · Next tracked review {{ $cycle['next_due'] }} @endif
+    </p>
+    @if($reviewRow['latest'])
+        <p>{{ match ($reviewRow['latest']->state) { 'Ready for signatures' => 'Saved review ready for signatures', 'Draft' => 'Saved review draft', default => 'Saved review status needs checking' } }}</p>
+    @endif
+    <details>
+        <summary>Dates, staff and reminders</summary>
+        <p>Mentor: {{ $a->mentor?->name ?? 'Not assigned' }} · Tutor: {{ $a->tutor?->name ?? 'Not assigned' }}</p>
+        <p>Last checked meeting {{ $cycle['last_meeting'] ?? 'Unknown' }} · {{ $cycle['confirmed_count'] }} checked copies · {{ $cycle['basis'] }}.</p>
 @if($position['programme_check'])<p>Programme status/source needs checking. No automatic reminder is generated.</p>@elseif($position['paused'])<p>Recorded programme status: {{ $position['programme_status'] }}. Automatic review reminders paused; existing review dates/history retained.</p>@endif
 @if(!$cycle['next_due'])<p>First-review reference: {{ $cycle['first_review_reference']??'Start date not recorded' }}. Check completed history before treating this as a current due date; no automatic reminder is generated.</p>@endif
 @if($position['due'])
@@ -35,11 +41,29 @@
 @endforeach
 @endif
 @include('reviews.draft-status')
-</div><div class="toolbar"><a class="button" href="{{ route('reviews.create',$a) }}">Start review / View history</a>@if($reviewRow['latest'])<a class="button" href="{{ route('reviews.edit',[$a,$reviewRow['latest']->id]) }}">Continue latest draft<span class="sr-only">: {{ $a->reference }}</span></a>@endif</div></article>
+</details>
+</div>
+<div class="toolbar">
+    @if($reviewRow['latest'])
+        <a class="button primary" href="{{ route('reviews.edit', [$a, $reviewRow['latest']->id]) }}">{{ $reviewRow['latest']->state === 'Ready for signatures' ? 'Open review sign-off' : 'Continue latest draft' }}<span class="sr-only">: {{ $a->reference }}</span></a>
+        <a href="{{ route('reviews.create', $a) }}">Review history</a>
+    @else
+        <a class="button primary" href="{{ route('reviews.create', $a) }}">Start review / View history</a>
+    @endif
+    @if(\App\Support\ReviewAppointments::staff(auth()->user(), $a))
+        <a href="{{ route('review-appointments.form', $a) }}">Book review appointment</a>
+    @endif
+</div>
+</article>
 @empty<p>No apprentices match this review view. Clear the filters to see other records in your permitted scope.</p>@endforelse
 </section>
 @endif
 <nav class="pagination" aria-label="Review follow-up pages">@if($reviewRows->previousPageUrl())<a class="button" href="{{ $reviewRows->previousPageUrl() }}">Previous reviews</a>@endif @if($reviewRows->nextPageUrl())<a class="button" href="{{ $reviewRows->nextPageUrl() }}">Next reviews</a>@endif</nav>
+<details class="panel"><summary>Review tools</summary><ul>
+    <li><a href="{{ route('review-workspace.index') }}">Prepare reviews and check saved drafts</a></li>
+    <li><a href="{{ route('review-appointments.index') }}">Review appointments</a></li>
+    <li><a href="{{ route('electronic-reviews.index') }}">Review signing</a></li>
+</ul><p>Tracked due dates use checked meeting records. Bookings and signing have their own status.</p></details>
 @if($manager)
 <details class="panel"><summary>In-portal review reminders for all eligible sources</summary><p>This processes all eligible sources regardless of the filters above. Due today or overdue checked-meeting references for a recorded Active programme only. Each current tutor and mentor gets one reminder per source; marking it seen does not complete a review. Provisional first-review dates do not create reminders.</p>
 <p><strong>{{ $reminderPreview['due'] }}</strong> apprentices due · {{ $reminderPreview['eligible'] }} eligible staff reminders · {{ $reminderPreview['already_recorded'] }} already recorded · {{ $reminderPreview['awaiting_seen'] }} recorded and awaiting acknowledgement.</p>

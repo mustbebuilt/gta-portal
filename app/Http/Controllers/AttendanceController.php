@@ -70,7 +70,22 @@ class AttendanceController extends Controller
         $page = min(Paginator::resolveCurrentPage(), max(1, (int) ceil($filtered->count() / 25)));
         $registerRows = new LengthAwarePaginator($filtered->forPage($page, 25)->values(), $filtered->count(), 25, $page, ['path' => $r->url(), 'query' => $r->except('page')]);
 
-        return view('attendance.index', ['nextScope83' => Workday83::registerScope($input), 'nextRegister83' => Workday83::nextRegister($r->user(), null, $input), 'groups' => $groups, 'sessions' => $registerRows->getCollection()->pluck('session'), 'weeklyGroupSessions' => $sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'), 'monthlyOutstanding' => $monthlyOutstanding, 'todayRegisterRows' => $followup['rows']->filter(fn ($row) => $row['session']->session_date->isToday())->values(), 'registerRows' => $registerRows, 'registerCounts' => $followup['counts'], 'registerView' => $view, 'registerSearch' => $search]);
+        $scheduledThisWeek = collect();
+        if (! $r->filled('apprentice') && ! $r->filled('search') && $view === 'all') {
+            $selectedGroups = $groups->when(isset($input['group']), fn ($all) => $all->where('id', (int) $input['group']));
+            $scheduled = $selectedGroups->map(fn ($group) => ['group' => $group, 'occurrence' => \App\Support\WeeklyRegisters::thisWeek($group)])
+                ->filter(fn ($row) => $row['occurrence'] !== null);
+            if ($scheduled->isNotEmpty()) {
+                $opened = TrainingSession::whereIn('tutor_group_id', $scheduled->pluck('group.id'))
+                    ->where('regular_week', $scheduled->first()['occurrence']['week'])->pluck('tutor_group_id');
+                $memberGroups = Apprentice::whereIn('tutor_group_id', $scheduled->pluck('group.id'))->distinct()->pluck('tutor_group_id');
+                $scheduledThisWeek = $scheduled->reject(fn ($row) => $opened->contains($row['group']->id))
+                    ->filter(fn ($row) => $memberGroups->contains($row['group']->id)
+                        && \App\Support\RegisterCreation::allowed($r->user(), $row['group']))
+                    ->sortBy(fn ($row) => [$row['occurrence']['date'], $row['occurrence']['settings']['start'], $row['group']->name])->values();
+            }
+        }
+        return view('attendance.index', ['scheduledThisWeek' => $scheduledThisWeek, 'nextScope83' => Workday83::registerScope($input), 'nextRegister83' => Workday83::nextRegister($r->user(), null, $input), 'groups' => $groups, 'sessions' => $registerRows->getCollection()->pluck('session'), 'weeklyGroupSessions' => $sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'), 'monthlyOutstanding' => $monthlyOutstanding, 'todayRegisterRows' => $followup['rows']->filter(fn ($row) => $row['session']->session_date->isToday())->values(), 'registerRows' => $registerRows, 'registerCounts' => $followup['counts'], 'registerView' => $view, 'registerSearch' => $search]);
     }
 
     public function create(Request $r): RedirectResponse
@@ -358,7 +373,7 @@ class AttendanceController extends Controller
         abort_unless(Access::training($r->user(), $apprentice), 403);
         $ledger = AttendanceLedger::forIds([$apprentice->id])[$apprentice->id];
 
-        return view('attendance.apprentice', ['apprentice' => $apprentice, ...$ledger]);
+        return view('attendance.apprentice', ['apprentice' => $apprentice, 'otjHeadline' => \App\Support\OtjPosition::headline(\App\Support\OtjPosition::forApprentice($apprentice)), ...$ledger]);
     }
 
     private function version(Request $r, TrainingSession $s): void

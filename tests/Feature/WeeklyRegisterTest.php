@@ -27,6 +27,11 @@ class WeeklyRegisterTest extends TestCase
             'breaks_checked'=>1,'break_start'=>'12:00','break_end'=>'13:00','planned_learning'=>'Practical workshop'];
         $this->actingAs($tutor)->post($base.'/schedule',$settings)->assertForbidden();
         $this->actingAs($manager)->post($base.'/schedule',$settings)->assertSessionHasNoErrors();
+        $this->actingAs($tutor)->get(route('attendance.index'))->assertOk()
+            ->assertSeeInOrder(['Your next register','Open weekly register','Weekly groups and schedules'])
+            ->assertSee(route('attendance.weekly.open', $group));
+        $this->assertDatabaseCount('training_sessions', 0);
+        $this->post($base.'/open',['date'=>'2026-11-24','week'=>'2026-11-23'])->assertRedirect();
         $this->artisan('gta:weekly-registers')->assertSuccessful();
         $this->artisan('gta:weekly-registers')->assertSuccessful();
         $first = TrainingSession::sole();

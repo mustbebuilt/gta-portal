@@ -7,3 +7,19 @@ document.addEventListener('keydown', (event) => {
   details.querySelector('summary')?.focus();
   event.preventDefault();
 });
+
+// Existing task and action links can target a record inside a collapsed history.
+function revealLinkedRecord() {
+  const target = document.getElementById(window.location.hash.slice(1));
+  if (!target) return;
+  let revealed = false;
+  for (let panel = target; panel; panel = panel.parentElement) {
+    if (panel instanceof HTMLDetailsElement && panel.hasAttribute('data-reveal-on-link') && !panel.open) {
+      panel.open = true;
+      revealed = true;
+    }
+  }
+  if (revealed) target.scrollIntoView();
+}
+window.addEventListener('hashchange', revealLinkedRecord);
+revealLinkedRecord();

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmployerPortalAction extends Model
 {
@@ -11,6 +12,11 @@ class EmployerPortalAction extends Model
     protected $keyType = 'string';
 
     protected $guarded = [];
+
+    public function apprentice(): BelongsTo
+    {
+        return $this->belongsTo(Apprentice::class);
+    }
 
     protected function casts(): array
     {

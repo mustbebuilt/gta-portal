@@ -165,12 +165,18 @@ return $result;
                 if ($reviewPosition['programme_check'] || $reviewPosition['paused']) {
                     $cycle['next_due'] = null;
                     $checks[] = $reviewPosition['paused'] ? 'Review cycle paused for the recorded programme status' : 'Programme status needed to confirm review cycle';
-                }$topicRows = [];
-                foreach (['maths', 'english'] as $s) {
-                    $ts = $topics->get($a->id, collect())->where('subject', $s)->filter(fn ($t) => $t->planned_hours > 0);
-                    if ($ts->count()) {
-                        $topicRows[$s] = ['assigned' => $ts->count(), 'completed' => $ts->where('status', 'Completed')->count(), 'qualification' => $quals->get($a->id, collect())->where('subject', $s)->map(fn ($q) => $q->title.': '.$q->status)->implode('; ') ?: 'Not recorded'];
-                    }
+                }
+                $topicRows = [];
+                foreach (['english', 'maths'] as $subject) {
+                 $assigned = $topics->get($a->id, collect())->where('subject', $subject)->filter(fn ($topic) => $topic->planned_hours > 0);
+                 $qualifications = $quals->get($a->id, collect())->where('subject', $subject);
+                 if ($assigned->isNotEmpty() || ($u->role === 'apprentice' && $qualifications->isNotEmpty())) {
+                  $topicRows[$subject] = [
+                   'assigned' => $assigned->count(),
+                   'completed' => $assigned->where('status', 'Completed')->count(),
+                   'qualification' => $qualifications->map(fn ($qualification) => $qualification->title.': '.$qualification->status)->implode('; ') ?: 'Not recorded',
+                  ];
+                 }
                 }
                 $act = [];
                 foreach ($actions->get($a->id, collect()) as $x) {
@@ -209,6 +215,20 @@ return $result;
                     }
                 }
                 $home = $u->role === 'apprentice' ? ApprenticeExperience::home($a) : null;
+                $personal = [];
+                if ($home !== null) {
+                 $personal['next_step'] = $home['next'];
+                 $personal['otj_headline'] = OtjPosition::headline($o);
+                 $catalogue = TaskCatalogue::allocationKey($a);
+                 if ($catalogue !== null) {
+                  $references = array_column(TaskCatalogue::tasks($catalogue), 'id');
+                  $approved = $known->where('status', 'Approved')
+                   ->filter(fn ($task) => TaskCatalogue::savedKey($task) === $catalogue)
+                   ->pluck('reference')->intersect($references)->unique()->count();
+                  $personal['programme_tasks'] = ['approved' => $approved, 'total' => count($references)];
+                 }
+                }
+
                 $forecast = 'Not available';
                 $outcome = 'Not recorded';
                 if (CohortForecasts::allowed($u, $a)) {
@@ -220,7 +240,7 @@ return $result;
                 $appointment = class_exists(ReviewNextStep::class) ? ReviewNextStep::for($u, $a)['appointment'] : ReviewAppointment::where('apprentice_id', $a->id)->where('state', 'Published')->where('ends_at', '>', now()->utc())->orderBy('starts_at')->limit(50)->get()->first(fn ($meeting) => ReviewAppointments::published($meeting) && ReviewAppointments::current($meeting) && ReviewAppointments::visible($u, $meeting));
 
                 $roadmap = ($u->role === 'apprentice' || $people->count() === 1) ? ApprenticeRoadmap67::live($u, $a, $home['blocks'] ?? ApprenticeExperience::blocks($a, $set), $o['rows']) : null;
-                $rows[] = ['id' => (string) $a->id, 'reference' => $a->reference, 'name' => $a->first_name.' '.$a->last_name, 'group_id' => $a->tutor_group_id, 'programme' => $a->programmeLabel() ?? 'Not recorded', 'group' => $a->groupLabel() ?? 'Not recorded', 'tutor' => $a->tutor?->name ?? 'Not recorded', 'scenario' => '', 'task_status' => $set->count() ? $status : null, 'expected_tasks' => $expected, 'attendance_rows' => $attendance, 'attendance' => AttendanceMath::report($attendance), 'otj' => ['recorded_hours' => count($o['rows']) ? round($o['summary']['recorded_minutes'] / 60, 2) : null, 'target_hours' => $o['summary']['target_hours'], 'planned_due_hours' => $o['summary']['planned_due_hours'], 'pending_sources' => $o['summary']['pending_sources'], 'invalid_sources' => $o['summary']['invalid_sources'], 'delivered_hours' => null, 'approved_extra_hours' => count($o['rows']) ? round($o['summary']['extra_minutes'] / 60, 2) : null], 'review_due' => $cycle['next_due'], 'review_state' => $cycle['status'] ?? 'Not available', 'topics' => $topicRows, 'actions' => $act, 'checks' => $checks, 'feedback' => $feedback, 'roadmap' => $roadmap, 'milestones' => array_values(array_filter($roadmap['events'] ?? [], fn ($e) => $e['status'] === 'Recorded')), 'blocks' => $home['blocks'] ?? ApprenticeExperience::blocks($a, $set), 'next_title' => $home['next']['title'] ?? 'Open your training tasks', 'next_url' => $home['next']['url'] ?? route('learning.index', $a), 'url' => route('progress66.index', ['apprentice' => $a->id]).'#records', 'review_url' => $u->role === 'apprentice' ? route('electronic-reviews.index', ['filter' => 'mine']) : route('reviews.create', $a), 'outcome' => $outcome, 'forecast' => $forecast, 'otj_ledger' => $o['rows'], 'otj_plan' => DeliveryPlan::approved($a)['blocks'] ?? [], 'appointment' => $appointment ? $appointment->starts_at->timezone('Europe/London')->format('d M Y H:i') : 'Not recorded'];
+                $rows[] = [...$personal, 'id' => (string) $a->id, 'reference' => $a->reference, 'name' => $a->first_name.' '.$a->last_name, 'group_id' => $a->tutor_group_id, 'programme' => $a->programmeLabel() ?? 'Not recorded', 'group' => $a->groupLabel() ?? 'Not recorded', 'tutor' => $a->tutor?->name ?? 'Not recorded', 'scenario' => '', 'task_status' => $set->count() ? $status : null, 'expected_tasks' => $expected, 'attendance_rows' => $attendance, 'attendance' => AttendanceMath::report($attendance), 'otj' => ['recorded_hours' => count($o['rows']) ? round($o['summary']['recorded_minutes'] / 60, 2) : null, 'target_hours' => $o['summary']['target_hours'], 'planned_due_hours' => $o['summary']['planned_due_hours'], 'pending_sources' => $o['summary']['pending_sources'], 'invalid_sources' => $o['summary']['invalid_sources'], 'delivered_hours' => null, 'approved_extra_hours' => count($o['rows']) ? round($o['summary']['extra_minutes'] / 60, 2) : null], 'review_due' => $cycle['next_due'], 'review_state' => $cycle['status'] ?? 'Not available', 'topics' => $topicRows, 'actions' => $act, 'checks' => $checks, 'feedback' => $feedback, 'roadmap' => $roadmap, 'milestones' => array_values(array_filter($roadmap['events'] ?? [], fn ($e) => $e['status'] === 'Recorded')), 'blocks' => $home['blocks'] ?? ApprenticeExperience::blocks($a, $set), 'next_title' => $home['next']['title'] ?? 'Open your training tasks', 'next_url' => $home['next']['url'] ?? route('learning.index', $a), 'url' => route('progress66.index', ['apprentice' => $a->id]).'#records', 'review_url' => $u->role === 'apprentice' ? route('electronic-reviews.index', ['filter' => 'mine']) : route('reviews.create', $a), 'outcome' => $outcome, 'forecast' => $forecast, 'otj_ledger' => $o['rows'], 'otj_plan' => DeliveryPlan::approved($a)['blocks'] ?? [], 'appointment' => $appointment ? $appointment->starts_at->timezone('Europe/London')->format('d M Y H:i') : 'Not recorded'];
             }
             $notice = 'Task decisions and plan references are current records at capture. The date filter applies to attendance only. No official achievement rate or historical progress curve is inferred.';
             $result = self::assemble($rows, $f, $role, false, ['as_of' => today()->toDateString(), 'notice' => $notice, 'task_history' => false]);

@@ -29,3 +29,20 @@ document.querySelectorAll('[data-evidence-kind]').forEach(select => {
   select.addEventListener('change', update);
   update();
 });
+
+// Show descriptions for the evidence source selected. Leave all fields available without JS.
+document.querySelectorAll('[data-evidence-file]').forEach(input => {
+  const form = input.form;
+  const fileDetails = form.querySelector('[data-file-details]');
+  const camera = form.querySelector('input[name="camera_photo"]');
+  const cameraDetails = form.querySelector('[data-camera-details]');
+  const update = (file, details) => {
+    if (!file || !details) return;
+    details.hidden = !file.files.length && !details.hasAttribute('data-keep-open') &&
+      !details.querySelector('textarea')?.value.trim();
+  };
+  input.addEventListener('change', () => update(input, fileDetails));
+  camera?.addEventListener('change', () => update(camera, cameraDetails));
+  update(input, fileDetails);
+  update(camera, cameraDetails);
+});

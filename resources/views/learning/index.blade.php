@@ -3,11 +3,8 @@
 @section('content')
 @include('quick-actions.context')
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Training blocks and tasks</h1></div></header>
-<nav class="page-actions64" aria-label="Training page actions"><div class="toolbar"><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a><a class="button" href="{{ route('delivery.show',$apprentice) }}">Delivery plan and block calendar</a></div>
-<details class="action-disclosure64"><summary>Reference and source details</summary><ul><li><a href="{{ route('curriculum.show',$apprentice) }}">Blocks and KSB reference</a></li>@if(\App\Support\CurriculumSources::allowed(auth()->user(),$apprentice))<li><a href="{{ route('curriculum-sources.show',$apprentice) }}">Task source comparison</a></li>@endif</ul></details></nav>
 @include('learning.errors')
 @include('learning.source-warnings')
-@if($manage)@include('learning.block-controls')@endif
 @if((int)$counts->sum()===0)
 <section class="panel"><h2>No tasks assigned</h2><p>No progress percentage is available until tasks are assigned.</p>
 @php($catalogueKey=\App\Support\TaskCatalogue::allocationKey($apprentice))
@@ -19,11 +16,54 @@
 @if($manage && ($counts['Source required']??0)>0 && \App\Support\TaskCatalogue::keyFor($apprentice)==='panel')
 <section class="panel"><h2>Panel reflection sources available</h2><p>Load the supplied reflections into untouched Source required placeholders. Saved answers, evidence and marking history are preserved. New reflections start as drafts and still need apprentice work and tutor approval.</p><form method="post" action="{{ route('learning.reflection-sources',$apprentice) }}">@csrf<label class="check"><input type="checkbox" name="confirmed" value="1" required>I confirm the supplied Panel reflection sources apply.</label><button class="primary">Load reflection sources</button></form></section>
 @endif
-<section class="panel"><h2>Task approval</h2><div class="progress-summary"><div class="progress-ring" style="--progress:{{ round(100*$approved/$all) }};--progress-color:var(--achieved)"><strong>{{ round(100*$approved/$all) }}%</strong></div><div><p><strong>{{ $approved }} of {{ $all }} tasks approved</strong></p><p>Task approval only; KSBs and completion are separate.</p><p class="muted">{{ $counts['Awaiting marking']??0 }} awaiting marking · {{ $counts['Referred']??0 }} returned for changes</p></div></div></section>
-<form class="search panel" method="get"><div><label for="task-status">Show tasks</label><select id="task-status" name="status"><option value="">All statuses</option>@foreach(['Draft','Awaiting marking','Referred','Approved','Source required'] as $status)<option @selected(request('status')===$status)>{{ $status }}</option>@endforeach</select></div><button>Apply filter</button><a class="button" href="{{ route('learning.index',$apprentice) }}">Clear</a></form>
-@forelse($tasks->groupBy('block') as $block=>$items)
-<section class="panel"><h2>Block {{ $block }} · {{ $items->first()->theme }}</h2>@php($release=\App\Support\BlockRelease::state($items->first()))@if(!$release['open'])<p class="status amber">{{ $release['label'] }}</p>@endif<div class="work-list">@foreach($items as $task)<article class="work-row"><div><h3><a href="{{ route('tasks.show',$task) }}">{{ $task->title }}</a></h3><p class="muted">Due: {{ $task->due_date?->format('d M Y') ?? 'Not set' }}</p></div><span class="status {{ $task->status==='Approved'?'achieved':($task->markingOverdue()?'red':'neutral') }}">{{ $task->markingOverdue()?'Overdue marking':$task->status }}</span><a class="button" href="{{ route('tasks.show',$task) }}">Open task</a></article>@endforeach</div></section>
+<section class="panel" aria-labelledby="task-approval">
+    <h2 id="task-approval">{{ $nextTask ? 'Continue your training' : 'Task approval' }}</h2>
+    @if($nextTask)
+        <h3>{{ $nextTask->title }}</h3>
+        @if($nextTask->due_date)<p>Due {{ $nextTask->due_date->format('j M Y') }}</p>@endif
+        <a class="button primary" href="{{ route('tasks.show', $nextTask) }}">{{ $nextTask->status === 'Referred' ? 'Make your task changes' : 'Open next task' }}</a>
+    @endif
+    <p><strong>{{ $approved }} of {{ $all }} tasks approved</strong></p>
+    @if(($counts['Awaiting marking'] ?? 0) || ($counts['Referred'] ?? 0))
+        <p>{{ $counts['Awaiting marking'] ?? 0 }} with the tutor for marking · {{ $counts['Referred'] ?? 0 }} returned for changes</p>
+    @endif
+</section>
+<details class="panel" @if($status) open @endif>
+    <summary>Filter tasks</summary>
+    <form class="search" method="get">
+        <div><label for="task-status">Show tasks</label><select id="task-status" name="status">
+            <option value="">All statuses</option>
+            @foreach($statuses as $option)<option value="{{ $option }}" @selected($status === $option)>{{ ['Referred' => 'Returned for changes', 'Awaiting marking' => 'With tutor for marking'][$option] ?? $option }}</option>@endforeach
+        </select></div>
+        <button>Apply filter</button>
+        @if($status)<a class="button" href="{{ route('learning.index', $apprentice) }}">Clear</a>@endif
+    </form>
+</details>
+@forelse($tasks->groupBy('block') as $block => $items)
+    <details class="panel" @if($status || $block === $focusBlock) open @endif>
+        <summary>Block {{ $block }} · {{ $items->first()->theme }}
+            @if(!$status) · {{ $items->where('status', 'Approved')->count() }} of {{ $items->count() }} approved @endif
+        </summary>
+        <div class="work-list">
+            @foreach($items as $task)
+                @php($release = $releaseStates[$task->id])
+                <article class="work-row">
+                    <div>
+                        <h3><a href="{{ route('tasks.show', $task) }}">{{ $task->title }}</a></h3>
+                        <p class="muted">{{ $task->due_date ? 'Due '.$task->due_date->format('j M Y') : 'Due date not set' }}</p>
+                        @if(!$release['open'])<p>{{ $release['label'] }}</p>@endif
+                    </div>
+                    <span class="status {{ $task->status === 'Approved' ? 'achieved' : ($task->markingOverdue() ? 'red' : 'neutral') }}">
+                        {{ $task->markingOverdue() ? 'Overdue marking' : (['Referred' => 'Returned for changes'][$task->status] ?? $task->status) }}
+                    </span>
+                </article>
+            @endforeach
+        </div>
+    </details>
 @empty<section class="panel"><h2>No matching tasks</h2><p>{{ (int)$counts->sum() }} task(s) are already assigned. No tasks match this status filter; this does not mean the allocation is missing.</p><a class="button" href="{{ route('learning.index',$apprentice) }}">Show all assigned tasks</a></section>@endforelse
 <p class="muted">Gateway, EPA and formal KSB assessment are recorded separately.</p>
 @endif
+<nav class="page-actions64" aria-label="Training page actions"><div class="toolbar"><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a><a class="button" href="{{ route('delivery.show',$apprentice) }}">Delivery plan and block calendar</a></div>
+<details class="action-disclosure64"><summary>Reference and source details</summary><ul><li><a href="{{ route('curriculum.show',$apprentice) }}">Blocks and KSB reference</a></li>@if(\App\Support\CurriculumSources::allowed(auth()->user(),$apprentice))<li><a href="{{ route('curriculum-sources.show',$apprentice) }}">Task source comparison</a></li>@endif</ul></details></nav>
+@if($manage)@include('learning.block-controls')@endif
 @endsection

@@ -152,7 +152,7 @@ class GuidedSetup68Test extends TestCase {
    ->assertSee('<optgroup label="Skills">', false)->assertSee('<optgroup label="Behaviours">', false)
    ->assertSee('Save and continue')
    ->assertSee('<details id="rpl-adjustments"', false)
-   ->assertSee('assets/setup68.js?v=rpl-entry-2')
+   ->assertSee('assets/setup68.js?v=refined-setup')
    ->assertDontSee('Saved training-hours preview')
    ->assertSee('Reduction for S1')->assertSee('Reduction for B1')
    ->assertDontSee('Save assessment reference')->assertDontSee('Preview selected changes')
@@ -175,6 +175,33 @@ class GuidedSetup68Test extends TestCase {
   $this->assertEquals($template->template['full_hours'], Setup::review($draft->fresh())['calculation']['revised_hours']);
  }
  public function test_no_prior_learning_one_click_moves_to_employer():void {$u=$this->actor();$this->actingAs($u);$t=$this->template();$d=Setup::start($u,$u->auth_version);$d=$this->save($d,3,['template_id'=>$t->id,'start_date'=>'2026-11-18']);$this->post('/apprentice-setup/'.$d->id.'/steps/4?next=5',['version'=>$d->version,'action'=>'none'])->assertRedirect('/apprentice-setup/'.$d->id.'/5');$this->assertTrue($d->fresh()->payload['rpl']['remaining_confirmed']);$this->assertSame([], $d->fresh()->payload['rpl']['adjustments']);}
+ public function test_employer_search_is_read_only_and_final_check_links_to_the_agreement():void
+ {
+  $actor=$this->actor();
+  $this->actingAs($actor);
+  $draft=Setup::start($actor,$actor->auth_version);
+  $template=$this->template();
+  $draft=$this->save($draft,3,['template_id'=>$template->id,'start_date'=>'2026-11-18']);
+  $draft=$this->save($draft,4,['mode'=>'applies','assessment_ref'=>'ASSESSMENT','adjustments'=>['K1'=>20],'remaining_confirmed'=>true]);
+  $employer=Employer::create(['reference'=>'SEARCH68','name'=>'Searchable Workshop']);
+  $search=route('setup68.show',[$draft,5,'employer_search'=>'search68']);
+
+  $this->get($search)->assertOk()->assertSeeInOrder(['Find an employer','Searchable Workshop','Add a new employer']);
+  $this->assertSame($draft->version,$draft->fresh()->version);
+  $this->get(route('setup68.show',[$draft,5,'employer_search'=>'No matching workshop']))
+   ->assertOk()->assertSee('No active employers match');
+  $this->post(route('setup68.save',[$draft,5]),['version'=>$draft->version,'next'=>6,'data'=>['id'=>$employer->id]])
+   ->assertRedirect(route('setup68.show',[$draft,5]));
+  $draft->refresh();
+  $this->get(route('setup68.show',[$draft,5]))->assertOk()->assertSee('Saved employer:')->assertSee('Searchable Workshop');
+  $this->get(route('setup68.show',[$draft,7]))->assertOk()
+   ->assertSeeInOrder(['Fix before confirming','Planned end dates','Training hours by block'])
+   ->assertSee(route('setup68.show',[$draft,5]).'#agreement');
+  $this->post(route('setup68.save',[$draft,5]),['version'=>$draft->version,'next'=>6,
+   'data'=>['id'=>$employer->id,'agreement_ref'=>'AGREE68','agreement_verified'=>1],
+  ])->assertRedirect(route('setup68.show',[$draft,6]))->assertSessionHasNoErrors();
+ }
+
  public function test_employer_change_clears_previous_agreement():void {[$d]=$this->ready(true);$this->post('/apprentice-setup/'.$d->id.'/reopen',['version'=>$d->version,'reason'=>'Employer changed'])->assertRedirect();$d=$d->fresh();$e=Employer::create(['reference'=>'OTHER68','name'=>'Another employer']);$d=$this->save($d,5,['id'=>$e->id,'agreement_ref'=>'OLD-REF','agreement_verified'=>true]);$this->assertFalse($d->payload['employer']['agreement_verified']);$this->assertTrue(collect(Setup::review($d)['issues'])->contains(fn($x)=>$x['step']===5));}
  public function test_guest_and_non_admin_cannot_read_a_private_draft():void {[$d]=$this->ready();$this->actingAs($this->actor('tutor'))->get('/apprentice-setup/'.$d->id.'/2')->assertForbidden();$this->post('/apprentice-setup/'.$d->id.'/steps/2',['version'=>$d->version,'data'=>['state'=>'selected','codes'=>['IM10']]])->assertForbidden();}
  public function test_revoked_auth_version_cannot_start_or_commit():void {$u=$this->actor();$this->actingAs($u);DB::table('users')->where('id',$u->id)->increment('auth_version');$this->post('/apprentice-setup')->assertRedirect()->assertSessionHasErrors();}

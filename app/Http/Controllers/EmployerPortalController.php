@@ -179,7 +179,14 @@ class EmployerPortalController extends Controller
             }
         }$visible = EmployerPortalAction::whereIn('employer_apprentice_grant_id', $ids)->get()->filter(fn ($x) => EmployerActions::grantBinding($x, EmployerApprenticeGrant::find($x->employer_apprentice_grant_id)))->pluck('id');
 
-        return $this->privateView('employer-portal.index', ['actions' => EmployerPortalAction::whereIn('id', $visible)->whereIn('employer_apprentice_grant_id', $ids)->where('state', '!=', 'Withdrawn')->orderByRaw("CASE WHEN state = 'Pending' THEN 0 ELSE 1 END")->orderBy('due_date')->orderBy('id')->paginate(15)]);
+        $query = EmployerPortalAction::whereIn('id', $visible)
+            ->whereIn('employer_apprentice_grant_id', $ids)->where('state', '!=', 'Withdrawn');
+        $pendingCount = (clone $query)->where('state', 'Pending')->count();
+        $actions = $query->with('apprentice:id,first_name,last_name')
+            ->orderByRaw("CASE WHEN state = 'Pending' THEN 0 ELSE 1 END")
+            ->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END')->orderBy('due_date')->orderBy('id')->paginate(15);
+
+        return $this->privateView('employer-portal.index', compact('actions', 'pendingCount'));
     }
 
     public function show(Request $r, EmployerPortalAction $action)

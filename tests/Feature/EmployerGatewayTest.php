@@ -164,6 +164,10 @@ class EmployerGatewayTest extends TestCase
         $this->actingAs($contact)->post(route('employer-actions.respond', $x), $this->reply($x))->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame('Responded', $x->fresh()->state);
         $this->assertSame($contact->id, $x->fresh()->responded_by);
+        $this->get(route('employer-actions.index'))->assertOk()
+            ->assertSeeInOrder(['Requests to answer', 'Earlier requests and replies', 'SHARED REQUEST TITLE'])
+            ->assertDontSee('Open request and reply');
+
         $this->assertSame($before, $r->fresh()->getAttributes());
         $this->assertDatabaseCount('signed_review_records', 0);
     }

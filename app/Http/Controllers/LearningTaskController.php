@@ -31,12 +31,30 @@ class LearningTaskController extends Controller
     public function index(Request $r, Apprentice $apprentice): View
     {
         abort_unless(Access::training($r->user(), $apprentice), 403);
-        $q = LearningTask::where('apprentice_id', $apprentice->id);
-        if (in_array($r->query('status'), ['Draft', 'Awaiting marking', 'Referred', 'Approved', 'Source required'], true)) {
-            $q->where('status', $r->query('status'));
-        }
+        $statuses = ['Draft', 'Awaiting marking', 'Referred', 'Approved', 'Source required'];
+        $status = $r->query('status');
+        $status = in_array($status, $statuses, true) ? $status : null;
+        $query = LearningTask::where('apprentice_id', $apprentice->id);
+        $counts = (clone $query)->selectRaw('status, COUNT(*) AS total')->groupBy('status')->pluck('total', 'status');
+        $tasks = $query->when($status, fn ($query) => $query->where('status', $status))
+            ->orderBy('block')->orderBy('reference')->get();
+        $nextTask = $status === null && Access::learner($r->user(), $apprentice)
+            ? \App\Support\ApprenticeExperience::nextTask($tasks) : null;
+        $focusBlock = $nextTask?->block ?? $tasks->firstWhere('status', 'Awaiting marking')?->block
+            ?? $tasks->first(fn ($task) => $task->status !== 'Approved')?->block ?? $tasks->first()?->block;
 
-        return view('learning.index', ['blockControl' => LearningBlockControl::where('apprentice_id', $apprentice->id)->first(), 'apprentice' => $apprentice, 'tasks' => $q->orderBy('block')->orderBy('reference')->get(), 'manage' => Access::manager($r->user()), 'counts' => LearningTask::where('apprentice_id', $apprentice->id)->selectRaw('status, COUNT(*) AS total')->groupBy('status')->pluck('total', 'status')]);
+        return view('learning.index', [
+            'apprentice' => $apprentice,
+            'tasks' => $tasks,
+            'status' => $status,
+            'statuses' => $statuses,
+            'counts' => $counts,
+            'nextTask' => $nextTask,
+            'focusBlock' => $focusBlock,
+            'releaseStates' => BlockRelease::states($tasks),
+            'manage' => Access::manager($r->user()),
+            'blockControl' => LearningBlockControl::where('apprentice_id', $apprentice->id)->first(),
+        ]);
     }
 
     public function allocate(Request $r, Apprentice $apprentice): RedirectResponse

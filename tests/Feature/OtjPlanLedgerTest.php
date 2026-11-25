@@ -39,6 +39,24 @@ class OtjPlanLedgerTest extends TestCase
         if($dir=getenv('GTA_QA_EXPORT_DIR')){file_put_contents($dir.'/otj-ledger.pdf',$pdf->getContent());}
     }
 
+    public function test_register_history_and_progress_share_the_progressive_otj_headline(): void
+    {
+        [$apprentice, $admin, $ceo, $tutor, $learner] = $this->approvedFixture();
+        $session = TrainingSession::factory()->create(['members' => [(string) $apprentice->id], 'session_date' => today()->subDay()]);
+        AttendanceMark::create(['training_session_id' => $session->id, 'apprentice_id' => $apprentice->id,
+            'code' => 'O', 'otj_confirmed' => true, 'otj_minutes' => 360, 'recorded_by' => $tutor->id]);
+        $headline = OtjPosition::headline(OtjPosition::forApprentice($apprentice));
+        $this->assertSame(6.0, $headline['recorded_hours']);
+        $this->assertNotNull($headline['expected_hours']);
+        $this->assertNotNull($headline['gap_hours']);
+        $this->actingAs($learner);
+        foreach ([route('attendance.apprentice', $apprentice), route('otj.show', $apprentice), route('progress66.index')] as $url) {
+            $this->get($url)->assertOk()
+                ->assertSeeInOrder(['Recorded off-the-job training', '6.00 hours', 'Indicative target to date',
+                    number_format($headline['expected_hours'], 2).' hours', 'Gap to date', number_format($headline['gap_hours'], 2).' hours']);
+        }
+    }
+
     public function test_no_or_withdrawn_plan_leaves_target_unknown_and_report_is_scoped(): void
     {
         [$a,$admin,$ceo,$tutor,$learner,$adviser,$plan]=$this->approvedFixture();

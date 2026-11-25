@@ -3,7 +3,7 @@
     @forelse($groups as $group)
         @continue(request()->filled('group') && (int) request('group') !== $group->id)
         @php
-            $next = \App\Support\WeeklyRegisters::next($group);
+            $next = \App\Support\WeeklyRegisters::thisWeek($group) ?? \App\Support\WeeklyRegisters::next($group);
             $regular = $weeklyGroupSessions->get($group->id, collect());
             $existing = $next ? $regular->firstWhere('regular_week', $next['week']) : null;
             $status = $existing ? match(\App\Support\RegisterFollowup::readiness($existing)['bucket']) {

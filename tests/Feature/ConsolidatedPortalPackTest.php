@@ -24,12 +24,12 @@ class ConsolidatedPortalPackTest extends TestCase
             'status'=>'Withdrawn','endDate'=>'2026-10-01','sourceRef'=>'Test record',
         ]]);
         $this->actingAs($admin)->get(route('reports.index'))->assertOk()
-            ->assertSee('Retention and Early Leaver Report')->assertSee('Support and Retention reporting');
+            ->assertSeeInOrder(['Who needs attention?', 'Support and Retention reporting', 'How are apprentices progressing?', 'How are we performing?', 'Retention and Early Leaver Report'])->assertSee('Employer attendance patterns');
         $report = $this->get(route('retention.report', ['outcome'=>'early-leavers','from'=>'2025-09-01']))->assertOk();
         $this->assertSame(1, $report->viewData('headlines')['early-leavers']);
         $this->assertSame($report->viewData('headlines')['early-leavers'], $report->viewData('rows')->total());
         $this->actingAs(User::factory()->create(['role'=>'tutor']))->get(route('reports.index'))->assertOk()
-            ->assertDontSee('Retention and Early Leaver Report')->assertDontSee('Support and Retention reporting');
+            ->assertDontSee('Retention and Early Leaver Report')->assertDontSee('Support and Retention reporting')->assertDontSee('How are we performing?')->assertDontSee('Employer attendance patterns');
         $this->get(route('support.report'))->assertForbidden();
     }
 

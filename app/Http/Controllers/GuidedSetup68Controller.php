@@ -79,20 +79,27 @@ class GuidedSetup68Controller extends Controller
          && ($block === null || in_array($block, $ksb['blocks'], true))
          && (! $adjusted || ($p['rpl']['adjustments'][$ksb['code']] ?? 0) > 0)
         ));
-        $needle = mb_strtolower(trim((string) $r->query('employer_search', '')));
-        $employers = $needle !== '' ? Employer::where('active', true)->where(fn ($q) => $q->whereRaw("LOWER(name) LIKE ? ESCAPE '!'", ['%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $needle).'%'])->orWhere('reference', $needle))->limit(30)->get() : collect();
-        if (! empty($p['employer']['id'])) {
-            $employers = $employers->merge(Employer::whereKey($p['employer']['id'])->get())->unique('id');
+        $searchValue = $step === 5 ? $r->query('employer_search', '') : '';
+        $employerSearch = is_string($searchValue) ? trim(mb_substr($searchValue, 0, 100)) : '';
+        $needle = mb_strtolower($employerSearch);
+        $employers = $needle === '' ? collect() : Employer::where('active', true)
+            ->where(fn ($query) => $query->whereRaw("LOWER(name) LIKE ? ESCAPE '!'", ['%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $needle).'%'])
+                ->orWhereRaw('LOWER(reference) = ?', [$needle]))
+            ->orderBy('name')->orderBy('id')->limit(30)->get();
+        $employerMatchCount = $employers->count();
+        $selectedEmployer = old('data.id', $p['employer']['id'] ?? null);
+        if (is_scalar($selectedEmployer) && ctype_digit((string) $selectedEmployer)) {
+            $employers = $employers->merge(Employer::whereKey((int) $selectedEmployer)->get())->unique('id');
         }
 
-        return response()->view('setup68.wizard', [...compact('draft', 'step', 'p', 'review', 'ksbs', 'employers', 'ksbTypes', 'ksbFilters'), 'templates' => Template::where('active', true)->get()->filter(fn ($x) => Setup::template(['programme' => ['template_id' => $x->id]]) !== null), 'markers' => json_decode(file_get_contents(resource_path('data/inclusion-markers.json')), true), 'tutors' => User::where('role', 'tutor')->where('active', true)->get(), 'groups' => TutorGroup::where('active', true)->get(), 'staffOptions' => collect(['mentor_id' => 'mentor', 'careers_adviser_id' => 'careers_adviser', 'maths_tutor_id' => 'maths_tutor', 'english_tutor_id' => 'english_tutor'])->mapWithKeys(fn ($role, $field) => [$field => DirectoryCatalog::options(StaffDuties::query(User::query(), $role))])->all(), ...$extra])->header('Cache-Control', 'no-store, private')->header('Referrer-Policy', 'no-referrer');
+        return response()->view('setup68.wizard', [...compact('draft', 'step', 'p', 'review', 'ksbs', 'employers', 'employerSearch', 'employerMatchCount', 'ksbTypes', 'ksbFilters'), 'templates' => Template::where('active', true)->get()->filter(fn ($x) => Setup::template(['programme' => ['template_id' => $x->id]]) !== null), 'markers' => json_decode(file_get_contents(resource_path('data/inclusion-markers.json')), true), 'tutors' => User::where('role', 'tutor')->where('active', true)->get(), 'groups' => TutorGroup::where('active', true)->get(), 'staffOptions' => collect(['mentor_id' => 'mentor', 'careers_adviser_id' => 'careers_adviser', 'maths_tutor_id' => 'maths_tutor', 'english_tutor_id' => 'english_tutor'])->mapWithKeys(fn ($role, $field) => [$field => DirectoryCatalog::options(StaffDuties::query(User::query(), $role))])->all(), ...$extra])->header('Cache-Control', 'no-store, private')->header('Referrer-Policy', 'no-referrer');
     }
 
     public function save(Request $r, Draft $draft, int $step)
     {
         $this->allow($r);
         $r->validate(['version' => ['required', 'integer', 'min:1'], 'next' => ['nullable', 'integer', 'between:1,7']]);
-        if ($step === 5 && $r->has('employer_search')) {
+        if ($step === 5 && $r->request->has('employer_search')) {
             $r->validate(['employer_search' => ['nullable', 'string', 'max:200']]);
 
             return to_route('setup68.show', [$draft, 5, 'employer_search' => $r->input('employer_search')]);
@@ -148,9 +155,12 @@ return $this->page($r, $draft, 4, ['batch' => $batch, 'batch_calculation' => Rpl
         if ($step === 1 && Setup::matches($d->payload['details'] ?? [], $d->apprentice_id)) {
             $next = 1;
         }
+        if ($step === 5 && $next > 5 && collect(Setup::review($d)['issues'])->contains(fn ($issue) => $issue['step'] === 5)) {
+            $next = 5;
+        }
         $returnFilters = $step === 4 && $next === 4 ? $this->ksbFilters($r) : [];
-        if ($step === 5 && $r->has('employer_search')) {
-            $returnFilters['employer_search'] = mb_substr((string) $r->input('employer_search'), 0, 100);
+        if ($step === 5 && $next === 5 && is_string($r->query('employer_search')) && filled($r->query('employer_search'))) {
+            $returnFilters['employer_search'] = mb_substr($r->query('employer_search'), 0, 100);
         }
 
         return to_route('setup68.show', [$d, $next, ...$returnFilters])->with('status', $step === 4 && ($r->input('action') === 'batch_apply') ? 'Reductions saved to this draft. Check the revised OTJ hours before continuing.' : ($next === 1 && $step === 1 ? 'Draft saved. Review any possible existing record before continuing.' : 'Draft saved.'));

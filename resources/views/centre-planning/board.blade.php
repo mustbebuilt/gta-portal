@@ -1,14 +1,37 @@
 @extends('layout')
 @section('title','Centre timetable')
 @section('content')
-@if(\App\Support\CentrePlanning::allowed(auth()->user()))<p><a class="button" href="{{ route('work-moves.index') }}">Reschedule planned work</a></p>@endif
 <link rel="stylesheet" href="{{ asset('assets/centre-planning.css') }}?v=54">
+<header class="page-heading">
+    <h1>{{ $safe_shared ? 'Staff timetable' : ($planner ? 'Centre timetable' : 'My timetable') }}</h1>
+    @if($planner && !$safe_shared)<a class="button primary" href="{{ route('centre-planning.form', ['date' => max($week, today()->toDateString())]) }}">Plan an activity</a>@endif
+</header>
+@php($currentWeek = \Carbon\CarbonImmutable::parse($week))
+<nav class="toolbar" aria-label="Timetable weeks">
+    <a class="button" href="{{ route('centre-planning.index', [...request()->except('week'), 'week' => $currentWeek->subWeek()->toDateString()]) }}">Previous week</a>
+    <a class="button" href="{{ route('centre-planning.index', [...request()->except('week'), 'week' => today()->startOfWeek()->toDateString()]) }}">This week</a>
+    <a class="button" href="{{ route('centre-planning.index', [...request()->except('week'), 'week' => $currentWeek->addWeek()->toDateString()]) }}">Next week</a>
+</nav>
+@if($planner || $safe_shared)
+    <nav class="toolbar" aria-label="Timetable views">
+        @foreach(['staff' => 'Staff', 'room' => 'Rooms', 'group' => 'Groups'] as $key => $label)
+            <a class="button" @if($mode === $key) aria-current="page" @endif href="{{ route('centre-planning.index', [...request()->except('resource', 'resource_mode', 'mode'), 'mode' => $key, 'week' => $week]) }}">{{ $label }}</a>
+        @endforeach
+    </nav>
+@endif
 @include('learning.errors')
-@if($planner&&!$safe_shared)<section class="panel" data-workload-tools data-add-url="{{ route('centre-planning.form') }}" data-move-url="{{ url('/centre-planning/year/move') }}"><h2>Plan or change workloads</h2><p><a class="button primary" href="{{ route('centre-planning.form') }}">Add workload</a> <a class="button" href="{{ route('annual.index') }}">Plan the full year</a> <a class="button" href="{{ route('help.index',['guide'=>'timetable-add']) }}#help-timetable-add">How to add workloads</a></p><p>1. Add a draft → 2. Check dates, working time and clashes → 3. Publish to the timetable. Drafts do not appear as published workloads.</p><label class="check"><input type="checkbox" data-enable-workload-drag>Enable optional drag-and-drop shortcuts</label><p>Drag a work type into a staff/date cell to open a prefilled draft. Drag an existing planned card to request a move at its current start time. Both open a form for checking; neither saves automatically. Buttons and Move workload links provide the same keyboard and touch-friendly route.</p><div class="toolbar" data-workload-palette>@foreach(\App\Support\CentrePlanning::TYPES as $type)<button type="button" data-new-workload="{{ $type }}">Add {{ $type }}</button>@endforeach</div><p role="status" data-workload-drag-status></p></section><script src="{{ asset('assets/timetable-workloads54.js') }}" defer></script>@endif
-<h1>{{ $safe_shared?'Staff timetable':($planner?'Centre timetable':'My timetable') }}</h1><p class="notice">{{ \App\Support\TimetableDuties::POLICY }}</p>@include('centre-planning.links')
+@if($planner&&!$safe_shared)<details class="panel" data-workload-tools data-add-url="{{ route('centre-planning.form') }}" data-move-url="{{ url('/centre-planning/year/move') }}"><summary>Workload shortcuts</summary><p><a href="{{ route('work-moves.index') }}">Reschedule planned work</a> <a class="button" href="{{ route('help.index',['guide'=>'timetable-add']) }}#help-timetable-add">How to add workloads</a></p><p>1. Add a draft → 2. Check dates, working time and clashes → 3. Publish to the timetable. Drafts do not appear as published workloads.</p><label class="check"><input type="checkbox" data-enable-workload-drag>Enable optional drag-and-drop shortcuts</label><p>Drag a work type into a staff/date cell to open a prefilled draft. Drag an existing planned card to request a move at its current start time. Both open a form for checking; neither saves automatically. Buttons and Move workload links provide the same keyboard and touch-friendly route.</p><div class="toolbar" data-workload-palette>@foreach(\App\Support\CentrePlanning::TYPES as $type)<button type="button" data-new-workload="{{ $type }}">Add {{ $type }}</button>@endforeach</div><p role="status" data-workload-drag-status></p></details><script src="{{ asset('assets/timetable-workloads54.js') }}" defer></script>@endif
 <p>@if($safe_shared)Shared staff view: published diary details only. Activity titles/shared notes, working-window gaps and private cover references are withheld. Use My timetable for your own fuller details.@endif</p><p>Week {{ $week }} · {{ config('app.timezone') }} · published planning and existing registers/appointments. Drafts are hidden. Planned time does not record attendance, OTJ or completed reviews.</p>
+<details class="panel" @if(request()->filled('resource') || request()->filled('site') || request()->filled('section')) open @endif>
+    <summary>Timetable filters and layout</summary>
 <form method="get"><input type="hidden" name="scope" value="{{ $scope }}"><label>Layout <select name="layout"><option value="day" @selected($day_cards)>Day cards</option><option value="timeline" @selected(!$day_cards)>Time-positioned view</option></select></label><label>Week <input type="date" name="week" value="{{ $week }}" required></label>@if($planner||$safe_shared)<label>View <select name="mode">@foreach(['staff'=>'Staff & workloads','room'=>'Rooms','group'=>'Groups'] as $v=>$label)<option value="{{ $v }}" @selected($mode===$v)>{{ $label }}</option>@endforeach</select></label><label>Site <select name="site"><option value="">Both centres & other locations</option>@foreach(['Doncaster','Sheffield'] as $v)<option @selected($site===$v)>{{ $v }}</option>@endforeach</select></label><input type="hidden" name="resource_mode" value="{{ $mode }}"><label>{{ ucfirst($mode) }} <select name="resource"><option value="">All</option>@foreach($options as $option)<option value="{{ $option['id'] }}" @selected($selected===$option['id'])>{{ $option['name'] }}</option>@endforeach</select></label>@endif<label>Staff section <select name="section">@foreach(['all'=>'All staff','teaching'=>'Teaching tutors','other'=>'Other staff','review'=>'Section needs review'] as $k=>$v)<option value="{{ $k }}" @selected($section===$k)>{{ $v }}</option>@endforeach</select></label><button>Show week</button></form>
 @if($planner)<p><a href="{{ route('centre-planning.export',request()->query()) }}">Download planned-status JSON</a></p>@endif
+</details>
+<details class="panel">
+    <summary>Planning tools and settings</summary>
+    <p class="notice">{{ \App\Support\TimetableDuties::POLICY }}</p>
+    @include('centre-planning.links')
+</details>
 @if(!$safe_shared)<button type="button" id="planning-gap-toggle" aria-pressed="false" aria-controls="planning-board-grid">Highlight checked planning gaps</button><script src="{{ asset('assets/timetable-management.js') }}" defer></script>@endif
 <p class="planning-legend"><span class="planning-teaching">Teaching</span> <span class="planning-review">Review</span> <span class="planning-admin">Other work</span> <span class="planning-travel">Travel</span> <span class="planning-non-working">Non-working</span> <span class="planning-gap-key">{{ $safe_shared?'Shared diary only':'Available within recorded working time' }}</span></p>
 <p>Time scale {{ $scale['start'] }}–{{ $scale['end'] }} is shared across the grid. Empty room/group space is unbooked in these records, not confirmed availability. Existing registers/appointments without a room are not allocated to a room row. Check travel/site gaps for those sources.</p>
