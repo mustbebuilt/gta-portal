@@ -140,17 +140,48 @@ class EmployerPortalController extends Controller
     public function staff(Request $r, Apprentice $apprentice)
     {
         abort_unless(EmployerActions::staff($r->user(), $apprentice), 403);
-        $sources = [];
-        foreach (ProgressReviewDraft::where('apprentice_id', $apprentice->id)->where('state', 'Ready for signatures')->get() as $x) {
-            $sources[] = ['value' => 'review:'.$x->id, 'label' => 'Frozen review '.$x->id.' · v'.$x->version];
-        }foreach (ExtraTraining::where('apprentice_id', $apprentice->id)->whereNull('withdrawn_at')->get()->filter->occurred() as $x) {
-            $sources[] = ['value' => 'workplace:'.$x->id, 'label' => 'Training '.$x->id.' · '.$x->topic];
-        }foreach (SmartAction::where('apprentice_id', $apprentice->id)->where('owner', 'Employer / workplace mentor')->where('status', '!=', 'Completed')->get() as $x) {
-            $sources[] = ['value' => 'target:'.$x->id, 'label' => 'Target '.$x->id.' · '.$x->title];
+        $choice = $r->validate(['source' => ['nullable', 'regex:/^(review|workplace|target):[1-9][0-9]*$/D']])['source'] ?? null;
+        $sources = collect();
+        foreach (ProgressReviewDraft::where('apprentice_id', $apprentice->id)->where('state', 'Ready for signatures')->latest()->get() as $review) {
+            $sources->put('review:'.$review->id, [
+                'label' => 'Review '.$review->id.' · ready for signatures',
+                'title' => 'Feedback on the progress review',
+                'detail' => 'Please let us know whether you agree with the progress discussed at the review or would like any changes.',
+                'due' => null,
+            ]);
         }
-        $grants = EmployerApprenticeGrant::where('apprentice_id', $apprentice->id)->where('active', true)->get()->filter(fn ($g) => EmployerActions::valid($g, $apprentice));
+        foreach (ExtraTraining::where('apprentice_id', $apprentice->id)->whereNull('withdrawn_at')->latest('training_date')->get()->filter->occurred() as $training) {
+            $sources->put('workplace:'.$training->id, [
+                'label' => $training->training_date->format('j M Y').' · '.$training->topic,
+                'title' => 'Confirm workplace training',
+                'detail' => 'Please confirm whether the workplace training took place on '.$training->training_date->format('j M Y').' and tell us if any details need updating.',
+                'due' => null,
+            ]);
+        }
+        foreach (SmartAction::with('task')->where('apprentice_id', $apprentice->id)->where('owner', 'Employer / workplace mentor')->where('status', '!=', 'Completed')->latest()->get() as $target) {
+            if ($target->currentStatus() === 'Completed' || ($target->learning_task_id && $target->task?->apprentice_id !== $apprentice->id)) {
+                continue;
+            }
+            $deadline = $target->deadline();
+            $sources->put('target:'.$target->id, [
+                'label' => $target->title,
+                'title' => 'Update on a workplace target',
+                'detail' => 'Please tell us how the agreed workplace target is progressing and whether any support or changes are needed.',
+                'due' => $deadline?->gte(today()) ? $deadline->toDateString() : null,
+            ]);
+        }
+        $grants = EmployerApprenticeGrant::where('apprentice_id', $apprentice->id)->where('active', true)->get()
+            ->filter(fn ($grant) => EmployerActions::valid($grant, $apprentice))->values();
+        $contacts = User::whereIn('id', $grants->pluck('user_id'))->pluck('name', 'id');
 
-        return $this->privateView('employer-portal.staff', ['apprentice' => $apprentice, 'sources' => $sources, 'grants' => $grants, 'actions' => EmployerPortalAction::where('apprentice_id', $apprentice->id)->orderByDesc('created_at')->paginate(15)]);
+        return $this->privateView('employer-portal.staff', [
+            'apprentice' => $apprentice,
+            'sources' => $sources,
+            'choice' => $choice,
+            'grants' => $grants,
+            'contacts' => $contacts,
+            'actions' => EmployerPortalAction::where('apprentice_id', $apprentice->id)->orderByDesc('created_at')->paginate(15)->withQueryString(),
+        ]);
     }
 
     public function publish(Request $r, Apprentice $apprentice)

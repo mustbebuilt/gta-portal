@@ -2,6 +2,9 @@
 @section('title',$signedConfirmed?'Signed review source content':'Progress review draft')
 @section('content')
 @include('quick-actions.context')
+@if($review->exists && $review->state === 'Ready for signatures' && \App\Support\EmployerActions::staff(auth()->user(), $apprentice))
+    <p><a href="{{ route('employer-actions.staff', ['apprentice' => $apprentice, 'source' => 'review:'.$review->id]) }}#publish-employer-request">Request employer feedback</a></p>
+@endif
 @if($review->exists&&$review->state==='Ready for signatures')<p><a class="button" href="{{ route('electronic-reviews.prepare-form',$review) }}">Prepare participant sign-off</a> <a class="button" href="{{ route('electronic-reviews.index',['filter'=>'all']) }}">Review signing records</a></p>@endif
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>{{ $signedConfirmed?'Signed review source content':'Progress review draft' }}</h1><p>{{ $review->exists?'Saved draft '.$review->id.' · Version '.$review->version:'New draft' }}</p></div><div class="toolbar"><a class="button" href="{{ route('reviews.index') }}">Back to review list</a>@if($review->exists)<a class="button" href="{{ route('reviews.pdf',[$apprentice,$review]) }}">{{ $review->state==='Ready for signatures'?'Download unsigned frozen source':'Download draft PDF' }}</a>@endif<button type="button" data-print>Print draft / Save PDF</button></div></header>
 @include('learning.errors')

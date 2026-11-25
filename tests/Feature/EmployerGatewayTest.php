@@ -145,6 +145,74 @@ class EmployerGatewayTest extends TestCase
         $this->actingAs($t)->get(route('employer-actions.staff', $a))->assertOk()->assertSee('Publish a checked employer request');
     }
 
+    public function test_employer_request_prefills_from_the_target_and_waits_for_staff_confirmation(): void
+    {
+        [$admin, $tutor, $apprentice, $contact, $grant] = $this->fixture();
+        $target = SmartAction::factory()->create([
+            'apprentice_id' => $apprentice->id,
+            'owner' => 'Employer / workplace mentor',
+            'title' => 'PRIVATE-TARGET-TITLE',
+            'support' => 'PRIVATE-TARGET-NOTES',
+            'due_date' => today()->addDays(7),
+        ]);
+        $staffUrl = route('employer-actions.staff', ['apprentice' => $apprentice, 'source' => 'target:'.$target->id]);
+        $this->actingAs($tutor)->get(route('actions.index', $apprentice))->assertOk()
+            ->assertSee('Request an employer update')->assertSee($staffUrl);
+        $page = $this->get($staffUrl)->assertOk()->assertHeader('Cache-Control', 'no-store, private')
+            ->assertSee('Update on a workplace target')->assertDontSee('PRIVATE-TARGET-NOTES');
+        $html = new \DOMDocument;
+        $html->loadHTML($page->getContent(), LIBXML_NOERROR | LIBXML_NOWARNING);
+        $form = new \DOMXPath($html);
+        $this->assertSame((string) $grant->id, $form->evaluate('string(//select[@id="grant"]/option[@selected]/@value)'));
+        $this->assertSame('target:'.$target->id, $form->evaluate('string(//select[@id="source"]/option[@selected]/@value)'));
+        $this->assertSame(today()->addDays(7)->toDateString(), $form->evaluate('string(//*[@id="due"]/@value)'));
+        $this->assertDatabaseCount('employer_portal_actions', 0);
+
+        $submission = [
+            'request_token' => $form->evaluate('string(//*[@name="request_token"]/@value)'),
+            'grant_id' => $grant->id, 'source_choice' => 'target:'.$target->id,
+            'title' => $form->evaluate('string(//*[@id="title"]/@value)'),
+            'detail' => $form->evaluate('string(//*[@id="detail"])'),
+            'due_date' => $form->evaluate('string(//*[@id="due"]/@value)'),
+        ];
+        $this->from($staffUrl)->post(route('employer-actions.publish', $apprentice), $submission)
+            ->assertSessionHasErrors('confirmed');
+        $this->assertDatabaseCount('employer_portal_actions', 0);
+        $this->post(route('employer-actions.publish', $apprentice), $submission + ['confirmed' => 1])
+            ->assertRedirect()->assertSessionHasNoErrors();
+        $request = EmployerPortalAction::sole();
+        $this->assertSame($target->id, $request->source_id);
+        $this->actingAs($contact)->get(route('employer-actions.show', $request))->assertOk()
+            ->assertSee($submission['detail'])->assertDontSee('PRIVATE-TARGET-TITLE')->assertDontSee('PRIVATE-TARGET-NOTES');
+    }
+
+    public function test_employer_request_chooses_no_recipient_when_multiple_verified_contacts_exist(): void
+    {
+        [$admin, $tutor, $apprentice, $contact, $grant] = $this->fixture();
+        $second = User::factory()->create(['role' => 'employer']);
+        EmployerActions::grant($admin, $admin->auth_version, $apprentice, [
+            'user_id' => $second->id, 'version' => 0, 'identity_reference' => 'Fictional verified authority',
+        ]);
+        $review = ProgressReviewDraft::factory()->create([
+            'apprentice_id' => $apprentice->id, 'state' => 'Ready for signatures',
+            'fields' => ['summary' => 'PRIVATE-REVIEW-CONTENT'],
+        ]);
+        $training = ExtraTraining::factory()->create(['apprentice_id' => $apprentice->id, 'learning' => 'PRIVATE-TRAINING-NOTES']);
+        $url = route('employer-actions.staff', $apprentice);
+        $page = $this->actingAs($tutor)->get($url.'?source=review:'.$review->id)->assertOk()
+            ->assertSee('Feedback on the progress review')->assertDontSee('PRIVATE-REVIEW-CONTENT')->assertDontSee('PRIVATE-TRAINING-NOTES');
+        $html = new \DOMDocument;
+        $html->loadHTML($page->getContent(), LIBXML_NOERROR | LIBXML_NOWARNING);
+        $form = new \DOMXPath($html);
+        $this->assertSame(0, count($form->query('//select[@id="grant"]/option[@selected]')));
+        $this->get(route('extra.index', ['apprentice' => $apprentice, 'record' => $training->id]))->assertOk()
+            ->assertSee('Request employer confirmation');
+        $this->get($url.'?source=workplace:'.$training->id)->assertOk()->assertSee('Confirm workplace training');
+        $this->get($url.'?source=target:9999999')->assertOk()->assertSee('That record is unavailable');
+        $this->assertDatabaseCount('employer_portal_actions', 0);
+        $this->actingAs($contact)->get($url.'?source=review:'.$review->id)->assertForbidden();
+    }
+
     public function test_employer_gets_only_shared_snapshot_not_private_source_or_other_routes(): void
     {
         [$admin,$t,$a,$contact,$g] = $this->fixture();

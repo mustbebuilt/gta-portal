@@ -6,6 +6,9 @@
 @if($manage && $a->status!=='Completed')<details><summary>Check action completion</summary><form method="post" action="{{ route('actions.progress',$a) }}">@csrf<input type="hidden" name="version" value="{{ $a->version }}"><label for="action-feedback-{{ $a->id }}">Feedback / evidence checked</label><textarea id="action-feedback-{{ $a->id }}" name="feedback" required></textarea><label for="action-completed-{{ $a->id }}">Actual completion date (for completion)</label><input id="action-completed-{{ $a->id }}" name="completion_date" type="date" max="{{ now()->toDateString() }}"><div class="form-actions"><button name="intent" value="return">Return to To do</button>@if($a->status==='With tutor'||$a->owner!=='Apprentice')<button class="primary" name="intent" value="complete">Confirm completed</button>@endif</div></form></details>@endif
 @endif
 @if($manage && $a->currentStatus()==='To do')<div class="form-actions"><a class="button" href="{{ route('actions.edit',[$apprentice,$a]) }}">Edit target</a></div>@endif
+@if(\App\Support\EmployerActions::staff(auth()->user(), $apprentice) && $a->owner === 'Employer / workplace mentor' && $a->currentStatus() !== 'Completed')
+    <p><a href="{{ route('employer-actions.staff', ['apprentice' => $apprentice, 'source' => 'target:'.$a->id]) }}#publish-employer-request">Request an employer update</a></p>
+@endif
 <details><summary>Target details and history</summary>
 <dl class="details-grid">
     <div><dt>Learning need</dt><dd>{{ $a->learning_reference }}</dd></div>
