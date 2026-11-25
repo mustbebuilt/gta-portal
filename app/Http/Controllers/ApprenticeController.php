@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Support\ApprenticeList;
 use App\Support\AssignmentHistory;
 use App\Support\DirectoryCatalog;
+use App\Support\EmployerActions;
 use App\Support\EntryContext;
 use App\Support\LearningAccess;
 use App\Support\MonthlyDevelopment;
@@ -122,7 +123,7 @@ class ApprenticeController extends Controller
         ]);
     }
 
-    public function edit(Request $request, Apprentice $apprentice): View
+    public function edit(Request $request, Apprentice $apprentice): View|\Illuminate\Http\Response
     {
         Gate::authorize('update', $apprentice);
 
@@ -130,7 +131,10 @@ class ApprenticeController extends Controller
             abort_if(\App\Models\ProgrammeOutcome::archived()->where('apprentice_id', $apprentice->id)->exists(), 404);
             $target = $request->validate(['link_employer'=>['required','integer','min:1']]);
             $employer = Employer::where('active', true)->findOrFail($target['link_employer']);
-            return view('setup68.link-employer', compact('apprentice', 'employer'));
+            $access = $apprentice->employer_id === $employer->id ? EmployerActions::directoryContact($apprentice, $employer) : null;
+
+            return response()->view('setup68.link-employer', compact('apprentice', 'employer', 'access'))
+                ->header('Cache-Control', 'no-store, private');
         }
 
         return view('apprentices.form', ['apprentice' => $apprentice, 'tutors' => $this->tutors($apprentice), 'linkedOptions' => $this->linkedOptions($apprentice)]);

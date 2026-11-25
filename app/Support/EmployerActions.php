@@ -51,6 +51,24 @@ class EmployerActions
         return $u;
     }
 
+    public static function directoryContact(Apprentice $profile, Employer $employer): ?array
+    {
+        $email = strtolower(trim($employer->contact_email ?? ''));
+        if ($email === '') {
+            return null;
+        }
+
+        $matches = User::whereRaw('LOWER(email) = ?', [$email])->limit(2)->get();
+        $user = $matches->count() === 1 ? $matches->first() : null;
+        if (! $user?->active || $user->role !== 'employer' || ! $user->email_verified_at) {
+            return null;
+        }
+
+        $grant = EmployerApprenticeGrant::where('apprentice_id', $profile->id)->where('user_id', $user->id)->first();
+
+        return ['user' => $user, 'version' => $grant?->version ?? 0, 'verified' => $grant && self::valid($grant, $profile)];
+    }
+
     public static function grant(User $actor, int $authVersion, Apprentice $profile, array $data): EmployerApprenticeGrant
     {
         return DB::transaction(function () use ($actor, $authVersion, $profile, $data) {
@@ -61,6 +79,14 @@ class EmployerActions
             if (! $e?->active || ! $target->active || $target->role !== 'employer' || ! $target->email_verified_at || User::whereRaw('LOWER(email) = ?', [strtolower($target->email)])->count() !== 1) {
                 self::fail('Use a current active linked employer and one verified employer login. Mailbox verification alone does not establish workplace authority.');
             }
+            if (isset($data['linked_employer_id']) && (
+                $e->id !== (int) $data['linked_employer_id']
+                || $e->record_version !== (int) $data['linked_employer_version']
+                || strtolower($target->email) !== strtolower(trim($e->contact_email ?? ''))
+            )) {
+                self::fail('The linked employer or contact changed. Check the current employer before verifying access.');
+            }
+
             $g = EmployerApprenticeGrant::where('apprentice_id', $a->id)->where('user_id', $target->id)->lockForUpdate()->first();
             if (($g?->version ?? 0) !== (int) $data['version']) {
                 self::fail('Employer access changed. Reload before verifying.');

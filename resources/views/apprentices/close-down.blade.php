@@ -14,8 +14,24 @@
 </header>
 @include('learning.errors')
 
-@if(!$closure && !$endedWithoutAchievement && ($outcome?->context['status'] ?? null) !== 'Completed')
-@include('apprentices.record-leaving')
+@php
+    $canRecordLeaving = !$closure && !$endedWithoutAchievement && ($outcome?->context['status'] ?? null) !== 'Completed';
+    $canRecordEpa = !$closure && !$endedWithoutAchievement && $number;
+@endphp
+
+@if($canRecordLeaving || $canRecordEpa)
+    <nav class="toolbar" aria-label="Choose a programme outcome">
+        @if($canRecordEpa)
+            <a @class(['button', 'primary' => $entry === 'epa']) @if($entry === 'epa') aria-current="page" @endif href="{{ route('apprentices.close-down', ['apprentice' => $apprentice, 'entry' => 'epa']) }}">Record EPA result</a>
+        @endif
+        @if($canRecordLeaving)
+            <a @class(['button', 'primary' => $entry === 'leaving']) @if($entry === 'leaving') aria-current="page" @endif href="{{ route('apprentices.close-down', ['apprentice' => $apprentice, 'entry' => 'leaving']) }}">Record a withdrawal or transfer</a>
+        @endif
+    </nav>
+@endif
+
+@if($canRecordLeaving && $entry === 'leaving' && !$errors->has('version'))
+    @include('apprentices.record-leaving')
 @endif
 
 @if($closure)
@@ -40,25 +56,6 @@
 </section>
 @endif
 
-<section class="panel">
-    <h2>EPA attempt history</h2>
-    @if($attempts)
-    <div class="table-scroll"><table>
-        <thead><tr><th scope="col">Attempt</th><th scope="col">Assessment date</th><th scope="col">Result</th><th scope="col">Result received date</th></tr></thead>
-        <tbody>
-        @foreach($attempts as $attempt)
-        <tr>
-            <td>{{ $attempt['number'] }}</td><td>{{ $attempt['assessment_date'] }}</td>
-            <td>{{ $attempt['result'] }}</td><td>{{ $attempt['received_date'] ?? 'Awaiting result' }}</td>
-        </tr>
-        @endforeach
-        </tbody>
-    </table></div>
-    @else
-    <p>No EPA attempts recorded.</p>
-    @endif
-</section>
-
 @if($endedWithoutAchievement)
 <section class="panel">
     <h2>{{ $outcome->context['status'] }}</h2>
@@ -67,8 +64,8 @@
     <p><a href="{{ route('retention.edit', $apprentice) }}">View reporting details or correct the record</a></p>
 </section>
 @elseif(!$closure && $errors->has('version'))
-<p><a class="button" href="{{ route('apprentices.close-down', $apprentice) }}">Reload attempt history</a></p>
-@elseif(!$closure && $number)
+<p><a class="button" href="{{ route('apprentices.close-down', $apprentice) }}">Reload programme outcome</a></p>
+@elseif($canRecordEpa && $entry === 'epa')
 <section class="panel">
     <h2>{{ $draft ? 'Update' : 'Record' }} EPA attempt {{ $number }}</h2>
     <p>The programme stays open while a result is awaited or after an unsuccessful attempt.</p>
@@ -124,7 +121,24 @@
     </form>
     <script src="{{ asset('assets/epa-close-down.js') }}" defer></script>
 </section>
-@elseif(!$closure)
-<section class="panel"><p>All three EPA attempts have been recorded. The programme remains open. <a href="{{ route('retention.edit', $apprentice) }}">Record another programme outcome</a></p></section>
+@elseif(!$closure && !$number && $entry !== 'leaving')
+<section class="panel"><p>All three EPA attempts have been recorded. The programme remains open.</p></section>
+@endif
+@if($attempts)
+<details class="panel">
+    <summary>History · EPA attempts ({{ count($attempts) }})</summary>
+    <div class="table-scroll"><table>
+        <thead><tr><th scope="col">Attempt</th><th scope="col">Assessment date</th><th scope="col">Result</th><th scope="col">Result received date</th></tr></thead>
+        <tbody>
+        @foreach($attempts as $attempt)
+        <tr>
+            <td>{{ $attempt['number'] }}</td><td>{{ $attempt['assessment_date'] }}</td>
+            <td>{{ $attempt['result'] }}</td><td>{{ $attempt['received_date'] ?? 'Awaiting result' }}</td>
+        </tr>
+        @endforeach
+        </tbody>
+    </table></div>
+</details>
+
 @endif
 @endsection

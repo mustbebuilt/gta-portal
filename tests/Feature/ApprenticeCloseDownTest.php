@@ -35,7 +35,13 @@ class ApprenticeCloseDownTest extends TestCase
 
         $this->actingAs($tutor)->get($page)->assertForbidden();
         $this->post($save, $input)->assertForbidden();
-        $this->actingAs($admin)->get($page)->assertOk()->assertSee('Record a withdrawal or transfer');
+        $this->actingAs($admin)->get($page)->assertOk()->assertSee('Record a withdrawal or transfer')
+            ->assertDontSee('id="leaving-end"', false)->assertDontSee('id="epa-assessment"', false);
+        $leaving = route('apprentices.close-down', ['apprentice'=>$person, 'entry'=>'leaving']);
+        $this->get($leaving)->assertOk()->assertSee('id="leaving-end"', false)->assertDontSee('id="epa-assessment"', false);
+        $this->from($leaving)->post($save, [...$input, 'context'=>[...$input['context'], 'sourceRef'=>'']])
+            ->assertRedirect($leaving)->assertSessionHasErrors('context.sourceRef');
+        $this->get($leaving)->assertOk()->assertSee('id="leaving-end"', false);
         $this->from($page)->post($save, $input)->assertRedirect($page)->assertSessionHasNoErrors();
         $this->get($page)->assertOk()->assertSee('Withdrawn')->assertSee('2026-11-20');
         $this->get(route('achievers-leavers.index', ['from' => '2026-11-01', 'to' => '2026-11-21']))
@@ -58,13 +64,14 @@ class ApprenticeCloseDownTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
         $url = route('apprentices.close-down', $apprentice);
         $this->actingAs($admin)->get(route('apprentices.show', $apprentice))->assertOk()->assertSee('Programme outcome');
-        $this->get($url)->assertOk()->assertSee('Record EPA attempt 1');
+        $epa = route('apprentices.close-down', ['apprentice'=>$apprentice, 'entry'=>'epa']);
+        $this->get($epa)->assertOk()->assertSee('Record EPA attempt 1')->assertDontSee('id="leaving-end"', false);
         $this->post($url, [
             'version' => 0, 'result' => 'Awaiting result', 'assessment_date' => '2026-11-01', 'action' => 'record',
         ])->assertRedirect($url)->assertSessionHasNoErrors();
         $outcome = ProgrammeOutcome::where('apprentice_id', $apprentice->id)->firstOrFail();
         $this->assertArrayNotHasKey('status', $outcome->context);
-        $this->get($url)->assertOk()->assertSee('Update EPA attempt 1');
+        $this->get($epa)->assertOk()->assertSee('Update EPA attempt 1')->assertSee('History · EPA attempts (1)');
         $this->get(route('apprentices.archive'))->assertOk()->assertDontSee($apprentice->reference);
         $this->get(route('apprentices.index'))->assertOk()->assertSee($apprentice->reference);
         $report = route('achievers-leavers.index', ['from' => '2026-11-01', 'to' => '2026-11-21']);

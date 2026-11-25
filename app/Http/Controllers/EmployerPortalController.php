@@ -122,8 +122,20 @@ class EmployerPortalController extends Controller
     public function grant(Request $r, Apprentice $apprentice)
     {
         $this->manager($r);
-        $data = $r->validate(['user_id' => ['required', 'integer'], 'version' => ['required', 'integer', 'min:0'], 'identity_reference' => ['required', 'string', 'max:2000'], 'confirmed' => ['accepted']]);
+        $data = $r->validate([
+            'user_id' => ['required', 'integer'],
+            'version' => ['required', 'integer', 'min:0'],
+            'identity_reference' => ['required', 'string', 'max:2000'],
+            'confirmed' => ['accepted'],
+            'linked_employer_id' => ['required_with:linked_employer_version', 'integer', 'min:1'],
+            'linked_employer_version' => ['required_with:linked_employer_id', 'integer', 'min:1'],
+        ]);
         EmployerActions::grant($r->user(), (int) $r->session()->get('auth_version'), $apprentice, $data);
+
+        if (isset($data['linked_employer_id'])) {
+            return to_route('apprentices.edit', ['apprentice' => $apprentice, 'link_employer' => $data['linked_employer_id']])
+                ->with('status', 'Workplace access verified for this apprentice.');
+        }
 
         return back()->with('status', 'Named employer authority verified for this apprentice. Earlier requests need reissue after any grant change.');
     }

@@ -1,5 +1,5 @@
-<details class="panel" id="record-leaving" @if(old('workflow') === 'exit') open @endif>
-    <summary>Record a withdrawal or transfer</summary>
+<section class="panel" aria-labelledby="record-leaving">
+    <h2 id="record-leaving">Withdrawal or transfer</h2>
     <form method="post" action="{{ route('retention.save', $apprentice) }}">
         @csrf
         <input type="hidden" name="workflow" value="exit">
@@ -53,4 +53,4 @@
         </details>
         <div class="form-actions"><button class="primary">Save leaving outcome</button></div>
     </form>
-</details>
+</section>

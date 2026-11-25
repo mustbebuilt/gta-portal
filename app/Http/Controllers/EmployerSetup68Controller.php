@@ -90,7 +90,8 @@ class EmployerSetup68Controller extends Controller
             }
         });
 
-        return to_route('apprentices.show', $apprentice)->with('status', 'Employer link saved.');
+        return to_route('apprentices.edit', ['apprentice' => $apprentice, 'link_employer' => $input['employer_id']])
+            ->with('status', 'Employer link saved.');
     }
 
     public function store(Request $r)

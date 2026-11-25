@@ -77,7 +77,8 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $admin = User::factory()->create(['role'=>'admin']);
         $tutor = User::factory()->create(['role'=>'tutor']);
         $oldEmployer = Employer::factory()->create();
-        $newEmployer = Employer::factory()->create();
+        $newContact = User::factory()->create(['role' => 'employer', 'email' => 'new-workplace@example.test']);
+        $newEmployer = Employer::factory()->create(['contact_email' => $newContact->email]);
         $person = Apprentice::factory()->create(['tutor_id'=>$tutor->id,'employer_id'=>$oldEmployer->id,'email'=>'learner@example.test']);
         $contact = User::factory()->create(['role' => 'employer']);
         $grant = \App\Support\EmployerActions::grant($admin, $admin->auth_version, $person, [
@@ -99,7 +100,7 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
             ...$person->only(['reference','first_name','last_name','version']), 'employer_id'=>$newEmployer->id,
         ])->assertSessionHasErrors('employer_id');
         $this->from($confirm)->post($change, $payload)
-            ->assertRedirect(route('apprentices.show', $person))->assertSessionHasNoErrors();
+            ->assertRedirect($confirm)->assertSessionHasNoErrors();
         $this->from($confirm)->post($change, $payload)->assertSessionHasErrors('version');
         $this->assertEquals($newEmployer->id, $person->fresh()->employer_id);
         $this->assertEquals($tutor->id, $person->fresh()->tutor_id);
@@ -110,5 +111,24 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $this->assertEquals($newEmployer->id, $history->payload['after']['entry_employer_id']);
         $this->assertFalse($grant->fresh()->active);
         $this->assertFalse(\App\Support\EmployerActions::valid($grant->fresh(), $person->fresh()));
+        $this->get($confirm)->assertOk()->assertSee('Verify workplace access')->assertSee($newContact->email);
+        $this->assertDatabaseMissing('employer_apprentice_grants', ['user_id'=>$newContact->id, 'apprentice_id'=>$person->id]);
+        $access = route('employer-grants.save', $person);
+        $verification = [
+            'user_id'=>$newContact->id, 'version'=>0, 'linked_employer_id'=>$newEmployer->id,
+            'linked_employer_version'=>$newEmployer->record_version,
+            'identity_reference'=>'Fictional independent authority check', 'confirmed'=>1,
+        ];
+        $this->actingAs($tutor)->post($access, $verification)->assertForbidden();
+        $this->actingAs($admin)->from($confirm)->post($access, [...$verification, 'confirmed'=>0])
+            ->assertSessionHasErrors('confirmed');
+        $this->from($confirm)->post($access, [...$verification, 'user_id'=>$contact->id, 'version'=>$grant->fresh()->version])
+            ->assertSessionHasErrors('actions');
+        $this->from($confirm)->post($access, [...$verification, 'linked_employer_version'=>$newEmployer->record_version + 1])
+            ->assertSessionHasErrors('actions');
+        $this->from($confirm)->post($access, $verification)->assertRedirect($confirm)->assertSessionHasNoErrors();
+        $this->get($confirm)->assertOk()->assertSee('Access verified for '.$newContact->name)->assertDontSee('Confirm workplace access');
+        $newGrant = \App\Models\EmployerApprenticeGrant::where('user_id', $newContact->id)->sole();
+        $this->assertTrue(\App\Support\EmployerActions::valid($newGrant, $person->fresh()));
     }
 }

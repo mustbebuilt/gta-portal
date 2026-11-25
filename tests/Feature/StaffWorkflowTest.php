@@ -122,6 +122,23 @@ class StaffWorkflowTest extends TestCase
         $this->actingAs($u)->get('/needs-attention?reason=action&view=overdue')->assertOk()->assertSee('Agreed action')->assertDontSee('Task due:');
     }
 
+    public function test_attention_groups_two_reasons_that_open_the_same_attendance_record(): void
+    {
+        [$tutor, $apprentice] = $this->fixture();
+        $this->rosterSession($apprentice, $tutor, today()->subDays(2)->toDateString(), 'A');
+        $this->rosterSession($apprentice, $tutor, today()->subDay()->toDateString(), 'S');
+        $page = $this->actingAs($tutor)->get(route('attention.index', ['reason'=>'attendance']))
+            ->assertOk()->assertSee('Other reasons and follow-up');
+        $document = new \DOMDocument;
+        $document->loadHTML($page->getContent(), LIBXML_NOERROR | LIBXML_NOWARNING);
+        $path = new \DOMXPath($document);
+        $section = $path->query('//section[./p="'.$apprentice->reference.'"]')->item(0);
+        $links = $path->query('.//a[@href="'.route('attendance.index').'"]', $section);
+        $this->assertCount(1, $links);
+        $this->assertSame('Open attendance record', trim($links->item(0)->textContent));
+        $this->assertCount(1, $path->query('.//details//li[contains(., "Recorded missed session")]', $section));
+    }
+
     public function test_unknown_and_paused_status_do_not_create_training_overdue_claims(): void
     {
         [$u,$a] = $this->fixture(false);

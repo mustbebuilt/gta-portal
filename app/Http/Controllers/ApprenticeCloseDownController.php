@@ -41,6 +41,11 @@ final class ApprenticeCloseDownController extends Controller
             'exitEmployment' => RetentionAnalysis::employmentAtExit($context),
             'closure' => $context['epa_closure'] ?? null,
             'endedWithoutAchievement' => $this->endedWithoutAchievement($context),
+            'entry' => match (true) {
+                old('workflow') === 'exit' => 'leaving',
+                old('result') !== null => 'epa',
+                default => $request->query('entry'),
+            },
             'number' => $number <= self::MAX_ATTEMPTS ? $number : null,
             'draft' => $pending ? $latest : [],
             'grades' => self::GRADES,
