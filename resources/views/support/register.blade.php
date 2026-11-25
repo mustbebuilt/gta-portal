@@ -45,7 +45,7 @@
             <div><h2>{{ $person->first_name }} {{ $person->last_name }}</h2><p class="muted">{{ $person->groupLabel() ?? 'Group not assigned' }}</p></div>
             <div>
                 <div class="register-badges">
-                    @foreach($row['codes'] as $code)<span class="register-marker" title="{{ $codes[$code] ?? $code }}" aria-label="{{ $code }} {{ $codes[$code] ?? '' }}">{{ $code }}</span>@endforeach
+                    @foreach($row['codes'] as $code)<span class="register-marker" title="{{ $codes[$code] ?? $code }}" aria-label="{{ $code }} {{ $codes[$code] ?? '' }}">{{ $code }} · {{ $codes[$code] ?? 'Marker' }}</span>@endforeach
                 </div>
                 <span class="register-status {{ $row['overdue'] ? 'is-overdue' : ($row['needs_review'] ? 'is-attention' : 'is-positive') }}">{{ $row['overdue'] ? 'Review overdue' : ($row['needs_review'] ? 'Needs review' : 'No review due') }}</span>
             </div>
@@ -57,7 +57,7 @@
                     <p class="muted">No open action</p>
                 @endif
             </div>
-            <a class="button" href="{{ route('support.index', $person) }}">Open<span class="sr-only"> support for {{ $person->first_name }} {{ $person->last_name }} ({{ $person->reference }})</span></a>
+            <a class="button" href="{{ route('support.index', $person) }}">Open record<span class="sr-only"> for {{ $person->first_name }} {{ $person->last_name }} ({{ $person->reference }})</span></a>
         </article>
     @empty
         <p>{{ $view === 'needs-review' ? 'No apprentices need a review for these filters.' : 'No apprentices match these filters.' }}</p>

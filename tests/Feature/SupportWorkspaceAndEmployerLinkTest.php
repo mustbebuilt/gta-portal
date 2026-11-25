@@ -20,12 +20,13 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $other = Apprentice::factory()->create();
         SupportCapability::create(['user_id'=>$member->id, 'duty'=>'member', 'scope'=>'assigned',
             'apprentice_ids'=>[$apprentice->id], 'group_ids'=>[]]);
-        $this->actingAs($admin)->post(route('support.track-marker',$apprentice), ['code'=>'IM34','frequency'=>'monthly'])->assertSessionHasNoErrors();
+        $this->actingAs($admin)->post(route('support.track-marker',$apprentice), ['code'=>'IM34','frequency'=>'monthly','reason'=>'Travel disruption affected attendance'])->assertSessionHasNoErrors();
         $schedule = SupportRegister71::addMarker($admin, $apprentice, ['code'=>'IM36','interval_key'=>'six_monthly','owner_id'=>$admin->id]);
         SupportRegister71::addMarker($admin, $other, ['code'=>'IM1','interval_key'=>'weekly','owner_id'=>$admin->id]);
         $page = route('support.index',$apprentice);
         $this->actingAs($member)->get(route('support.worklist'))->assertOk()
-            ->assertSee('Alex Morgan')->assertDontSee($other->reference);
+            ->assertSee('Alex Morgan')->assertDontSee($other->reference)->assertDontSee('Travel disruption affected attendance');
+        $this->get($page)->assertOk()->assertSeeInOrder(['Markers and reasons', 'Travel disruption affected attendance', 'Action plan', 'SMART target']);
         $this->get(route('support-register71.index',['view'=>'all']))->assertOk()->assertDontSee($other->reference);
         $this->get(route('support.index',$other))->assertForbidden();
 
@@ -38,17 +39,37 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $this->assertSame(['IM34'], $due->viewData('rows')->items()[0]['due']->pluck('code')->all());
         $this->assertSame(2, SupportConcern::where('apprentice_id',$apprentice->id)->where('status','!=','Closed')->count());
 
-        $this->from($page)->post(route('support-register71.add-action'), [
+        $target = [
             'request_uuid'=>(string) Str::uuid(),'apprentice_id'=>$apprentice->id,'owner_id'=>$member->id,
-            'due_date'=>today()->subDay()->toDateString(),'summary'=>'Arrange next meeting',
+            'due_date'=>today()->subDay()->toDateString(),'summary'=>'Arrange next meeting','target_type'=>'smart',
+        ];
+        $this->from($page)->post(route('support-register71.add-action'), $target)->assertSessionHasErrors('measure');
+        $this->from($page)->post(route('support-register71.add-action'), [
+            ...$target, 'measure'=>'Acceptances from apprentice and tutor',
         ])->assertSessionHasNoErrors();
-        $action = SupportSharedAction71::firstOrFail();
+        $action = SupportSharedAction71::sole();
+        $this->assertSame('Acceptances from apprentice and tutor', $action->details['measure']);
+        $this->get($page)->assertOk()->assertSee('Acceptances from apprentice and tutor');
         $this->get(route('support.worklist'))->assertOk()->assertSee('Arrange next meeting');
         $this->get(route('support.report'))->assertOk()->assertSee('1 have an overdue support action')->assertDontSee('Arrange next meeting');
         $this->from($page)->post(route('support-register71.complete-action',$action), ['outcome'=>'Meeting arranged'])->assertSessionHasNoErrors();
         $this->get($page)->assertOk()->assertSee('Meeting arranged');
         $this->get(route('support.worklist'))->assertOk()->assertDontSee('Arrange next meeting');
         $this->get(route('support.report'))->assertOk()->assertSee('0 have an overdue support action');
+    }
+
+    public function test_marker_other_uses_the_same_reason_field(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $apprentice = Apprentice::factory()->create();
+        $route = route('support.track-marker', $apprentice);
+        $marker = ['code' => 'IM40', 'frequency' => 'monthly'];
+
+        $this->actingAs($admin)->post($route, $marker)->assertSessionHasErrors('reason');
+        $this->post($route, $marker + ['reason' => 'Temporary travel disruption'])->assertSessionHasNoErrors();
+        $record = SupportConcern::sole();
+        $this->assertSame('Temporary travel disruption', $record->other_code);
+        $this->get(route('support.index', $apprentice))->assertOk()->assertSee('Temporary travel disruption');
     }
 
     public function test_employer_link_uses_the_normal_versioned_update_and_keeps_other_assignments(): void

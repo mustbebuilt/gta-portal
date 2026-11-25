@@ -1,11 +1,30 @@
 <section class="panel" id="support-actions">
-    <h2>Open actions</h2>
+    <h2>Action plan</h2>
+    @php($actionForm = route('support-register71.add-action'))
+    @php($restoreAction = old('_support_form') === $actionForm)
+    <form method="post" action="{{ $actionForm }}">
+        @csrf
+        <input type="hidden" name="_support_form" value="{{ $actionForm }}">
+        <input type="hidden" name="target_type" value="smart">
+        <input type="hidden" name="apprentice_id" value="{{ $apprentice->id }}">
+        <input type="hidden" name="request_uuid" value="{{ $restoreAction ? old('request_uuid') : \Illuminate\Support\Str::uuid() }}">
+        <label>SMART target <input name="summary" required maxlength="2000" value="{{ $restoreAction ? old('summary') : '' }}"></label>
+        <label>How will we know it’s done? <input name="measure" required maxlength="1000" value="{{ $restoreAction ? old('measure') : '' }}"></label>
+        <div class="form-grid">
+            <label>Owner <select name="owner_id" required>
+                <option value="">Choose owner</option>
+                @foreach($owners as $owner)<option value="{{ $owner->id }}" @selected((int) ($restoreAction ? old('owner_id') : auth()->id()) === $owner->id)>{{ $owner->name }}</option>@endforeach
+            </select></label>
+            <label>Due date <input type="date" name="due_date" required value="{{ $restoreAction ? old('due_date') : '' }}"></label>
+        </div>
+        <button class="primary">Save target</button>
+    </form>
     @php($openActions = collect())
     @foreach($concerns->where('status','!=','Closed')->filter(fn ($marker) => filled($marker->next_action)) as $marker)
         @php($openActions->push(['title'=>$marker->next_action, 'owner'=>$marker->owner?->name, 'due'=>$marker->action_due?->toDateString(), 'route'=>route('support.complete-action',$marker), 'version'=>$marker->version]))
     @endforeach
     @foreach($sharedActions->where('state','Open') as $action)
-        @php($openActions->push(['title'=>$action->details['summary'] ?? 'Follow-up action', 'owner'=>$action->owner?->name, 'due'=>$action->due_date->toDateString(), 'route'=>route('support-register71.complete-action',$action)]))
+        @php($openActions->push(['title'=>$action->details['summary'] ?? 'Follow-up action', 'measure'=>$action->details['measure'] ?? null, 'owner'=>$action->owner?->name, 'due'=>$action->due_date->toDateString(), 'route'=>route('support-register71.complete-action',$action)]))
     @endforeach
     @foreach($plans->where('status','Active') as $plan)
         @foreach($plan->activities ?? [] as $activity)
@@ -18,6 +37,7 @@
     @forelse($openActions->sortBy(fn ($action) => $action['due'] ?? '9999-12-31') as $action)
         <div class="support-item">
             <p><strong>{{ $action['title'] }}</strong></p>
+            @if(filled($action['measure'] ?? null)) <p>{{ $action['measure'] }}</p> @endif
             <p class="muted">{{ $action['owner'] ?? 'Owner to assign' }} · {{ $action['due'] ? 'Due '.$action['due'] : 'Due date to set' }}</p>
             <details @if(old('_support_form') === $action['route']) open @endif><summary>Complete action</summary>
                 <form method="post" action="{{ $action['route'] }}">
@@ -32,23 +52,6 @@
     @empty
         <p>No open actions.</p>
     @endforelse
-    @php($actionForm = route('support-register71.add-action'))
-    <details @if(old('_support_form') === $actionForm) open @endif><summary>Add action</summary>
-        <form method="post" action="{{ $actionForm }}">
-            @csrf
-            <input type="hidden" name="_support_form" value="{{ $actionForm }}">
-            <input type="hidden" name="apprentice_id" value="{{ $apprentice->id }}">
-            <input type="hidden" name="request_uuid" value="{{ old('_support_form') === $actionForm ? old('request_uuid') : \Illuminate\Support\Str::uuid() }}">
-            <label>Next action <input name="summary" required maxlength="2000" value="{{ old('_support_form') === $actionForm ? old('summary') : '' }}"></label>
-            <div class="form-grid">
-                <label>Owner <select name="owner_id" required>
-                    @foreach($owners as $owner)<option value="{{ $owner->id }}" @selected((int) (old('_support_form') === $actionForm ? old('owner_id') : auth()->id()) === $owner->id)>{{ $owner->name }}</option>@endforeach
-                </select></label>
-                <label>Due date <input type="date" name="due_date" required value="{{ old('_support_form') === $actionForm ? old('due_date') : today()->toDateString() }}"></label>
-            </div>
-            <button class="primary">Save action</button>
-        </form>
-    </details>
     <details><summary>Completed action history</summary>
         @foreach($concerns as $marker)
             @foreach(collect($marker->history ?? [])->where('event','marker_action_completed') as $event)

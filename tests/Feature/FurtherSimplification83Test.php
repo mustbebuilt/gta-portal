@@ -67,13 +67,14 @@ final class FurtherSimplification83Test extends TestCase
         $this->assertSame(1,(new \DOMXPath($doc))->query('//details[summary="Actual times, OTJ and other details" and @open]')->length);
     }
 
-    public function test_meeting_opens_first_due_review_but_leaves_frequency_optional_and_does_not_save(): void
+    public function test_meeting_shows_action_plan_with_marker_reviews_closed_and_does_not_save(): void
     {
         $u=User::factory()->create(['role'=>'admin']);$a=Apprentice::factory()->create();
         $s=SupportRegister71::addMarker($u,$a,['code'=>'IM34','interval_key'=>'six_monthly','owner_id'=>$u->id]);
         $page=$this->actingAs($u)->get(route('support.worklist',['meeting'=>$a->id]))->assertOk()->assertSee('Change review frequency');
         $dom=new \DOMDocument();@$dom->loadHTML($page->getContent());$xp=new \DOMXPath($dom);
-        $this->assertSame(1,$xp->query('//details[@open and starts-with(summary,"Record review")]')->length);
+        $this->assertSame(1, $xp->query('//details[not(@open) and summary="Record review"]')->length);
+        $this->assertSame(1, $xp->query('//section[@id="support-actions"]/form//input[@name="measure" and @required]')->length);
         $this->assertSame(1,$xp->query('//details[summary="Change review frequency" and not(@open)]')->length);
         $this->assertFalse($s->fresh()->first_review_completed);
     }

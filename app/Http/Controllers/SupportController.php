@@ -32,6 +32,8 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class SupportController extends Controller
 {
+    public const MARKER_WITHOUT_REASON = 'Marker added to the Support and Retention Register.';
+
     private const PRIVATE_CACHE = ['Cache-Control'=>'private, no-store', 'Referrer-Policy'=>'same-origin'];
     private function team(Request $r, ?Apprentice $apprentice = null): bool
     {
@@ -194,18 +196,22 @@ class SupportController extends Controller
     public function trackMarker(Request $request, Apprentice $apprentice): RedirectResponse
     {
         abort_unless($this->lead($request, $apprentice), 403);
-        $data = $request->validate(['code'=>['required',Rule::in(array_keys($this->codes()))],
-            'other'=>['nullable','required_if:code,IM40','string','max:250'],
-            'frequency'=>['required','in:weekly,fortnightly,monthly,quarterly,six-monthly']]);
+        $needsOtherDescription = $request->input('code') === 'IM40' && ! $request->filled('other');
+        $data = $request->validate([
+            'code' => ['required', Rule::in(array_keys($this->codes()))],
+            'reason' => ['nullable', Rule::requiredIf($needsOtherDescription), 'string', $needsOtherDescription ? 'max:250' : 'max:2000'],
+            'other' => ['nullable', 'string', 'max:250'],
+            'frequency' => ['required', 'in:weekly,fortnightly,monthly,quarterly,six-monthly'],
+        ]);
         DB::transaction(function () use ($request, $apprentice, $data): void {
             $profile = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
             abort_unless($this->lead($request, $profile), 403);
             if (SupportConcern::where('apprentice_id',$profile->id)->where('code',$data['code'])->where('status','!=','Closed')->exists()) {
                 throw ValidationException::withMessages(['code'=>'This marker already has an open review record.']);
             }
-            $marker = new SupportConcern(['apprentice_id'=>$profile->id,'raised_by'=>$request->user()->id,'initial_note'=>'Marker added to the Support and Retention Register.']);
+            $marker = new SupportConcern(['apprentice_id'=>$profile->id,'raised_by'=>$request->user()->id,'initial_note'=>$data['reason'] ?? self::MARKER_WITHOUT_REASON]);
             $marker->code = $data['code'];
-            $marker->other_code = $data['code'] === 'IM40' ? $data['other'] : null;
+            $marker->other_code = $data['code'] === 'IM40' ? ($data['other'] ?? $data['reason']) : null;
             $marker->owner_id = $request->user()->id;
             $marker->history = [['event'=>'marker_review_frequency_set','frequency'=>$data['frequency'],
                 'by'=>$request->user()->id,'at'=>now()->toIso8601String()]];

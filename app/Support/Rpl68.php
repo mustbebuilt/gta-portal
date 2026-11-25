@@ -34,15 +34,52 @@ class Rpl68 {
   foreach($adjustments as $v)if(!is_int($v)||$v<0||$v>100||$v%10!==0)self::fail('Use whole 10-percentage-point increments from 0% to 100%.');
   if(($r['mode']??null)==='none'&&array_sum($adjustments)>0)self::fail('No relevant prior learning cannot contain reductions.');
   $ksbs=count($codes);$unit=(float)$t['full_hours']/$ksbs;$removed=0.0;$byBlock=[];$unresolved=[];
+  $eligibleBlocks = array_filter(array_column($t['blocks'], 'hours', 'number'), fn ($hours) => $hours > 0);
   foreach($t['ksbs'] as $k){$pct=$adjustments[$k['code']]??0;if(!$pct)continue;$hours=$unit*$pct/100;$removed+=$hours;
-   $alloc=$k['allocation']??(count($k['blocks'])===1?[(string)$k['blocks'][0]=>1]:null);
-   if(!$alloc){foreach($k['blocks'] as $n)$unresolved[$n][]=$k['code'];continue;}
+   $alloc = $k['allocation'] ?? null;
+   if ($alloc === null) {
+    $linked = array_intersect_key($eligibleBlocks, array_flip($k['blocks']));
+    if (!$linked) {
+     foreach ($k['blocks'] as $n) $unresolved[$n][] = $k['code'];
+     continue;
+    }
+    $alloc = array_fill_keys(array_keys($linked), 1 / count($linked));
+   }
    foreach($alloc as $n=>$weight)$byBlock[$n]=($byBlock[$n]??0)+$hours*$weight;
   }
   $blocks=[];foreach($t['blocks'] as $b){$reduction=$byBlock[$b['number']]??0;$revised=(float)$b['hours']-$reduction;if($revised<-.00001)$unresolved[$b['number']][]='Reduction exceeds this block’s baseline';$blocks[]=[...$b,'original_hours'=>(float)$b['hours'],'removed_hours'=>round($reduction,4),'hours'=>round($revised,4),'unresolved'=>$unresolved[$b['number']]??[]];}
   $revised=round((float)$t['full_hours']-$removed,4);
   if(!$unresolved){$delta=round($revised-array_sum(array_column($blocks,'hours')),4);if($delta){foreach($blocks as &$block){if($block['number']<12&&$block['hours']+$delta>=0){$block['hours']=round($block['hours']+$delta,4);$block['removed_hours']=round($block['original_hours']-$block['hours'],4);break;}}unset($block);}}
   return ['original_hours'=>(float)$t['full_hours'],'removed_hours'=>round($removed,4),'revised_hours'=>$revised,'revised_hours_unrounded'=>(float)$t['full_hours']-$removed,'unit_hours_unrounded'=>$unit,'ksb_count'=>$ksbs,'adjusted_count'=>count(array_filter($adjustments,fn($v)=>$v>0)),'remaining_count'=>$ksbs-count(array_filter($adjustments,fn($v)=>$v>0)),'blocks'=>$blocks,'unresolved'=>$unresolved];
+ }
+ /** Carry display rounding between rows so the displayed hours reconcile to the displayed total. */
+ public static function reviewBlocks(array $calculation): array
+ {
+  if ($calculation['unresolved']) return $calculation['blocks'];
+
+  $original = 0.0;
+  $revised = 0.0;
+  $originalCents = 0;
+  $revisedCents = 0;
+  $blocks = [];
+  foreach ($calculation['blocks'] as $block) {
+   $original += $block['original_hours'];
+   $revised += $block['hours'];
+   $nextOriginal = (int) round(round($original, 4) * 100);
+   $nextRevised = (int) round(round($revised, 4) * 100);
+   $rowOriginal = $nextOriginal - $originalCents;
+   $rowRevised = $nextRevised - $revisedCents;
+   $originalCents = $nextOriginal;
+   $revisedCents = $nextRevised;
+   $blocks[] = [
+    ...$block,
+    'original_hours' => $rowOriginal / 100,
+    'removed_hours' => ($rowOriginal - $rowRevised) / 100,
+    'hours' => $rowRevised / 100,
+   ];
+  }
+
+  return $blocks;
  }
  public static function position(TrainingPlanWorkspace $w):array {
   $v=$w->setup_rpl;$template=ProgrammeSetupTemplate68::find($v['template_id']??0);$sourceOk=$template&&$template->active&&$template->source_hash===($v['template_hash']??null)&&self::templateMatches($template);

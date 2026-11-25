@@ -40,7 +40,38 @@ class GuidedSetup68Test extends TestCase {
   }
  }
  public function test_four_of_fifty_is_entered_once_even_when_ksb_has_two_teaching_blocks():void {$t=self::source();$c=Rpl68::calculate($t,['mode'=>'applies','adjustments'=>['K1'=>20,'K2'=>30,'K3'=>40,'K4'=>50]]);$this->assertSame(4,$c['adjusted_count']);$this->assertSame(46,$c['remaining_count']);$this->assertEquals(16.8,$c['removed_hours']);$this->assertEquals(583.2,$c['revised_hours']);$this->assertEquals(16.8,$c['blocks'][0]['removed_hours']);$this->assertEquals(0,$c['blocks'][1]['removed_hours']);}
- public function test_unresolved_multiblock_ksb_is_flagged_on_each_affected_block():void {$t=self::source();unset($t['ksbs'][0]['allocation']);$c=Rpl68::calculate($t,['mode'=>'applies','adjustments'=>['K1'=>20]]);$this->assertArrayHasKey(1,$c['unresolved']);$this->assertArrayHasKey(2,$c['unresolved']);$this->assertEquals(2.4,$c['removed_hours']);}
+ public function test_existing_autocare_links_allocate_saved_reductions_when_a_draft_reopens(): void
+ {
+  $template = $this->template();
+  $source = json_decode(file_get_contents(resource_path('data/setup68-templates/ST0499_v1.3_autocare.json')), true, 512, JSON_THROW_ON_ERROR);
+  $template->update(['template' => $source, 'source_hash' => Rpl68::templateHash($source)]);
+  $actor = $this->actor();
+  $this->actingAs($actor);
+  $draft = Setup::start($actor, $actor->auth_version);
+  $draft = $this->save($draft, 3, ['template_id' => $template->id, 'start_date' => '2026-11-18']);
+  $adjustments = ['K1' => 70, 'K12' => 80, 'K15' => 80];
+  $rpl = ['mode' => 'applies', 'assessment_ref' => 'AUT-RPL-TEST', 'adjustments' => $adjustments, 'remaining_confirmed' => true];
+  $draft = $this->save($draft, 4, $rpl);
+  $url = route('setup68.show', [$draft, 7]);
+  $response = $this->get($url)->assertOk()->assertSee('589.52 hours')->assertDontSee('Pending allocation');
+  $calculation = $response->viewData('review')['calculation'];
+  $this->assertSame($adjustments, $draft->fresh()->payload['rpl']['adjustments']);
+  $this->assertSame([], $calculation['unresolved']);
+  $this->assertEqualsWithDelta(611.5 / 64 * 0.7 / 9 + 611.5 / 64 * 0.8 / 10, $calculation['blocks'][0]['removed_hours'], 0.0005);
+  $this->assertEquals(589.52, round(array_sum(array_column(Rpl68::reviewBlocks($calculation), 'hours')), 2));
+  $this->assertEquals(0, $calculation['blocks'][10]['removed_hours']);
+  $this->assertEquals(0, $calculation['blocks'][11]['removed_hours']);
+
+  $rpl['adjustments']['K1'] = 80;
+  $draft = $this->save($draft, 4, $rpl);
+  $updated = $this->get($url)->assertOk()->assertSee('588.57 hours')->viewData('review')['calculation'];
+  $draft = $this->save($draft, 4, $rpl);
+  $this->assertSame($updated, $this->get($url)->assertOk()->viewData('review')['calculation']);
+
+  $this->save($draft, 4, ['mode' => 'none']);
+  $none = $this->get($url)->assertOk()->assertSee('611.50 hours')->viewData('review')['calculation'];
+  $this->assertEquals(array_column($none['blocks'], 'original_hours'), array_column($none['blocks'], 'hours'));
+ }
  public function test_invalid_percentage_rejected_server_side():void {$this->expectException(\Illuminate\Validation\ValidationException::class);Rpl68::calculate(self::source(),['mode'=>'applies','adjustments'=>['K1'=>25]]);}
  public function test_duplicate_ksb_catalogue_rejected():void {$t=self::source();$t['ksbs'][]=$t['ksbs'][0];$this->expectException(\Illuminate\Validation\ValidationException::class);Rpl68::validateTemplate($t);}
  public function test_author_can_confirm_setup_already_waiting_for_review():void {
@@ -63,7 +94,7 @@ class GuidedSetup68Test extends TestCase {
  public function test_stale_draft_write_is_rejected():void {[$d]=$this->ready();$this->post('/apprentice-setup/'.$d->id.'/reopen',['version'=>$d->version,'reason'=>'Correction'])->assertRedirect();$this->post('/apprentice-setup/'.$d->id.'/steps/1',['version'=>1,'data'=>['first_name'=>'Lost write']])->assertStatus(409);}
  public function test_correction_reuses_same_apprentice_employer_and_rpl_record_with_history():void {[$d,$author,$reviewer]=$this->complete(true);$oldPlan=DeliveryPlan::approved(Apprentice::find($d->apprentice_id));$this->actingAs($author)->post('/apprentice-setup/'.$d->id.'/reopen',['version'=>$d->version,'reason'=>'Approved K1 correction'])->assertRedirect();$d=$d->fresh();$r=$d->payload['rpl'];$r['adjustments']['K1']=10;$r['remaining_confirmed']=true;$d=$this->save($d,4,$r);$this->assertEquals(583.2,DeliveryPlan::approved(Apprentice::find($d->apprentice_id))['details']['target_hours']);$d=$this->save($d,5,[...$d->payload['employer'],'agreement_verified'=>true]);$this->post('/apprentice-setup/'.$d->id.'/submit',['version'=>$d->version,'confirmed'=>1])->assertRedirect()->assertSessionHasNoErrors();$d=$d->fresh();$this->actingAs($reviewer)->post('/apprentice-setup/'.$d->id.'/confirm',['version'=>$d->version,'confirmed'=>1])->assertRedirect()->assertSessionHasNoErrors();$this->assertDatabaseCount('apprentices',1);$this->assertDatabaseCount('employers',1);$this->assertDatabaseCount('training_plan_workspaces',1);$this->assertEquals(584.4,DeliveryPlan::approved(Apprentice::find($d->apprentice_id))['details']['target_hours']);$this->assertStringContainsString('Approved K1 correction',json_encode($d->fresh()->history));}
  public function test_template_revision_invalidates_approved_target_instead_of_silently_recalculating():void {[$d,$a,$r,$t]=$this->complete();$value=$t->template;$value['source_ref']='Revised source';$t->template=$value;$t->source_hash=Rpl68::hash($value);$t->save();$this->assertNull(DeliveryPlan::approved(Apprentice::find($d->apprentice_id)));}
- public function test_missing_remainder_confirmation_and_unresolved_blocks_prevent_submission():void {[$d,$a,$r,$t]=$this->ready(true);$this->post('/apprentice-setup/'.$d->id.'/reopen',['version'=>$d->version,'reason'=>'Continue assessment'])->assertRedirect();$d=$d->fresh();$d=$this->save($d,4,[...$d->payload['rpl'],'remaining_confirmed'=>false]);$this->post('/apprentice-setup/'.$d->id.'/submit',['version'=>$d->version,'confirmed'=>1])->assertSessionHasErrors();$this->assertDatabaseCount('apprentices',0);}
+ public function test_missing_remainder_confirmation_prevents_submission():void {[$d,$a,$r,$t]=$this->ready(true);$this->post('/apprentice-setup/'.$d->id.'/reopen',['version'=>$d->version,'reason'=>'Continue assessment'])->assertRedirect();$d=$d->fresh();$d=$this->save($d,4,[...$d->payload['rpl'],'remaining_confirmed'=>false]);$this->post('/apprentice-setup/'.$d->id.'/submit',['version'=>$d->version,'confirmed'=>1])->assertSessionHasErrors();$this->assertDatabaseCount('apprentices',0);}
  public function test_preview_bulk_changes_has_no_mutation_then_confirm_applies_once():void {[$d]=$this->ready(true);$this->post('/apprentice-setup/'.$d->id.'/reopen',['version'=>$d->version,'reason'=>'Batch change'])->assertRedirect();$d=$d->fresh();$data=['version'=>$d->version,'action'=>'batch_preview','codes'=>['K1','K2'],'percent'=>20];$response=$this->post('/apprentice-setup/'.$d->id.'/steps/4',$data)->assertOk()->assertSee('Review these changes');$this->assertSame($d->version,$d->fresh()->version);$binding=Rpl68::hash([$d->version,['K1','K2'],20,Setup::template($d->payload)->source_hash]);$this->post('/apprentice-setup/'.$d->id.'/steps/4',[...$data,'action'=>'batch_apply','binding'=>$binding])->assertRedirect()->assertSessionHasNoErrors();$this->assertSame(20,$d->fresh()->payload['rpl']['adjustments']['K2']);$this->assertFalse($d->fresh()->payload['rpl']['remaining_confirmed']);}
  public function test_ksb_type_filters_compose_without_changing_the_draft(): void
  {
@@ -147,7 +178,27 @@ class GuidedSetup68Test extends TestCase {
  public function test_employer_change_clears_previous_agreement():void {[$d]=$this->ready(true);$this->post('/apprentice-setup/'.$d->id.'/reopen',['version'=>$d->version,'reason'=>'Employer changed'])->assertRedirect();$d=$d->fresh();$e=Employer::create(['reference'=>'OTHER68','name'=>'Another employer']);$d=$this->save($d,5,['id'=>$e->id,'agreement_ref'=>'OLD-REF','agreement_verified'=>true]);$this->assertFalse($d->payload['employer']['agreement_verified']);$this->assertTrue(collect(Setup::review($d)['issues'])->contains(fn($x)=>$x['step']===5));}
  public function test_guest_and_non_admin_cannot_read_a_private_draft():void {[$d]=$this->ready();$this->actingAs($this->actor('tutor'))->get('/apprentice-setup/'.$d->id.'/2')->assertForbidden();$this->post('/apprentice-setup/'.$d->id.'/steps/2',['version'=>$d->version,'data'=>['state'=>'selected','codes'=>['IM10']]])->assertForbidden();}
  public function test_revoked_auth_version_cannot_start_or_commit():void {$u=$this->actor();$this->actingAs($u);DB::table('users')->where('id',$u->id)->increment('auth_version');$this->post('/apprentice-setup')->assertRedirect()->assertSessionHasErrors();}
- public function test_unresolved_plan_cannot_be_confirmed():void {[$d,$author,$reviewer,$t]=$this->ready(true);$v=$t->template;unset($v['ksbs'][0]['allocation']);$t->template=$v;$t->source_hash=Rpl68::hash($v);$t->save();$this->actingAs($reviewer)->post('/apprentice-setup/'.$d->id.'/confirm',['version'=>$d->version,'confirmed'=>1])->assertSessionHasErrors();$this->assertDatabaseCount('apprentices',0);$this->assertDatabaseCount('employers',0);}
+ public function test_overallocated_draft_shows_one_message_and_cannot_be_confirmed(): void
+ {
+  $template = $this->template();
+  $source = $template->template;
+  $source['ksbs'][0]['allocation'] = [2 => 1];
+  $source['blocks'][0]['hours'] = 117;
+  $source['blocks'][1]['hours'] = 3;
+  $template->update(['template' => $source, 'source_hash' => Rpl68::hash($source)]);
+  [$draft] = $this->ready(true, $template, submit: false);
+  $rpl = $draft->payload['rpl'];
+  $rpl['adjustments']['K1'] = 100;
+  $draft = $this->save($draft, 4, $rpl);
+
+  $review = $this->get(route('setup68.show', [$draft, 7]))
+   ->assertOk()->assertSee('Provisional OTJ hours')->assertSee('Pending allocation')->viewData('review');
+  $this->assertCount(1, array_filter($review['issues'], fn ($issue) => $issue['step'] === 4));
+  $this->post(route('setup68.confirm', $draft), ['version' => $draft->version, 'confirmed' => 1])
+   ->assertSessionHasErrors();
+  $this->assertSame('Draft', $draft->fresh()->state);
+  $this->assertDatabaseCount('apprentices', 0);
+ }
  public function test_allocation_cannot_remove_more_than_a_blocks_baseline():void {$t=self::source();$t['ksbs'][0]['allocation']=[2=>1];$t['blocks'][1]['hours']=1;$t['blocks'][0]['hours']=119;$c=Rpl68::calculate($t,['mode'=>'applies','adjustments'=>['K1'=>100]]);$this->assertNotEmpty($c['unresolved'][2]);}
  public function test_unknown_ksb_and_string_percentages_are_not_silently_coerced():void {$this->expectException(\Illuminate\Validation\ValidationException::class);Rpl68::calculate(self::source(),['mode'=>'applies','adjustments'=>['K999'=>20]]);}
  public function test_sensitive_draft_payload_and_rpl_history_are_encrypted_at_rest():void {[$d]=$this->ready(true);$raw=DB::table('apprentice_setup_drafts68')->where('id',$d->id)->first();$this->assertStringNotContainsString('Morgan',$raw->payload);$this->assertStringNotContainsString('ASSESSMENT-68-B',$raw->history);$events=$d->history;$rpl=collect($events)->first(fn($e)=>isset($e['rpl_after']));$this->assertSame(20,$rpl['rpl_after']['adjustments']['K1']);}

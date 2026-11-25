@@ -269,7 +269,11 @@ final class SupportRegister71
             $action->due_date = $data['due_date'];
             $action->state = 'Open';
             $action->version = 1;
-            $action->details = ['summary' => trim((string) $data['summary']), 'outcome' => null];
+            $action->details = [
+                'summary' => trim((string) $data['summary']),
+                ...(!empty($data['measure']) ? ['measure' => $data['measure']] : []),
+                'outcome' => null,
+            ];
             $action->history = [[
                 'event' => 'action_created',
                 'by' => $actor->id,

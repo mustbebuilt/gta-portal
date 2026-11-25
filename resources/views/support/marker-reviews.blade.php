@@ -1,77 +1,86 @@
-@php $frequencies = ['weekly'=>'Weekly','fortnightly'=>'Fortnightly','monthly'=>'Monthly','quarterly'=>'Every three months','six-monthly'=>'Every six months']; @endphp
+@php
+    $frequencies = ['weekly'=>'Weekly','fortnightly'=>'Fortnightly','monthly'=>'Monthly','quarterly'=>'Every three months','six-monthly'=>'Every six months'];
+    $openByCode = $concerns->where('status', '!=', 'Closed')->whereNotNull('code')->groupBy('code');
+    $markerCodes = collect($markers)->merge($openByCode->keys())->unique()->sort(SORT_NATURAL);
+@endphp
 <section class="panel" id="marker-reviews">
-    <h2>Open markers</h2>
-    @forelse($concerns->where('status','!=','Closed')->whereNotNull('code') as $marker)
-        @php
-            $schedule = $schedules->get($marker->id);
-            $due = $schedule ? $schedule->next_due_date : $marker->next_review;
-            $first = $schedule ? !$schedule->first_review_completed : ($marker->status === 'New' || !$due);
-            $form = $schedule ? route('support-register71.review', $schedule) : route('support.marker-review',$marker);
-            $restore = old('_support_form') === $form;
-            $intervals = $schedule ? \App\Support\SupportRegister71::INTERVALS : $frequencies;
-            $frequencyKey = $schedule ? 'interval_key' : 'frequency';
-            $dateKey = $schedule ? 'review_date' : 'date';
-            $outcomeKey = $schedule ? 'note' : 'outcome';
-            $frequency = $schedule?->interval_key ?? (collect($marker->history ?? [])->last(fn ($event) => isset($event['frequency']))['frequency'] ?? 'monthly');
-        @endphp
+    <h2>Markers and reasons</h2>
+    @forelse($markerCodes as $code)
         <article class="support-item">
-            <h3>{{ $marker->code }} · {{ $codes[$marker->code] ?? 'Marker' }}</h3>
-            <p @class(['register-overdue' => $due?->lt(today())])>
-                @if($due?->lt(today())) Overdue since {{ $due->format('j M Y') }}
-                @elseif($first) First review needed
-                @elseif($due?->isToday()) Due today
-                @else Next review {{ $due?->format('j M Y') }}
-                @endif
-            </p>
-            <details @if($restore || ($inlineMarker83??null)===$marker->id) open @endif><summary>Record review · {{ $marker->code }}</summary>
-                <form method="post" action="{{ $form }}">
-                    @csrf
-                    <input type="hidden" name="_support_form" value="{{ $form }}">
-                    <input type="hidden" name="version" value="{{ $restore ? old('version') : ($schedule?->version ?? $marker->version) }}">
-                    @if($schedule)<input type="hidden" name="kind" value="formal_review">@endif
-                    <div class="form-grid">
-                        <label>Review date <input type="date" name="{{ $dateKey }}" value="{{ $restore ? old($dateKey) : today()->toDateString() }}" max="{{ today()->toDateString() }}" required></label>
-
-                    </div>
-                    <details @if($restore && $errors->has($frequencyKey)) open @endif><summary>Change review frequency</summary><label>Review frequency <select name="{{ $frequencyKey }}" required>
-                            @foreach($intervals as $value=>$label)<option value="{{ $value }}" @selected(($restore ? old($frequencyKey) : $frequency) === $value)>{{ $label }}</option>@endforeach
-                        </select></label></details>
-                    <label>Review outcome <textarea name="{{ $outcomeKey }}" required maxlength="1000">{{ $restore ? old($outcomeKey) : '' }}</textarea></label>
-                    @if(!$schedule && !filled($marker->next_action))
-                        <details @if($restore && (old('action') || old('owner') || old('due'))) open @endif><summary>Add a follow-up action</summary>
-                            <label>Action <textarea name="action" maxlength="1000">{{ $restore ? old('action') : '' }}</textarea></label>
-                            <div class="form-grid">
-                                <label>Owner <select name="owner"><option value="">Choose owner</option>
-                                    @foreach($owners as $owner)<option value="{{ $owner->id }}" @selected($restore && (int) old('owner') === $owner->id)>{{ $owner->name }}</option>@endforeach
-                                </select></label>
-                                <label>Due date <input type="date" name="due" value="{{ $restore ? old('due') : '' }}"></label>
-                            </div>
-                        </details>
+            <h3>{{ $code }} · {{ $codes[$code] ?? 'Marker' }}</h3>
+            @unless($openByCode->has($code))
+                @php
+                    $added = $markerHistory->first(fn ($change) => in_array($code, json_decode($change->after_codes, true), true)
+                        && !in_array($code, json_decode($change->before_codes, true), true));
+                @endphp
+                @if(filled($added?->reason)) <p>{{ $added->reason }}</p> @endif
+            @endunless
+            @foreach($openByCode->get($code, collect()) as $marker)
+            @php
+                $schedule = $schedules->get($marker->id);
+                $due = $schedule ? $schedule->next_due_date : $marker->next_review;
+                $first = $schedule ? !$schedule->first_review_completed : ($marker->status === 'New' || !$due);
+                $form = $schedule ? route('support-register71.review', $schedule) : route('support.marker-review',$marker);
+                $restore = old('_support_form') === $form;
+                $reason = $marker->initial_note;
+                if (in_array($reason, [\App\Http\Controllers\SupportController::MARKER_WITHOUT_REASON, $code.' recorded on Support and Retention Register.'], true)) {
+                    $reason = null;
+                }
+                $description = $marker->other_code;
+                $intervals = $schedule ? \App\Support\SupportRegister71::INTERVALS : $frequencies;
+                $frequencyKey = $schedule ? 'interval_key' : 'frequency';
+                $dateKey = $schedule ? 'review_date' : 'date';
+                $outcomeKey = $schedule ? 'note' : 'outcome';
+                $frequency = $schedule?->interval_key ?? (collect($marker->history ?? [])->last(fn ($event) => isset($event['frequency']))['frequency'] ?? 'monthly');
+            @endphp
+                @if(filled($description)) <p>{{ $description }}</p> @endif
+                @if(filled($reason) && $reason !== $description) <p>{{ $reason }}</p> @endif
+                <p @class(['register-overdue' => $due?->lt(today())])>
+                    @if($due?->lt(today())) Overdue since {{ $due->format('j M Y') }}
+                    @elseif($first) First review needed
+                    @elseif($due?->isToday()) Due today
+                    @else Next review {{ $due?->format('j M Y') }}
                     @endif
-                    <button class="primary">Save review</button>
-                </form>
-            </details>
-            @if($schedule)
-                <details><summary>Update or close marker</summary>
+                </p>
+                <details @if($restore) open @endif><summary>Record review</summary>
                     <form method="post" action="{{ $form }}">
                         @csrf
-                        <input type="hidden" name="version" value="{{ $schedule->version }}">
-                        <label>Action <select name="kind"><option value="discussion_only">Log discussion only</option><option value="change_frequency">Change frequency</option><option value="close_marker">Close marker</option></select></label>
-                        <label>Review frequency <select name="interval_key">@foreach($intervals as $value=>$label)<option value="{{ $value }}" @selected($frequency === $value)>{{ $label }}</option>@endforeach</select></label>
-                        <label>Note or reason <textarea name="note" maxlength="2000"></textarea></label>
-                        <button>Save marker update</button>
+                        <input type="hidden" name="_support_form" value="{{ $form }}">
+                        <input type="hidden" name="version" value="{{ $restore ? old('version') : ($schedule?->version ?? $marker->version) }}">
+                        @if($schedule)<input type="hidden" name="kind" value="formal_review">@endif
+                        <div class="form-grid">
+                            <label>Review date <input type="date" name="{{ $dateKey }}" value="{{ $restore ? old($dateKey) : today()->toDateString() }}" max="{{ today()->toDateString() }}" required></label>
+
+                        </div>
+                        <details @if($restore && $errors->has($frequencyKey)) open @endif><summary>Change review frequency</summary><label>Review frequency <select name="{{ $frequencyKey }}" required>
+                                @foreach($intervals as $value=>$label)<option value="{{ $value }}" @selected(($restore ? old($frequencyKey) : $frequency) === $value)>{{ $label }}</option>@endforeach
+                            </select></label></details>
+                        <label>Review outcome <textarea name="{{ $outcomeKey }}" required maxlength="1000">{{ $restore ? old($outcomeKey) : '' }}</textarea></label>
+                        <button class="primary">Save review</button>
                     </form>
                 </details>
-            @elseif($lead)
-                <p><a href="#concern-{{ $marker->id }}">Manage concern</a></p>
-            @endif
+                @if($schedule)
+                    <details><summary>Update or close marker</summary>
+                        <form method="post" action="{{ $form }}">
+                            @csrf
+                            <input type="hidden" name="version" value="{{ $schedule->version }}">
+                            <label>Action <select name="kind"><option value="discussion_only">Log discussion only</option><option value="change_frequency">Change frequency</option><option value="close_marker">Close marker</option></select></label>
+                            <label>Review frequency <select name="interval_key">@foreach($intervals as $value=>$label)<option value="{{ $value }}" @selected($frequency === $value)>{{ $label }}</option>@endforeach</select></label>
+                            <label>Note or reason <textarea name="note" maxlength="2000"></textarea></label>
+                            <button>Save marker update</button>
+                        </form>
+                    </details>
+                @elseif($lead)
+                    <p><a href="{{ !empty($inMeeting) ? route('support.index', $apprentice).'#concern-'.$marker->id : '#concern-'.$marker->id }}">Manage concern</a></p>
+                @endif
+            @endforeach
         </article>
     @empty
-        <p>No open classified markers.</p>
+        <p>No markers recorded.</p>
     @endforelse
-    @foreach($concerns->where('status','!=','Closed')->whereNull('code') as $concern)
-        <p><a href="#concern-{{ $concern->id }}">Review unclassified concern</a> · Raised {{ $concern->created_at->format('j M Y') }}</p>
-    @endforeach
+    @if($concerns->where('status','!=','Closed')->whereNull('code')->isNotEmpty())
+        <p><a href="{{ !empty($inMeeting) ? route('support.index', $apprentice).'#support-concerns' : '#support-concerns' }}">Review unclassified concerns</a></p>
+    @endif
     @if($lead)
         @php $trackForm = route('support.track-marker', $apprentice); @endphp
         @php $restoreMarker = old('_support_form') === $trackForm; @endphp
@@ -82,7 +91,7 @@
                 <label>Marker <select name="code" required><option value="">Choose a marker</option>
                     @foreach($codes as $code => $label)<option value="{{ $code }}" @selected($restoreMarker && old('code') === $code)>{{ $code }} · {{ $label }}</option>@endforeach
                 </select></label>
-                <label>Description for IM40 (Other) <input name="other" maxlength="250" value="{{ $restoreMarker ? old('other') : '' }}"></label>
+                <label>Reason (optional except for IM40 Other) <textarea name="reason" rows="2" maxlength="2000">{{ $restoreMarker ? old('reason') : '' }}</textarea></label>
                 <label>Review frequency <select name="frequency" required>
                     @foreach($frequencies as $value=>$label)<option value="{{ $value }}" @selected(($restoreMarker ? old('frequency') : 'monthly') === $value)>{{ $label }}</option>@endforeach
                 </select></label>

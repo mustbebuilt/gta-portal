@@ -89,6 +89,8 @@ class SupportRegister71Controller extends Controller
             'owner_id' => ['required', 'integer', 'exists:users,id'],
             'due_date' => ['required', 'date_format:Y-m-d'],
             'summary' => ['required', 'string', 'max:2000'],
+            'target_type' => ['nullable', 'in:smart'],
+            'measure' => ['nullable', 'required_if:target_type,smart', 'string', 'max:1000'],
             'request_uuid' => ['required', 'uuid'],
             'support_concern_id' => ['nullable', 'integer'],
             'support_plan_id' => ['nullable', 'integer'],
@@ -96,7 +98,7 @@ class SupportRegister71Controller extends Controller
         $apprentice = Apprentice::findOrFail($v['apprentice_id']);
         SupportRegister71::createAction($r->user(), $apprentice, $v);
 
-        return back()->with('status', 'Shared follow-up action saved.');
+        return back()->with('status', 'Action saved.');
     }
 
     public function completeAction(Request $r, SupportSharedAction71 $action): RedirectResponse

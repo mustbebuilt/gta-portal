@@ -78,7 +78,13 @@ class GuidedSetup68 {
   if($t){try{$calc=Rpl68::calculate($t->template,$r);}catch(\Illuminate\Validation\ValidationException $ex){$add(4,$ex->getMessage());}}
   if(($r['mode']??null)==='applies'&&!filled($r['assessment_ref']??null))$add(4,'Enter the completed assessment reference once.');
   if(!($r['remaining_confirmed']??false)||($t&&($r['confirmation_hash']??null)!==Rpl68::hash([$t->source_hash,$r['mode']??null,$r['assessment_ref']??null,$r['adjustments']??[]])))$add(4,'Confirm the remaining KSBs have no reduction.');
-  if($calc&&$calc['unresolved'])foreach($calc['unresolved'] as $n=>$codes)$add(4,'Block '.$n.' needs a controlled allocation for '.implode(', ',$codes).'.');
+  if ($calc && $calc['unresolved']) {
+   $affected = [];
+   foreach ($calc['unresolved'] as $number => $reasons) {
+    $affected[] = 'block '.$number.' ('.implode(', ', $reasons).')';
+   }
+   $add(4, 'Ask the programme team to check the OTJ allocation for '.implode(', ', $affected).'.');
+  }
   if($calc&&$calc['revised_hours']<=0)$add(4,'No training remains; refer this case for programme review rather than enrolling automatically.');
   $e=$p['employer']??[];$employer=null;
   if(!empty($e['id'])){$employer=Employer::find($e['id']);if(!$employer?->active||$employer->record_version!==($e['record_version']??null))$add(5,'Employer changed or is inactive. Reselect and verify its agreement.');}

@@ -1,5 +1,5 @@
-<details class="panel" id="quick-support-log" @if(old('_support_form') || old('return_to_workspace')) open @endif>
-    <summary>Log support</summary>
+<details class="panel" id="quick-support-log" @if(old('return_to_workspace') || $plans->contains(fn ($plan) => old('_support_form') === route('support.activity', $plan))) open @endif>
+    <summary>Log support delivered</summary>
     @php($activePlans = $plans->where('status','Active')->filter(fn ($plan) => filled($plan->active_plan['approved_at'] ?? null)))
     @forelse($activePlans as $plan)
         @php($logForm = route('support.activity',$plan))
