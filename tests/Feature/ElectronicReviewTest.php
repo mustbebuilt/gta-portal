@@ -71,7 +71,15 @@ class ElectronicReviewTest extends TestCase
         $this->actingAs($f['tutor'])->post(route('reviews.reopen',[$a,$r]),['version'=>$r->version,'reason'=>'Use shorter review layout'])->assertSessionHasNoErrors();$r->refresh();
         $fields=collect($r->fields)->only(['reviewDate','trainingFrom','mentor','tutor','employerRep','method','attendance','judgement','summary','planChange','newNeeds','safetyAnswer'])->all();
         $fields['format83']='simple83';$fields['checked83']=1;
-        $this->post(route('reviews.update',[$a,$r]),['version'=>$r->version,'fields'=>$fields,'after_save'=>'prepare','prepare_plan_hash'=>$f['plan']->approved['hash']])->assertSessionHasNoErrors();$r->refresh();
+        $signoff = route('electronic-reviews.prepare-form', $r);
+        $this->post(route('reviews.update', [$a, $r]), [
+            'version' => $r->version, 'fields' => $fields, 'after_save' => 'signoff',
+            'prepare_plan_hash' => $f['plan']->approved['hash'],
+        ])->assertRedirect($signoff)->assertSessionHasNoErrors();
+        $r->refresh();
+        $this->get($signoff)->assertOk()->assertSee('Prepare private preview')->assertSee($f['employer']->name)
+            ->assertSee('value="'.$f['authority']->id.'" selected', false);
+        $this->assertDatabaseCount('electronic_review_packets', 0);
         $f['review']=$r;$f['p']=E::prepare($f['tutor'],$f['tutor']->auth_version,$r,['version'=>$r->version,'authority_id'=>$f['authority']->id,'expires_on'=>today()->addDays(20)->toDateString()]);
         $this->assertSame('simple83',$f['p']->snapshot['document']['layout83']);
         $this->assertStringNotContainsString('PRIVATE-SUPPORT-NEVER-SHARE',json_encode($f['p']->snapshot['document']));
@@ -176,6 +184,9 @@ class ElectronicReviewTest extends TestCase
     {
         $f = $this->fixture();
         extract($f);
+        $signoff = route('electronic-reviews.prepare-form', $review);
+        $this->actingAs($tutor)->get($signoff)->assertRedirect(route('electronic-reviews.show', $p));
+        $this->actingAs($learner)->get($signoff)->assertForbidden();
         $this->invalid(fn () => E::prepare($tutor, $tutor->auth_version, $review, ['version' => 2, 'authority_id' => $authority->id, 'expires_on' => today()->addDay()->toDateString()]));
         $this->actingAs($tutor)->post('/apprentices/'.$a->id.'/reviews/'.$review->id.'/reopen', ['version' => 2, 'reason' => 'Must withdraw packet first'])->assertSessionHasErrors();
         $this->invalid(fn () => SignedReviews::prepare($review, $tutor, UploadedFile::fake()->createWithContent('fake.pdf', '%PDF-FICTIONAL'), ['version' => 2]));

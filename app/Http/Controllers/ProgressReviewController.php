@@ -107,6 +107,10 @@ class ProgressReviewController extends Controller
             abort_unless($review->apprentice_id === $apprentice->id, 404);
         }
         $simple83=$r->input('fields.format83')==='simple83';
+        $continueToSignoff = $simple83 && $r->input('after_save') === 'signoff';
+        if ($continueToSignoff) {
+            $r->merge(['after_save' => 'prepare']);
+        }
         if ($simple83 && $r->input('after_save')==='prepare') $r->merge(['prepare_confirmed'=>$r->input('fields.checked83',false)]);
         $rules = ['fields.format83'=>['nullable','in:simple83'],'fields.checked83'=>['sometimes','boolean'],'prepare_plan_hash'=>['exclude_unless:after_save,prepare','required','string','size:64'],'after_save'=>['nullable','in:stay,prepare'],'prepare_confirmed'=>['exclude_unless:after_save,prepare','required','accepted'],'use_recorded_facts'=>['sometimes','boolean'],'version' => $review ? ['required', 'integer'] : ['prohibited'], 'fields' => ['required', 'array']];
         foreach (['reviewDate', 'trainingFrom'] as $key) {
@@ -176,6 +180,11 @@ class ProgressReviewController extends Controller
             if ($r->input('after_save')==='prepare') DB::table('learning_events')->insert(['user_id'=>$r->user()->id,'apprentice_id'=>$fresh->id,'kind'=>'review_draft','record_id'=>$row->id,'event'=>'ready_for_signatures','created_at'=>now()]);
             return $row;
         });
+
+        if ($continueToSignoff) {
+            return to_route('electronic-reviews.prepare-form', $saved)
+                ->with('status', 'Review saved. Choose how to prepare it for signing.');
+        }
 
         return to_route('reviews.edit', [$apprentice, $saved])->with('status', $saved->state==='Ready for signatures'?'Review saved and prepared for participant signatures. No signature or sharing has been recorded.':'Review draft saved. Check the saved notes before preparing signatures.');
     }

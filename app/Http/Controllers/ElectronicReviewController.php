@@ -77,7 +77,21 @@ class ElectronicReviewController extends Controller
         $a = Apprentice::findOrFail($review->apprentice_id);
         abort_unless(E::staff($r->user(), $a), 403);
 
-        return $this->page('prepare', ['review' => $review, 'apprentice' => $a, 'authorities' => Authority::where('apprentice_id', $a->id)->get()->filter(fn ($x) => E::authorityValid($x, $a))]);
+        $activePacket = Packet::where('active_review_id', $review->id)->first();
+        if ($activePacket) {
+            abort_unless($activePacket->apprentice_id === $a->id, 409);
+
+            return to_route('electronic-reviews.show', $activePacket);
+        }
+
+        $hasSignedCopy = SignedReviewRecord::where('progress_review_draft_id', $review->id)
+            ->whereNull('withdrawn_at')->exists();
+        $authorities = $review->state === 'Ready for signatures' && ! $hasSignedCopy
+            ? Authority::where('apprentice_id', $a->id)->get()
+                ->filter(fn ($authority) => E::authorityValid($authority, $a))
+            : collect();
+
+        return $this->page('prepare', ['review' => $review, 'apprentice' => $a, 'authorities' => $authorities, 'hasSignedCopy' => $hasSignedCopy]);
     }
 
     public function prepare(Request $r, Review $review)

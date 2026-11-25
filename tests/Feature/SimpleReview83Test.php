@@ -37,6 +37,27 @@ final class SimpleReview83Test extends TestCase
         if(getenv('GTA_SIMPLE_REVIEW_READY_PDF'))file_put_contents(getenv('GTA_SIMPLE_REVIEW_READY_PDF'),$this->get(route('reviews.pdf',[$a,$r]))->assertOk()->getContent());
         $this->get(route('reviews.edit',[$a,$r]))->assertOk()->assertSee('Participant signatures');
     }
+    public function test_review_continues_to_signoff_with_a_paper_option_and_no_automatic_release(): void
+    {
+        [$tutor, $person, $plan] = $this->fixture();
+        Mail::fake();
+        $data = ['fields' => $this->fields(), 'after_save' => 'signoff', 'prepare_plan_hash' => $plan->approved['hash']];
+        $this->get(route('reviews.create', $person))->assertOk()->assertSee('Save and continue to sign-off');
+        $this->post(route('reviews.store', $person), [...$data, 'fields' => [...$data['fields'], 'checked83' => 0]])
+            ->assertSessionHasErrors('prepare_confirmed');
+        $this->assertDatabaseCount('progress_review_drafts', 0);
+        $response = $this->post(route('reviews.store', $person), $data)->assertSessionHasNoErrors();
+        $review = ProgressReviewDraft::sole();
+        $signoff = route('electronic-reviews.prepare-form', $review);
+        $response->assertRedirect($signoff);
+        $this->get($signoff)->assertOk()->assertSee('Review sign-off')->assertSee('Sign on paper')
+            ->assertSee(route('reviews.signed.form', $review))->assertDontSee('Prepare private preview');
+        $this->assertSame('Ready for signatures', $review->state);
+        $this->assertDatabaseCount('electronic_review_packets', 0);
+        $this->assertDatabaseCount('signed_review_records', 0);
+        Mail::assertNothingSent();
+    }
+
     public function test_empty_judgement_and_unchecked_confirmation_do_not_prepare_even_with_forged_legacy_flags():void {
         [$u,$a,$p]=$this->fixture();$f=$this->fields();$f['checked83']=0;$f['trainingChecked']=$f['targetsAgreed']=$f['providerPrepared']=1;
         $this->post(route('reviews.store',$a),['fields'=>$f,'after_save'=>'prepare','prepare_plan_hash'=>$p->approved['hash'],'prepare_confirmed'=>1])->assertSessionHasErrors('prepare_confirmed');
