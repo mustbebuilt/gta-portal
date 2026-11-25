@@ -8,6 +8,7 @@
         <input type="hidden" name="target_type" value="smart">
         <input type="hidden" name="apprentice_id" value="{{ $apprentice->id }}">
         <input type="hidden" name="request_uuid" value="{{ $restoreAction ? old('request_uuid') : \Illuminate\Support\Str::uuid() }}">
+        @include('shared.staff-template-picker', ['pickerLabel'=>'Support target template','family'=>'support_targets','fieldNames'=>['summary','measure']])
         <label>SMART target <input name="summary" required maxlength="2000" value="{{ $restoreAction ? old('summary') : '' }}"></label>
         <label>How will we know it’s done? <input name="measure" required maxlength="1000" value="{{ $restoreAction ? old('measure') : '' }}"></label>
         <div class="form-grid">

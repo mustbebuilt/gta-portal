@@ -31,7 +31,8 @@ class SmartActionWorkflowTest extends TestCase
     public function test_smart_creation_builds_measure_and_reopens_saved_target(): void
     {
         $a = Apprentice::factory()->create();
-        $this->actingAs($this->actor())->get('/apprentices/'.$a->id.'/actions/create')->assertOk();
+        $this->actingAs($this->actor())->get('/apprentices/'.$a->id.'/actions/create')->assertOk()
+            ->assertSee('Learning target template')->assertSee('Practise an English topic')->assertSee('Custom');
         $this->post('/apprentices/'.$a->id.'/actions', $this->data())->assertRedirect()->assertSessionHasNoErrors();
         $row = SmartAction::firstOrFail();
         $this->assertSame('5 questions', $row->measure);

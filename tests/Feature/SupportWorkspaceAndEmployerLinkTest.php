@@ -26,7 +26,9 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $page = route('support.index',$apprentice);
         $this->actingAs($member)->get(route('support.worklist'))->assertOk()
             ->assertSee('Alex Morgan')->assertDontSee($other->reference)->assertDontSee('Travel disruption affected attendance');
-        $this->get($page)->assertOk()->assertSeeInOrder(['Markers and reasons', 'Travel disruption affected attendance', 'Action plan', 'SMART target']);
+        $this->get($page)->assertOk()->assertSeeInOrder(['Markers and reasons', 'Travel disruption affected attendance', 'Action plan', 'SMART target'])
+            ->assertSee('Support target template')->assertSee('Review outcome template')->assertSee('Resolve a transport barrier')
+            ->assertSee('value="custom"', false)->assertSee('name="owner_id"', false);
         $this->get(route('support-register71.index',['view'=>'all']))->assertOk()->assertDontSee($other->reference);
         $this->get(route('support.index',$other))->assertForbidden();
 

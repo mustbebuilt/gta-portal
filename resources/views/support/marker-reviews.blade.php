@@ -55,10 +55,12 @@
                         <details @if($restore && $errors->has($frequencyKey)) open @endif><summary>Change review frequency</summary><label>Review frequency <select name="{{ $frequencyKey }}" required>
                                 @foreach($intervals as $value=>$label)<option value="{{ $value }}" @selected(($restore ? old($frequencyKey) : $frequency) === $value)>{{ $label }}</option>@endforeach
                             </select></label></details>
+                        @include('shared.staff-template-picker', ['pickerLabel'=>'Review outcome template','family'=>'review_outcomes','fieldNames'=>[$outcomeKey]])
                         <label>Review outcome <textarea name="{{ $outcomeKey }}" required maxlength="1000">{{ $restore ? old($outcomeKey) : '' }}</textarea></label>
                         <details @if($restore && (old('summary') || $errors->hasAny(['summary', 'measure', 'owner_id', 'due_date']))) open @endif>
                             <summary>Add an agreed SMART target</summary>
                             <input type="hidden" name="request_uuid" value="{{ $restore && old('request_uuid') ? old('request_uuid') : (string) \Illuminate\Support\Str::uuid() }}">
+                            @include('shared.staff-template-picker', ['pickerLabel'=>'Support target template','family'=>'support_targets','fieldNames'=>['summary','measure']])
                             <label>SMART target <input name="summary" maxlength="2000" value="{{ $restore ? old('summary') : '' }}"></label>
                             <label>How will we know it’s done? <input name="measure" maxlength="1000" value="{{ $restore ? old('measure') : '' }}"></label>
                             <label>Owner <select name="owner_id"><option value="">Choose owner if adding a target</option>

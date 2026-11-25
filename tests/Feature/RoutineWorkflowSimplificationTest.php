@@ -218,7 +218,8 @@ class RoutineWorkflowSimplificationTest extends TestCase
         $cancel = route('attendance.cancel', $session);
         $this->post(route('attendance.save', $session), $payload)->assertSessionHasNoErrors();
         $recorded = $session->fresh();
-        $this->get($page)->assertOk()->assertSee('Correct this register')->assertSee('Cancellation reason');
+        $this->get($page)->assertOk()->assertSee('Correct this register')->assertSee('Cancellation reason')
+            ->assertSee('Correction reason template')->assertSee('Cancellation reason template');
         $this->from($page)->post($cancel, ['version' => $recorded->version])->assertSessionHasErrors('reason');
         $this->assertSame('Planned', $session->fresh()->state);
         $this->from($page)->post($cancel, ['version' => $recorded->version, 'reason' => 'Workshop unavailable'])

@@ -18,6 +18,7 @@
     <section class="panel" aria-labelledby="register-correction">
         <h2 id="register-correction">Correct this register</h2>
         <p>Change only the entries that need correcting. Confirmed OTJ is recalculated from the corrected record. The original entries stay in the history.</p>
+        @include('shared.staff-template-picker', ['pickerLabel'=>'Correction reason template','family'=>'register_corrections','fieldNames'=>['correction_reason']])
         <label for="correction-reason">Reason for correction (when changing saved information)</label>
         <textarea id="correction-reason" name="correction_reason" maxlength="2000" @if($errors->has('correction_reason')) aria-invalid="true" @endif>{{ old('correction_reason') }}</textarea>
     </section>
@@ -75,6 +76,7 @@
         <form method="post" action="{{ route('attendance.cancel', $session) }}">
             @csrf
             <input type="hidden" name="version" value="{{ $session->version }}">
+            @include('shared.staff-template-picker', ['pickerLabel'=>'Cancellation reason template','family'=>'register_cancellations','fieldNames'=>['reason']])
             <label for="cancel-reason">Cancellation reason</label>
             <textarea id="cancel-reason" name="reason" maxlength="2000" required>{{ old('reason') }}</textarea>
             <div class="form-actions"><button>Cancel this session</button></div>
