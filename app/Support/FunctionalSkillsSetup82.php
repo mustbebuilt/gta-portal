@@ -19,6 +19,17 @@ final class FunctionalSkillsSetup82
             'next_action' => 'Arrange initial assessment and diagnostic with the subject tutor.', 'topics' => []]);
     }
 
+    public static function topicNames(array $entry): array
+    {
+        $legacy = match ([$entry['subject'], $entry['topic']]) {
+            ['Maths: Level 2', 'Data Tables (Two-way Tables)'] => ['Data tables (Two way tables)'],
+            ['English: Level 1', 'Understanding'], ['English: Level 2', 'The Exam'] => ['Speaking and Listening'],
+            default => [],
+        };
+
+        return [$entry['topic'], ...$legacy];
+    }
+
     public static function current(?int $apprenticeId): array
     {
         return $apprenticeId ? (ProgrammeOutcome::where('apprentice_id', $apprenticeId)->first()?->context['functional_skills_setup82'] ?? []) : [];
@@ -67,7 +78,8 @@ final class FunctionalSkillsSetup82
                 $source = self::catalogue()[$id];
                 $key = ['apprentice_id' => $apprentice->id, 'subject' => $subject,
                     'level' => explode(': ', $source['subject'])[1], 'topic' => $source['topic']];
-                $topic = TrainingTopic::where($key)->lockForUpdate()->first();
+                $topic = TrainingTopic::where(collect($key)->except('topic')->all())
+                    ->whereIn('topic', self::topicNames($source))->orderBy('id')->lockForUpdate()->first();
                 if ($topic && abs((float) $topic->planned_hours - (float) $hours) > 0.001) Rpl68::fail('This topic already has different planned hours. Keep its existing record and reconcile it in English/maths.');
                 if (!$topic) {
                     $topic = new TrainingTopic([...$key, 'area' => $source['area'], 'planned_hours' => $hours]);

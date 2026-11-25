@@ -64,7 +64,8 @@ class RetentionEntryRequirementsTest extends TestCase
         $this->get(route('qualifications.create', [$apprentice, 'subject' => $subject]))
             ->assertOk()->assertSee('Subject training start date')
             ->assertViewHas('qualification', fn ($record) =>
-                $record->subject === $subject && $record->status === 'Working towards' && $record->start_date === null);
+                $record->subject === $subject && $record->title === 'Functional Skills '.ucfirst($subject)
+                && $record->status === 'Working towards' && $record->start_date === null);
         $this->get(route('qualifications.create', [$apprentice, 'subject' => $other]))->assertForbidden();
 
         $this->post(route('qualifications.store', $apprentice), [

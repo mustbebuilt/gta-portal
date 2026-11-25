@@ -1,1 +1,587 @@
-[{"subject": "Maths: Level 1", "topic": "Addition and Subtraction", "area": "Using Numbers"}, {"subject": "Maths: Level 2", "topic": "Addition and Subtraction (including decimals)", "area": "Using Numbers"}, {"subject": "Maths: Level 2", "topic": "Circles", "area": "Common Measures, Shape and Space"}, {"subject": "Maths: Level 2", "topic": "Estimation", "area": "Using Numbers"}, {"subject": "Maths: Level 2", "topic": "Nets", "area": "Common Measures, Shape and Space"}, {"subject": "Maths: Level 2", "topic": "Ordering Numbers (including decimals & fractions)", "area": "Using Numbers"}, {"subject": "Maths: Level 2", "topic": "Percentage Change", "area": "Using Numbers"}, {"subject": "English: Level 2", "topic": "Audience", "area": "Writing"}, {"subject": "English: Level 1", "topic": "Comparing Texts", "area": "Reading"}, {"subject": "English: Level 2", "topic": "Comparing Texts", "area": "Reading"}, {"subject": "English: Level 2", "topic": "Punctuation", "area": "Writing"}, {"subject": "English: Level 2", "topic": "Spelling", "area": "Writing"}, {"subject": "English: Level 2", "topic": "Purpose", "area": "Additional confirmed topic"}, {"subject": "English: Level 2", "topic": "Text Types", "area": "Additional confirmed topic"}, {"subject": "English: Level 2", "topic": "Fact or Opinion", "area": "Additional confirmed topic"}, {"subject": "English: Level 2", "topic": "Detail and Navigating Sources", "area": "Additional confirmed topic"}]
+[
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Addition and Subtraction",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Addition and Subtraction (including decimals)",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Circles",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Estimation",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Nets",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Ordering Numbers (including decimals & fractions)",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Percentage Change",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Audience",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Comparing Texts",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Comparing Texts",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Punctuation",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Spelling",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Purpose",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Text Types",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Fact or Opinion",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Detail and Navigating Sources",
+    "area": "Reading"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "BIDMAS",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Decimals",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Division",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Formulas",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Fractions",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Fractions, Decimals and Percentages",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Multiplication",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Numbers and Place Value",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Ordering Numbers",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Percentages",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Proportion",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Ratio",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Rounding and Estimating",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "2D Shapes",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "3D Shapes",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Angles and Bearings",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Area",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Capacity",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Circles",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Interest",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Length",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Maps and Scale Drawings",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Nets",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Perimeter",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Plans and Elevations",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Problems Involving Money",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Time",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Using Length, Area and Volume in Calculations",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Volume",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Weight",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Bar Charts",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Data Tables",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Grouped Data",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Line Graphs",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Mean and Range",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Pie Charts",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "Maths: Level 1",
+    "topic": "Probability",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Fact and Opinion",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Finding Meaning",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Investigating Images",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Investigating Layout",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Key and Detailed Points",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Language Features",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Layout Features",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Purpose",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Specialist Words",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Types of Texts",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Understanding Styles of Writing and Tone",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Assessing the Basics",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Checking Your Answer",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Common Mistakes",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Communicating",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Grammar",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Linking Up Your Answer",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Planning Your Answer",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Punctuation",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Spelling",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Using Language Features",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 1",
+    "topic": "Understanding",
+    "area": "Speaking, Listening and Communicating"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Decimals and Place Value",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Direct and Inverse Proportion",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Fractions (adding & subtracting)",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Fractions of Amounts",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Fractions, Decimals and Percentages",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Multiplication and Division (including decimals)",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Order of Operations",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Percentages of Amounts",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Ratio",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Reverse Percentages",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Substituting Values into Equations",
+    "area": "Using Numbers"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Angles in 2D Shapes",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Area",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Compound Growth",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Conversion Graphs",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Coordinates",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Maps and Scale Drawings",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Perimeter",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Problems Involving Money",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Projections and Elevations",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Speed and Density",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Surface Area",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Unit Conversions",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Volume",
+    "area": "Common Measures, Shape and Space"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Data Tables (Two-way Tables)",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Estimating the Mean",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Mean, Median, Mode and Range",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Scatter Graphs",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "Maths: Level 2",
+    "topic": "Simple Probability",
+    "area": "Handling Information and Data"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Formality and Bias",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Language Features",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Organisational Features",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Point of View and Line of Argument",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Style, Tone and Voice",
+    "area": "Reading"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Articles and Probability",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Context",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Finalising Your Writing",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Formatting, Organisational and Language Features",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Grammar",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Organisational Markers",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "Why are you Writing?",
+    "area": "Writing"
+  },
+  {
+    "subject": "English: Level 2",
+    "topic": "The Exam",
+    "area": "Speaking, Listening and Communicating"
+  }
+]

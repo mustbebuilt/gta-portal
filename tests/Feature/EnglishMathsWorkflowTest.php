@@ -65,6 +65,76 @@ class EnglishMathsWorkflowTest extends TestCase
         $this->actingAs($learner)->get($list)->assertOk()->assertDontSee('Record topic completion');
     }
 
+    public function test_subject_planning_reuses_assigned_hours_and_stays_on_the_saved_subject(): void
+    {
+        $admin = $this->actor();
+        $person = Apprentice::factory()->create();
+        $catalogue = \App\Support\FunctionalSkillsSetup82::catalogue();
+        $english = array_filter($catalogue, fn ($entry) => str_starts_with($entry['subject'], 'English:'));
+        $id = array_key_first($english);
+        $entry = $english[$id];
+        $topic = TrainingTopic::factory()->create([
+            'apprentice_id' => $person->id, 'subject' => 'english',
+            'level' => explode(': ', $entry['subject'])[1], 'topic' => $entry['topic'], 'planned_hours' => 3,
+        ]);
+        $url = route('em.index', ['apprentice' => $person, 'subject' => 'english']);
+        $this->actingAs($admin)->get($url)->assertOk()
+            ->assertSee('planned hours already assigned')
+            ->assertDontSee('id="fs-topic-'.$id.'"', false)
+            ->assertDontSee('Save Maths assessment information')
+            ->assertViewHas('catalogue', fn ($options) => ! isset($options[$id])
+                && collect($options)->every(fn ($option) => str_starts_with($option['subject'], 'English:')));
+        $this->from($url)->post(route('em.setup-assessments.save', $person), [
+            'subject' => 'english', 'version' => 0, 'data' => ['english' => [
+                'state' => 'recorded', 'owner_id' => $admin->id, 'next_action' => 'Review assigned topics',
+                'initial_assessment' => 'Initial assessment reference', 'diagnostic' => 'Diagnostic reference',
+            ]],
+        ])->assertRedirect($url.'#assessment-english')->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('training_topics', 1);
+        $this->assertEquals(3, $topic->fresh()->planned_hours);
+        $this->assertDatabaseCount('qualifications', 0);
+    }
+
+    public function test_diagnostic_catalogue_recognises_an_existing_register_label(): void
+    {
+        $admin = $this->actor();
+        $person = Apprentice::factory()->create();
+        $topic = TrainingTopic::factory()->create([
+            'apprentice_id' => $person->id, 'subject' => 'maths', 'level' => 'Level 2',
+            'topic' => 'Data tables (Two way tables)', 'planned_hours' => 4,
+        ]);
+        $catalogue = collect(\App\Support\FunctionalSkillsSetup82::catalogue());
+        $id = $catalogue->search(fn ($entry) => $entry['topic'] === 'Data Tables (Two-way Tables)');
+        $this->assertIsInt($id);
+
+        $url = route('em.index', ['apprentice' => $person, 'subject' => 'maths']);
+        $this->actingAs($admin)->get($url)->assertOk()->assertSee('Data Tables (Two-way Tables)')
+            ->assertViewHas('catalogue', fn ($options) => ! isset($options[$id]));
+        $this->from($url)->post(route('topics.assign', $person), [
+            'catalogue_id' => $id, 'planned_hours' => 4,
+        ])->assertSessionHasErrors('catalogue_id');
+
+        $this->assertDatabaseCount('training_topics', 1);
+        $this->assertSame('Data tables (Two way tables)', $topic->fresh()->topic);
+    }
+
+    public function test_recording_a_non_achievement_clears_the_previous_achievement_date(): void
+    {
+        $admin = $this->actor();
+        $person = Apprentice::factory()->create();
+        $qualification = Qualification::factory()->create([...$this->data(), 'apprentice_id' => $person->id,
+            'status' => 'Achieved', 'result' => 'Achieved', 'achievement_date' => '2026-11-03',
+        ]);
+        $return = route('em.index', ['apprentice' => $person, 'subject' => 'maths']).'#em-qualification-results';
+        $this->actingAs($admin)->put(route('qualifications.update', [$person, $qualification]), [
+            ...$this->data(), 'version' => $qualification->version,
+        ])->assertRedirect($return)->assertSessionHasNoErrors();
+
+        $this->assertNull($qualification->fresh()->achievement_date);
+        $this->assertNull($qualification->fresh()->result);
+        $this->assertSame('2026-11-01', $qualification->fresh()->start_date->toDateString());
+    }
+
     public function test_qualification_create_reopen_and_twelve_month_target_are_individual(): void
     {
         $a = Apprentice::factory()->create(['start_date' => '2025-01-01']);

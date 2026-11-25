@@ -11,9 +11,22 @@ $fs = $fsInput ?? old('data', (!empty($p['fs_applied82']) ? null : ($p['function
 <label for="{{$subject}}-owner">Follow-up owner</label><select id="{{$subject}}-owner" name="data[{{$subject}}][owner_id]" required>@foreach(\App\Models\User::where('active',true)->whereIn('role',['admin','ceo','tutor','functional_skills_tutor'])->orderBy('name')->get() as $staff)<option value="{{$staff->id}}" @selected(($fs[$subject]['owner_id']??auth()->id())==$staff->id)>{{$staff->name}}</option>@endforeach</select>
 <label for="{{$subject}}-action">Next action</label><input id="{{$subject}}-action" name="data[{{$subject}}][next_action]" maxlength="500" required value="{{$fs[$subject]['next_action']??''}}">
 <details><summary>Assign topics and planned hours</summary><p>Leave unassigned topics blank. Zero hours means Secure. Existing topics and evidence are retained.</p>
-@foreach(\App\Support\FunctionalSkillsSetup82::catalogue() as $id=>$topic)
-@if((str_starts_with($topic['subject'],'Maths')?'maths':'english')===$subject)
-<label for="fs-topic-{{$id}}">{{$topic['subject']}} · {{$topic['topic']}}</label><input id="fs-topic-{{$id}}" type="number" step="0.01" min="0" max="9999" name="data[{{$subject}}][topics][{{$id}}]" value="{{$fs[$subject]['topics'][$id]??''}}">
+@foreach(collect(\App\Support\FunctionalSkillsSetup82::catalogue())->filter(fn ($topic) => str_starts_with($topic['subject'], $label.':'))->groupBy('subject', true)->sortKeys() as $group => $levelTopics)
+<details @if(array_intersect(array_keys($fs[$subject]['topics'] ?? []), $levelTopics->keys()->all())) open @endif>
+<summary>{{ $group }}</summary>
+@foreach($levelTopics->groupBy('area', true) as $area => $areaTopics)
+<p><strong>{{ $area }}</strong></p>
+@foreach($areaTopics->sortBy('topic') as $id => $topic)
+@php($existingTopic = collect(\App\Support\FunctionalSkillsSetup82::topicNames($topic))->map(fn ($name) => ($assignedTopics ?? null)?->get(implode('|', [$subject, explode(': ', $group)[1], $name])))->first(fn ($match) => $match !== null))
+@if($existingTopic)
+    <p>{{ $topic['topic'] }} · {{ $existingTopic->planned_hours }} planned hours already assigned</p>
+@else
+    <label for="fs-topic-{{$id}}">{{ $topic['topic'] }}</label>
+    <input id="fs-topic-{{$id}}" type="number" step="0.01" min="0" max="9999" name="data[{{$subject}}][topics][{{$id}}]" value="{{$fs[$subject]['topics'][$id]??''}}">
 @endif
-@endforeach</details></fieldset>
+@endforeach
+@endforeach
+</details>
+@endforeach
+</details></fieldset>
 @endforeach

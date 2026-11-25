@@ -7,6 +7,7 @@ use App\Models\ProgrammeOutcome;
 use App\Models\Qualification;
 use App\Models\TrainingTopic;
 use App\Support\LearningAccess as Access;
+use App\Support\FunctionalSkillsSetup82;
 use App\Support\PrivateEvidence;
 use App\Support\EnglishMathsFollowup;
 use App\Support\SubjectMarkingQueue;
@@ -64,6 +65,7 @@ class EnglishMathsController extends Controller
     {
         $subjects = $this->subjects($r, $apprentice);
         abort_unless($subjects, 403);
+        $availableSubjects = $subjects;
         $data = $r->validate(['show' => ['nullable', Rule::in(['working', 'achieved', 'overdue', 'today', 'checks'])], 'topics' => ['nullable', Rule::in(['awaiting', 'referred'])], 'subject' => ['nullable', Rule::in(['maths', 'english'])]]);
         if (isset($data['subject'])) {
             abort_unless(in_array($data['subject'], $subjects, true), 403);
@@ -71,7 +73,8 @@ class EnglishMathsController extends Controller
         }
         $topics = TrainingTopic::where('apprentice_id', $apprentice->id)->whereIn('subject', $subjects)->orderBy('subject')->orderBy('topic')->get();
         $quals = Qualification::where('apprentice_id', $apprentice->id)->whereIn('subject', $subjects)->orderBy('subject')->get();
-        $filter = $r->query('show');
+        $subjectsWithFunctionalSkillsRecord = $quals->where('type', 'Functional Skills')->pluck('subject')->unique()->all();
+        $filter = $data['show'] ?? null;
         $quals = $quals->filter(fn ($q) => match ($filter) {
             'working' => $q->status === 'Working towards','achieved' => $q->achieved(),'overdue' => $q->position() === 'Overdue','today' => $q->position() === 'Due today','checks' => $q->position() === 'Date check',default => true
         });
@@ -81,7 +84,16 @@ class EnglishMathsController extends Controller
             ? ProgrammeOutcome::where('apprentice_id', $apprentice->id)->first()
             : null;
 
-        return view('em.index', ['apprentice' => $apprentice, 'learner' => Access::learner($r->user(), $apprentice), 'subjects' => $subjects, 'topics' => $topics, 'topicRows' => $topics->filter(fn ($t) => match ($data['topics'] ?? '') { 'awaiting' => $t->evidence_stage === 'Awaiting review', 'referred' => $t->evidence_stage === 'Referred', default => true }), 'qualifications' => $quals, 'catalogue' => $this->catalogue(), 'canManage' => Access::manager($r->user()), 'entryRequirements' => $entryRequirements, 'editableSubjects' => $editableSubjects]);
+        $assignedTopics = $topics->keyBy(fn (TrainingTopic $topic) => implode('|', [$topic->subject, $topic->level, $topic->topic]));
+        $unassignedCatalogue = array_filter($this->catalogue(), function (array $entry) use ($editableSubjects, $assignedTopics) {
+            [$subject, $level] = explode(': ', $entry['subject']);
+
+            return in_array(strtolower($subject), $editableSubjects, true)
+                && ! collect(FunctionalSkillsSetup82::topicNames($entry))
+                    ->contains(fn ($name) => $assignedTopics->has(implode('|', [strtolower($subject), $level, $name])));
+        });
+
+        return view('em.index', ['apprentice' => $apprentice, 'learner' => Access::learner($r->user(), $apprentice), 'subjects' => $subjects, 'topics' => $topics, 'topicRows' => $topics->filter(fn ($t) => match ($data['topics'] ?? '') { 'awaiting' => $t->evidence_stage === 'Awaiting review', 'referred' => $t->evidence_stage === 'Referred', default => true }), 'qualifications' => $quals, 'catalogue' => $unassignedCatalogue, 'assignedTopics' => $assignedTopics, 'availableSubjects' => $availableSubjects, 'subjectsWithFunctionalSkillsRecord' => $subjectsWithFunctionalSkillsRecord, 'canManage' => Access::manager($r->user()), 'entryRequirements' => $entryRequirements, 'editableSubjects' => $editableSubjects]);
     }
 
     public function saveSetupAssessments(Request $request, Apprentice $apprentice): RedirectResponse
@@ -94,7 +106,8 @@ class EnglishMathsController extends Controller
             abort_unless(Access::subject($request->user(), $fresh, $subject), 403);
             \App\Support\FunctionalSkillsSetup82::persist($fresh, $request->user(), $values, $request->integer('version'));
         });
-        return to_route('em.index', $apprentice)->with('status', 'Assessment information and follow-up saved. Qualification results are unchanged.');
+        return redirect(route('em.index', ['apprentice'=>$apprentice, 'subject'=>$subject]).'#assessment-'.$subject)
+            ->with('status', 'Assessment information and follow-up saved.');
     }
 
     public function saveRequirements(Request $request, Apprentice $apprentice): RedirectResponse
@@ -153,7 +166,8 @@ class EnglishMathsController extends Controller
             $fresh=Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
             abort_unless(Access::subject($r->user(),$fresh,$subject),403);
             $level = explode(': ', $source['subject'])[1];
-            if (TrainingTopic::where(['apprentice_id' => $apprentice->id, 'subject' => $subject, 'level' => $level, 'topic' => $source['topic']])->exists()) {
+            if (TrainingTopic::where(['apprentice_id' => $apprentice->id, 'subject' => $subject, 'level' => $level])
+                ->whereIn('topic', FunctionalSkillsSetup82::topicNames($source))->exists()) {
                 throw ValidationException::withMessages(['catalogue_id' => 'This topic is already assigned.']);
             }$t = new TrainingTopic(['apprentice_id' => $apprentice->id, 'subject' => $subject, 'level' => $level, 'topic' => $source['topic'], 'area' => $source['area'], 'planned_hours' => $data['planned_hours']]);
             $t->status = (float) $data['planned_hours'] === 0.0 ? 'Secure' : 'Not Started';
@@ -330,6 +344,7 @@ class EnglishMathsController extends Controller
             abort_unless(in_array($subject, $subjects, true), 403);
             $qualification = new Qualification([
                 'subject' => $subject, 'type' => 'Functional Skills', 'status' => 'Working towards',
+                'title' => 'Functional Skills '.ucfirst($subject),
             ]);
         }
 
@@ -399,6 +414,9 @@ class EnglishMathsController extends Controller
         if (! $achieved && filled($data['achievement_date'] ?? null)) {
             throw ValidationException::withMessages(['achievement_date' => 'Achievement dates apply only to an achieved or already-held qualification.']);
         }
+        if (! $achieved) {
+            $data['achievement_date'] = null;
+        }
         DB::transaction(function () use ($r, $apprentice, $qualification, $data): void {
             $q = $qualification ? Qualification::whereKey($qualification->id)->lockForUpdate()->firstOrFail() : new Qualification(['apprentice_id' => $apprentice->id]);
             $fresh=Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
@@ -419,12 +437,13 @@ class EnglishMathsController extends Controller
             $this->audit($r, $apprentice->id, 'qualification', $q->id, 'saved');
         });
 
-        return to_route('em.index', $apprentice)->with('status', 'Qualification result/status saved separately from training topics.');
+        return redirect(route('em.index', ['apprentice'=>$apprentice, 'subject'=>$data['subject']]).'#em-qualification-results')
+            ->with('status', 'Qualification saved.');
     }
 
     private function catalogue(): array
     {
-        return json_decode(file_get_contents(resource_path('data/topic-catalogue.json')), true, 512, JSON_THROW_ON_ERROR);
+        return FunctionalSkillsSetup82::catalogue();
     }
 
     private function version(Request $r, Model $row): void
