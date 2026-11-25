@@ -13,7 +13,7 @@ class PortalNavigation
             'label'=>$label,'href'=>route($route,$parameters),'current'=>$current??$request->routeIs(...($patterns?:[$route]))];
         $primary=[];$groups=[];
         if($u->role==='employer') {$primary[]=$item('Getting started','employer-start.index',[],['employer-start.*']);$primary[]=$item('My employer actions','employer-actions.index',[],['employer-actions.index','employer-actions.show','employer-actions.respond']);}
-        if(StaffAttention::allowed($u)) {$primary[]=$item('Needs attention','attention.index');}
+        if(StaffAttention::allowed($u)) {$primary[]=$item('Needs attention','attention.index',[],['attention.index','operations-desk.*']);}
         if($u->role==='apprentice') {$primary[]=$item('My next step','experience.home');$primary[]=$item('Getting started','getting-started.index',[],['getting-started.*']);}
         $group=function(string $id,string $label,array $links)use(&$groups):void {
             if(!$links) {return;}
@@ -75,7 +75,6 @@ class PortalNavigation
         if(!in_array($u->role,['apprentice','employer'],true)) {$links[]=$item('Staff development','staff.index',[],['staff.*']);}
         if($u->role!=='apprentice') {$links[]=$item('Case studies','cases.index',[],['cases.*']);}
         if($manage) {$links[]=$item('Curriculum source checks','curriculum-sources.index',[],['curriculum-sources.*']);}
-        if(StaffAttention::allowed($u)){$links[]=$item('Staff follow-up','operations-desk.index',[],['operations-desk.*']);}
         if(SavedPortalWork::allowed($u)){$links[]=$item('Saved work','saved-work.index',[],['saved-work.*']);}
         if($u->role==='apprentice') {$primary[]=$item('Quick actions','quick-actions.index',[],['quick-actions.*']);}
         else {$links[]=$item('Quick actions','quick-actions.index',[],['quick-actions.*']);}

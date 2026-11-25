@@ -1,11 +1,29 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\{User,Apprentice,OperationalFollowup};
-use App\Support\{OperationalFollowups as F,StaffAttention,LearningAccess};
+use App\Support\{OperationalFollowups as F,StaffAttention};
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 class OperationalFollowupController extends Controller {
- public function index(Request $r){abort_unless(StaffAttention::allowed($r->user()),403);$d=$r->validate(['q'=>'nullable|string|max:100','state'=>'nullable|in:all,In progress,Waiting,Resolved','page'=>'nullable|integer|min:1']);$source=F::reasons($r->user());$records=F::visible($r->user(),$d['q']??null,$d['state']??'all');abort_if($records->count()>1000,422,'Review or narrow the follow-up scope.');$q=mb_strtolower(trim($d['q']??''));$matches=fn($a)=>$q===''||str_contains(mb_strtolower($a->reference.' '.$a->first_name.' '.$a->last_name),$q);$source=array_filter($source,fn($x)=>$matches($x['apprentice']));$records=$records->filter(fn($x)=>$matches(Apprentice::findOrFail($x->apprentice_id))&&(($d['state']??'all')==='all'||$x->status===$d['state']));$page=(int)($d['page']??1);$items=new \Illuminate\Pagination\LengthAwarePaginator($records->forPage($page,20)->values(),$records->count(),20,$page,['path'=>$r->url(),'query'=>$r->except('page')]);$people=User::where('active',true)->orderBy('name')->get()->filter(fn($u)=>StaffAttention::allowed($u));return response()->view('operations-desk.index',['flags'=>array_slice($source,0,100,true),'flag_count'=>count($source),'records'=>$items,'owners'=>$people,'token'=>(string)Str::uuid(),'source_all'=>F::reasons($r->user()),'q'=>$d['q']??'','state'=>$d['state']??'all'])->header('Cache-Control','no-store, private')->header('Referrer-Policy','no-referrer');}
+ public function index(Request $r)
+ {
+     abort_unless(StaffAttention::allowed($r->user()),403);
+     $data = $r->validate(['q'=>'nullable|string|max:100','state'=>'nullable|in:all,In progress,Waiting,Resolved','page'=>'nullable|integer|min:1','followup'=>'nullable|uuid']);
+     $q = $data['q'] ?? '';
+     $state = $data['state'] ?? 'all';
+     $records = F::visible($r->user(), $q, $state, $data['followup'] ?? null);
+     abort_if(isset($data['followup']) && $records->isEmpty(), 404);
+     abort_if($records->count() > 1000, 422, 'Review or narrow the follow-up scope.');
+     $page = min((int) ($data['page'] ?? 1), max(1, (int) ceil($records->count()/20)));
+     $items = new \Illuminate\Pagination\LengthAwarePaginator(
+         $records->forPage($page, 20)->values(), $records->count(), 20, $page,
+         ['path' => $r->url(), 'query' => $r->except('page')]
+     );
+     $owners = User::where('active', true)->orderBy('name')->get()->filter(fn ($user) => StaffAttention::allowed($user));
+
+     return response()->view('operations-desk.index', [
+         'records' => $items, 'owners' => $owners, 'source_all' => F::reasons($r->user()), 'q' => $q, 'state' => $state,
+     ])->header('Cache-Control','no-store, private')->header('Referrer-Policy','no-referrer');
+ }
  public function start(Request $r,Apprentice $apprentice){abort_unless(StaffAttention::allowed($r->user()),403);$d=$r->validate(['source_key'=>'required|regex:/^[a-f0-9]{64}$/D','owner_id'=>'required|integer|exists:users,id','request_token'=>'required|uuid','due'=>'required|date_format:Y-m-d','reference'=>'required|string|max:2000','confirmed'=>'accepted']);F::start($r->user(),(int)$r->session()->get('auth_version'),$apprentice,$d['source_key'],User::findOrFail($d['owner_id']),$d['request_token'],$d['due'],$d['reference']);return back()->with('status','Source-linked follow-up started; the underlying task/review remains in its original workflow.');}
  public function update(Request $r,OperationalFollowup $followup){abort_unless(StaffAttention::allowed($r->user()),403);$d=$r->validate(['version'=>'required|integer|min:1','status'=>'required|in:In progress,Waiting,Resolved','owner_id'=>'required|integer|exists:users,id','due'=>'required|date_format:Y-m-d','reference'=>'required|string|max:2000','confirmed'=>'accepted']);F::update($r->user(),(int)$r->session()->get('auth_version'),$followup,(int)$d['version'],$d['status'],User::findOrFail($d['owner_id']),$d['due'],$d['reference']);return back()->with('status','Follow-up updated. Source flags and actual task/review decisions remain independently checked.');}
 }

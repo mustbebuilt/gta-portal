@@ -38,4 +38,24 @@ class OperationalFollowupsTest extends TestCase {
  public function test_required_audit_failure_rolls_back_status_and_owner():void {$f=$this->f();$x=$this->start($f);AuditFault::install('followup_update_fault','portal_operations_events','Fictional failure','followup_updated');try{F::update($f['admin'],1,$x,1,'Resolved',$f['admin'],today()->toDateString(),'Checked outcome');$this->fail('Expected fault');}catch(\Illuminate\Database\QueryException){$this->assertSame('In progress',$x->fresh()->status);$this->assertSame($f['tutor']->id,$x->owner_id);}}
  public function test_search_and_state_filter_match_authorised_scope():void {$f=$this->f();$x=$this->start($f);$this->assertCount(1,F::visible($f['tutor'],$f['a']->reference,'In progress'));$this->assertCount(0,F::visible($f['tutor'],'no-such-reference','all'));$this->assertCount(0,F::visible($f['tutor'],null,'Resolved'));$this->actingAs($f['tutor'])->get('/staff-follow-up')->assertOk()->assertHeader('Referrer-Policy','no-referrer');}
  public function test_followups_send_no_messages_and_change_no_canonical_marks():void {Mail::fake();Http::preventStrayRequests();$f=$this->f();$this->start($f);$this->assertDatabaseCount('attendance_marks',0);$this->assertDatabaseCount('signed_review_records',0);$this->assertSame('Draft',$f['task']->fresh()->status);Mail::assertNothingSent();Http::assertNothingSent();}
+
+ public function test_attention_starts_followup_and_desk_shows_only_saved_work():void
+ {
+     $f = $this->f();
+     $attention = route('attention.index', ['reason' => 'task']);
+     $start = route('operations-desk.start', $f['a']);
+     $this->actingAs($f['tutor'])->get($attention)->assertOk()
+         ->assertSee($start)->assertSee('Start a staff follow-up');
+     $this->get(route('operations-desk.index'))->assertOk()
+         ->assertSee('No recorded follow-ups')->assertDontSee($start);
+     $this->from($attention)->post($start, [
+         'source_key' => $this->key($f), 'request_token' => (string) Str::uuid(),
+         'owner_id' => $f['tutor']->id, 'due' => today()->addDay()->toDateString(),
+         'reference' => 'Fictional planned call', 'confirmed' => 1,
+     ])->assertRedirect($attention)->assertSessionHasNoErrors();
+     $record = Followup::sole();
+     $this->get($attention)->assertOk()->assertSee('Open recorded follow-up')->assertDontSee($start);
+     $this->get(route('operations-desk.index', ['followup' => $record->id]))->assertOk()->assertSee('Update follow-up');
+     $this->actingAs($f['other'])->get(route('operations-desk.index', ['followup' => $record->id]))->assertNotFound();
+ }
 }

@@ -4,7 +4,11 @@
 <header class="page-heading"><div><h1>Progress reviews</h1></div></header>
 @include('learning.errors')
 @include('employer-resources65.dashboard-link')
-@include('reviews.triage')
+<nav class="toolbar" aria-label="Progress review views">
+    <a class="button" href="{{ route('reviews.index', request()->only('search', 'group', 'apprentice')) }}" @if(!$preparationView) aria-current="page" @endif>Review follow-up</a>
+    <a class="button" href="{{ route('reviews.index', ['view' => 'preparation'] + request()->only('search', 'group', 'apprentice')) }}" @if($preparationView) aria-current="page" @endif>Prepare reviews</a>
+</nav>
+@if(!$preparationView) @include('reviews.triage') @endif
 @include('reviews.followup-controls')
 @if($triageView)
 @include('reviews.triage-rows')
@@ -23,6 +27,9 @@
     </p>
     @if($reviewRow['latest'])
         <p>{{ match ($reviewRow['latest']->state) { 'Ready for signatures' => 'Saved review ready for signatures', 'Draft' => 'Saved review draft', default => 'Saved review status needs checking' } }}</p>
+    @endif
+    @if($preparationView)
+        @include('reviews.preparation-details', ['prep' => $preparation[$a->id]])
     @endif
     <details>
         <summary>Dates, staff and reminders</summary>
@@ -44,7 +51,10 @@
 </details>
 </div>
 <div class="toolbar">
-    @if($reviewRow['latest'])
+    @if($preparationView)
+        <a class="button primary" href="{{ $preparation[$a->id]['url'] }}">{{ $preparation[$a->id]['latest_id'] ? 'Open saved review' : 'Start review draft' }}</a>
+        <a href="{{ route('review-workspace.show', $a) }}">Factual preparation worksheet</a>
+    @elseif($reviewRow['latest'])
         <a class="button primary" href="{{ route('reviews.edit', [$a, $reviewRow['latest']->id]) }}">{{ $reviewRow['latest']->state === 'Ready for signatures' ? 'Open review sign-off' : 'Continue latest draft' }}<span class="sr-only">: {{ $a->reference }}</span></a>
         <a href="{{ route('reviews.create', $a) }}">Review history</a>
     @else
@@ -60,7 +70,6 @@
 @endif
 <nav class="pagination" aria-label="Review follow-up pages">@if($reviewRows->previousPageUrl())<a class="button" href="{{ $reviewRows->previousPageUrl() }}">Previous reviews</a>@endif @if($reviewRows->nextPageUrl())<a class="button" href="{{ $reviewRows->nextPageUrl() }}">Next reviews</a>@endif</nav>
 <details class="panel"><summary>Review tools</summary><ul>
-    <li><a href="{{ route('review-workspace.index') }}">Prepare reviews and check saved drafts</a></li>
     <li><a href="{{ route('review-appointments.index') }}">Review appointments</a></li>
     <li><a href="{{ route('electronic-reviews.index') }}">Review signing</a></li>
 </ul><p>Tracked due dates use checked meeting records. Bookings and signing have their own status.</p></details>

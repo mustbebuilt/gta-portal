@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Apprentice;
+use App\Models\OperationalFollowup;
 use App\Models\ProgressReviewDraft;
+use App\Models\User;
+use App\Support\OperationalFollowups;
 use App\Models\ReviewPreparationBrief;
 use App\Support\ReviewBriefs;
 use App\Support\ReviewedImports;
@@ -32,7 +35,24 @@ class StaffWorkflowController extends Controller
         $page = min((int) ($data['page'] ?? 1), max(1, (int) ceil($rows->count() / 15)));
         $list = new LengthAwarePaginator($rows->forPage($page, 15)->values(), $rows->count(), 15, $page, ['path' => $r->url(), 'query' => $r->except('page')]);
 
-        return response()->view('staff-workflow.attention', ['position' => $position, 'rows' => $list, 'view' => $view, 'reason' => $reason, 'q' => $q])->header('Cache-Control', 'no-store, private');
+        $ownersBySource = [];
+        $openFollowups = collect();
+        if ($position['scope_count'] <= 1000 && $list->isNotEmpty()) {
+            $owners = User::where('active', true)->orderBy('name')->get()->filter(fn ($user) => StaffAttention::allowed($user));
+            foreach ($list as $row) {
+                foreach ($row['reasons'] as $item) {
+                    $person = $row['apprentice'];
+                    if (OperationalFollowups::allowed($r->user(), $person, $item['kind'])) {
+                        $ownersBySource[OperationalFollowups::sourceKey($person, $item)] = $owners
+                            ->filter(fn ($owner) => OperationalFollowups::allowed($owner, $person, $item['kind']));
+                    }
+                }
+            }
+            $openFollowups = OperationalFollowup::whereIn('source_key', array_keys($ownersBySource))
+                ->whereNotNull('open_key')->get()->keyBy('source_key');
+        }
+
+        return response()->view('staff-workflow.attention', ['position' => $position, 'rows' => $list, 'view' => $view, 'reason' => $reason, 'q' => $q, 'ownersBySource' => $ownersBySource, 'openFollowups' => $openFollowups])->header('Cache-Control', 'no-store, private');
     }
 
     private function check(Request $r, Apprentice $a, ProgressReviewDraft $review): void

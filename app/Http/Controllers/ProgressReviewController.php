@@ -43,11 +43,15 @@ class ProgressReviewController extends Controller
             });
         }
 
-        $input=$r->validate(['search'=>['nullable','string','max:250'],'view'=>['nullable','string',Rule::in([...\App\Support\ReviewFollowup::VIEWS, ...ReviewTriage::VIEWS])],'group'=>['nullable','integer','min:1'],'apprentice'=>['nullable','integer','min:1']]);
+        $input=$r->validate(['search'=>['nullable','string','max:250'],'view'=>['nullable','string',Rule::in([...\App\Support\ReviewFollowup::VIEWS, ...ReviewTriage::VIEWS, 'preparation'])],'group'=>['nullable','integer','min:1'],'apprentice'=>['nullable','integer','min:1'],'page'=>['nullable','integer','min:1','max:1000000']]);
         if($r->filled('group')){$q->where('tutor_group_id',(int)$input['group']);}
         if($r->filled('apprentice')){abort_unless((clone $q)->whereKey((int)$input['apprentice'])->exists(),404);$q->whereKey((int)$input['apprentice']);}
         $search=trim($input['search']??'');
         if($search!==''){$q->where(fn($n)=>$n->where('reference','like','%'.$search.'%')->orWhere('first_name','like','%'.$search.'%')->orWhere('last_name','like','%'.$search.'%'));}
+        $preparationView = ($input['view'] ?? null) === 'preparation';
+        if ($preparationView) {
+            $actor = \App\Support\PortalActions::actor($r->user());
+        }
         $people=$q->orderBy('last_name')->orderBy('id')->get();
         $followup = \App\Support\ReviewFollowup::for($r->user(), $people, true);
         $view = $input['view'] ?? 'all';
@@ -59,11 +63,15 @@ class ProgressReviewController extends Controller
         $triageView = in_array($view, ReviewTriage::VIEWS, true);
         $filtered = $triageView
             ? ReviewTriage::filter($triage, $view)
-            : \App\Support\ReviewFollowup::filter($followup['rows'], $view)->values();
-        $page=\Illuminate\Pagination\Paginator::resolveCurrentPage();$page=min($page,max(1,(int)ceil($filtered->count()/25)));
-        $reviewRows=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,25)->values(),$filtered->count(),25,$page,['path'=>$r->url(),'query'=>$r->except('page')]);
+            : \App\Support\ReviewFollowup::filter($followup['rows'], $preparationView ? 'all' : $view)->values();
+        $pageSize = $preparationView ? 20 : 25;
+        $page=\Illuminate\Pagination\Paginator::resolveCurrentPage();$page=min($page,max(1,(int)ceil($filtered->count()/$pageSize)));
+        $reviewRows=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,$pageSize)->values(),$filtered->count(),$pageSize,$page,['path'=>$r->url(),'query'=>$r->except('page')]);
         $apprentices=$reviewRows->getCollection()->pluck('apprentice');$positions=$followup['positions'];
-        return view('reviews.index', ['apprentices'=>$apprentices,'positions'=>$positions,'triageCounts'=>$triageCounts,'triageView'=>$triageView,'reviewRows'=>$reviewRows,'reviewCounts'=>$followup['counts'],'reviewView'=>$view,'reviewSearch'=>$search,'manager'=>Access::manager($r->user()),'reminderPreview'=>Access::manager($r->user()) ? \App\Support\ReviewReminders::generate() : null,'reminderScheduleEnabled'=>(bool)config('portal_reminders.scheduled',false),'lastReminderRun'=>Access::manager($r->user()) ? DB::table('portal_reminder_runs')->latest('id')->first() : null]);
+        $preparation = $preparationView ? $apprentices->mapWithKeys(fn ($person) =>
+            [$person->id => \App\Support\ReviewWorkspace::position($actor, $person)]
+        ) : collect();
+        return view('reviews.index', ['preparation' => $preparation, 'preparationView' => $preparationView, 'apprentices'=>$apprentices,'positions'=>$positions,'triageCounts'=>$triageCounts,'triageView'=>$triageView,'reviewRows'=>$reviewRows,'reviewCounts'=>$followup['counts'],'reviewView'=>$view,'reviewSearch'=>$search,'manager'=>Access::manager($r->user()),'reminderPreview'=>Access::manager($r->user()) ? \App\Support\ReviewReminders::generate() : null,'reminderScheduleEnabled'=>(bool)config('portal_reminders.scheduled',false),'lastReminderRun'=>Access::manager($r->user()) ? DB::table('portal_reminder_runs')->latest('id')->first() : null]);
     }
 
     public function form(Request $r, Apprentice $apprentice, ?ProgressReviewDraft $review = null): View
