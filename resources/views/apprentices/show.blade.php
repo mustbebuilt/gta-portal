@@ -1,13 +1,15 @@
 @extends('layout')
 @section('title', $apprentice->reference)
 @section('content')
-<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }}</p><h1>{{ $apprentice->first_name }} {{ $apprentice->last_name }}</h1><p class="muted">{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }}</p></div><div class="toolbar"><a class="button" href="{{ route('apprentices.index') }}">Back to apprentices</a> @can('update', $apprentice)<a class="button" href="{{ route('apprentices.edit', $apprentice) }}">Edit apprentice</a>@endcan</div></header>
+<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }}</p><h1>{{ $apprentice->first_name }} {{ $apprentice->last_name }}</h1><p>{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }} · {{ $apprentice->groupLabel() ?? 'Group not assigned' }}</p><p class="muted">{{ $apprentice->employerLabel() ?? 'Employer not recorded' }} · Main tutor {{ $apprentice->tutor?->name ?? 'not assigned' }}</p></div><div class="toolbar"><a class="button" href="{{ $listUrl ?? route('apprentices.index') }}">Back to apprentices</a> @can('update', $apprentice)<a class="button" href="{{ route('apprentices.edit', $apprentice) }}">Edit apprentice</a>@endcan</div></header>
 @include('apprentices.overview83')
 <nav aria-label="Common apprentice actions" class="toolbar">
 <a @class(['button','primary'=>!$overview83['next']]) href="{{ route('progress66.index',['apprentice'=>$apprentice->id]) }}">View progress</a>
 <a class="button" href="{{ route('journey.show', $apprentice) }}">Apprenticeship journey</a>
 <a class="button" href="{{ route('learning.index',$apprentice) }}">{{ auth()->user()->role==='apprentice'?'My training tasks':(auth()->user()->role==='tutor'?'Open training tasks':'Training tasks') }}</a>
 <a class="button" href="{{ route('attendance.apprentice',$apprentice) }}">Attendance and OTJ</a>
+<a class="button" href="{{ route('em.index', $apprentice) }}">Maths and English</a>
+<a class="button" href="{{ route('actions.index', $apprentice) }}">Action plan</a>
 @if(auth()->user()->role!=='apprentice' && ($overview83['next']['kind']??null)!=='review')<a class="button" href="{{ \App\Support\PortalActions::destination(auth()->user(),$apprentice,'reviews') }}">Progress reviews</a>@endif
 </nav>
 <details class="panel action-disclosure64"><summary>More record options</summary>

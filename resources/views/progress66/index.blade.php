@@ -4,12 +4,13 @@
 @include('progress66.assets')
 @php
  $p=$report['selected'];$personal=$p&&$report['role']==='apprentice';$base=$report['demo']?route('progress66.demo',['role'=>$report['role']]):route('progress66.index');
- $link=fn($extra)=>$base.'?'.http_build_query(array_merge($report['filters'],request()->only('origin68'),$extra));
+ $link=fn($extra)=>$base.'?'.http_build_query(array_merge($report['filters'],request()->only('origin68', 'list'),$extra));
  $roleLabels=['admin'=>'Administrator','manager'=>'Management','tutor'=>'Tutor','apprentice'=>'Apprentice','employer'=>'Employer / workplace mentor','mentor'=>($report['demo']?'Workplace mentor':'Learning & Progress Mentor')];
  $display=fn($v)=>$v===null?'Not available':$v;
  $page=max(1,(int)$report['filters']['page']);$pageCount=max(1,(int)ceil(count($report['details'])/15));$page=min($page,$pageCount);$detailRows=array_slice($report['details'],($page-1)*15,15);
 @endphp
 <div class="progress66">
+@if(!empty($report['apprentice_list_url']))<p><a class="button" href="{{ $report['apprentice_list_url'] }}">Back to apprentices</a></p>@endif
 @if(!empty($report['back68']))<p><a class="button" href="{{$report['back68']}}">← Back to filtered list</a></p>@endif
 @if($report['demo'])<div class="p66-demo" role="note"><strong>Demonstration — fictional data</strong><span>Separate read-only examples. No live records or notifications.</span></div>@endif
 @if($personal)

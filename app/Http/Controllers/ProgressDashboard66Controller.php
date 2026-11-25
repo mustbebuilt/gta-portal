@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\ApprenticeList;
 use App\Support\ProgressDashboard66 as Dash;
 use App\Support\ProgressReturn68;
 use Illuminate\Database\QueryException;
@@ -21,6 +22,7 @@ class ProgressDashboard66Controller extends Controller
             $report = ProgressReturn68::decorate($r, $this->report($r, $role));
             if ($role === null && in_array($r->user()->role, ['admin', 'ceo', 'tutor', 'apprentice'], true)) {
                 $report['groups'] = Dash::groups(Dash::actor($r));
+                $report['apprentice_list_url'] = ApprenticeList::returnUrl($r);
             }
 
 return response()->view('progress66.index', compact('report'))->header('Cache-Control', 'private, no-store')->header('Referrer-Policy', 'no-referrer');

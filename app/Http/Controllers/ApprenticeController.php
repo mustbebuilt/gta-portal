@@ -10,11 +10,13 @@ use App\Models\MonthlyScorecard;
 use App\Models\Programme;
 use App\Models\TutorGroup;
 use App\Models\User;
+use App\Support\ApprenticeList;
 use App\Support\AssignmentHistory;
 use App\Support\DirectoryCatalog;
 use App\Support\EntryContext;
 use App\Support\LearningAccess;
 use App\Support\MonthlyDevelopment;
+use App\Support\OtjPosition;
 use App\Support\TaskCatalogue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -29,16 +31,43 @@ class ApprenticeController extends Controller
     public function index(Request $request): View
     {
         Gate::authorize('viewAny', Apprentice::class);
-        $search = trim((string) $request->query('search', ''));
-        $records = Apprentice::visibleTo($request->user())->with(['tutor', 'programmeRecord'])
-            ->whereNotIn('id', \App\Models\ProgrammeOutcome::archived()->select('apprentice_id'))
-            ->when($search !== '', fn ($q) => $q->where(fn ($q) => $q
-                ->where('reference', 'like', '%'.$search.'%')
-                ->orWhere('first_name', 'like', '%'.$search.'%')
-                ->orWhere('last_name', 'like', '%'.$search.'%')))
-            ->orderBy('last_name')->orderBy('first_name')->paginate(15)->withQueryString();
+        $filters = ApprenticeList::filters($request->query());
+        $search = $filters['search'] ?? '';
+        $scope = Apprentice::visibleTo($request->user())
+            ->whereNotIn('id', \App\Models\ProgrammeOutcome::archived()->select('apprentice_id'));
 
-        return view('apprentices.index', compact('records', 'search'));
+        $options = [
+            'group' => TutorGroup::whereIn('id', (clone $scope)->select('tutor_group_id'))->orderBy('name')->pluck('name', 'id'),
+            'programme' => Programme::whereIn('id', (clone $scope)->select('programme_id'))->orderBy('name')->pluck('name', 'id'),
+        ];
+        if (LearningAccess::manager($request->user())) {
+            $options['tutor'] = User::whereIn('id', (clone $scope)->select('tutor_id'))->orderBy('name')->pluck('name', 'id');
+        } else {
+            unset($filters['tutor']);
+        }
+
+        $query = $scope->with(['tutor', 'programmeRecord', 'groupRecord']);
+        foreach (['group' => 'tutor_group_id', 'programme' => 'programme_id', 'tutor' => 'tutor_id'] as $key => $field) {
+            if (isset($filters[$key])) {
+                $query->where($field, $filters[$key]);
+            }
+        }
+        foreach (preg_split('/\s+/u', $search, -1, PREG_SPLIT_NO_EMPTY) as $term) {
+            $query->where(fn ($q) => $q->where('reference', 'like', '%'.$term.'%')
+                ->orWhere('first_name', 'like', '%'.$term.'%')
+                ->orWhere('last_name', 'like', '%'.$term.'%'));
+        }
+
+        $query->orderBy('last_name')->orderBy('first_name')->orderBy('id');
+        $records = (clone $query)->paginate(15);
+        if ($records->currentPage() > $records->lastPage()) {
+            $records = $query->paginate(15, ['*'], 'page', $records->lastPage());
+        }
+        unset($filters['page']);
+        $records->appends($filters);
+        $returnFilters = $filters + ($records->currentPage() > 1 ? ['page' => $records->currentPage()] : []);
+
+        return view('apprentices.index', compact('records', 'search', 'filters', 'returnFilters', 'options'));
     }
 
     public function create(): View
@@ -71,6 +100,7 @@ class ApprenticeController extends Controller
     public function show(Request $request, Apprentice $apprentice): View
     {
         Gate::authorize('view', $apprentice);
+        $listUrl = ApprenticeList::returnUrl($request);
         $monthly = LearningAccess::training($request->user(), $apprentice)
             ? MonthlyScorecard::where('apprentice_id', $apprentice->id)->whereNotNull('development')->orderByDesc('month')->first()
             : null;
@@ -82,6 +112,8 @@ class ApprenticeController extends Controller
             : [];
         return view('apprentices.show', [
             'overview83' => \App\Support\Workday83::apprentice($request->user(),$apprentice),
+            'listUrl' => $listUrl,
+            'otjHeadline' => $trainingAccess ? OtjPosition::headline(OtjPosition::forApprentice($apprentice)) : null,
             'apprentice' => $apprentice->load(['tutor', 'programmeRecord', 'employerRecord', 'groupRecord', 'mentor', 'careersAdviser', 'mathsTutor', 'englishTutor']),
             'developmentMonth' => $monthly?->month,
             'trainingReceipts' => $receipts,
