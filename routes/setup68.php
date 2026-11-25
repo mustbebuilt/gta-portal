@@ -18,4 +18,6 @@ Route::prefix('apprentice-setup')->name('setup68.')->group(function () {
 Route::get('/employer-setup', [EmployerSetup68Controller::class, 'show'])->name('employer68.show');
 Route::post('/employer-setup', [EmployerSetup68Controller::class, 'store'])->middleware('throttle:20,1')->name('employer68.store');
 
+Route::post('/apprentices/{apprentice}/employer', [EmployerSetup68Controller::class, 'change'])->name('employer68.change');
+
 Route::post('/apprentices/{apprentice}/complete-setup', [Setup68Controller::class, 'resumeExisting'])->name('setup68.resume-existing');

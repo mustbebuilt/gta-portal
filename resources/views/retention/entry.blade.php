@@ -18,7 +18,7 @@
 <div><label for="entry-notes">Brief relevant notes (optional)</label><textarea id="entry-notes" name="notes" maxlength="500">{{ old('notes',$entry?->notes) }}</textarea></div>
 @if($entry)<div><label for="entry-reason">Reason for correction or enrolment confirmation</label><input id="entry-reason" name="reason" maxlength="500" required value="{{ old('reason') }}"></div>@endif
 </div><button>Save recruitment and entry</button></form>
-<details class="panel"><summary>Record a later employer or supervisor change</summary><p>First update the linked employer in the apprentice profile where it has changed. Use this dated record for later circumstances; original recruitment stays intact.</p><form method="post" action="{{ route('retention.employment',$apprentice) }}">@csrf
+<details class="panel"><summary>Record a change in workplace circumstances</summary><p>Use this for changes such as a new supervisor at the linked employer. For a different organisation, <a href="{{ route('employer68.show', ['apprentice' => $apprentice->id]) }}">change the linked employer</a>.</p><form method="post" action="{{ route('retention.employment',$apprentice) }}">@csrf
 <label for="change-date">Date these circumstances applied</label><input id="change-date" type="date" name="effective_on" max="{{ today()->toDateString() }}" required>
 <input type="hidden" name="entry_employer_id" value="{{ $apprentice->employer_id }}">
 @foreach(['family_owned','family_owner_manager','family_supervisor','relationship'] as $key)<label for="change-{{ $key }}">{{ $labels[$key] }}</label><select id="change-{{ $key }}" name="{{ $key }}">@foreach($choices[$key] as $value)<option @selected($value==='Unknown')>{{ $value }}</option>@endforeach</select>@endforeach

@@ -14,6 +14,20 @@
 @if($overview83['next'])<p><strong>Next action:</strong> {{$overview83['next']['title']}} <a class="button primary" href="{{$overview83['next']['url']}}">Open next action</a></p>@else<p>No due training actions in this view.</p>@endif
 </section>
 
-@if(\App\Support\LearningAccess::manager(auth()->user()) && !\App\Support\DeliveryPlan::approved($apprentice))
-<details class="panel"><summary>Training plan setup incomplete</summary><form method="post" action="{{route('setup68.resume-existing',$apprentice)}}">@csrf<button>Complete apprentice setup</button></form><a href="{{route('delivery.show',$apprentice)}}">Open individual delivery plan</a></details>
+@if(\App\Support\LearningAccess::manager(auth()->user())
+    && !\App\Support\DeliveryPlan::approved($apprentice)
+    && !\App\Models\ProgrammeOutcome::archived()->where('apprentice_id', $apprentice->id)->exists())
+    @php($setupDraft = \App\Models\ApprenticeSetupDraft68::where('apprentice_id', $apprentice->id)->whereIn('state', ['Draft', 'Ready'])->latest()->first())
+    <section class="panel">
+        <h2>Training plan setup incomplete</h2>
+        @if($setupDraft)
+            <a class="button" href="{{ route('setup68.show', $setupDraft) }}">Continue setup</a>
+        @else
+            <form method="post" action="{{ route('setup68.resume-existing', $apprentice) }}">
+                @csrf
+                <button>Complete apprentice setup</button>
+            </form>
+        @endif
+        <a href="{{ route('delivery.show', $apprentice) }}">Open individual delivery plan</a>
+    </section>
 @endif

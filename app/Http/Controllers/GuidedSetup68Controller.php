@@ -25,7 +25,7 @@ class GuidedSetup68Controller extends Controller
     {
         $this->allow($r);
 
-        return response()->view('setup68.index', ['drafts' => Draft::orderByDesc('updated_at')->paginate(20)])->header('Cache-Control', 'no-store, private');
+        return response()->view('setup68.index', ['drafts' => Draft::orderByRaw('CASE WHEN state IN (?, ?) THEN 0 ELSE 1 END', ['Draft', 'Ready'])->orderByDesc('updated_at')->paginate(20)])->header('Cache-Control', 'no-store, private');
     }
 
     public function create(Request $r)
@@ -36,9 +36,10 @@ class GuidedSetup68Controller extends Controller
         return to_route('setup68.show', [$d, 1]);
     }
 
-    public function show(Request $r, Draft $draft, int $step = 1)
+    public function show(Request $r, Draft $draft, ?int $step = null)
     {
         $this->allow($r);
+        $step ??= Setup::nextStep($draft);
         abort_unless(isset(Setup::STEPS[$step]), 404);
 
         return $this->page($r, $draft, $step);
@@ -239,6 +240,6 @@ return $this->page($r, $draft, 4, ['batch' => $batch, 'batch_calculation' => Rpl
         $this->allow($request);
         $draft = Setup::resumeExisting($request->user(),(int) $request->session()->get('auth_version'),$apprentice);
 
-        return to_route('setup68.show',[$draft, 7])->with('status','Complete the missing setup items for this existing apprentice. No duplicate apprentice or approved plan was created.');
+        return to_route('setup68.show',$draft)->with('status', 'Continue setup using the details already saved for this apprentice.');
     }
 }

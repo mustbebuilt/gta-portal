@@ -28,6 +28,19 @@ class GuidedSetup68Test extends TestCase {
   if($submit)$this->post('/apprentice-setup/'.$d->id.'/submit',['version'=>$d->version,'confirmed'=>1])->assertRedirect()->assertSessionHasNoErrors();return [$d->fresh(),$author,$reviewer,$t];
  }
  private function complete(bool $partial=false):array {[$d,$author,$reviewer,$t]=$this->ready($partial, submit:false);$this->post('/apprentice-setup/'.$d->id.'/confirm',['version'=>$d->version,'confirmed'=>1])->assertRedirect()->assertSessionHasNoErrors();return [$d->fresh(),$author,$reviewer,$t];}
+ public function test_continue_setup_finds_first_missing_item_without_creating_a_second_draft(): void
+ {
+  $user = $this->actor();
+  $this->actingAs($user)->post(route('setup68.create'))->assertRedirect();
+  $draft = Draft::where('owner_id', $user->id)->sole();
+  $draft = $this->save($draft, 1, ['reference' => 'DRAFT-P93', 'first_name' => 'Alex', 'last_name' => 'Fiction']);
+  $this->get(route('apprentices.index'))->assertOk()->assertSee('Add apprentice or continue setup');
+  $this->get(route('setup68.index'))->assertOk()->assertSee('Continue setup')->assertSee('Alex');
+  $this->get(route('setup68.show', $draft))->assertOk()->assertViewHas('step', 2);
+  $this->assertSame('DRAFT-P93', $draft->fresh()->payload['details']['reference']);
+  $this->assertDatabaseCount('apprentice_setup_drafts68', 1);
+  $this->actingAs($this->actor('tutor'))->get(route('setup68.show', $draft))->assertForbidden();
+ }
  public function test_two_complete_http_setups_feed_the_real_approved_plan_otj_and_training_source():void {
   foreach([false,true] as $partial){[$d,$author,$reviewer,$t]=$this->complete($partial);$a=Apprentice::findOrFail($d->apprentice_id);$expected=$partial?583.2:600.0;
    $this->assertEquals($expected,DeliveryPlan::approved($a)['details']['target_hours']);$this->assertEquals($expected,OtjPosition::forApprentice($a)['summary']['target_hours']);$this->assertEquals($expected,\App\Support\TrainingPlanSource::position(TrainingPlanWorkspace::where('apprentice_id',$a->id)->first())['remaining_hours']);

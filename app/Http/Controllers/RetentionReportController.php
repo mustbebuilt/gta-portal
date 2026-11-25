@@ -41,6 +41,9 @@ class RetentionReportController extends Controller
     {
         abort_unless(Access::manager($r->user()), 403);
         $choices = $this->choices();
+        if ($r->input('workflow') === 'exit') {
+            return $this->saveLeaving($r, $apprentice, $choices);
+        }
         $rules = ['version' => ['required', 'integer'],'followup_owner_id'=>['nullable','integer',Rule::exists('users','id')->where('active',true)->whereIn('role',['admin','ceo'])]];
         foreach (['status', 'achievement', 'reason', 'reasonBasis', 'voice', 'destination', 'destinationBasis', 'age', 'size', 'maths', 'english', 'additional', 'ehcp'] as $key) {
             $list = in_array($key, ['maths', 'english', 'additional', 'ehcp'], true) ? $choices['flag'] : $choices[$key];
@@ -120,19 +123,11 @@ class RetentionReportController extends Controller
                     }
                 }
             }
-            $row ??= new ProgrammeOutcome(['apprentice_id' => $apprentice->id]);
-            $h = $row->history ?? [];
-            $h[] = ['before' => $row->context, 'by' => $r->user()->id, 'at' => now()->toIso8601String()];
             $retainedKeys = ['epa_attempts', 'epa_closure', 'maths', 'english'];
             if ($ended && ($existing['endDate'] ?? null) === $v['endDate']) {
                 $retainedKeys[] = 'exitEmployment';
             }
-            $row->context = array_replace(array_intersect_key($existing, array_flip($retainedKeys)), $v);
-            $row->history = $h;
-            if ($row->exists) {
-                $row->version++;
-            }$row->save();
-            DB::table('learning_events')->insert(['user_id' => $r->user()->id, 'apprentice_id' => $apprentice->id, 'kind' => 'outcome_context', 'record_id' => $row->id, 'event' => 'context_recorded', 'created_at' => now()]);
+            $this->recordContext($r, $apprentice, $row, array_replace(array_intersect_key($existing, array_flip($retainedKeys)), $v));
         });
 
         \App\Support\DestinationMilestones::sync($apprentice);
@@ -141,6 +136,71 @@ class RetentionReportController extends Controller
         return back()->with('status', 'Reporting context saved. The live ILR, qualification results and training plan were not changed.');
     }
 
+
+    private function saveLeaving(Request $request, Apprentice $apprentice, array $choices): RedirectResponse
+    {
+        $data = $request->validate([
+            'version' => ['required', 'integer', 'min:0'],
+            'context.status' => ['required', Rule::in(['Withdrawn', 'Transferred'])],
+            'context.endDate' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'context.sourceRef' => ['required', 'string', 'max:1000'],
+            'context.exitEmployment' => ['required', Rule::in(RetentionAnalysis::EXIT_EMPLOYMENT)],
+            'context.reason' => ['sometimes', 'required', Rule::in($choices['reason'])],
+            'context.reasonBasis' => ['sometimes', 'required', Rule::in($choices['reasonBasis'])],
+        ]);
+        $exit = $data['context'] + ['reason' => 'Not established', 'reasonBasis' => 'Not confirmed'];
+        if ($exit['status'] === 'Transferred') {
+            $exit['reason'] = 'Not established';
+            $exit['reasonBasis'] = 'Not confirmed';
+        }
+        if ($exit['reason'] !== 'Not established' && $exit['reasonBasis'] === 'Not confirmed') {
+            throw ValidationException::withMessages(['context.reasonBasis' => 'Select who confirmed the withdrawal reason.']);
+        }
+
+        DB::transaction(function () use ($request, $apprentice, $data, $exit): void {
+            $profile = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
+            $row = ProgrammeOutcome::where('apprentice_id', $profile->id)->lockForUpdate()->first();
+            $existing = $row?->context ?? [];
+            if ((int) $data['version'] !== ($row?->version ?? 0)) {
+                throw ValidationException::withMessages(['version' => 'The outcome changed. Check the current record before saving.']);
+            }
+            if (isset($existing['epa_closure']) || in_array($existing['status'] ?? null, ['Completed', 'Withdrawn', 'Transferred'], true)) {
+                throw ValidationException::withMessages(['context.status' => 'An outcome is already recorded. Open reporting details to review or correct it.']);
+            }
+            if (! $profile->start_date || $exit['endDate'] < $profile->start_date->toDateString()) {
+                throw ValidationException::withMessages(['context.endDate' => 'Enter an actual end date on or after the known first learning day.']);
+            }
+            if (filled($existing['destinationDate'] ?? null) && $existing['destinationDate'] < $exit['endDate']) {
+                throw ValidationException::withMessages(['context.endDate' => 'The recorded destination predates this programme end date. Check reporting details.']);
+            }
+            $this->recordContext($request, $profile, $row, array_replace($existing, $exit, [
+                'achievement' => 'Unknown',
+                'achievementDate' => null,
+            ]));
+            \App\Support\DestinationMilestones::sync($profile);
+        });
+
+        return to_route('apprentices.close-down', $apprentice)->with('status', 'Programme outcome saved for the apprentice record and reports.');
+    }
+
+    private function recordContext(Request $request, Apprentice $apprentice, ?ProgrammeOutcome $row, array $context): void
+    {
+        $row ??= new ProgrammeOutcome(['apprentice_id' => $apprentice->id]);
+        $row->history = [...($row->history ?? []), [
+            'before' => $row->context,
+            'by' => $request->user()->id,
+            'at' => now()->toIso8601String(),
+        ]];
+        $row->context = $context;
+        if ($row->exists) {
+            $row->version++;
+        }
+        $row->save();
+        DB::table('learning_events')->insert([
+            'user_id' => $request->user()->id, 'apprentice_id' => $apprentice->id, 'kind' => 'outcome_context',
+            'record_id' => $row->id, 'event' => 'context_recorded', 'created_at' => now(),
+        ]);
+    }
 
     public function report(Request $r)
     {

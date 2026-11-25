@@ -1,7 +1,12 @@
 @extends('layout')
 @section('title', $apprentice->reference)
 @section('content')
-<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }}</p><h1>{{ $apprentice->first_name }} {{ $apprentice->last_name }}</h1><p>{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }} · {{ $apprentice->groupLabel() ?? 'Group not assigned' }}</p><p class="muted">{{ $apprentice->employerLabel() ?? 'Employer not recorded' }} · Main tutor {{ $apprentice->tutor?->name ?? 'not assigned' }}</p></div><div class="toolbar"><a class="button" href="{{ $listUrl ?? route('apprentices.index') }}">Back to apprentices</a> @can('update', $apprentice)<a class="button" href="{{ route('apprentices.edit', $apprentice) }}">Edit apprentice</a>@endcan</div></header>
+<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }}</p><h1>{{ $apprentice->first_name }} {{ $apprentice->last_name }}</h1><p>{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }} · {{ $apprentice->groupLabel() ?? 'Group not assigned' }}</p><p class="muted">{{ $apprentice->employerLabel() ?? 'Employer not recorded' }} · Main tutor {{ $apprentice->tutor?->name ?? 'not assigned' }}</p></div><div class="toolbar"><a class="button" href="{{ $listUrl ?? route('apprentices.index') }}">Back to apprentices</a> @can('update', $apprentice)<a class="button" href="{{ route('apprentices.edit', $apprentice) }}">Edit apprentice</a>
+    @unless(\App\Models\ProgrammeOutcome::archived()->where('apprentice_id', $apprentice->id)->exists())
+        <a class="button" href="{{ route('employer68.show', ['apprentice' => $apprentice->id]) }}">{{ $apprentice->employerLabel() ? 'Change employer' : 'Link employer' }}</a>
+    @endunless
+    <a class="button" href="{{ route('apprentices.close-down', $apprentice) }}">Programme outcome</a>
+@endcan</div></header>
 @include('apprentices.overview83')
 <nav aria-label="Common apprentice actions" class="toolbar">
 <a @class(['button','primary'=>!$overview83['next']]) href="{{ route('progress66.index',['apprentice'=>$apprentice->id]) }}">View progress</a>
@@ -16,7 +21,7 @@
 @include('apprentices.page-actions64')
 
 </details>
-<details class="panel"><summary>Apprentice details and staff contacts</summary>@if(\App\Support\LearningAccess::manager(auth()->user()))<a class="button" href="{{ route('apprentices.close-down', $apprentice) }}">Close down and archive</a>@endif<dl class="details-grid">
+<details class="panel"><summary>Apprentice details and staff contacts</summary><dl class="details-grid">
 @php($approvedDateDetails = \App\Support\DeliveryPlan::approved($apprentice)['details'] ?? [])
 @if(isset($approvedDateDetails['practical_end_date']))
 <div><dt>Planned practical end</dt><dd>{{ $approvedDateDetails['practical_end_date'] }}</dd></div>

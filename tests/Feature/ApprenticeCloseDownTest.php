@@ -15,6 +15,38 @@ class ApprenticeCloseDownTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
+    public function test_leaving_is_recorded_once_from_the_programme_outcome_screen(): void
+    {
+        $this->travelTo(now()->setDate(2026, 11, 21));
+        $person = Apprentice::factory()->create([
+            'start_date' => '2025-09-01', 'planned_end_date' => '2027-09-01',
+        ]);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $tutor = User::factory()->create(['role' => 'tutor']);
+        $outcome = ProgrammeOutcome::create(['apprentice_id' => $person->id, 'context' => [
+            'status' => 'Active', 'age' => '19–24', 'maths' => 'Yes',
+        ]]);
+        $page = route('apprentices.close-down', $person);
+        $save = route('retention.save', $person);
+        $input = ['workflow' => 'exit', 'version' => $outcome->version, 'context' => [
+            'status' => 'Withdrawn', 'endDate' => '2026-11-20', 'sourceRef' => 'Fictional case record',
+            'exitEmployment' => 'Unknown', 'reason' => 'Employment ended', 'reasonBasis' => 'Staff record',
+        ]];
+
+        $this->actingAs($tutor)->get($page)->assertForbidden();
+        $this->post($save, $input)->assertForbidden();
+        $this->actingAs($admin)->get($page)->assertOk()->assertSee('Record a withdrawal or transfer');
+        $this->from($page)->post($save, $input)->assertRedirect($page)->assertSessionHasNoErrors();
+        $this->get($page)->assertOk()->assertSee('Withdrawn')->assertSee('2026-11-20');
+        $this->get(route('achievers-leavers.index', ['from' => '2026-11-01', 'to' => '2026-11-21']))
+            ->assertOk()->assertSee($person->reference);
+        $this->assertSame('19–24', $outcome->fresh()->context['age']);
+        $this->assertSame('Yes', $outcome->fresh()->context['maths']);
+        $this->assertDatabaseCount('destination_milestones', 3);
+        $this->from($page)->post($save, $input)->assertSessionHasErrors('version');
+        $this->assertCount(1, $outcome->fresh()->history);
+    }
+
     #[TestWith(['Pass', 1])]
     #[TestWith(['Merit', 2])]
     #[TestWith(['Distinction', 3])]
@@ -25,7 +57,7 @@ class ApprenticeCloseDownTest extends TestCase
         $apprentice = Apprentice::factory()->create(['start_date' => '2025-09-01']);
         $admin = User::factory()->create(['role' => 'admin']);
         $url = route('apprentices.close-down', $apprentice);
-        $this->actingAs($admin)->get(route('apprentices.show', $apprentice))->assertOk()->assertSee('Close down and archive');
+        $this->actingAs($admin)->get(route('apprentices.show', $apprentice))->assertOk()->assertSee('Programme outcome');
         $this->get($url)->assertOk()->assertSee('Record EPA attempt 1');
         $this->post($url, [
             'version' => 0, 'result' => 'Awaiting result', 'assessment_date' => '2026-11-01', 'action' => 'record',

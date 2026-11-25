@@ -36,6 +36,7 @@ final class ApprenticeCloseDownController extends Controller
             'apprentice' => $apprentice,
             'outcome' => $outcome,
             'attempts' => $attempts,
+            'exitChoices' => json_decode(file_get_contents(resource_path('data/retention-choices.json')), true, 512, JSON_THROW_ON_ERROR),
             'employmentChoices' => RetentionAnalysis::EXIT_EMPLOYMENT,
             'exitEmployment' => RetentionAnalysis::employmentAtExit($context),
             'closure' => $context['epa_closure'] ?? null,

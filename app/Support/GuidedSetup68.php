@@ -231,6 +231,23 @@ return $t;
         });
     }
 
+    public static function nextStep(Draft $draft): int
+    {
+        if ($draft->state !== 'Draft') {
+            return 7;
+        }
+
+        $issue = self::review($draft)['issues'][0] ?? null;
+
+        if ($issue) {
+            return $issue['step'];
+        }
+
+        $skills = $draft->payload['functional_skills82'] ?? FunctionalSkillsSetup82::current($draft->apprentice_id);
+
+        return isset($skills['maths'], $skills['english']) ? 7 : 6;
+    }
+
     public static function review(Draft $d): array
     {
         $p = $d->payload;
@@ -501,7 +518,7 @@ return $t;
             $a = Apprentice::whereKey($record->id)->lockForUpdate()->firstOrFail();
             abort_if(ProgrammeOutcome::archived()->where('apprentice_id', $a->id)->exists(), 409, 'Reopen the archived programme through its existing workflow first.');
             abort_if(DeliveryPlan::approved($a) !== null, 409, 'This apprentice already has a current approved plan. Use the individual delivery-plan workflow.');
-            $existing = Draft::where('apprentice_id', $a->id)->where('state', 'Draft')->orderByDesc('updated_at')->lockForUpdate()->first();
+            $existing = Draft::where('apprentice_id', $a->id)->whereIn('state', ['Draft', 'Ready'])->orderByDesc('updated_at')->lockForUpdate()->first();
             if ($existing) {
                 return $existing;
             }

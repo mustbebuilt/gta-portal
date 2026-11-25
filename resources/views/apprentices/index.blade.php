@@ -8,7 +8,7 @@
             <a class="button" href="{{ route('apprentices.archive') }}">Apprentice archive</a>
         @endif
         @can('create', App\Models\Apprentice::class)
-            <form method="post" action="{{ route('setup68.create') }}">@csrf<button class="primary">Add apprentice</button></form>
+            @include('setup68.start-action')
         @endcan
     </div>
 </header>

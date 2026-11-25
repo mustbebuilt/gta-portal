@@ -1,10 +1,10 @@
 @extends('layout')
-@section('title', 'Close down and archive')
+@section('title', 'Programme outcome')
 @section('content')
 <header class="page-heading">
     <div>
         <p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }} · {{ $apprentice->reference }}</p>
-        <h1>Close down and archive</h1>
+        <h1>Programme outcome</h1>
         <p>{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }}</p>
     </div>
     <div class="toolbar">
@@ -15,7 +15,7 @@
 @include('learning.errors')
 
 @if(!$closure && !$endedWithoutAchievement && ($outcome?->context['status'] ?? null) !== 'Completed')
-<p><a href="{{ route('retention.edit', $apprentice) }}">Record a withdrawal in Outcome and reporting context</a></p>
+@include('apprentices.record-leaving')
 @endif
 
 @if($closure)
@@ -29,6 +29,14 @@
     @else
         <p>Completion pack unavailable for this previous closure.</p>
     @endif
+</section>
+@endif
+
+@if(!$closure && ($outcome?->context['status'] ?? null) === 'Completed')
+<section class="panel">
+    <h2>Completed</h2>
+    <p>Actual programme end date {{ $outcome->context['endDate'] ?? 'Not recorded' }} · Achievement {{ $outcome->context['achievement'] ?? 'Unknown' }}</p>
+    <p><a href="{{ route('retention.edit', $apprentice) }}">View reporting details</a></p>
 </section>
 @endif
 
@@ -52,7 +60,12 @@
 </section>
 
 @if($endedWithoutAchievement)
-<section class="panel"><p>This programme was recorded as {{ strtolower($outcome->context['status']) }}. <a href="{{ route('retention.edit', $apprentice) }}">View programme outcome</a></p></section>
+<section class="panel">
+    <h2>{{ $outcome->context['status'] }}</h2>
+    <p>Actual programme end date {{ $outcome->context['endDate'] ?? 'Not recorded' }} · Employment at exit {{ $exitEmployment }}</p>
+    @if($outcome->context['status'] === 'Withdrawn')<p>Reason {{ $outcome->context['reason'] ?? 'Not established' }}</p>@endif
+    <p><a href="{{ route('retention.edit', $apprentice) }}">View reporting details or correct the record</a></p>
+</section>
 @elseif(!$closure && $errors->has('version'))
 <p><a class="button" href="{{ route('apprentices.close-down', $apprentice) }}">Reload attempt history</a></p>
 @elseif(!$closure && $number)
@@ -81,11 +94,11 @@
             </div>
             <div data-epa-achievement>
                 <label for="epa-achievement">Confirmed achievement date</label>
-                <input id="epa-achievement" type="date" name="achievement_date" max="{{ today()->toDateString() }}" value="{{ old('achievement_date') }}">
+                <input id="epa-achievement" type="date" name="achievement_date" max="{{ today()->toDateString() }}" value="{{ old('achievement_date', $outcome?->context['achievementDate'] ?? null) }}">
             </div>
             <div data-epa-achievement>
                 <label for="epa-end">Actual programme end date</label>
-                <input id="epa-end" type="date" name="end_date" max="{{ today()->toDateString() }}" value="{{ old('end_date') }}">
+                <input id="epa-end" type="date" name="end_date" max="{{ today()->toDateString() }}" value="{{ old('end_date', $outcome?->context['endDate'] ?? null) }}">
             </div>
         </div>
         <div data-epa-achievement>

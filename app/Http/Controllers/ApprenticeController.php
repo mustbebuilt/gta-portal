@@ -145,6 +145,9 @@ class ApprenticeController extends Controller
             }
             $beforeLinks = $locked->only(AssignmentHistory::KEYS);
             $locked->fill($request->safe()->except(['version',...\App\Support\ApprenticeAlerts::INPUTS]));
+            if ($locked->isDirty(['employer_id', 'employer'])) {
+                throw ValidationException::withMessages(['employer_id' => 'Use Change employer to save the link and its effective date together.']);
+            }
             if ($locked->isDirty('programme_id') && LearningTask::where('apprentice_id', $locked->id)->exists() && ! TaskCatalogue::historyMatches($locked)) {
                 throw ValidationException::withMessages(['programme_id' => 'Assigned programme task history cannot be transferred to another programme automatically. Keep the current mapping until a controlled programme transfer is available.']);
             }

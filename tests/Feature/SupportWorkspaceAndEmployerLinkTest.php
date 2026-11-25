@@ -72,23 +72,43 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $this->get(route('support.index', $apprentice))->assertOk()->assertSee('Temporary travel disruption');
     }
 
-    public function test_employer_link_uses_the_normal_versioned_update_and_keeps_other_assignments(): void
+    public function test_employer_change_records_the_effective_date_and_keeps_other_assignments(): void
     {
         $admin = User::factory()->create(['role'=>'admin']);
         $tutor = User::factory()->create(['role'=>'tutor']);
         $oldEmployer = Employer::factory()->create();
         $newEmployer = Employer::factory()->create();
         $person = Apprentice::factory()->create(['tutor_id'=>$tutor->id,'employer_id'=>$oldEmployer->id,'email'=>'learner@example.test']);
+        $contact = User::factory()->create(['role' => 'employer']);
+        $grant = \App\Support\EmployerActions::grant($admin, $admin->auth_version, $person, [
+            'user_id' => $contact->id, 'version' => 0, 'identity_reference' => 'Fictional access verification',
+        ]);
+        $this->assertTrue(\App\Support\EmployerActions::valid($grant, $person));
         $confirm = route('apprentices.edit', ['apprentice'=>$person, 'link_employer'=>$newEmployer->id]);
         $this->actingAs($tutor)->get($confirm)->assertForbidden();
         $this->actingAs($admin)->get(route('employer68.show',['link'=>$newEmployer->id,'apprentice'=>$person->id]))->assertRedirect($confirm);
         $this->get($confirm)->assertOk()->assertSee($oldEmployer->name)->assertSee($newEmployer->name);
-        $this->from($confirm)->put(route('apprentices.update',$person), [
+        $change = route('employer68.change', $person);
+        $payload = ['version'=>$person->version, 'employer_id'=>$newEmployer->id,
+            'employer_version'=>$newEmployer->record_version, 'effective_on'=>today()->subDay()->toDateString()];
+        $this->get(route('employer68.show', ['apprentice'=>$person->id, 'search'=>$newEmployer->reference]))
+            ->assertOk()->assertSee('Choose employer');
+        $this->get($confirm)->assertSee('Effective date')->assertSee('Directory contact');
+        $this->actingAs($tutor)->post($change, $payload)->assertForbidden();
+        $this->actingAs($admin)->from($confirm)->put(route('apprentices.update',$person), [
             ...$person->only(['reference','first_name','last_name','version']), 'employer_id'=>$newEmployer->id,
-        ])->assertSessionHasNoErrors();
+        ])->assertSessionHasErrors('employer_id');
+        $this->from($confirm)->post($change, $payload)
+            ->assertRedirect(route('apprentices.show', $person))->assertSessionHasNoErrors();
+        $this->from($confirm)->post($change, $payload)->assertSessionHasErrors('version');
         $this->assertEquals($newEmployer->id, $person->fresh()->employer_id);
         $this->assertEquals($tutor->id, $person->fresh()->tutor_id);
         $this->assertSame('learner@example.test', $person->fresh()->email);
         $this->assertDatabaseHas('assignment_change_events', ['apprentice_id'=>$person->id,'actor_id'=>$admin->id]);
+        $history = \App\Models\EntryContextEvent::where('apprentice_id', $person->id)->where('kind', 'Employment')->sole();
+        $this->assertSame($payload['effective_on'], $history->effective_on->toDateString());
+        $this->assertEquals($newEmployer->id, $history->payload['after']['entry_employer_id']);
+        $this->assertFalse($grant->fresh()->active);
+        $this->assertFalse(\App\Support\EmployerActions::valid($grant->fresh(), $person->fresh()));
     }
 }
