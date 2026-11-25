@@ -2,6 +2,9 @@
 namespace App\Http\Controllers;
 use App\Models\{User,TutorGroup,TimetableGroupBrief as Brief,TimetableFlexibleDay as Day,TimetablePlanEntry as Entry,TimetablePlan as Plan,TimetableCoverAllocation as Cover};
 use App\Support\{CentrePlanning as P,TimetableDuties as D,TimetableCover as C,ReviewedImports};
+use App\Models\TrainingSession;
+use App\Support\LearningAccess;
+use App\Support\RegisterFollowup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 class TimetableDutiesController extends Controller {
@@ -16,6 +19,24 @@ class TimetableDutiesController extends Controller {
  public function withdrawDay(Request $r,Day $day) {$this->allowed($r);$d=$r->validate(['version'=>['required','integer','min:1'],'confirmed'=>['accepted']]);D::withdrawDay($r->user(),$this->auth($r),$day,(int)$d['version']);return back()->with('status','Flexible-day classification withdrawn; booked work and cover were not cancelled and must be checked separately.');}
  public function covers(Request $r) {$this->allowed($r);$filter=$r->validate(['page'=>['nullable','integer','min:1'],'date'=>['nullable','date_format:Y-m-d']]);$date=$filter['date']??null;return $this->view('covers',['date'=>$date,'covers'=>Cover::orderByDesc('updated_at')->paginate(25),'entries'=>Entry::where('kind','Teaching')->whereDate('work_date','>=',today())->when($date,fn($q)=>$q->whereDate('work_date',$date))->orderBy('work_date')->limit(500)->get()->filter(fn($e)=>($p=Plan::find($e->plan_id))&&P::published($p)&&$p->state==='Published'),'days'=>Day::where('state','Active')->whereDate('work_date','>=',today())->when($date,fn($q)=>$q->whereDate('work_date',$date))->orderBy('work_date')->get()->filter(fn($d)=>D::dayCurrent($d)&&($candidate=User::find($d->staff_id))&&$candidate->role==='tutor'),'token'=>(string)Str::uuid()]);}
  public function prepare(Request $r) {$this->allowed($r);$d=$r->validate(['entry_id'=>['required','integer','min:1'],'day_id'=>['required','integer','min:1'],'request_token'=>['required','uuid'],'reference'=>['required','string','max:1000'],'suitability_confirmed'=>['accepted'],'confirmed'=>['accepted']]);$c=C::prepare($r->user(),$this->auth($r),Entry::findOrFail($d['entry_id']),Day::findOrFail($d['day_id']),$d['request_token'],$d['reference']);return to_route('timetable-duties.cover',$c)->with('status','Cover proposal prepared. Check conflicts and publish explicitly; no register or apprentice access granted.');}
- public function cover(Request $r,Cover $cover) {$this->allowed($r);abort_unless(C::intact($cover),409,'Cover evidence needs repair.');return $this->view('cover',['c'=>$cover,'basis'=>$cover->source['basis'],'checks'=>C::inspect($cover),'current'=>C::current($cover)]);}
+ public function cover(Request $request, Cover $cover)
+ {
+     $this->allowed($request);
+     abort_unless(C::intact($cover), 409, 'Cover evidence needs repair.');
+
+     $basis = $cover->source['basis'];
+     $current = C::current($cover);
+     $register = $current && isset($basis['register']['id'])
+         ? TrainingSession::find($basis['register']['id'])
+         : null;
+     if ($register && ! RegisterFollowup::canOpen($request->user(), $register)) {
+         $register = null;
+     }
+
+     return $this->view('cover', [
+         'c' => $cover, 'basis' => $basis, 'checks' => C::inspect($cover), 'current' => $current,
+         'register' => $register, 'canOpenGroupRegisters' => LearningAccess::manager($request->user()),
+     ]);
+ }
  public function decide(Request $r,Cover $cover) {$this->allowed($r);$d=$r->validate(['version'=>['required','integer','min:1'],'action'=>['required','in:check,publish,withdraw'],'reason'=>['nullable','string','max:2000'],'confirmed'=>['accepted']]);match($d['action']){'check'=>C::check($r->user(),$this->auth($r),$cover,(int)$d['version']),'publish'=>C::publish($r->user(),$this->auth($r),$cover,(int)$d['version']),'withdraw'=>C::withdraw($r->user(),$this->auth($r),$cover,(int)$d['version'],$d['reason']??'')};return back()->with('status','Cover planning decision recorded. Permanent Tutor, register permissions, attendance and OTJ remain unchanged.');}
 }

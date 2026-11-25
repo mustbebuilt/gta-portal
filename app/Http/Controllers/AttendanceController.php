@@ -450,10 +450,13 @@ class AttendanceController extends Controller
     {
         abort_unless($this->sessionAllowed($r, $session), 403);
         $r->validate(['version' => ['required', 'integer'], 'reason' => ['required', 'string', 'max:2000']]);
-        DB::transaction(function () use ($r, $session): void {
+        $cancelled = DB::transaction(function () use ($r, $session): bool {
             $s = TrainingSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
-            $this->version($r, $s);
             abort_unless($this->sessionAllowed($r, $s), 403);
+            if ($s->state === 'Cancelled') {
+                return false;
+            }
+            $this->version($r, $s);
             $h = $s->history ?? [];
             $h[] = ['event' => 'session_cancelled', 'by' => $r->user()->id, 'at' => now()->toIso8601String(), 'reason' => $r->input('reason'), 'before_state' => $s->state];
             $s->history = $h;
@@ -462,9 +465,13 @@ class AttendanceController extends Controller
             $s->version++;
             $s->save();
             $this->audit($r, $s, 'cancelled');
+
+            return true;
         });
 
-        return back()->with('status', 'Session cancelled. It is excluded from attendance percentages and OTJ totals.');
+        return back()->with('status', $cancelled
+            ? 'Session cancelled. Attendance and OTJ totals exclude this session.'
+            : 'This session was already cancelled.');
     }
 
     public function apprentice(Request $r, Apprentice $apprentice): View

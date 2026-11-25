@@ -1,13 +1,27 @@
 @extends('layout')
 @section('title',$session->name)
 @section('content')
-<header class="page-heading"><div><p class="eyebrow">{{ $session->group->name }}</p><h1>{{ $session->name }}</h1><p>{{ $session->session_date->format('d M Y') }} · {{ $session->start_time }}–{{ $session->end_time }}</p><span class="status">{{ $session->state }}</span></div><a class="button" href="{{ route('attendance.index') }}">Back to sessions</a></header>
+<header class="page-heading"><div><p class="eyebrow">{{ $session->group->name }}</p><h1>{{ $session->name }}</h1><p>{{ $session->session_date->format('d M Y') }} · {{ $session->start_time }}–{{ $session->end_time }}</p><span class="status">{{ $session->state }}</span></div><a class="button" href="{{ route('attendance.index', $nextScope83) }}">Back to sessions</a></header>
 @include('learning.errors')
 @include('attendance.register-readiness')
+@if($session->state === 'Cancelled')
+    <section class="panel">
+        <h2>Cancelled session</h2>
+        <p>{{ $session->cancellation_reason }}</p>
+        <p>Attendance and OTJ totals exclude this session.</p>
+    </section>
+@endif
 <section class="panel"><h2>Planned learning</h2><p class="recorded-answer">{{ $session->planned_learning }}</p><p>Excluded periods: @forelse($session->breaks as $break){{ $break['start'] }}–{{ $break['end'] }} @empty None recorded @endforelse</p><p class="muted">The roster is a saved snapshot. Changing current group membership does not rewrite past attendance.</p></section>
-@if($session->state==='Cancelled')<section class="panel"><h2>Cancelled session</h2><p>{{ $session->cancellation_reason }}</p><p>This session is excluded from attendance and OTJ totals.</p></section>
-@else
+@if($session->state !== 'Cancelled' && $registerReadiness['ended'])
 <form method="post" data-compact-register data-start="{{ substr($session->start_time,0,5) }}" data-end="{{ substr($session->end_time,0,5) }}" action="{{ route('attendance.save',$session) }}">@csrf @foreach($nextScope83 as $key=>$value)<input type="hidden" name="next_scope[{{$key}}]" value="{{$value}}">@endforeach<input type="hidden" name="version" value="{{ $session->version }}">
+@if($session->marks->isNotEmpty())
+    <section class="panel" aria-labelledby="register-correction">
+        <h2 id="register-correction">Correct this register</h2>
+        <p>Change only the entries that need correcting. Confirmed OTJ is recalculated from the corrected record. The original entries stay in the history.</p>
+        <label for="correction-reason">Reason for correction (when changing saved information)</label>
+        <textarea id="correction-reason" name="correction_reason" maxlength="2000" @if($errors->has('correction_reason')) aria-invalid="true" @endif>{{ old('correction_reason') }}</textarea>
+    </section>
+@endif
 @include('attendance.structured-training')
 <section class="panel" data-register-bulk hidden>
     <h2>Full-session attendance</h2>
@@ -42,10 +56,30 @@
 @include('attendance.monthly-development', ['record' => $monthlyDevelopment->get($a->id)])
 </section>
 @endforeach
-@if($session->marks->isNotEmpty())<section class="panel"><h2>Correct this register</h2><label for="correction-reason">Reason for correction (only when changing saved information)</label><textarea id="correction-reason" name="correction_reason" maxlength="2000">{{ old('correction_reason') }}</textarea><p>The previous marks and delivered subjects are retained in the history. Updated minutes replace the previous subtotal; they are not added again.</p></section>@endif
 <label class="check"><input type="checkbox" name="weekly_confirmed" value="1" @checked(old('weekly_confirmed'))> Confirm this register and its recorded training</label>
 <div class="form-actions">@if($nextRegister83)<button class="primary" name="after_save" value="next">Save and open next register</button>@endif<button @class(['primary'=>!$nextRegister83]) name="after_save" value="stay">{{ $session->regular_week ? 'Submit register' : 'Save actual register' }}</button></div></form>
-<details class="panel"><summary>Cancel session</summary><form method="post" action="{{ route('attendance.cancel',$session) }}">@csrf<input type="hidden" name="version" value="{{ $session->version }}"><label for="cancel-reason">Cancellation reason</label><textarea id="cancel-reason" name="reason" required></textarea><div class="form-actions"><button>Cancel this session</button></div></form></details>
+@elseif($session->state !== 'Cancelled')
+    <section class="panel">
+        <h2>Register opens after the session</h2>
+        <p>Come back after {{ $session->end_time }} on {{ $session->session_date->format('d M Y') }} to record attendance and actual training.</p>
+        <details>
+            <summary>Saved roster · {{ $members->count() }} apprentices</summary>
+            <ul>@foreach($members as $member)<li>{{ $member->first_name }} {{ $member->last_name }} · {{ $member->reference }}</li>@endforeach</ul>
+        </details>
+    </section>
+@endif
+@if($session->state !== 'Cancelled')
+    <details class="panel" @if($errors->has('reason')) open @endif>
+        <summary>Cancel session</summary>
+        <p>Attendance and OTJ totals will exclude this session. The register history retains existing entries and the cancellation reason.</p>
+        <form method="post" action="{{ route('attendance.cancel', $session) }}">
+            @csrf
+            <input type="hidden" name="version" value="{{ $session->version }}">
+            <label for="cancel-reason">Cancellation reason</label>
+            <textarea id="cancel-reason" name="reason" maxlength="2000" required>{{ old('reason') }}</textarea>
+            <div class="form-actions"><button>Cancel this session</button></div>
+        </form>
+    </details>
 @endif
 <details class="panel"><summary>Register history</summary>@forelse(array_reverse($session->history??[]) as $h)<p>{{ $h['event'] === 'session_planned_subjects' ? 'Subjects planned' : $h['event'] }} · {{ $h['at'] }} · User {{ $h['by'] }}</p>@if($h['correction_reason']??$h['reason']??null)<p>{{ $h['correction_reason']??$h['reason'] }}</p>@endif
 @empty<p>No register changes recorded.</p>@endforelse</details>

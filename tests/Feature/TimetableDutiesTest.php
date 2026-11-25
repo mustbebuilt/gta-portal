@@ -40,6 +40,30 @@ class TimetableDutiesTest extends TestCase {
  public function test_cover_withdrawal_restores_original_planning_and_keeps_data():void {$f=$this->fixture();$c=$this->activate($f);C::withdraw($f['planner'],1,$c,3,'Reconciled');$this->assertTrue(C::closed($c->refresh()));$rows=P::busy([$f['date']])['rows'];$this->assertCount(1,$rows);$this->assertSame($f['tutor']->id,$rows[0]['staff_id']);$this->assertDatabaseCount('timetable_plans',1);}
  public function test_cover_from_another_week_never_creates_ghost_holds_in_empty_week():void {$f=$this->fixture();$c=$this->activate($f);D::withdrawDay($f['planner'],1,Day::find($c->flexible_day_id),1);$this->assertSame([],P::busy([today()->addMonths(3)->toDateString()])['rows']);}
  public function test_unlinked_or_marked_register_blocks_cover_but_checked_link_is_preserved():void {$f=$this->fixture();$p=$this->plan($f);$day=$this->flex($f);$e=Entry::where('plan_id',$p->id)->orderBy('work_date')->first();$s=TrainingSession::factory()->create(['tutor_group_id'=>$f['group']->id,'created_by'=>$f['admin']->id,'session_date'=>$f['date'],'start_time'=>'09:00','end_time'=>'16:00','members'=>[$f['a']->id]]);$this->reject(fn()=>C::prepare($f['planner'],1,$e,$day,(string)Str::uuid(),'Ref'));P::link($f['planner'],1,$e,3,$s,1);$c=C::prepare($f['planner'],1,$e->refresh(),$day,(string)Str::uuid(),'Checked original register arrangements');C::check($f['planner'],1,$c,1);C::publish($f['planner'],1,$c->refresh(),2);$this->assertCount(1,P::busy([$f['date']])['rows']);$this->assertSame($s->id,$e->refresh()->training_session_id);$this->assertSame($f['tutor']->id,$s->group->tutor_id);}
+ public function test_published_cover_hands_the_linked_register_to_authorised_staff_only(): void
+ {
+     $f = $this->fixture();
+     $plan = $this->plan($f);
+     $day = $this->flex($f);
+     $entry = Entry::where('plan_id', $plan->id)->orderBy('work_date')->firstOrFail();
+     $session = TrainingSession::factory()->create([
+         'tutor_group_id' => $f['group']->id, 'created_by' => $f['admin']->id,
+         'session_date' => $f['date'], 'start_time' => '09:00', 'end_time' => '16:00', 'members' => [$f['a']->id],
+     ]);
+     P::link($f['planner'], 1, $entry, 3, $session, $session->version);
+     $cover = C::prepare($f['planner'], 1, $entry->refresh(), $day, (string) Str::uuid(), 'Fictional cover');
+     C::check($f['planner'], 1, $cover, 1);
+     C::publish($f['planner'], 1, $cover->refresh(), 2);
+
+     $handover = route('timetable-duties.cover', $cover);
+     $register = route('attendance.show', $session);
+     $this->actingAs($f['planner'])->get($handover)->assertOk()->assertSee('Register for this session')->assertDontSee($register);
+     $this->actingAs($f['admin'])->get($handover)->assertOk()->assertSee('Open linked register')->assertSee($register);
+     $this->actingAs($f['cover'])->get($register)->assertForbidden();
+     $this->actingAs($f['tutor'])->get($register)->assertOk()->assertSee('Register opens after the session');
+     $this->assertSame($f['tutor']->id, $f['a']->fresh()->tutor_id);
+ }
+
  public function test_forged_cover_state_and_active_pointer_fail_closed():void {$f=$this->fixture();$c=$this->proposal($f);DB::table('timetable_cover_allocations')->update(['state'=>'Active','active_entry_id'=>$c->entry_id]);$this->assertFalse(C::active($c->refresh()));$this->assertNotEmpty(P::busy([$f['date']])['uncertain']);}
  public function test_required_event_failure_rolls_back_cover_publication():void {$f=$this->fixture();$c=$this->proposal($f);C::check($f['planner'],1,$c,1);AuditFault::install('cover_fault','timetable_duty_events','Fictional failure','cover_published');try{C::publish($f['planner'],1,$c->refresh(),2);$this->fail('Expected audit failure');}catch(\Illuminate\Database\QueryException){$this->assertSame('Draft',$c->refresh()->state);$this->assertNull($c->active_entry_id);}}
  public function test_flexible_multi_date_event_failure_is_atomic():void {$f=$this->fixture();AuditFault::install('flex_fault','timetable_duty_events','Fictional failure','flexible_day_saved');try{$this->flex($f);$this->fail('Expected event failure');}catch(\Illuminate\Database\QueryException){$this->assertDatabaseCount('timetable_flexible_days',0);}}

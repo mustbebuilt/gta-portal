@@ -208,7 +208,47 @@ class RoutineWorkflowSimplificationTest extends TestCase
         $this->assertSame(390,AttendanceMark::first()->otj_minutes);
         $d['correction_reason']='Corrected actual departure';$this->post(route('attendance.save',$s),$d)->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame(330,AttendanceMark::first()->otj_minutes);
+        $this->assertSame(330, \App\Support\AttendanceLedger::forIds([$a->id], false)[$a->id]['report']['minutes']);
+        $this->assertSame('Corrected actual departure', $s->fresh()->history[1]['correction_reason']);
     }
+    public function test_cancellation_keeps_history_and_removes_attendance_and_otj_once(): void
+    {
+        [$person, $session, $payload] = $this->register();
+        $page = route('attendance.show', $session);
+        $cancel = route('attendance.cancel', $session);
+        $this->post(route('attendance.save', $session), $payload)->assertSessionHasNoErrors();
+        $recorded = $session->fresh();
+        $this->get($page)->assertOk()->assertSee('Correct this register')->assertSee('Cancellation reason');
+        $this->from($page)->post($cancel, ['version' => $recorded->version])->assertSessionHasErrors('reason');
+        $this->assertSame('Planned', $session->fresh()->state);
+        $this->from($page)->post($cancel, ['version' => $recorded->version, 'reason' => 'Workshop unavailable'])
+            ->assertRedirect($page)->assertSessionHasNoErrors();
+        $closed = $session->fresh();
+        $this->assertSame('Cancelled', $closed->state);
+        $this->assertSame('Workshop unavailable', $closed->cancellation_reason);
+        $this->assertSame(390, AttendanceMark::firstOrFail()->otj_minutes);
+        $report = \App\Support\AttendanceLedger::forIds([$person->id], false)[$person->id]['report'];
+        $this->assertSame(0, $report['minutes']);
+        $this->assertSame(0, $report['attended']);
+        $this->assertSame(1, $report['cancelled']);
+        $this->from($page)->post($cancel, ['version' => $recorded->version, 'reason' => 'Retried form'])
+            ->assertRedirect($page)->assertSessionHasNoErrors();
+        $this->assertSame($closed->history, $session->fresh()->history);
+        $this->assertSame($closed->version, $session->fresh()->version);
+        $this->get($page)->assertOk()->assertSee('Cancelled session')->assertSee('Workshop unavailable')
+            ->assertDontSee('data-compact-register', false);
+        $this->post(route('attendance.save', $session), [...$payload, 'version' => $closed->version])
+            ->assertSessionHasErrors('marks');
+    }
+
+    public function test_upcoming_session_shows_its_saved_roster_and_cancellation_before_marking_opens(): void
+    {
+        [$person, $session] = $this->register();
+        $session->update(['session_date' => today()->addDay()]);
+        $this->get(route('attendance.show', $session))->assertOk()->assertSee('Register opens after the session')
+            ->assertSee($person->reference)->assertSee('Cancellation reason')->assertDontSee('data-compact-register', false);
+    }
+
     public function test_register_view_has_compact_details_and_explicit_full_session_control():void {
         [,$s]=$this->register();$page=$this->get(route('attendance.show',$s))->assertOk()->assertSee('Actual times, OTJ and other details')
             ->assertSee('Attended for the full session')->assertSee('routine-workflows.js');

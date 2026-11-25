@@ -201,13 +201,16 @@ class AttendanceWorkflowTest extends TestCase
         $this->assertSame('2026-11-30', $session->regular_week);
         $this->assertDatabaseCount('attendance_marks', 0);
         $this->assertDatabaseCount('register_training_records', 0);
-        $this->get(route('attendance.show', $session))->assertOk()->assertSee('Planned subjects are filled in below')
+        $this->get(route('attendance.show', $session))->assertOk()->assertSee('Register opens after the session')
             ->assertSee('Vehicle safety inspection')->assertSee('Basic brake and tyre condition check');
         $this->actingAs($this->actor('tutor'))->getJson($options)->assertForbidden();
         $this->post('/sessions', $data)->assertForbidden();
 
         $this->travelTo(Carbon::parse('2026-12-01 17:00'));
-        $this->actingAs($tutor)->post(route('attendance.save', $session), [
+        $this->actingAs($tutor)->get(route('attendance.show', $session))->assertOk()
+            ->assertSee('Planned subjects are filled in below')->assertSee('Vehicle safety inspection')
+            ->assertSee('Basic brake and tyre condition check');
+        $this->post(route('attendance.save', $session), [
             'version' => $session->version, 'weekly_confirmed' => 1,
             'delivered_learning' => 'Vehicle safety inspection was delivered.',
             'marks' => [$member->id => ['code' => 'O', 'arrival' => '09:00', 'departure' => '16:00']],
