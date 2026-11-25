@@ -371,7 +371,7 @@ class EmployerResources65Test extends TestCase
         // Contextual help and referral URL propagation vs fallback.
         $this->actingAs($contact)->get(route('employer-resources.index'))
             ->assertOk()
-            ->assertSee('Help with this page: Use employer and mentor resources')
+            ->assertSee(route('help.index'))->assertDontSee('Help with this page:')
             ->assertSee('"safeguardingUrl":null', false)
             ->assertSee('"supportUrl":null', false);
 

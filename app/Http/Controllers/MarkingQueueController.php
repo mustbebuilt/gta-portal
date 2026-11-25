@@ -42,7 +42,7 @@ class MarkingQueueController extends Controller
         }
         $reminders = MarkingReminder::whereIn('source_key', array_filter(array_column($sources, 'source_key')))->get()->keyBy('source_key');
 
-        return view('marking.index', ['reminderScheduleEnabled'=>(bool)config('portal_reminders.scheduled',false),'lastReminderRun'=>LearningAccess::manager($request->user()) ? \Illuminate\Support\Facades\DB::table('portal_reminder_runs')->latest('id')->first() : null,'tasks' => $tasks, 'counts' => $counts, 'sources' => $sources, 'reminders' => $reminders, 'manager' => LearningAccess::manager($request->user()), 'filter' => $filter, 'search' => $search,'tutorFilter'=>$tutorFilter,'tutorOptions'=>$tutorOptions]);
+        return view('marking.index', ['nextTask83'=>MarkingQueueViews::next($request->user(),['view'=>$filter,'search'=>$search,'tutor'=>$tutorFilter],0),'reminderScheduleEnabled'=>(bool)config('portal_reminders.scheduled',false),'lastReminderRun'=>LearningAccess::manager($request->user()) ? \Illuminate\Support\Facades\DB::table('portal_reminder_runs')->latest('id')->first() : null,'tasks' => $tasks, 'counts' => $counts, 'sources' => $sources, 'reminders' => $reminders, 'manager' => LearningAccess::manager($request->user()), 'filter' => $filter, 'search' => $search,'tutorFilter'=>$tutorFilter,'tutorOptions'=>$tutorOptions]);
     }
 
     public function record(Request $request): RedirectResponse

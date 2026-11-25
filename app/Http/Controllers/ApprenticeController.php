@@ -81,6 +81,7 @@ class ApprenticeController extends Controller
             ? \App\Support\RegisterTraining::coverage($apprentice, $receipts, \App\Support\DeliveryPlan::approved($apprentice))
             : [];
         return view('apprentices.show', [
+            'overview83' => \App\Support\Workday83::apprentice($request->user(),$apprentice),
             'apprentice' => $apprentice->load(['tutor', 'programmeRecord', 'employerRecord', 'groupRecord', 'mentor', 'careersAdviser', 'mathsTutor', 'englishTutor']),
             'developmentMonth' => $monthly?->month,
             'trainingReceipts' => $receipts,

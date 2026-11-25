@@ -10,15 +10,16 @@
 </header>
 @include('learning.errors')
 @php($filters = request()->only(['search','by','marker']))
+@if($meetingRows->isNotEmpty())<p><a class="button primary" href="{{route('support.worklist',['view'=>$view,...$filters,'meeting'=>$meetingRows->first()['person']->id])}}">Start meeting · {{$meetingRows->count()}} apprentices</a></p>@endif
 <div class="toolbar register-views" aria-label="Register views">
-    <a class="button {{ $view === 'needs-review' ? 'primary' : '' }}" href="{{ route('support.worklist', ['view'=>'needs-review', ...$filters]) }}" @if($view === 'needs-review') aria-current="page" @endif>Needs review · {{ $dueCount }}</a>
-    <a class="button {{ $view === 'all' ? 'primary' : '' }}" href="{{ route('support.worklist', ['view'=>'all', ...$filters]) }}" @if($view === 'all') aria-current="page" @endif>All · {{ $allCount }}</a>
+    <a class="button" href="{{ route('support.worklist', ['view'=>'needs-review', ...$filters]) }}" @if($view === 'needs-review') aria-current="page" @endif>@if($view==='needs-review')<strong>Needs review · {{ $dueCount }}</strong>@else Needs review · {{ $dueCount }}@endif</a>
+    <a class="button" href="{{ route('support.worklist', ['view'=>'all', ...$filters]) }}" @if($view === 'all') aria-current="page" @endif>@if($view==='all')<strong>All · {{ $allCount }}</strong>@else All · {{ $allCount }}@endif</a>
 </div>
 <form method="get" action="{{ route('support.worklist') }}" class="panel register-filter">
     <input type="hidden" name="view" value="{{ $view }}">
     <div class="search">
         <div><label for="support-search">Apprentice name or reference</label><input type="search" id="support-search" name="search" value="{{ $search }}" maxlength="100"></div>
-        <button class="primary">Search</button>
+        <button>Search</button>
         @if($search || request('by') || request('marker'))<a class="button" href="{{ route('support.worklist', ['view'=>$view]) }}">Clear</a>@endif
     </div>
     <details @if(request('by') || request('marker')) open @endif>

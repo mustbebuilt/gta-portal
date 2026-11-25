@@ -61,7 +61,7 @@ class SupportController extends Controller
     public function worklist(Request $r): Response
     {
         abort_unless($this->team($r), 403);
-        $data = $r->validate(['search' => ['nullable', 'string', 'max:100'], 'view' => ['nullable','in:all,needs-review'], 'by' => ['nullable','date_format:Y-m-d'], 'marker' => ['nullable',Rule::in(array_keys($this->codes()))], 'state' => ['nullable', Rule::in(SupportFollowup::CONCERN_VIEWS)], 'plan_state' => ['nullable', Rule::in(SupportFollowup::PLAN_VIEWS)], 'page' => ['nullable', 'integer', 'min:1'], 'plan_page' => ['nullable', 'integer', 'min:1'], 'apprentice_page' => ['nullable', 'integer', 'min:1']]);
+        $data = $r->validate(['meeting'=>['nullable','integer','min:1'],'search' => ['nullable', 'string', 'max:100'], 'view' => ['nullable','in:all,needs-review'], 'by' => ['nullable','date_format:Y-m-d'], 'marker' => ['nullable',Rule::in(array_keys($this->codes()))], 'state' => ['nullable', Rule::in(SupportFollowup::CONCERN_VIEWS)], 'plan_state' => ['nullable', Rule::in(SupportFollowup::PLAN_VIEWS)], 'page' => ['nullable', 'integer', 'min:1'], 'plan_page' => ['nullable', 'integer', 'min:1'], 'apprentice_page' => ['nullable', 'integer', 'min:1']]);
         $search = trim($data['search'] ?? '');
         $allowedIds = SupportAccess::ids($r->user());
         $people = Apprentice::whereIn('id', $allowedIds)->with('groupRecord')->get();
@@ -74,7 +74,15 @@ class SupportController extends Controller
         $plans = SupportPlan::whereIn('apprentice_id', $people->pluck('id'))->get(['id', 'apprentice_id', 'status', 'active_plan', 'reviews', 'activities']);
         if (!$r->hasAny(['state', 'plan_state', 'plan_page', 'apprentice_page']) || $r->filled('view')) {
             $data['view'] ??= 'needs-review';
-            return response()->view('support.register', $this->registerData($r, $people, $concerns, $plans, $data) + [
+            $register=$this->registerData($r,$people,$concerns,$plans,$data);
+            if (!empty($data['meeting'])) {
+                $selected=$register['meetingRows']->first(fn($row)=>$row['person']->id===(int)$data['meeting']);
+                $position=$register['meetingRows']->search(fn($row)=>$row['person']->id===(int)$data['meeting']);
+                $next=$position===false ? $register['meetingRows']->first() : $register['meetingRows']->get($position+1);
+                $record=$selected ? $this->recordData($r,$selected['person']) : [];
+                return response()->view('support.meeting',$record+$register+['selected'=>$selected,'nextMeeting'=>$next,'search'=>$search],200,self::PRIVATE_CACHE);
+            }
+            return response()->view('support.register', $register + [
                 'search' => $search,
                 'employerMeeting' => $data['view'] === 'needs-review' ? $this->employerMeeting($allowedIds) : null,
             ], 200, self::PRIVATE_CACHE);
@@ -164,7 +172,7 @@ class SupportController extends Controller
             $rows = $rows->where('needs_review', true)->sortByDesc('overdue');
         }
 
-        return ['rows' => SupportFollowup::paginate($rows->values(), $request, 'page'), 'allCount' => $allCount,
+        return ['meetingRows'=>$rows->values(),'rows' => SupportFollowup::paginate($rows->values(), $request, 'page'), 'allCount' => $allCount,
             'dueCount' => $dueCount, 'by' => $by, 'codes' => $this->codes(), 'view' => $filters['view'] ?? 'all',
             'overdueActions' => $overdueActions];
     }
@@ -298,13 +306,18 @@ class SupportController extends Controller
 
     public function index(Request $r, Apprentice $apprentice): Response
     {
+        return response()->view('support.index',$this->recordData($r,$apprentice),200,self::PRIVATE_CACHE);
+    }
+
+    private function recordData(Request $r, Apprentice $apprentice): array
+    {
         abort_unless($this->raiseAllowed($r, $apprentice), 403);
         $team = $this->team($r, $apprentice);
         $concerns = SupportConcern::with('owner')->where('apprentice_id', $apprentice->id)->when(! $team, fn ($q) => $q->where('raised_by', $r->user()->id))->orderByDesc('created_at')->get();
 
         $schedules = $team ? SupportMarkerSchedule71::where('apprentice_id', $apprentice->id)->get()->keyBy('support_concern_id') : collect();
         $sharedActions = $team ? SupportSharedAction71::with('owner:id,name')->where('apprentice_id', $apprentice->id)->orderBy('due_date')->get() : collect();
-        return response()->view('support.index', ['apprentice' => $apprentice, 'schedules' => $schedules, 'sharedActions' => $sharedActions, 'team' => $team, 'lead' => $this->lead($r, $apprentice), 'concerns' => $concerns, 'codes' => $this->codes(), 'markers' => $team ? DB::table('apprentice_markers')->where('apprentice_id', $apprentice->id)->pluck('code')->all() : [], 'markerHistory' => $team ? DB::table('marker_change_events')->where('apprentice_id', $apprentice->id)->orderByDesc('id')->get() : collect(), 'owners' => $team ? SupportAccess::owners($apprentice) : collect(), 'instructionWriter' => SupportAccess::writer($r->user(), $apprentice) || ExecutiveAccess::enabled($r), 'instructionApprover' => SupportAccess::approver($r->user(), $apprentice) || ExecutiveAccess::enabled($r), 'instructions' => $team ? TeachingInstruction::where('apprentice_id', $apprentice->id)->get() : collect(), 'plans' => $team ? SupportPlan::where('apprentice_id', $apprentice->id)->get() : collect(), 'recipients' => $team ? User::whereIn('id', $this->recipients($apprentice))->where('active', true)->get() : collect()], 200, self::PRIVATE_CACHE);
+        return ['apprentice' => $apprentice, 'schedules' => $schedules, 'sharedActions' => $sharedActions, 'team' => $team, 'lead' => $this->lead($r, $apprentice), 'concerns' => $concerns, 'codes' => $this->codes(), 'markers' => $team ? DB::table('apprentice_markers')->where('apprentice_id', $apprentice->id)->pluck('code')->all() : [], 'markerHistory' => $team ? DB::table('marker_change_events')->where('apprentice_id', $apprentice->id)->orderByDesc('id')->get() : collect(), 'owners' => $team ? SupportAccess::owners($apprentice) : collect(), 'instructionWriter' => SupportAccess::writer($r->user(), $apprentice) || ExecutiveAccess::enabled($r), 'instructionApprover' => SupportAccess::approver($r->user(), $apprentice) || ExecutiveAccess::enabled($r), 'instructions' => $team ? TeachingInstruction::where('apprentice_id', $apprentice->id)->get() : collect(), 'plans' => $team ? SupportPlan::where('apprentice_id', $apprentice->id)->get() : collect(), 'recipients' => $team ? User::whereIn('id', $this->recipients($apprentice))->where('active', true)->get() : collect()];
     }
 
     public function raise(Request $r, Apprentice $apprentice): RedirectResponse

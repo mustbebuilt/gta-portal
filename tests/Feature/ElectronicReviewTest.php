@@ -65,6 +65,27 @@ class ElectronicReviewTest extends TestCase
         return compact('a', 'admin', 'checker', 'tutor', 'mentor', 'learner', 'employer', 'grant', 'authority', 'plan', 'review', 'p', 'e');
     }
 
+    public function test_short_review_uses_existing_three_party_signing_without_private_support_or_legacy_packet_changes(): void
+    {
+        $f=$this->fixture(false);$r=$f['review'];$a=$f['a'];
+        $this->actingAs($f['tutor'])->post(route('reviews.reopen',[$a,$r]),['version'=>$r->version,'reason'=>'Use shorter review layout'])->assertSessionHasNoErrors();$r->refresh();
+        $fields=collect($r->fields)->only(['reviewDate','trainingFrom','mentor','tutor','employerRep','method','attendance','judgement','summary','planChange','newNeeds','safetyAnswer'])->all();
+        $fields['format83']='simple83';$fields['checked83']=1;
+        $this->post(route('reviews.update',[$a,$r]),['version'=>$r->version,'fields'=>$fields,'after_save'=>'prepare','prepare_plan_hash'=>$f['plan']->approved['hash']])->assertSessionHasNoErrors();$r->refresh();
+        $f['review']=$r;$f['p']=E::prepare($f['tutor'],$f['tutor']->auth_version,$r,['version'=>$r->version,'authority_id'=>$f['authority']->id,'expires_on'=>today()->addDays(20)->toDateString()]);
+        $this->assertSame('simple83',$f['p']->snapshot['document']['layout83']);
+        $this->assertStringNotContainsString('PRIVATE-SUPPORT-NEVER-SHARE',json_encode($f['p']->snapshot['document']));
+        $this->assertSame(E::FIELDS,E::displayFields(['fields'=>[]]));
+        $this->release($f);
+        foreach(['learner','employer','mentor'] as $role)E::respond($f[$role],$f[$role]->auth_version,$f['p']->fresh(),$this->data($f,$f[$role]));
+        $this->assertSame(3,Signer::where('packet_id',$f['p']->id)->where('state','Signed')->count());
+        $this->assertDatabaseCount('signed_review_records',0);
+        $packet=$f['p']->fresh();
+        $record=E::confirm($f['checker'],$f['checker']->auth_version,$packet,$packet->version,'Fictional independent check of the shorter record');
+        $this->assertTrue(E::recordIntact($packet->fresh(),$record));
+        $this->assertDatabaseCount('signed_review_records',1);
+    }
+
     private function invalid(callable $fn): void
     {
         try {

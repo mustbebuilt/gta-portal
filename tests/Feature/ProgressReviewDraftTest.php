@@ -28,7 +28,7 @@ class ProgressReviewDraftTest extends TestCase
         $u = $this->actor('mentor');
         $a = Apprentice::factory()->create(['mentor_id' => $u->id]);
         $this->actingAs($u)->get('/reviews')->assertOk()->assertSee($a->first_name);
-        $this->get('/apprentices/'.$a->id.'/reviews/new')->assertOk()->assertSee('Progress review draft');
+        $this->get('/apprentices/'.$a->id.'/reviews/new')->assertOk()->assertSee('Apprentice Progress Review');
         $this->post('/apprentices/'.$a->id.'/reviews', ['fields' => ['reviewDate' => '2026-11-01', 'summary' => 'Fictional three-way discussion', 'judgement' => 'Unable to confirm']])->assertRedirect()->assertSessionHasNoErrors();
         $row = ProgressReviewDraft::firstOrFail();
         $this->assertSame('2027-01-10', $row->fields['nextReview']);
@@ -68,7 +68,7 @@ class ProgressReviewDraftTest extends TestCase
         $this->actingAs($this->actor())->post('/apprentices/'.$a->id.'/reviews', ['fields' => ['summary' => 'Draft only']])->assertRedirect()->assertSessionHasNoErrors();
         $row = ProgressReviewDraft::firstOrFail();
         $before = $row->source_snapshot;
-        $this->get('/apprentices/'.$a->id.'/reviews/'.$row->id)->assertOk()->assertSee('No assigned tasks in the snapshot');
+        $this->get('/apprentices/'.$a->id.'/reviews/'.$row->id)->assertOk()->assertSee('Assigned learning completed')->assertSee('Not available');
         $this->assertSame($before, $row->fresh()->source_snapshot);
         $this->assertSame(false, $row->source_snapshot['forecast_complete']);
         $this->assertArrayNotHasKey('compliance_score', $row->source_snapshot);

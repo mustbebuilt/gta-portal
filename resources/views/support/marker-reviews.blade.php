@@ -23,7 +23,7 @@
                 @else Next review {{ $due?->format('j M Y') }}
                 @endif
             </p>
-            <details @if($restore) open @endif><summary>Record review · {{ $marker->code }}</summary>
+            <details @if($restore || ($inlineMarker83??null)===$marker->id) open @endif><summary>Record review · {{ $marker->code }}</summary>
                 <form method="post" action="{{ $form }}">
                     @csrf
                     <input type="hidden" name="_support_form" value="{{ $form }}">
@@ -31,10 +31,11 @@
                     @if($schedule)<input type="hidden" name="kind" value="formal_review">@endif
                     <div class="form-grid">
                         <label>Review date <input type="date" name="{{ $dateKey }}" value="{{ $restore ? old($dateKey) : today()->toDateString() }}" max="{{ today()->toDateString() }}" required></label>
-                        <label>Review frequency <select name="{{ $frequencyKey }}" required>
-                            @foreach($intervals as $value=>$label)<option value="{{ $value }}" @selected(($restore ? old($frequencyKey) : $frequency) === $value)>{{ $label }}</option>@endforeach
-                        </select></label>
+
                     </div>
+                    <details @if($restore && $errors->has($frequencyKey)) open @endif><summary>Change review frequency</summary><label>Review frequency <select name="{{ $frequencyKey }}" required>
+                            @foreach($intervals as $value=>$label)<option value="{{ $value }}" @selected(($restore ? old($frequencyKey) : $frequency) === $value)>{{ $label }}</option>@endforeach
+                        </select></label></details>
                     <label>Review outcome <textarea name="{{ $outcomeKey }}" required maxlength="1000">{{ $restore ? old($outcomeKey) : '' }}</textarea></label>
                     @if(!$schedule && !filled($marker->next_action))
                         <details @if($restore && (old('action') || old('owner') || old('due'))) open @endif><summary>Add a follow-up action</summary>

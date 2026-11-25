@@ -29,7 +29,7 @@ class ReviewPreparationTest extends TestCase
  }
  public function test_saved_draft_view_links_sections_and_is_business_read_only():void {
   [$u,$a,$r]=$this->fixture();$before=DB::table('progress_review_drafts')->where('id',$r->id)->first();
-  $response=$this->actingAs($u)->get('/apprentices/'.$a->id.'/reviews/'.$r->id)->assertOk()->assertSee('Saved draft preparation check')->assertSee('Actual meeting date')->assertSee('Discussion summary')->assertSee('href="#review-1"',false)->assertSee('href="#review-6"',false)->assertSee('save the draft')->assertSee('ask for clarification');
+  $response=$this->actingAs($u)->get('/apprentices/'.$a->id.'/reviews/'.$r->id)->assertOk()->assertSee('saved items to finish')->assertSee('Actual meeting date')->assertSee('Discussion summary')->assertSee('href="#review-1"',false)->assertSee('href="#review-4"',false)->assertSee('Typed changes are checked when saved.');
   $this->assertEquals($before,DB::table('progress_review_drafts')->where('id',$r->id)->first());$this->assertSame([],$r->fresh()->fields);$this->assertFalse($response->viewData('preparation')['ready']);
  }
  public function test_ready_post_reports_all_saved_pending_items_and_ignores_forged_completed_fields():void {
@@ -40,11 +40,11 @@ class ReviewPreparationTest extends TestCase
   $f=$this->fields();$f['previousCheck']='Unable to check';$f['targetsAgreed']=false;$r=ReviewPreparation::inspect($f,['delivery_plan'=>['hash'=>'old']],['hash'=>'new']);$this->assertSame(['previousCheck','targetsAgreed','currentPlan'],array_column($r['pending'],'key'));$this->assertFalse($r['ready']);
  }
  public function test_new_and_frozen_records_do_not_show_an_editable_saved_draft_checklist():void {
-  [$u,$a,$r]=$this->fixture();$this->actingAs($u)->get('/apprentices/'.$a->id.'/reviews/new')->assertOk()->assertSee('Save this draft to see its preparation checklist')->assertDontSee('Saved draft preparation check');
+  [$u,$a,$r]=$this->fixture();$this->actingAs($u)->get('/apprentices/'.$a->id.'/reviews/new')->assertOk()->assertSee('4. Finish')->assertSee('Save draft')->assertDontSee('saved items to finish');
   $r->state='Ready for signatures';$r->save();$this->get('/apprentices/'.$a->id.'/reviews/'.$r->id)->assertOk()->assertDontSee('Saved draft preparation check')->assertSee('Reopen as draft');
  }
  public function test_no_extra_access_for_learner_employer_or_unrelated_tutor_and_mentor_scope_remains():void {
   [$u,$a,$r]=$this->fixture();foreach(['apprentice','employer','tutor','mentor']as$role){$other=User::factory()->create(['role'=>$role]);$this->actingAs($other)->get('/apprentices/'.$a->id.'/reviews/'.$r->id)->assertForbidden();}
-  $mentor=User::factory()->create(['role'=>'mentor']);$a->mentor_id=$mentor->id;$a->save();$this->actingAs($mentor)->get('/apprentices/'.$a->id.'/reviews/'.$r->id)->assertOk()->assertSee('Saved draft preparation check');
+  $mentor=User::factory()->create(['role'=>'mentor']);$a->mentor_id=$mentor->id;$a->save();$this->actingAs($mentor)->get('/apprentices/'.$a->id.'/reviews/'.$r->id)->assertOk()->assertSee('saved items to finish');
  }
 }

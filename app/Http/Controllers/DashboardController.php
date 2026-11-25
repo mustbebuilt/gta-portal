@@ -24,14 +24,12 @@ class DashboardController extends Controller
 {
     public function index(Request $r): View
     {
+        abort_unless(in_array($r->user()->role,['admin','ceo','tutor','apprentice'],true),403);
+        $r->validate(['group'=>['nullable','integer','min:1'],'apprentice'=>['nullable','integer','min:1']]);
         $data=$this->data($r,false);
         $filter=$r->query('priority','all');$page=$r->query('priority_page','1');
         abort_unless(is_string($filter) && in_array($filter,['all','overdue','today','checks'],true),422,'Choose a recognised work filter.');
         abort_unless((is_string($page) || is_int($page)) && ctype_digit((string)$page) && (int)$page>=1 && (int)$page<=1000000,422,'Choose a valid work-list page.');
-        $priorities=\App\Support\DashboardPriorities::for($r->user(),$data['apprentices'],$data['tasks'],$data['actions']);
-        $filtered=$filter==='all'?$priorities['rows']:$priorities['rows']->where('bucket',$filter)->values();
-        $page=min((int)$page,max(1,(int)ceil($filtered->count()/15)));
-        $list=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,15)->values(),$filtered->count(),15,$page,['path'=>$r->url(),'query'=>$r->except('priority_page'),'pageName'=>'priority_page']);
         $reviewSummary=$r->user()->role==='apprentice'?null:\App\Support\ReviewFollowup::for($r->user(),$data['apprentices']);
         $registerSummary=null;
         if($r->user()->role!=='apprentice'){
@@ -43,6 +41,11 @@ class DashboardController extends Controller
                 $registerSummary=\App\Support\RegisterFollowup::for($visibleRegisters);
             }
         }
+        $training=\App\Support\DashboardPriorities::for($r->user(),$data['apprentices'],$data['tasks'],$data['actions']);
+        $priorities=\App\Support\Workday83::combine($r->user(),$training['rows'],$reviewSummary,$registerSummary);
+        $filtered=$filter==='all'?$priorities['rows']:$priorities['rows']->where('bucket',$filter)->values();
+        $page=min((int)$page,max(1,(int)ceil($filtered->count()/15)));
+        $list=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,15)->values(),$filtered->count(),15,$page,['path'=>$r->url(),'query'=>$r->except('priority_page'),'pageName'=>'priority_page']);
         $weeklyReminderCount = in_array($r->user()->role, ['tutor', 'apprentice'], true)
             ? \App\Support\WeeklyRetention::currentReminderCount($r->user(), $data['apprentices']->pluck('id')->all())
             : 0;

@@ -47,7 +47,7 @@ class AttendanceController extends Controller
         $search=trim($input['search']??'');if($search!==''){$sessions=$sessions->filter(fn($s)=>mb_stripos($s->name,$search)!==false || mb_stripos($s->group->name,$search)!==false);}
         $followup=\App\Support\RegisterFollowup::for($sessions);$view=$input['view']??'all';$filtered=($view==='all'?$followup['rows']:$followup['rows']->where('bucket',$view))->values();$page=min(\Illuminate\Pagination\Paginator::resolveCurrentPage(),max(1,(int)ceil($filtered->count()/25)));
         $registerRows=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,25)->values(),$filtered->count(),25,$page,['path'=>$r->url(),'query'=>$r->except('page')]);
-        return view('attendance.index',['groups'=>$groups,'sessions'=>$registerRows->getCollection()->pluck('session'),'weeklyGroupSessions'=>$sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'),'monthlyOutstanding'=>$monthlyOutstanding,'todayRegisterRows'=>$followup['rows']->filter(fn($row)=>$row['session']->session_date->isToday())->values(),'registerRows'=>$registerRows,'registerCounts'=>$followup['counts'],'registerView'=>$view,'registerSearch'=>$search]);
+        return view('attendance.index',['nextScope83'=>\App\Support\Workday83::registerScope($input),'nextRegister83'=>\App\Support\Workday83::nextRegister($r->user(),null,$input),'groups'=>$groups,'sessions'=>$registerRows->getCollection()->pluck('session'),'weeklyGroupSessions'=>$sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'),'monthlyOutstanding'=>$monthlyOutstanding,'todayRegisterRows'=>$followup['rows']->filter(fn($row)=>$row['session']->session_date->isToday())->values(),'registerRows'=>$registerRows,'registerCounts'=>$followup['counts'],'registerView'=>$view,'registerSearch'=>$search]);
     }
 
     public function create(Request $r): RedirectResponse
@@ -107,6 +107,8 @@ class AttendanceController extends Controller
         $training = RegisterTrainingRecord::find($session->id)?->details ?? [];
         return view('attendance.session', [
             'session'=>$session,
+            'nextScope83'=>\App\Support\Workday83::registerScope($r->query()),
+            'nextRegister83'=>\App\Support\Workday83::nextRegister($r->user(),$session->id,\App\Support\Workday83::registerScope($r->query())),
             'structuredTraining'=>$training,
             'trainingOptions'=>RegisterTraining::options($members, $training),
             'members'=>$members,
@@ -120,6 +122,7 @@ class AttendanceController extends Controller
     public function save(Request $r, TrainingSession $session): RedirectResponse
     {
         abort_unless($this->sessionAllowed($r, $session), 403);
+        $nextScope83=\App\Support\Workday83::registerScope($r->input('next_scope',[]));
         $data = $r->validate(['version' => ['required', 'integer'], 'correction_reason' => ['nullable', 'string', 'max:2000'], 'delivered_learning' => ['nullable', 'string', 'max:10000'], 'marks' => ['required', 'array'], 'marks.*.code' => ['nullable', Rule::in(array_keys(Math::CODES))], 'marks.*.arrival' => ['nullable', 'date_format:H:i'], 'marks.*.departure' => ['nullable', 'date_format:H:i'], 'marks.*.otj_confirmed' => ['nullable', 'boolean'], 'marks.*.minutes' => ['nullable', 'integer', 'min:0'], 'marks.*.comment' => ['nullable', 'string', 'max:2000'], 'marks.*.adjustment' => ['nullable', 'string', 'max:2000'], 'monthly_dev' => ['nullable', 'array']]);
         $training = $r->validate([
             'training'=>['sometimes','array:vocational,functional_skills,themes,exceptions,subjects,topic_exceptions,topic_exceptions_present'],
@@ -291,6 +294,10 @@ class AttendanceController extends Controller
             }
         });
 
+        if ($r->input('after_save') === 'next') {
+            $next=\App\Support\Workday83::nextRegister($r->user(),$session->id,$nextScope83);
+            return $next ? to_route('attendance.show',['session'=>$next['session'],...$nextScope83])->with('status','Register saved.') : to_route('attendance.index',$nextScope83)->with('status','Register saved. No further due registers.');
+        }
         return back()->with('status', 'Register saved. Only explicitly confirmed eligible minutes enter the session OTJ subtotal.');
     }
 

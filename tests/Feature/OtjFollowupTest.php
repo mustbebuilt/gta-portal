@@ -50,14 +50,14 @@ class OtjFollowupTest extends TestCase
         $this->actingAs($admin)->post($reviews,['fields'=>['summary'=>'Fictional follow-up review']])->assertSessionHasNoErrors();
         $review = ProgressReviewDraft::sole();
         $this->assertSame($due, $review->source_snapshot['action_plan'][0]['due_date']);
-        $this->get($reviews.'/'.$review->id)->assertOk()->assertSee('Open OTJ catch-up actions')->assertSee($action->title);
+        $this->get($reviews.'/'.$review->id)->assertOk()->assertSee('OTJ catch-up')->assertSee($action->title);
         $this->actingAs($tutor)->post('/actions/'.$action->id.'/progress', [
             'version'=>$action->version, 'intent'=>'complete', 'completion_date'=>today()->toDateString(),
             'feedback'=>'Tutor confirmed both records.',
         ])->assertSessionHasNoErrors();
         $this->assertSame('Completed', $action->fresh()->status);
         $this->get($report)->assertOk()->assertDontSee('View existing action')->assertSee('Agree catch-up');
-        $this->actingAs($admin)->get($reviews.'/'.$review->id)->assertOk()->assertSee('Open OTJ catch-up actions');
+        $this->actingAs($admin)->get($reviews.'/'.$review->id)->assertOk()->assertSee('Completed targets')->assertSee($action->title);
         $this->post($reviews,['fields'=>['summary'=>'Later review']])->assertSessionHasNoErrors();
         $later = ProgressReviewDraft::latest('id')->firstOrFail();
         $this->get($reviews.'/'.$later->id)->assertOk()->assertDontSee('Open OTJ catch-up actions');

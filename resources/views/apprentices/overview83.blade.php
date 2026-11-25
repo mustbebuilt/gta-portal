@@ -1,0 +1,8 @@
+<section class="panel" aria-label="Apprentice overview">
+<h2>At a glance</h2><div class="metrics">
+<div class="metric">Tasks approved<strong>{{$overview83['task_total'] ? round(100*$overview83['task_approved']/$overview83['task_total']).'%' : 'Not available'}}</strong><small>{{$overview83['task_approved']}} of {{$overview83['task_total']}} tasks · task approval only</small></div>
+<div class="metric">Attendance<strong>{{$overview83['attendance_check'] ? 'Needs checking' : (($overview83['attendance']['percent']??null)!==null ? round($overview83['attendance']['percent']).'%' : 'Not available')}}</strong></div>
+<div class="metric">Next review reference<strong>{{$overview83['review_due']??'Check review history'}}</strong></div>
+</div>
+@if($overview83['next'])<p><strong>Next action:</strong> {{$overview83['next']['title']}} <a class="button primary" href="{{$overview83['next']['url']}}">Open next action</a></p>@else<p>No due training actions in this view.</p>@endif
+</section>

@@ -76,7 +76,8 @@ class ProgressReviewController extends Controller
         $signedRecords=$review ? \App\Models\SignedReviewRecord::where('progress_review_draft_id',$review->id)->whereNull('withdrawn_at')->get() : collect();
         $signedConfirmed=$signedRecords->contains(fn($r)=>$r->checked_at && \App\Support\SignedReviews::intact($r));
 
-        return view('reviews.form', ['automatedDefaults'=>\App\Support\ReviewAutomation::defaults($apprentice),'preparation'=>($review?->exists&&$review->state==='Draft')?\App\Support\ReviewPreparation::inspect($review->fields??[],$review->source_snapshot??[],DeliveryPlan::approved($apprentice)):null,'signedConfirmed'=>$signedConfirmed,'hasSignedSource'=>$signedRecords->isNotEmpty(),'apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $review?->source_snapshot ?? \App\Support\ReviewSnapshot::capture($apprentice, []), 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
+        $simple83=!$review?->exists || $review->state==='Draft' || ($review->fields['format83']??null)==='simple83';
+        return view($simple83?'reviews.simple83':'reviews.form', ['automatedDefaults'=>\App\Support\ReviewAutomation::defaults($apprentice),'preparation'=>($review?->exists&&$review->state==='Draft')?\App\Support\ReviewPreparation::inspect([...($review->fields??[]),'format83'=>'simple83'],$review->source_snapshot??[],DeliveryPlan::approved($apprentice)):null,'signedConfirmed'=>$signedConfirmed,'hasSignedSource'=>$signedRecords->isNotEmpty(),'apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $review?->source_snapshot ?? \App\Support\ReviewSnapshot::capture($apprentice, []), 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
     }
 
     public function pdf(Request $r, Apprentice $apprentice, ProgressReviewDraft $review): Response
@@ -84,7 +85,7 @@ class ProgressReviewController extends Controller
         abort_unless($this->allowed($r, $apprentice), 403);
         abort_unless($review->apprentice_id === $apprentice->id, 404);
 
-        return PortalPdf::response('pdf.review', compact('review', 'apprentice'), ($review->state==='Ready for signatures'?'GTA-Review-For-Signing-':'GTA-Review-DRAFT-').$apprentice->reference.'-v'.$review->version);
+        return PortalPdf::response(($review->fields['format83']??null)==='simple83'?'pdf.review-simple83':'pdf.review', compact('review', 'apprentice'), ($review->state==='Ready for signatures'?'GTA-Review-For-Signing-':'GTA-Review-DRAFT-').$apprentice->reference.'-v'.$review->version);
     }
 
     public function save(Request $r, Apprentice $apprentice, ?ProgressReviewDraft $review = null): RedirectResponse
@@ -93,7 +94,9 @@ class ProgressReviewController extends Controller
         if ($review) {
             abort_unless($review->apprentice_id === $apprentice->id, 404);
         }
-        $rules = ['version' => $review ? ['required', 'integer'] : ['prohibited'], 'fields' => ['required', 'array']];
+        $simple83=$r->input('fields.format83')==='simple83';
+        if ($simple83 && $r->input('after_save')==='prepare') $r->merge(['prepare_confirmed'=>$r->input('fields.checked83',false)]);
+        $rules = ['fields.format83'=>['nullable','in:simple83'],'fields.checked83'=>['sometimes','boolean'],'prepare_plan_hash'=>['exclude_unless:after_save,prepare','required','string','size:64'],'after_save'=>['nullable','in:stay,prepare'],'prepare_confirmed'=>['exclude_unless:after_save,prepare','required','accepted'],'use_recorded_facts'=>['sometimes','boolean'],'version' => $review ? ['required', 'integer'] : ['prohibited'], 'fields' => ['required', 'array']];
         foreach (['reviewDate', 'trainingFrom'] as $key) {
             $rules['fields.'.$key] = ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'];
         }
@@ -117,6 +120,7 @@ class ProgressReviewController extends Controller
         if (($fields['safetyAnswer'] ?? null) !== 'yes') {
             unset($fields['safetyFollowup']);
         }
+        if($simple83){$checked=$r->boolean('fields.checked83');foreach(['trainingChecked','targetsAgreed','providerPrepared'] as $key)$fields[$key]=$checked;$fields['checked83']=$checked;}
         $fields['nextReview'] = filled($fields['reviewDate'] ?? null) ? Carbon::parse($fields['reviewDate'])->addDays(70)->toDateString() : null;
         $saved = DB::transaction(function () use ($r, $apprentice, $review, $fields) {
             $fresh = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
@@ -129,20 +133,39 @@ class ProgressReviewController extends Controller
             }
             if ($row->exists && $row->version !== $r->integer('version')) {
                 throw ValidationException::withMessages(['version' => 'This review draft changed. Reopen before saving.']);
-            }$history = $row->history ?? [];
+            }$previousPlanHash83=$row->source_snapshot['delivery_plan']['hash']??null;$history = $row->history ?? [];
             if ($row->exists) {
                 $history[] = ['fields' => $row->fields, 'source_snapshot' => $row->source_snapshot, 'saved_by' => $r->user()->id, 'saved_at' => now()->toIso8601String()];
                 $row->version++;
-            }$row->fields = $fields;
+            }
+            if (($fields['format83']??null)==='simple83') {
+                // Omitted optional legacy notes stay in the same record; explicit edits win.
+                $fields=array_replace($row->fields??[],$fields);
+                if(filled($fields['trainingFrom']??null)&&filled($fields['reviewDate']??null)&&$fields['trainingFrom']>$fields['reviewDate'])throw ValidationException::withMessages(['fields.trainingFrom'=>'The training period cannot start after the actual meeting date.']);
+                $fields['nextReview']=filled($fields['reviewDate']??null)?Carbon::parse($fields['reviewDate'])->addDays(70)->toDateString():null;
+                if (($fields['safetyAnswer']??null)!=='yes') unset($fields['safetyFollowup']);
+            }
+            $row->fields = $fields;
             $row->source_snapshot = \App\Support\ReviewSnapshot::capture($fresh, $fields);
+            if ($r->boolean('use_recorded_facts')) $row->fields = \App\Support\ReviewFacts83::fill($fields,$row->source_snapshot);
+            if ($r->input('after_save')==='prepare') {
+                $currentPlan=DeliveryPlan::approved($fresh);
+                if (!$currentPlan || !hash_equals($currentPlan['hash'],(string)$r->input('prepare_plan_hash')) || ($review && $previousPlanHash83!==$currentPlan['hash'])) {
+                    throw ValidationException::withMessages(['prepare_confirmed'=>'The linked training plan changed or is unavailable. Save the draft, check the refreshed plan and prepare signatures again.']);
+                }
+                \App\Support\ReviewPreparation::requireReady($row->fields??[],$row->source_snapshot??[],$currentPlan);
+                $history[]=['event'=>'ready_for_signatures','fields'=>$row->fields,'source_snapshot'=>$row->source_snapshot,'saved_by'=>$r->user()->id,'saved_at'=>now()->toIso8601String()];
+                $row->state='Ready for signatures';$row->version++;
+            }
             $row->history = $history;
             $row->save();
             DB::table('learning_events')->insert(['user_id' => $r->user()->id, 'apprentice_id' => $apprentice->id, 'kind' => 'review_draft', 'record_id' => $row->id, 'event' => 'draft_saved', 'created_at' => now()]);
 
+            if ($r->input('after_save')==='prepare') DB::table('learning_events')->insert(['user_id'=>$r->user()->id,'apprentice_id'=>$fresh->id,'kind'=>'review_draft','record_id'=>$row->id,'event'=>'ready_for_signatures','created_at'=>now()]);
             return $row;
         });
 
-        return to_route('reviews.edit', [$apprentice, $saved])->with('status', 'Review draft saved privately. It is not completed, signed or shared, and does not reset the review cycle.');
+        return to_route('reviews.edit', [$apprentice, $saved])->with('status', $saved->state==='Ready for signatures'?'Review saved and prepared for participant signatures. No signature or sharing has been recorded.':'Review draft saved. Check the saved notes before preparing signatures.');
     }
 
     public function ready(Request $r, Apprentice $apprentice, ProgressReviewDraft $review): RedirectResponse

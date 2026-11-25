@@ -27,6 +27,16 @@ class ElectronicReviews
 
     public const FIELDS = ['reviewDate' => 'Actual meeting date', 'trainingFrom' => 'Training period from', 'mentor' => 'Learning & Progress Mentor', 'tutor' => 'Tutor', 'employerRep' => 'Employer representative', 'method' => 'Meeting method', 'attendance' => 'Employer contribution', 'absence' => 'Participation details', 'judgement' => 'Progress judgement', 'learning' => 'Learning discussed', 'progressDiscussion' => 'Progress discussion', 'planChange' => 'Training-plan change decision', 'planChangeNotes' => 'Plan-change notes', 'previousCheck' => 'Previous action check', 'previousNotes' => 'Previous action outcomes', 'summary' => 'Review discussion summary', 'nextReview' => 'Next review due reference (not a booked appointment)'];
 
+    public static function displayFields(array $document):array
+    {
+        if (($document['layout83']??null)!=='simple83') return self::FIELDS;
+        $keys=['reviewDate','trainingFrom','mentor','tutor','employerRep','method','attendance','judgement','summary','planChange','nextReview'];
+        foreach(['learning','progressDiscussion','previousNotes'] as $key)if(filled($document['fields'][$key]??null))$keys[]=$key;
+        if (($document['fields']['attendance']??null)==='Absent — opportunity to contribute recorded') $keys[]='absence';
+        if (($document['fields']['planChange']??null)==='Yes') $keys[]='planChangeNotes';
+        return array_intersect_key(self::FIELDS,array_flip($keys));
+    }
+
     public static function staff(User $u, Apprentice $a): bool
     {
         return SignedReviews::allowed($u, $a);
@@ -204,6 +214,7 @@ class ElectronicReviews
                 }$actions[] = collect($row)->only('id', 'title', 'owner', 'status', 'due_date', 'completion_date')->all();
             }
             $document = ['reference' => $a->reference, 'apprentice_name' => $a->first_name.' '.$a->last_name, 'employer' => $a->employerLabel(), 'review_id' => $r->id, 'review_version' => $r->version, 'fields' => collect($r->fields)->only(array_keys(self::FIELDS))->all(), 'actions' => $actions, 'excluded' => 'Restricted support needs/summary, questionnaires, careers, private feedback, evidence files and internal source snapshots are not included.'];
+            if (($r->fields['format83']??null)==='simple83') $document['layout83']='simple83';
             $s = ['document' => $document, 'binding' => $binding, 'expires_on' => $d['expires_on'], 'intent' => self::INTENT, 'declaration_version' => 'gta-participant-review-1'];
             $p = Packet::create(['id' => (string) Str::uuid(), 'apprentice_id' => $a->id, 'progress_review_draft_id' => $r->id, 'active_review_id' => $r->id, 'prepared_by' => $actor->id, 'snapshot' => $s, 'snapshot_hash' => self::digest($s), 'expires_on' => $d['expires_on']]);
             foreach ($binding['participants'] as $role => $person) {

@@ -18,6 +18,7 @@ class ReviewPreparation
 
     public static function inspect(array $fields,array $snapshot,?array $plan):array
     {
+        if (($fields['format83']??null)==='simple83') return self::simple($fields,$snapshot,$plan);
         $items=[];
         foreach(self::FIELDS as $key=>[$label,$section]) {
             $checked=filled($fields[$key]??null)&&($key!=='previousCheck'||$fields[$key]!=='Unable to check');
@@ -40,6 +41,40 @@ class ReviewPreparation
         }
         $pending=array_values(array_filter($items,fn($item)=>!$item['checked']));
         return ['items'=>$items,'pending'=>$pending,'ready'=>$pending===[]];
+    }
+
+    public const SIMPLE_SECTIONS=['review-1'=>'1. Progress','review-2'=>'2. Discussion','review-3'=>'3. Targets','review-4'=>'4. Finish'];
+
+    private static function simple(array $fields,array $snapshot,?array $plan):array
+    {
+        $required=['reviewDate'=>['Actual meeting date','review-1'],'trainingFrom'=>['Training period start','review-1'],
+            'mentor'=>['Learning & Progress Mentor','review-1'],'tutor'=>['Tutor','review-1'],'employerRep'=>['Employer representative','review-1'],
+            'method'=>['Meeting method','review-1'],'attendance'=>['Employer participation','review-2'],
+            'judgement'=>['Progress judgement','review-2'],'summary'=>['Discussion summary','review-2'],
+            'planChange'=>['Training-plan change decision','review-2'],'newNeeds'=>['New support needs decision','review-2']];
+        if (($fields['attendance']??null)==='Absent — opportunity to contribute recorded') $required['absence']=['Opportunity for employer contribution','review-2'];
+        if (($fields['planChange']??null)==='Yes') $required['planChangeNotes']=['Agreed training-plan change','review-2'];
+        $items=[];
+        foreach($required as $key=>[$label,$section])$items[]=['key'=>$key,'label'=>$label,'section'=>$section,'checked'=>filled($fields[$key]??null)];
+        $items[]=['key'=>'checked83','label'=>'Progress, agreed targets, review content and current plan checked','section'=>'review-4','checked'=>($fields['checked83']??false)===true || ($fields['checked83']??null)===1 || ($fields['checked83']??null)==='1'];
+        $items[]=['key'=>'currentPlan','label'=>'Saved draft linked to the current approved delivery plan','section'=>'review-1',
+            'checked'=>$plan!==null && isset($plan['hash']) && ($snapshot['delivery_plan']['hash']??null)===$plan['hash']];
+        if ($snapshot['requires_safety_answer']??false) {
+            try {ApprenticeReviewData::safety(match($fields['safetyAnswer']??null){'yes'=>true,'no'=>false,default=>null},$fields['safetyFollowup']??null);$ok=true;}
+            catch(\InvalidArgumentException){$ok=false;}
+            $items[]=['key'=>'safety','label'=>'Accidents or near-misses answer and follow-up if needed','section'=>'review-2','checked'=>$ok];
+        }
+        $periodOk=false;
+        try {
+            $start=$snapshot['programme_dates']['start']??null;
+            if ($start && filled($fields['reviewDate']??null) && filled($fields['trainingFrom']??null)) {
+                $from=ApprenticeReviewData::date($fields['trainingFrom']);$meeting=ApprenticeReviewData::date($fields['reviewDate']);
+                $periodOk=$from>=ApprenticeReviewData::date($start) && $from<=$meeting && $meeting<=ApprenticeReviewData::date(today()->toDateString());
+            }
+        } catch(\InvalidArgumentException) {}
+        $items[]=['key'=>'period83','label'=>'Review dates within the recorded programme','section'=>'review-1','checked'=>$periodOk];
+        $pending=array_values(array_filter($items,fn($item)=>!$item['checked']));
+        return ['items'=>$items,'pending'=>$pending,'ready'=>$pending===[],'sections'=>self::SIMPLE_SECTIONS];
     }
 
     public static function requireReady(array $fields,array $snapshot,?array $plan):void
