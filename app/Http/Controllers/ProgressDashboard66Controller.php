@@ -23,6 +23,12 @@ class ProgressDashboard66Controller extends Controller
             if ($role === null && in_array($r->user()->role, ['admin', 'ceo', 'tutor', 'apprentice'], true)) {
                 $report['groups'] = Dash::groups(Dash::actor($r));
                 $report['apprentice_list_url'] = ApprenticeList::returnUrl($r);
+                $selected = $report['selected'];
+                if ($selected && $r->boolean('from_record') && (string) $selected['id'] === $report['filters']['apprentice']) {
+                    $listOrigin = [...ApprenticeList::origin($r), ...\App\Support\Workday83::returnParameters($r)];
+                    $report['record_origin'] = ['from_record'=>1, ...$listOrigin];
+                    $report['apprentice_record_url'] = route('apprentices.show', ['apprentice'=>$selected['id'], ...$listOrigin]);
+                }
             }
 
 return response()->view('progress66.index', compact('report'))->header('Cache-Control', 'private, no-store')->header('Referrer-Policy', 'no-referrer');

@@ -22,14 +22,21 @@ final class ApprenticeList
             $value !== null && $value !== '' && ($key !== 'page' || (int) $value > 1), ARRAY_FILTER_USE_BOTH);
     }
 
-    public static function returnUrl(Request $request): ?string
+    public static function origin(Request $request): array
     {
-        if (!$request->filled('list')) {
-            return null;
+        if (! $request->filled('list')) {
+            return [];
         }
 
         $list = $request->validate(['list' => ['array']])['list'];
 
-        return route('apprentices.index', self::filters($list));
+        return ['list' => self::filters($list)];
+    }
+
+    public static function returnUrl(Request $request): ?string
+    {
+        $origin = self::origin($request);
+
+        return $origin ? route('apprentices.index', $origin['list']) : null;
     }
 }

@@ -58,24 +58,7 @@ class ReviewSnapshot
 
         $trainingFrom = $fields['trainingFrom'] ?? null;
         $meeting = $fields['reviewDate'] ?? null;
-        $scope = $plan['curriculum'] ?? [];
-        $taskScope = isset($scope['tasks']) ? array_keys($scope['tasks']) : null;
-        $assignedTasks = $tasks->filter(fn ($task) => ($task->template['kind'] ?? 'source-pending') !== 'source-pending');
-        $completedTasks = $assignedTasks->where('status', 'Approved')->filter(fn ($task) =>
-            $taskScope === null || TaskCatalogue::savedKey($task) === $plan['identity']['catalogue']);
-        $progress = ['Apprenticeship tasks'=>self::progress(
-            $completedTasks->pluck('reference')->all(), $assignedTasks->pluck('reference')->all(), $taskScope
-        )];
-        foreach (PlanCurriculum::SUBJECTS as $key => $label) {
-            $assigned = $topics->where('subject', $key)->filter(fn ($topic) => $topic->planned_hours > 0);
-            $secureIds = $topics->where('subject', $key)->filter(fn ($topic) => (float) $topic->planned_hours === 0.0)
-                ->map(fn ($topic) => PlanCurriculum::keyForTopic($topic))->all();
-            $required = $scope['subjects'][$key]['topics'] ?? null;
-            $required = $required === null ? null : array_diff(array_keys($required), $secureIds);
-            $topicId = fn ($topic) => PlanCurriculum::keyForTopic($topic);
-            $progress[$label] = self::progress($assigned->where('status', 'Completed')->map($topicId)->all(),
-                $assigned->map($topicId)->all(), $required);
-        }
+        $progress = PlanCurriculum::completion($tasks, $topics, $plan);
         $attendance = null;
         $otj = OtjPosition::forApprentice($a);
         $periodOtjMinutes = null;
@@ -113,13 +96,4 @@ class ReviewSnapshot
 
         return ReviewedImports::hash($facts);
     }
-
-    private static function progress(array $done, array $assigned, ?array $whole): array
-    {
-        $progress = ApprenticeReviewData::progress($done, $assigned, $whole);
-        return ['done'=>$progress['assigned_done'], 'total'=>$progress['assigned_total'],
-            'percent'=>$progress['assigned_percent'], 'whole_done'=>$progress['overall_done'],
-            'whole_total'=>$progress['overall_total'], 'whole_percent'=>$progress['overall_percent']];
-    }
-
 }

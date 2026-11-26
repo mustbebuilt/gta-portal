@@ -1,31 +1,42 @@
 @extends('layout')
 @section('title', $apprentice->reference)
 @section('content')
-<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }}</p><h1>{{ $apprentice->first_name }} {{ $apprentice->last_name }}</h1><p>{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }} · {{ $apprentice->groupLabel() ?? 'Group not assigned' }}</p><p class="muted">{{ $apprentice->employerLabel() ?? 'Employer not recorded' }} · Main tutor {{ $apprentice->tutor?->name ?? 'not assigned' }}</p></div><div class="toolbar"><a class="button" href="{{ $listUrl ?? route('apprentices.index') }}">Back to apprentices</a> @can('update', $apprentice)<a class="button" href="{{ route('apprentices.edit', $apprentice) }}">Edit apprentice</a>
-    @unless(\App\Models\ProgrammeOutcome::archived()->where('apprentice_id', $apprentice->id)->exists())
-        <a class="button" href="{{ route('employer68.show', ['apprentice' => $apprentice->id]) }}">{{ $apprentice->employerLabel() ? 'Change employer' : 'Link employer' }}</a>
-        @if($apprentice->employerRecord?->active)
-            <a class="button" href="{{ route('apprentices.edit', ['apprentice' => $apprentice, 'link_employer' => $apprentice->employer_id]) }}#workplace-access">Workplace contact or mentor</a>
-        @endif
-    @endunless
-    <a class="button" href="{{ route('apprentices.close-down', $apprentice) }}">Programme outcome</a>
-@endcan</div></header>
+<header class="page-heading">
+    <div>
+        <p class="eyebrow">{{ $apprentice->reference }}</p>
+        <h1>{{ $apprentice->first_name }} {{ $apprentice->last_name }}</h1>
+        <p>{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }} · {{ $apprentice->groupLabel() ?? 'Group not assigned' }}</p>
+        <p class="muted">{{ $apprentice->employerLabel() ?? 'Employer not recorded' }} · Main tutor {{ $apprentice->tutor?->name ?? 'not assigned' }}</p>
+    </div>
+    @if($workUrl = \App\Support\Workday83::returnUrl(request()))
+        <a class="button" href="{{ $workUrl }}">{{ auth()->user()->role === 'apprentice' ? 'Back to your next steps' : 'Back to Work today' }}</a>
+    @else
+        <a class="button" href="{{ $listUrl }}">Back to apprentices</a>
+    @endif
+</header>
+@if($next = $overview83['next'])
+    <section class="panel" aria-labelledby="record-next">
+        <div class="work-row">
+            <div>
+                <h2 id="record-next">Next action</h2>
+                <p>{{ $next['title'] }} · {{ \App\Support\Workday83::STATUSES[$next['bucket']] }}</p>
+            </div>
+            <a class="button primary" href="{{ $next['url'] }}">Open next action</a>
+        </div>
+    </section>
+@endif
 @include('apprentices.overview83')
 <nav aria-label="Common apprentice actions" class="toolbar">
-<a @class(['button','primary'=>!$overview83['next']]) href="{{ route('progress66.index',['apprentice'=>$apprentice->id]) }}">View progress</a>
-<a class="button" href="{{ route('journey.show', $apprentice) }}">Apprenticeship journey</a>
-<a class="button" href="{{ route('learning.index',$apprentice) }}">{{ auth()->user()->role==='apprentice'?'My training tasks':(auth()->user()->role==='tutor'?'Open training tasks':'Training tasks') }}</a>
-<a class="button" href="{{ route('attendance.apprentice',$apprentice) }}">Attendance and OTJ</a>
-<a class="button" href="{{ route('em.index', $apprentice) }}">Maths and English</a>
-<a class="button" href="{{ route('actions.index', $apprentice) }}">Action plan</a>
-@if(auth()->user()->role!=='apprentice' && ($overview83['next']['kind']??null)!=='review')<a class="button" href="{{ \App\Support\PortalActions::destination(auth()->user(),$apprentice,'reviews') }}">Progress reviews</a>@endif
+    <a @class(['button','primary'=>!$next]) href="{{ $progressUrl }}">View progress</a>
+    <a class="button" href="{{ route('journey.show', $apprentice) }}">Apprenticeship journey</a>
+    <a class="button" href="{{ route('actions.index', $apprentice) }}">Action plan</a>
 </nav>
 <details class="panel action-disclosure64"><summary>More record options</summary>
 @include('apprentices.page-actions64')
 
 </details>
 <details class="panel"><summary>Apprentice details and staff contacts</summary><dl class="details-grid">
-@php($approvedDateDetails = \App\Support\DeliveryPlan::approved($apprentice)['details'] ?? [])
+@php($approvedDateDetails = $approvedPlan['details'] ?? [])
 @if(isset($approvedDateDetails['practical_end_date']))
 <div><dt>Planned practical end</dt><dd>{{ $approvedDateDetails['practical_end_date'] }}</dd></div>
 @endif

@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use App\Models\{Apprentice, LearningTask, SmartAction, User};
+use App\Models\{Apprentice, LearningTask, SmartAction, TrainingTopic, User};
 use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -87,7 +87,7 @@ final class Workday83
             if (!in_array($row['bucket'], ['overdue', 'today', 'checks'], true)) continue;
             $a = $row['apprentice'];
             $rows->push(['key'=>'review:'.$a->id, 'kind'=>'review', 'bucket'=>$row['bucket'],
-                'title'=>'Progress review', 'apprentice'=>$a->first_name.' '.$a->last_name, 'reference'=>$a->reference,
+                'title'=>'Progress review', 'apprentice_id'=>$a->id, 'apprentice'=>$a->first_name.' '.$a->last_name, 'reference'=>$a->reference,
                 'date'=>$row['due'], 'sort'=>$row['due'], 'owner'=>$a->tutor?->name ?? 'Check assignment',
                 'reason'=>$row['bucket'] === 'checks' ? 'Check the review record and next date' : null,
                 'url'=>PortalActions::destination($actor, $a, 'reviews')]);
@@ -130,7 +130,7 @@ final class Workday83
         ])->validate();
     }
 
-    public static function apprentice(User $actor, Apprentice $a): array
+    public static function apprentice(User $actor, Apprentice $a, ?array $plan): array
     {
         abort_unless(LearningAccess::training($actor,$a),403);
         $tasks=LearningTask::with('apprentice')->where('apprentice_id',$a->id)->get();
@@ -141,7 +141,10 @@ final class Workday83
         catch(\Symfony\Component\HttpKernel\Exception\HttpException $e){if($e->getStatusCode()!==422)throw $e;$attendanceCheck=true;}
         $reviews=$actor->role==='apprentice'?null:ReviewFollowup::for($actor,collect([$a]));
         $work=self::combine($actor,$priorities['rows'],$reviews,null);
-        return ['task_total'=>$tasks->count(),'task_approved'=>$tasks->where('status','Approved')->count(),
+        $topics = TrainingTopic::where('apprentice_id', $a->id)
+            ->get(['subject', 'level', 'topic', 'planned_hours', 'status']);
+
+        return ['learning'=>PlanCurriculum::completion($tasks, $topics, $plan),
             'attendance'=>$attendance,'attendance_check'=>$attendanceCheck,
             'review_due'=>SignedReviews::cycle($a)['next_due']??null,'next'=>$work['rows']->first(),
             'outstanding'=>$work['rows']->count()];

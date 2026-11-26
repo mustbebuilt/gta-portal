@@ -1,11 +1,11 @@
 <?php
 namespace Tests\Feature;
 
-use App\Models\{Apprentice,Programme,TrainingSession,TutorGroup,User};
+use App\Models\{Apprentice,IndividualDeliveryPlan,LearningTask,Programme,TrainingSession,TrainingTopic,TutorGroup,User};
+use App\Support\{DeliveryPlan,PlanCurriculum,ReviewSnapshot};
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
-/** Staging checks supplied for the inspected conventions. Not executed in this export. */
 class RecordNavigationSimplificationTest extends TestCase
 {
     use LazilyRefreshDatabase;
@@ -74,6 +74,10 @@ class RecordNavigationSimplificationTest extends TestCase
         $this->get($recordLink)->assertOk()->assertSee($url)->assertSee('Recorded OTJ')
             ->assertSee(route('em.index', $person))->assertSee(route('actions.index', $person));
         $this->get($progressLink)->assertOk()->assertSee($url)->assertSee('Back to apprentices');
+        $fromRecord = route('progress66.index', ['apprentice'=>$person->id,'from_record'=>1,'list'=>$filters]);
+        $this->get($recordLink)->assertOk()->assertSee($fromRecord);
+        $this->get($fromRecord)->assertOk()->assertSee($recordLink)->assertSee('Back to apprentice record')
+            ->assertSee('name="from_record" value="1"', false);
 
         $this->actingAs($tutor)->get(route('apprentices.index', ['group' => $hiddenGroup->id]))->assertOk()
             ->assertSee('Selection unavailable')->assertDontSee($hiddenGroup->name)->assertDontSee($hidden->reference);
@@ -92,6 +96,51 @@ class RecordNavigationSimplificationTest extends TestCase
         $link = route('apprentices.show', ['apprentice' => $person, 'list' => $filters]);
         $response->assertSee($link);
         $this->get($link)->assertOk()->assertSee(route('apprentices.index', $filters));
+    }
+
+    public function test_profile_opens_with_the_next_action_and_uses_the_same_progress_as_the_review(): void
+    {
+        $tutor = $this->actor('tutor');
+        $person = Apprentice::factory()->create(['tutor_id'=>$tutor->id]);
+        $task = LearningTask::factory()->create([
+            'apprentice_id'=>$person->id,'status'=>'Awaiting marking','submitted_at'=>now()->subDays(9),
+            'title'=>'Check fictional submission',
+        ]);
+        $maths = TrainingTopic::factory()->create(['apprentice_id'=>$person->id,'subject'=>'maths','topic'=>'Fictional fractions','status'=>'Completed']);
+        $nextMaths = TrainingTopic::factory()->create(['apprentice_id'=>$person->id,'subject'=>'maths','topic'=>'Fictional ratio']);
+        $secure = TrainingTopic::factory()->create(['apprentice_id'=>$person->id,'subject'=>'maths','topic'=>'Fictional secure topic','planned_hours'=>0]);
+        TrainingTopic::factory()->create(['apprentice_id'=>$person->id,'subject'=>'english','topic'=>'Fictional text types']);
+        $plan = new IndividualDeliveryPlan(['apprentice_id'=>$person->id]);
+        $plan->active = true;
+        $plan->approved = [
+            'identity'=>DeliveryPlan::identity($person),'blocks'=>[],'hash'=>str_repeat('a',64),
+            'approved_at'=>now()->toIso8601String(),'details'=>['target_hours'=>600,'source_ref'=>'Fictional delivery plan'],
+            'curriculum'=>['subjects'=>['maths'=>['topics'=>[
+                PlanCurriculum::keyForTopic($maths)=>['level'=>$maths->level,'title'=>$maths->topic],
+                PlanCurriculum::keyForTopic($nextMaths)=>['level'=>$nextMaths->level,'title'=>$nextMaths->topic],
+                PlanCurriculum::keyForTopic($secure)=>['level'=>$secure->level,'title'=>$secure->topic],
+                'fixture-unassigned-maths'=>['level'=>'Level 2','title'=>'Fictional maps'],
+            ]]]],
+        ];
+        $plan->draft = $plan->approved;
+        $plan->history = [];
+        $plan->save();
+
+        $page = $this->actingAs($tutor)->get(route('apprentices.show',$person))->assertOk()
+            ->assertSeeInOrder(['Next action','Check fictional submission','At a glance','Tasks approved','Maths topics','English topics'])
+            ->assertSee(route('tasks.show',$task))->assertSee('1 of 2 assigned topics complete')->assertSee('33.3% of applicable topics');
+        $progress = $page->viewData('overview83')['learning'];
+        $this->assertSame(50.0, $progress['Maths']['percent']);
+        $this->assertSame(0.0, $progress['English']['percent']);
+        $this->assertSame($progress, ReviewSnapshot::capture($person,[])['review_summary']['progress']);
+        $dashboard = $this->get(route('dashboard.index',['priority'=>'overdue','work_type'=>'marking']))->assertOk();
+        $work = ['work_today'=>['from'=>'1', ...$dashboard->viewData('workScope')]];
+        $fromWork = route('apprentices.show',['apprentice'=>$person, ...$work]);
+        $dashboard->assertSee($fromWork);
+        $this->get($fromWork)->assertOk()->assertSee('Back to Work today')
+            ->assertSee(route('dashboard.index', $dashboard->viewData('workScope')).'#training-priorities');
+        $this->get(route('progress66.index',['apprentice'=>$person->id,'from_record'=>1,...$work]))
+            ->assertOk()->assertSee($fromWork);
     }
 
     public function test_record_overview_shows_the_same_confirmed_otj_hours_as_the_register_ledger(): void

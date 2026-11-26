@@ -11,7 +11,7 @@ class DashboardPriorities
     {
         $people=$people->filter(fn($a)=>LearningAccess::training($user,$a))->keyBy('id');$rows=[];$availability=[];
         $add=function(string $key,string $bucket,string $title,string $owner,$date,string $url,$person,string $kind,?string $reason=null)use(&$rows): void {
-            $rows[]=['key'=>$key,'bucket'=>$bucket,'title'=>$title,'owner'=>$owner,'date'=>$date?->format($kind==='marking'?'d M Y H:i':'d M Y'),'sort'=>$date?->format('Y-m-d H:i:s')??'','url'=>$url,'apprentice'=>$person->first_name.' '.$person->last_name,'reference'=>$person->reference,'kind'=>$kind,'reason'=>$reason];
+            $rows[]=['key'=>$key,'bucket'=>$bucket,'title'=>$title,'owner'=>$owner,'date'=>$date?->format($kind==='marking'?'d M Y H:i':'d M Y'),'sort'=>$date?->format('Y-m-d H:i:s')??'','url'=>$url,'apprentice_id'=>$person->id,'apprentice'=>$person->first_name.' '.$person->last_name,'reference'=>$person->reference,'kind'=>$kind,'reason'=>$reason];
         };
         $releaseStates=BlockRelease::states($tasks->filter(fn($task)=>$people->has($task->apprentice_id) && $task->editable() && ($task->template['kind']??'source-pending')!=='source-pending' && (!$task->due_date || !$task->due_date->gt(today()))));
         foreach($tasks as $task){

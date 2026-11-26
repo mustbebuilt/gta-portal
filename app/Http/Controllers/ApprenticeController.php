@@ -101,7 +101,10 @@ class ApprenticeController extends Controller
     public function show(Request $request, Apprentice $apprentice): View
     {
         Gate::authorize('view', $apprentice);
-        $listUrl = ApprenticeList::returnUrl($request);
+        $listOrigin = ApprenticeList::origin($request);
+        $workContext = \App\Support\Workday83::returnParameters($request);
+        $approvedPlan = \App\Support\DeliveryPlan::approved($apprentice);
+        $archived = \App\Models\ProgrammeOutcome::archived()->where('apprentice_id', $apprentice->id)->exists();
         $monthly = LearningAccess::training($request->user(), $apprentice)
             ? MonthlyScorecard::where('apprentice_id', $apprentice->id)->whereNotNull('development')->orderByDesc('month')->first()
             : null;
@@ -109,11 +112,14 @@ class ApprenticeController extends Controller
         $trainingAccess = LearningAccess::training($request->user(), $apprentice);
         $receipts = $trainingAccess ? \App\Support\RegisterTraining::receipts($apprentice->id) : [];
         $coverage = $trainingAccess
-            ? \App\Support\RegisterTraining::coverage($apprentice, $receipts, \App\Support\DeliveryPlan::approved($apprentice))
+            ? \App\Support\RegisterTraining::coverage($apprentice, $receipts, $approvedPlan)
             : [];
         return view('apprentices.show', [
-            'overview83' => \App\Support\Workday83::apprentice($request->user(),$apprentice),
-            'listUrl' => $listUrl,
+            'overview83' => \App\Support\Workday83::apprentice($request->user(), $apprentice, $approvedPlan),
+            'listUrl' => route('apprentices.index', $listOrigin['list'] ?? []),
+            'progressUrl' => route('progress66.index', ['apprentice'=>$apprentice->id, 'from_record'=>1, ...$listOrigin, ...$workContext]),
+            'approvedPlan' => $approvedPlan,
+            'archived' => $archived,
             'otjHeadline' => $trainingAccess ? OtjPosition::headline(OtjPosition::forApprentice($apprentice)) : null,
             'apprentice' => $apprentice->load(['tutor', 'programmeRecord', 'employerRecord', 'groupRecord', 'mentor', 'careersAdviser', 'mathsTutor', 'englishTutor']),
             'developmentMonth' => $monthly?->month,

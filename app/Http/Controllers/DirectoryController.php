@@ -34,10 +34,12 @@ class DirectoryController extends Controller
         return view('directories.index', ['kind' => $kind, 'title' => DirectoryCatalog::title($kind), 'records' => $records, 'search' => $search, 'state' => $state]);
     }
 
-    public function create(string $kind): View
+    public function create(Request $request, string $kind): View|\Illuminate\Http\Response|RedirectResponse
     {
         Gate::authorize('manage-directories');
-        if($kind==='employers')return view('setup68.employer',['token'=>old('token',(string)Str::uuid()),'matches'=>collect(),'employer'=>null]);
+        if ($kind === 'employers') {
+            return app(EmployerSetup68Controller::class)->show($request);
+        }
 
         return view('directories.form', ['kind' => $kind, 'title' => DirectoryCatalog::title($kind), 'record' => DirectoryCatalog::blank($kind), 'fields' => DirectoryCatalog::fields($kind)]);
     }

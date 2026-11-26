@@ -51,7 +51,7 @@ class WorkflowSimplification83Test extends TestCase
     {
         [$u,$g,$a]=$this->fixture();LearningTask::factory()->create(['apprentice_id'=>$a->id,'status'=>'Approved']);LearningTask::factory()->create(['apprentice_id'=>$a->id,'reference'=>'b1-t4']);
         $page=$this->actingAs($u)->get(route('apprentices.show',$a))->assertOk()->assertSee('At a glance')->assertSee('50%')->assertSee('Not available')->assertSee('Apprentice details and staff contacts');
-        $this->assertSame(2,$page->viewData('overview83')['task_total']);
+        $this->assertSame(2,$page->viewData('overview83')['learning']['Apprenticeship tasks']['total']);
         $this->assertNull($page->viewData('overview83')['attendance']['percent']);
         $this->assertSame(1,substr_count($page->getContent(),'href="'.route('reviews.create',$a).'"'));
     }

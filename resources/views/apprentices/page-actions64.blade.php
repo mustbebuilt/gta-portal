@@ -16,6 +16,14 @@
 @if(auth()->user()->role==='apprentice')<li><a href="{{ route('alerts.index') }}">Change my alert preferences</a></li>@endif
 </ul></section>
 @if(\App\Support\LearningAccess::manager(auth()->user()))<section><h2>Administration</h2><ul>
+<li><a href="{{ route('apprentices.edit', $apprentice) }}">Edit apprentice</a></li>
+@unless($archived)
+    <li><a href="{{ route('employer68.show', ['apprentice'=>$apprentice->id]) }}">{{ $apprentice->employerLabel() ? 'Change employer' : 'Link employer' }}</a></li>
+    @if($apprentice->employerRecord?->active)
+        <li><a href="{{ route('apprentices.edit', ['apprentice'=>$apprentice, 'link_employer'=>$apprentice->employer_id]) }}#workplace-access">Workplace contact or mentor</a></li>
+    @endif
+@endunless
+<li><a href="{{ route('apprentices.close-down', $apprentice) }}">Programme outcome</a></li>
 <li><a href="{{ route('apprentice-onboarding.show',$apprentice) }}">Set up apprentice sign-in</a></li>
 <li><a href="{{ route('employer-grants.index',$apprentice) }}">Verify employer access</a></li>
 <li><a href="{{ route('retention.entry',$apprentice) }}">Recruitment and starting circumstances</a></li>
