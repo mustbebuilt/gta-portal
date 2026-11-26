@@ -52,8 +52,63 @@ class CentrePlanningController extends Controller {
  public function windows(Request $r) {return $this->view('windows',$this->windowData($r));}
  public function saveWindows(Request $r) {$this->allowed($r);$d=$r->validate(['staff_id'=>['required','integer','min:1'],'date'=>['required','date_format:Y-m-d'],'weeks'=>['required','integer','between:1,53'],'source_hash'=>['required','regex:/^[a-f0-9]{64}$/D'],'working'=>['required','boolean'],'start'=>['nullable','date_format:H:i'],'end'=>['nullable','date_format:H:i'],'confirmed'=>['accepted']]);P::windows($r->user(),$this->auth($r),User::findOrFail($d['staff_id']),P::dates($d['date'],(int)$d['weeks']),$d['source_hash'],(bool)$d['working'],$d['start']??null,$d['end']??null);return to_route('centre-planning.windows',collect($d)->only(['staff_id','date','weeks'])->all())->with('status','Exact dated working windows saved. This is planning availability, not a contract, attendance or absence record.');}
  public function plans(Request $r) {$this->allowed($r);$r->validate(['page'=>['nullable','integer','min:1']]);return $this->view('plans',['plans'=>Plan::orderByDesc('updated_at')->orderByDesc('id')->paginate(25)]);}
- public function form(Request $r,?Plan $plan=null) {$this->allowed($r);if($plan){abort_unless($plan->state==='Draft'&&P::intact($plan),409);}$prefill=$r->validate(['staff_id'=>'nullable|integer|min:1','date'=>'nullable|date_format:Y-m-d','kind'=>'nullable|in:'.implode(',',P::TYPES)]);$d=$plan?->source['data']['args']??array_filter($prefill,fn($v)=>$v!==null);return $this->view('form',['p'=>$plan,'d'=>$d,'staff'=>$this->staff(),'rooms'=>Room::orderBy('site')->orderBy('name')->get(),'groups'=>TutorGroup::where('active',true)->orderBy('name')->get(),'token'=>(string)Str::uuid()]);}
- public function save(Request $r,?Plan $plan=null) {$this->allowed($r);$d=$r->validate(['request_token'=>['required','uuid'],'version'=>['required','integer','min:0'],'staff_id'=>['required','integer','min:1'],'date'=>['required','date_format:Y-m-d'],'weeks'=>['required','integer','between:1,53'],'start'=>['required','date_format:H:i'],'end'=>['required','date_format:H:i'],'kind'=>['required','in:'.implode(',',P::TYPES)],'site'=>['required','in:'.implode(',',P::SITES)],'room_id'=>['nullable','integer','min:1'],'group_id'=>['nullable','integer','min:1'],'headcount'=>['nullable','integer','between:1,200'],'excluded_dates_text'=>['nullable','string','max:5000'],'title'=>['required','string','max:160'],'confirmed'=>['accepted']]);$d['excluded_dates']=preg_split('/[\s,]+/',trim($d['excluded_dates_text']??''),-1,PREG_SPLIT_NO_EMPTY);$p=P::save($r->user(),$this->auth($r),$plan,(int)$d['version'],$d['request_token'],$d);return to_route('centre-planning.show',$p)->with('status','Exact recurring dates saved as a draft. Check before publishing; no register or attendance created.');}
+ public function form(Request $r, ?Plan $plan = null)
+ {
+     $this->allowed($r);
+     if ($plan) {
+         abort_unless($plan->state === 'Draft' && P::intact($plan), 409);
+     }
+     $prefill = $r->validate([
+         'staff_id' => ['nullable', 'integer', 'min:1'],
+         'date' => ['nullable', 'date_format:Y-m-d'],
+         'kind' => ['nullable', 'in:'.implode(',', $plan ? P::TYPES : P::NEW_ACTIVITIES)],
+     ]);
+     if (($prefill['kind'] ?? null) === P::FLEXIBLE_DAY) {
+         return to_route('timetable-duties.flexible', collect($prefill)->only(['staff_id', 'date'])->filter()->all());
+     }
+     $d = $plan?->source['data']['args'] ?? array_filter($prefill, fn ($value) => $value !== null);
+
+     return $this->view('form', [
+         'p' => $plan, 'd' => $d, 'staff' => $this->staff(),
+         'rooms' => Room::orderBy('site')->orderBy('name')->get(),
+         'groups' => TutorGroup::where('active', true)->orderBy('name')->get(),
+         'token' => (string) Str::uuid(),
+     ]);
+ }
+ public function save(Request $r, ?Plan $plan = null)
+ {
+     $this->allowed($r);
+     if (! $plan && $r->input('kind') === P::FLEXIBLE_DAY) {
+         $selection = $r->validate([
+             'staff_id' => ['required', 'integer', 'min:1'],
+             'date' => ['required', 'date_format:Y-m-d'],
+         ]);
+
+         return to_route('timetable-duties.flexible', $selection);
+     }
+
+     $data = $r->validate([
+         'request_token' => ['required', 'uuid'],
+         'version' => ['required', 'integer', 'min:0'],
+         'staff_id' => ['required', 'integer', 'min:1'],
+         'date' => ['required', 'date_format:Y-m-d'],
+         'weeks' => ['required', 'integer', 'between:1,53'],
+         'start' => ['required', 'date_format:H:i'],
+         'end' => ['required', 'date_format:H:i'],
+         'kind' => ['required', 'in:'.implode(',', P::TYPES)],
+         'site' => ['required', 'in:'.implode(',', P::SITES)],
+         'room_id' => ['nullable', 'integer', 'min:1'],
+         'group_id' => ['nullable', 'integer', 'min:1'],
+         'headcount' => ['nullable', 'integer', 'between:1,200'],
+         'excluded_dates_text' => ['nullable', 'string', 'max:5000'],
+         'title' => ['required', 'string', 'max:160'],
+         'confirmed' => ['accepted'],
+     ]);
+     $data['excluded_dates'] = preg_split('/[\s,]+/', trim($data['excluded_dates_text'] ?? ''), -1, PREG_SPLIT_NO_EMPTY);
+     $draft = P::save($r->user(), $this->auth($r), $plan, (int) $data['version'], $data['request_token'], $data);
+
+     return to_route('centre-planning.show', $draft)->with('status', 'Draft saved. Check the dates and clashes before publishing.');
+ }
  public function show(Request $r, Plan $plan)
  {
      $this->allowed($r);

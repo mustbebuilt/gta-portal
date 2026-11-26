@@ -13,6 +13,18 @@ class GroupedNavigationTest extends TestCase
  private function requestFor(string $name,array $parameters=[]):Request {
   $r=Request::create('/fictional-navigation-test');$route=new Route(['GET'],'/fictional-navigation-test',fn()=>null);$route->name($name)->bind($r);foreach($parameters as $key=>$value){$route->setParameter($key,$value);}$r->setRouteResolver(fn()=>$route);return $r;
  }
+ public function test_timetable_and_register_tools_are_grouped_apart_from_training_tools(): void
+ {
+     $user = User::factory()->create(['role' => 'admin']);
+     $menu = PortalNavigation::build($user, $this->requestFor('timetable-duties.flexible'));
+     $groups = collect($menu['groups'])->keyBy('id');
+     $this->assertTrue($groups['timetable-registers']['open']);
+     $this->assertFalse($groups['training']['open']);
+     $this->assertContains('Timetable', array_column($groups['timetable-registers']['links'], 'label'));
+     $this->assertContains('Register changes', array_column($groups['timetable-registers']['links'], 'label'));
+     $this->assertContains('Maths and English', array_column($groups['training']['links'], 'label'));
+ }
+
  private function links(string $html):array {
   $dom=new \DOMDocument();$dom->loadHTML($html,LIBXML_NONET|LIBXML_NOERROR|LIBXML_NOWARNING);$links=[];foreach($dom->getElementsByTagName('a')as$link){$links[]=$link->getAttribute('href');}sort($links);return $links;
  }
@@ -67,7 +79,7 @@ class GroupedNavigationTest extends TestCase
  public function test_rendered_markup_has_native_disclosures_current_section_and_no_empty_headers():void {
   $u=User::factory()->create(['role'=>'admin']);$this->actingAs($u);$this->app->instance('request',$this->requestFor('marking.index'));$html=view('navigation.menu')->render();
   $dom=new \DOMDocument();$dom->loadHTML($html,LIBXML_NONET|LIBXML_NOERROR|LIBXML_NOWARNING);$xpath=new \DOMXPath($dom);
-  $this->assertSame(7,$xpath->query('//details[@data-navigation-group]')->length);$this->assertSame(0,$xpath->query('//details[@open]')->length);
+  $this->assertSame(8,$xpath->query('//details[@data-navigation-group]')->length);$this->assertSame(0,$xpath->query('//details[@open]')->length);
   $this->assertSame(1,$xpath->query('//a[@aria-current="page"]')->length);$this->assertSame(0,$xpath->query('//details[not(summary)]')->length);$this->assertSame(0,$xpath->query('//details[not(.//a)]')->length);$this->assertSame(1,$xpath->query('//nav/a[contains(@class,"navigation-help")]')->length);
  }
  public function test_inactive_account_does_not_build_navigation_and_guest_has_no_sidebar_links():void {

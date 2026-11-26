@@ -41,19 +41,21 @@ class PortalNavigation
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)) {
             $primary[]=$item('Apprentice register','attendance.index',[],['attendance.*']);
-            $links[]=$item('Register changes','session-operations.index',[],['session-operations.*','session-changes.*','register-actions.*']);
         }
         if(MarkingReminders::allowed($u) || SubjectMarkingQueue::allowedSubjects($u)) {
             $primary[]=$item('Work to mark','marking.index',[],['marking.*'],
                 $request->routeIs('marking.*') || ($request->routeIs('topics.show') && $request->boolean('from_marking')));
         }
         if(in_array($u->role,['admin','ceo','tutor'],true)){$links[]=$item('Gateway preparation','gateway.index',[],['gateway.*']);}
-        if(CentrePlanning::staff($u)){$links[]=$item(CentrePlanning::allowed($u)?'Centre timetable':'Timetable','centre-planning.index',[],['centre-planning.*','work-moves.*','optimiser.*','timetable-duties.*','timetable-governance.*']);}
-        if(\App\Support\ApprenticeRecordChecks::allowed($u)){$links[]=$item('Record checks','record-checks.index',[],['record-checks.*']);}
         if($u->role==='apprentice'){$links[]=$item('My calendar','calendar.index',[],['calendar.*']);}
+        $group('training','Training tools',$links);
+        $links=[];
+        if(CentrePlanning::staff($u)){$links[]=$item('Timetable','centre-planning.index',[],['centre-planning.*','annual.*','occurrence-register.*','work-moves.*','optimiser.*','timetable-duties.*','timetable-governance.*']);}
+        if(in_array($u->role,['admin','ceo','tutor'],true)) {$links[]=$item('Register changes','session-operations.index',[],['session-operations.*','session-changes.*','register-actions.*']);}
+        if(\App\Support\ApprenticeRecordChecks::allowed($u)){$links[]=$item('Record checks','record-checks.index',[],['record-checks.*']);}
         if(CentreManagerAccess::workspace($u)){$links[]=$item('Centre oversight','centre-oversight.index',[],['centre-oversight.*']);}
         if(CentreFollowups::inbox($u)){$links[]=$item('Centre follow-ups','centre-followups.index',[],['centre-followups.*']);}
-        $group('training','Training tools',$links);
+        $group('timetable-registers','Timetable and registers',$links);
         $links=[];
         if(ReviewReminders::allowed($u)) {$primary[]=$item('Reviews','reviews.index',[],['reviews.*','review-appointments.*','electronic-reviews.*','review-authority.*','review-workspace.*']);}
         if(in_array($u->role,['admin','ceo','apprentice'],true)||StaffDuties::has($u,'careers_adviser')) {$links[]=$item('Careers','careers.worklist',[],['careers.*']);}

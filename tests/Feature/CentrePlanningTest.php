@@ -54,6 +54,23 @@ class CentrePlanningTest extends TestCase {
  public function test_unlink_retains_register_and_creates_no_marks():void {$f=$this->fixture();$p=$this->publish($f);$s=$this->register($f);$e=Entry::where('plan_id',$p->id)->orderBy('work_date')->first();P::link($f['planner'],1,$e,3,$s,1);$e->refresh();P::unlink($f['planner'],1,$e,3,ReviewedImports::hash($e->link_proof));$this->assertNull($e->refresh()->training_session_id);$this->assertDatabaseHas('training_sessions',['id'=>$s->id,'state'=>'Planned']);$this->assertDatabaseCount('attendance_marks',0);}
  public function test_mandatory_audit_failure_rolls_back_publication():void {$f=$this->fixture();$p=$this->draft($f);P::check($f['planner'],1,$p,1,true);AuditFault::install('planning_fault','timetable_planning_events','Fictional failure','plan_published');try{P::publish($f['planner'],1,$p->refresh(),2);$this->fail('Expected DB failure');}catch(\Illuminate\Database\QueryException){$this->assertSame('Draft',$p->refresh()->state);$this->assertNull($p->publication);}}
  public function test_no_training_attendance_completion_otj_or_messages_created():void {Mail::fake();Http::preventStrayRequests();$f=$this->fixture();$p=$this->publish($f);P::withdraw($f['planner'],1,$p,3,'Fictional change');foreach(['training_sessions','attendance_marks','signed_review_records','historical_otj_records']as$t){$this->assertDatabaseCount($t,0);}Mail::assertNothingSent();Http::assertNothingSent();}
+ public function test_flexible_day_selection_opens_the_existing_workflow_with_staff_and_date(): void
+ {
+     $fixture = $this->fixture();
+     $selection = ['staff_id' => $fixture['tutor']->id, 'date' => $fixture['date']];
+     $flexible = route('timetable-duties.flexible', $selection);
+     $save = route('centre-planning.save');
+     $new = route('centre-planning.form');
+     $this->actingAs($fixture['planner'])->get($new)->assertOk()
+         ->assertSee('Flexible day')->assertSee('Timetable title')->assertDontSee('Safe title');
+     $this->get(route('centre-planning.form', $selection + ['kind' => 'Flexible day']))->assertRedirect($flexible);
+     $this->post($save, $selection + ['kind' => 'Flexible day'])->assertRedirect($flexible);
+     $this->get($flexible)->assertOk()->assertSee($fixture['date']);
+     $this->assertDatabaseCount('timetable_plans', 0);
+     $this->assertDatabaseCount('timetable_flexible_days', 0);
+     $this->actingAs($fixture['tutor'])->post($save, $selection + ['kind' => 'Flexible day'])->assertForbidden();
+ }
+
  public function test_http_all_forms_board_and_private_headers_render():void {$f=$this->fixture();$p=$this->publish($f);$this->actingAs($f['planner']);foreach(['/centre-planning?week='.$f['date'],'/centre-planning/setup','/centre-planning/working-time?staff_id='.$f['tutor']->id.'&date='.$f['date'],'/centre-planning/plans','/centre-planning/plans/new','/centre-planning/plans/'.$p->id]as$url){$this->get($url)->assertOk()->assertHeader('Referrer-Policy','no-referrer');}$this->get('/centre-planning?week='.$f['date'])->assertSee('Available')->assertSee('Accessible item list')->assertSee($f['tutor']->name);}
  public function test_status_export_omits_private_rosters_and_activity_titles():void {$f=$this->fixture();$this->publish($f);$this->actingAs($f['planner'])->get('/centre-planning.json?week='.$f['date'])->assertOk()->assertJsonPath('actual_attendance_or_otj',false)->assertDontSee($f['a']->reference)->assertDontSee('Fictional engine training');}
  public function test_missing_confirmation_writes_no_check():void {$f=$this->fixture();$p=$this->draft($f);$this->actingAs($f['planner'])->post('/centre-planning/plans/'.$p->id.'/decision',['version'=>1,'action'=>'check'])->assertSessionHasErrors('confirmed');$this->assertNull($p->refresh()->check_proof);}

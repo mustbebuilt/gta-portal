@@ -3,7 +3,7 @@
  const tools=document.querySelector('[data-workload-tools]');if(!tools)return;
  const toggle=tools.querySelector('[data-enable-workload-drag]');const status=tools.querySelector('[data-workload-drag-status]');
  const sources=[...document.querySelectorAll('[data-new-workload],[data-move-workload]')];const targets=[...document.querySelectorAll('[data-workload-target]')];
- const types=new Set(['Teaching','Review','Admin','Travel','Non-working','Marking','Preparation','Learner support','Staff development']);
+ const types=new Set(Array.from(tools.querySelectorAll('[data-new-workload]'), button=>button.dataset.newWorkload));
  function route(payload,target){
   if(payload.version!==1)return;let url;
   if(payload.action==='new'&&types.has(payload.kind)){url=new URL(tools.dataset.addUrl,window.location.href);url.searchParams.set('kind',payload.kind);}

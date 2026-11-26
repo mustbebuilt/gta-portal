@@ -48,7 +48,7 @@ class TimetableUsability54Test extends TestCase
     {
         $f = $this->f();
         $before = Plan::count();
-        $this->actingAs($f['u'])->get('/centre-planning/plans/new?staff_id='.$f['staff']->id.'&date=2026-11-17&kind=Preparation')->assertOk()->assertSee('value="2026-11-17"', false)->assertSee('Step1 of3')->assertSee('Preparation');
+        $this->actingAs($f['u'])->get('/centre-planning/plans/new?staff_id='.$f['staff']->id.'&date=2026-11-17&kind=Preparation')->assertOk()->assertSee('value="2026-11-17"', false)->assertSee('Check and publish the draft')->assertSee('Preparation');
         $this->assertSame($before, Plan::count());
     }
 
