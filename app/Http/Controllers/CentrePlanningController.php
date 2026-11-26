@@ -101,7 +101,7 @@ class CentrePlanningController extends Controller {
          'group_id' => ['nullable', 'integer', 'min:1'],
          'headcount' => ['nullable', 'integer', 'between:1,200'],
          'excluded_dates_text' => ['nullable', 'string', 'max:5000'],
-         'title' => ['required', 'string', 'max:160'],
+         'title' => ['exclude_if:kind,Teaching', 'required', 'string', 'max:160'],
          'confirmed' => ['accepted'],
      ]);
      $data['excluded_dates'] = preg_split('/[\s,]+/', trim($data['excluded_dates_text'] ?? ''), -1, PREG_SPLIT_NO_EMPTY);

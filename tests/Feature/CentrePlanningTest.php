@@ -54,6 +54,24 @@ class CentrePlanningTest extends TestCase {
  public function test_unlink_retains_register_and_creates_no_marks():void {$f=$this->fixture();$p=$this->publish($f);$s=$this->register($f);$e=Entry::where('plan_id',$p->id)->orderBy('work_date')->first();P::link($f['planner'],1,$e,3,$s,1);$e->refresh();P::unlink($f['planner'],1,$e,3,ReviewedImports::hash($e->link_proof));$this->assertNull($e->refresh()->training_session_id);$this->assertDatabaseHas('training_sessions',['id'=>$s->id,'state'=>'Planned']);$this->assertDatabaseCount('attendance_marks',0);}
  public function test_mandatory_audit_failure_rolls_back_publication():void {$f=$this->fixture();$p=$this->draft($f);P::check($f['planner'],1,$p,1,true);AuditFault::install('planning_fault','timetable_planning_events','Fictional failure','plan_published');try{P::publish($f['planner'],1,$p->refresh(),2);$this->fail('Expected DB failure');}catch(\Illuminate\Database\QueryException){$this->assertSame('Draft',$p->refresh()->state);$this->assertNull($p->publication);}}
  public function test_no_training_attendance_completion_otj_or_messages_created():void {Mail::fake();Http::preventStrayRequests();$f=$this->fixture();$p=$this->publish($f);P::withdraw($f['planner'],1,$p,3,'Fictional change');foreach(['training_sessions','attendance_marks','signed_review_records','historical_otj_records']as$t){$this->assertDatabaseCount($t,0);}Mail::assertNothingSent();Http::assertNothingSent();}
+ public function test_teaching_form_uses_the_selected_group_name_as_the_timetable_title(): void
+ {
+     $f = $this->fixture();
+     $f['group']->update(['name' => 'Autocare Year 1']);
+     $form = [...$f['d'], 'request_token' => (string) Str::uuid(), 'version' => 0, 'confirmed' => 1];
+     unset($form['title']);
+     $this->actingAs($f['planner'])->post(route('centre-planning.save'), $form)
+         ->assertRedirect()->assertSessionHasNoErrors();
+     $draft = Plan::sole();
+     $this->assertSame('Autocare Year 1', $draft->source['data']['args']['title']);
+     $this->assertSame(['Autocare Year 1'], Entry::where('plan_id', $draft->id)->distinct()->pluck('title')->all());
+     $this->assertTrue(P::fresh($draft));
+     $this->post(route('centre-planning.update', $draft), [
+         ...$form, 'version' => $draft->version, 'title' => 'Typed title ignored for teaching',
+     ])->assertSessionHasNoErrors();
+     $this->assertSame('Autocare Year 1', $draft->fresh()->source['data']['args']['title']);
+ }
+
  public function test_flexible_day_selection_opens_the_existing_workflow_with_staff_and_date(): void
  {
      $fixture = $this->fixture();

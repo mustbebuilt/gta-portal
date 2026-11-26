@@ -30,10 +30,10 @@
     <fieldset data-booked-activity>
         <legend>Activity details</legend>
         <div class="form-grid">
-            <div class="full">
+            <fieldset class="full" data-activity-title>
                 <label>Timetable title <input name="title" maxlength="160" value="{{ old('title', $d['title'] ?? '') }}" aria-describedby="timetable-title-hint"></label>
-                <p id="timetable-title-hint" class="muted">This appears on the timetable. Use a short title such as Brake systems workshop. Keep learner names and private details out of the title.</p>
-            </div>
+                <p id="timetable-title-hint" class="muted">This appears on the timetable. Use a short title such as Workshop preparation. Keep learner names and private details out of the title.</p>
+            </fieldset>
             @foreach(['start' => '09:00', 'end' => '16:00'] as $field => $default)
                 <label>{{ ucfirst($field) }} time <input type="time" name="{{ $field }}" value="{{ old($field, $d[$field] ?? $default) }}" required></label>
             @endforeach
@@ -65,7 +65,7 @@
                     </label>
                     <label>Expected headcount <input type="number" min="1" max="200" name="headcount" value="{{ old('headcount', $d['headcount'] ?? '') }}"></label>
                 </div>
-                <p class="muted">Choose the group’s primary tutor and a suitable room.</p>
+                <p class="muted">The group name, for example Autocare Year 1, will appear on the timetable. Choose the group’s primary tutor and a suitable room.</p>
             </fieldset>
         </div>
         <details @if((int) old('weeks', $d['weeks'] ?? 1) !== 1 || old('excluded_dates_text', $d['excluded_dates'] ?? []) || $errors->hasAny(['weeks', 'excluded_dates_text'])) open @endif>
@@ -78,5 +78,5 @@
     </fieldset>
     <button class="primary" data-timetable-submit>{{ $p ? 'Save draft for checking' : 'Continue' }}</button>
 </form>
-<script src="{{ asset('assets/timetable-activity.js') }}" defer></script>
+<script src="{{ asset('assets/timetable-activity.js') }}?v=103" defer></script>
 @endsection

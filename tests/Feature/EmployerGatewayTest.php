@@ -583,7 +583,7 @@ class EmployerGatewayTest extends TestCase
     {
         [$admin,$t,$a] = $this->fixture();
         $other = Apprentice::factory()->create(['first_name' => 'UNRELATED-GATEWAY-SECRET']);
-        $this->actingAs($t)->get('/gateway-preparation')->assertOk()->assertSee($a->reference)->assertDontSee('UNRELATED-GATEWAY-SECRET')->assertSee('not Gateway approvals');
+        $this->actingAs($t)->get('/gateway-preparation')->assertOk()->assertSee($a->reference)->assertDontSee('UNRELATED-GATEWAY-SECRET')->assertSee('Formal approval is recorded separately');
         $this->get('/gateway-preparation?view=not-assessed')->assertOk()->assertSee($a->reference);
         $this->get('/gateway-preparation?q=NO-SUCH')->assertOk()->assertSee('0 apprentices match');
         $this->get('/gateway-preparation?view=bad')->assertSessionHasErrors('view');
