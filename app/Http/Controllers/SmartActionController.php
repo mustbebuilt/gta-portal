@@ -63,7 +63,7 @@ class SmartActionController extends Controller
             $proposalTask = LearningTask::where('apprentice_id',$apprentice->id)->where('status','Referred')->findOrFail($r->integer('source_task_id'));
             $existing = SmartAction::where('apprentice_id', $apprentice->id)->where('learning_task_id', $proposalTask->id)->first();
             if ($existing) {
-                return redirect()->to(route('actions.index', $apprentice).'#action-'.$existing->id);
+                return redirect()->to(route('actions.index', [$apprentice, ...\App\Support\Workday83::returnParameters($r)]).'#action-'.$existing->id);
             }
             if (! $proposalTask->due_date) {
                 throw ValidationException::withMessages(['learning_task_id' => 'Set a deadline on the task before adding its target.']);
@@ -157,11 +157,12 @@ class SmartActionController extends Controller
         });
 
         $review = $this->reviewContext($r, $apprentice);
+        $workContext = \App\Support\Workday83::returnParameters($r);
         if ($review) {
-            return redirect()->to(route('reviews.edit', [$apprentice, $review]).'#review-3')->with('status', 'Target saved.');
+            return redirect()->to(route('reviews.edit', [$apprentice, $review, ...$workContext]).'#review-3')->with('status', 'Target saved.');
         }
 
-        return to_route('actions.index', $apprentice)->with('status', 'SMART action saved. Linked tasks retain their own deadlines and tutor decisions.');
+        return to_route('actions.index', [$apprentice, ...$workContext])->with('status', 'SMART action saved. Linked tasks retain their own deadlines and tutor decisions.');
     }
 
     public function progress(Request $r, SmartAction $action): RedirectResponse

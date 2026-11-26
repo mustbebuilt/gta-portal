@@ -13,7 +13,7 @@
 @endif
 <details class="panel"><summary>Session plan and breaks</summary><p class="recorded-answer">{{ $session->planned_learning }}</p><p>Excluded periods: @forelse($session->breaks as $break){{ $break['start'] }}–{{ $break['end'] }} @empty None recorded @endforelse</p><p class="muted">The roster is a saved snapshot. Changing current group membership does not rewrite past attendance.</p></details>
 @if($session->state !== 'Cancelled' && $registerReadiness['ended'])
-<form method="post" data-compact-register data-start="{{ substr($session->start_time,0,5) }}" data-end="{{ substr($session->end_time,0,5) }}" action="{{ route('attendance.save',$session) }}">@csrf @foreach($nextScope83 as $key=>$value)<input type="hidden" name="next_scope[{{$key}}]" value="{{$value}}">@endforeach<input type="hidden" name="version" value="{{ $session->version }}">
+<form method="post" data-compact-register data-start="{{ substr($session->start_time,0,5) }}" data-end="{{ substr($session->end_time,0,5) }}" action="{{ route('attendance.save', ['session'=>$session, ...\App\Support\Workday83::returnParameters(request())]) }}">@csrf @foreach($nextScope83 as $key=>$value)<input type="hidden" name="next_scope[{{$key}}]" value="{{$value}}">@endforeach<input type="hidden" name="version" value="{{ $session->version }}">
 @if($session->marks->isNotEmpty())
     <details class="panel" @if($errors->has('correction_reason') || old('correction_reason')) open @endif>
         <summary>Correct saved entries</summary>

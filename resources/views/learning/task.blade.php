@@ -3,11 +3,13 @@
 @section('content')
 @php($markingFocus = $queue !== null && $tutor && $task->status === 'Awaiting marking')
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }} · Block {{ $task->block }}</p><h1>{{ $task->title }}</h1><p>{{ $task->theme }}</p><span class="status {{ $task->status==='Approved'?'achieved':($task->markingOverdue()?'red':'neutral') }}">{{ $task->markingOverdue()?'Overdue marking':$task->status }}</span></div><div class="toolbar">
-    @if($queue !== null)
-        <a class="button" href="{{ route('marking.index', $queue) }}">Back to Work to mark</a>
-    @else
-        <a class="button" href="{{ route('learning.index', $apprentice) }}">Back to training tasks</a>
-    @endif
+    @unless(\App\Support\Workday83::returnParameters(request()))
+        @if($queue !== null)
+            <a class="button" href="{{ route('marking.index', $queue) }}">Back to Work to mark</a>
+        @else
+            <a class="button" href="{{ route('learning.index', $apprentice) }}">Back to training tasks</a>
+        @endif
+    @endunless
     <details class="action-disclosure64">
         <summary>Print or download</summary>
         <ul>

@@ -378,12 +378,16 @@ class LearningTaskController extends Controller
             $this->audit($r, $t->apprentice_id, $t->id, 'decision_recorded');
         });
 
+        $workContext = \App\Support\Workday83::returnParameters($r);
         if (($decisionData['after_save'] ?? null) === 'target') {
-            return to_route('actions.create', ['apprentice' => $task->apprentice_id, 'source_task_id' => $task->id])
+            return to_route('actions.create', ['apprentice' => $task->apprentice_id, 'source_task_id' => $task->id, ...$workContext])
                 ->with('status', 'Work returned. Agree the follow-up target below.');
         }
 
         if ($r->input('after_save') === 'next') {
+            if ($workUrl = \App\Support\Workday83::returnUrl($r)) {
+                return redirect()->to($workUrl)->with('status', 'Decision saved.');
+            }
             $filters = MarkingQueueViews::parameters($r->input('queue', []));
             $next = MarkingQueueViews::next($r->user(), $filters, $task->id);
             if (! $next) {

@@ -131,6 +131,28 @@ class Pack81TaskWorkflowTest extends TestCase
         $this->assertSame(1, $task->fresh()->version);
     }
 
+    public function test_marking_from_work_today_saves_and_returns_to_the_same_filter(): void
+    {
+        [$person,$learner,$tutor] = $this->fixture();
+        $task = $this->task($person, 'b1-t4');
+        $this->actingAs($learner)->post(route('tasks.save', $task), [
+            'version'=>1,'intent'=>'submit','own_work'=>1,'answers'=>$this->apprenticeName($task),
+        ])->assertSessionHasNoErrors();
+        $this->travel(8)->days();
+        $page = $this->actingAs($tutor)->get(route('dashboard.index', [
+            'apprentice'=>$person->id, 'work_type'=>'marking', 'priority'=>'overdue',
+        ]))->assertOk();
+        $scope = $page->viewData('workScope');
+        $item = $page->viewData('priorityList')->items()[0];
+        $url = \App\Support\Workday83::openItem($item, $scope);
+        $this->get($url)->assertOk()->assertSee('Save and return to Work today')->assertDontSee('Back to Work to mark');
+        $this->post(route('tasks.decide', ['task'=>$task, 'work_today'=>['from'=>'1', ...$scope]]), [
+            'version'=>2,'decision'=>'Approved','decision_date'=>today()->toDateString(),'confirmed'=>1,'after_save'=>'next',
+        ])->assertRedirect(route('dashboard.index', $scope).'#training-priorities')->assertSessionHasNoErrors();
+        $this->get(route('dashboard.index', $scope))->assertOk()->assertViewHas('workType','marking')
+            ->assertDontSee('data-priority-row="task-'.$task->id.'"', false);
+    }
+
     public function test_save_and_open_next_rechecks_the_filtered_queue_and_skips_other_tutors(): void
     {
         [$person,$learner,$tutor] = $this->fixture();

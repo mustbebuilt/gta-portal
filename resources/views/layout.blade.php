@@ -10,4 +10,9 @@
 @if(auth()->user()?->role==='ceo'&&\App\Support\ExecutiveAccess::enabled(request()))<div class="errors" role="status">CEO emergency override is on for this session. Uses are recorded. <a href="{{ route('executive.index') }}" @if(request()->routeIs('executive.*'))aria-current="page"@endif>Review or end override</a></div>@endif
 @if(app()->environment('staging'))<p class="test-notice">Staging portal — verify workflows with authorised test records before live release.</p>@endif
 
+@if(request()->routeIs('tasks.show', 'attendance.show', 'actions.index', 'actions.create', 'actions.edit', 'reviews.create', 'reviews.edit', 'electronic-reviews.prepare-form'))
+    @if($workTodayUrl = \App\Support\Workday83::returnUrl(request()))
+        <p><a class="button" href="{{ $workTodayUrl }}">{{ auth()->user()->role === 'apprentice' ? 'Back to your next steps' : 'Back to Work today' }}</a></p>
+    @endif
+@endif
 @yield('content')<footer><p><a href="{{ route('privacy.public') }}">Privacy information and contact</a></p></footer></main></div></div></body></html>

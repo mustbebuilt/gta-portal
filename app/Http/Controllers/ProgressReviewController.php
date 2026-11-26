@@ -194,16 +194,16 @@ class ProgressReviewController extends Controller
         });
 
         if (($data['after_save'] ?? null) === 'targets') {
-            return to_route('actions.index', ['apprentice' => $apprentice, 'review' => $saved->id])
+            return to_route('actions.index', ['apprentice' => $apprentice, 'review' => $saved->id, ...\App\Support\Workday83::returnParameters($r)])
                 ->with('status', 'Review draft saved.');
         }
 
         if ($continueToSignoff) {
-            return to_route('electronic-reviews.prepare-form', $saved)
+            return to_route('electronic-reviews.prepare-form', [$saved, ...\App\Support\Workday83::returnParameters($r)])
                 ->with('status', 'Review saved. Choose how to prepare it for signing.');
         }
 
-        return to_route('reviews.edit', [$apprentice, $saved])->with('status', $saved->state==='Ready for signatures'?'Review saved and prepared for participant signatures. No signature or sharing has been recorded.':'Review draft saved. Check the saved notes before preparing signatures.');
+        return to_route('reviews.edit', [$apprentice, $saved, ...\App\Support\Workday83::returnParameters($r)])->with('status', $saved->state==='Ready for signatures'?'Review saved and prepared for participant signatures. No signature or sharing has been recorded.':'Review draft saved. Check the saved notes before preparing signatures.');
     }
 
     public function ready(Request $r, Apprentice $apprentice, ProgressReviewDraft $review): RedirectResponse

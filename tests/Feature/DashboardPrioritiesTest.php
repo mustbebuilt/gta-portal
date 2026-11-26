@@ -1,7 +1,7 @@
 <?php
 namespace Tests\Feature;
 
-use App\Models\{Apprentice,LearningTask,SmartAction,TutorGroup,User};
+use App\Models\{Apprentice,LearningTask,SmartAction,TrainingSession,TutorGroup,User};
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -43,6 +43,72 @@ class DashboardPrioritiesTest extends TestCase
     {
         $a=Apprentice::factory()->create();$this->task($a);$this->actingAs($this->actor());$r=$this->get(route('dashboard.index',['priority'=>'overdue']))->assertOk()->assertSee('No matching work in this view. Other areas may still need attention.')->assertDontSee('All work complete');$this->assertSame(2,$r->viewData('priorities')['counts']['checks']);$this->assertSame(0,$r->viewData('priorityList')->total());$this->get(route('dashboard.index',['priority'=>'invented']))->assertStatus(422);$this->get(route('dashboard.index',['priority_page'=>'2bad']))->assertStatus(422);$this->get(route('dashboard.index',['priority_page'=>0]))->assertStatus(422);
     }
+    public function test_work_status_uses_real_deadline_order_and_todays_ended_register_is_due_today(): void
+    {
+        $tutor = $this->actor('tutor');
+        $group = TutorGroup::factory()->create(['tutor_id'=>$tutor->id]);
+        $person = Apprentice::factory()->create(['tutor_id'=>$tutor->id, 'tutor_group_id'=>$group->id]);
+        $old = $this->task($person, ['due_date'=>'2026-10-26']);
+        $new = $this->task($person, ['due_date'=>'2026-11-02']);
+        $register = TrainingSession::factory()->create([
+            'tutor_group_id'=>$group->id, 'members'=>[$person->id], 'session_date'=>today()->toDateString(),
+            'start_time'=>'09:00', 'end_time'=>'11:00', 'breaks'=>[],
+        ]);
+        $page = $this->actingAs($tutor)->get(route('dashboard.index', [
+            'group'=>$group->id, 'work_type'=>'task', 'priority'=>'overdue',
+        ]))->assertOk();
+        $this->assertSame(['all'=>2,'overdue'=>2,'today'=>0,'checks'=>0], $page->viewData('workCounts'));
+        $this->assertSame(['task-'.$old->id,'task-'.$new->id], $page->viewData('priorityList')->getCollection()->pluck('key')->all());
+        $this->assertSame('today', $page->viewData('priorities')['rows']->firstWhere('key', 'register:'.$register->id)['bucket']);
+        $scope = ['group'=>$group->id, 'priority_page'=>1, 'priority'=>'overdue', 'work_type'=>'task'];
+        $url = \App\Support\Workday83::openItem($page->viewData('priorityList')->items()[0], $page->viewData('workScope'));
+        $page->assertSee($url);
+        $this->get($url)->assertOk()->assertSee('Back to Work today')
+            ->assertSee(route('dashboard.index', $scope).'#training-priorities');
+        $this->get(route('dashboard.index', ['work_type'=>['task']]))->assertStatus(422);
+    }
+
+    public function test_register_next_keeps_the_group_and_returns_to_work_today_when_finished(): void
+    {
+        $tutor = $this->actor('tutor');
+        $group = TutorGroup::factory()->create(['tutor_id'=>$tutor->id]);
+        $person = Apprentice::factory()->create(['tutor_id'=>$tutor->id,'tutor_group_id'=>$group->id]);
+        $first = TrainingSession::factory()->create(['tutor_group_id'=>$group->id,'members'=>[$person->id],'session_date'=>'2026-11-10']);
+        $second = TrainingSession::factory()->create(['tutor_group_id'=>$group->id,'members'=>[$person->id],'session_date'=>'2026-11-11']);
+        $context = ['work_today'=>['from'=>'1','group'=>$group->id,'work_type'=>'register']];
+        $this->actingAs($tutor)->get(route('attendance.show', ['session'=>$first,'group'=>$group->id,...$context]))
+            ->assertOk()->assertSee('Back to Work today');
+        $payload = [
+            'version'=>$first->version, 'after_save'=>'next', 'next_scope'=>['group'=>$group->id],
+            'marks'=>[$person->id=>['code'=>'O','arrival'=>'09:00','departure'=>'16:00']],
+        ];
+        $this->post(route('attendance.save', ['session'=>$first,...$context]), $payload)->assertSessionHasNoErrors()
+            ->assertRedirect(route('attendance.show', ['session'=>$second,'group'=>$group->id,...$context]));
+        $this->post(route('attendance.save', ['session'=>$second,...$context]), [...$payload,'version'=>$second->version])
+            ->assertSessionHasNoErrors()->assertRedirect(route('dashboard.index', ['group'=>$group->id,'work_type'=>'register']).'#training-priorities');
+    }
+
+    public function test_action_anchor_and_review_draft_keep_the_work_today_scope(): void
+    {
+        $tutor = $this->actor('tutor');
+        $person = Apprentice::factory()->create(['tutor_id'=>$tutor->id]);
+        $action = SmartAction::factory()->create(['apprentice_id'=>$person->id, 'due_date'=>today()]);
+        $page = $this->actingAs($tutor)->get(route('dashboard.index',['apprentice'=>$person->id,'work_type'=>'action']))
+            ->assertOk();
+        $url = \App\Support\Workday83::openItem($page->viewData('priorityList')->items()[0], $page->viewData('workScope'));
+        $this->assertStringEndsWith('#action-'.$action->id, $url);
+        $this->get($url)->assertOk()->assertSee('Back to Work today');
+        $context = ['work_today'=>['from'=>'1','apprentice'=>$person->id,'work_type'=>'review']];
+        $this->get(route('reviews.create', [$person, ...$context]))->assertOk()->assertSee('Back to Work today');
+        $response = $this->post(route('reviews.store', [$person, ...$context]), [
+            'fields'=>['format83'=>'simple83','summary'=>'Fictional draft from work list'],
+        ])->assertSessionHasNoErrors();
+        $draft = \App\Models\ProgressReviewDraft::sole();
+        $response->assertRedirect(route('reviews.edit', [$person, $draft, ...$context]));
+        $this->get(route('reviews.edit', [$person, $draft, ...$context]))->assertOk()
+            ->assertSee(route('dashboard.index', ['apprentice'=>$person->id,'work_type'=>'review']).'#training-priorities');
+    }
+
     public function test_unsupported_roles_cannot_open_dashboard_and_existing_report_does_not_include_live_list(): void
     {
         $this->actingAs($this->actor('employer'))->get(route('dashboard.index'))->assertForbidden();$this->actingAs($this->actor())->get(route('dashboard.report'))->assertOk()->assertDontSee('data-priority-row',false);

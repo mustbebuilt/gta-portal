@@ -16,6 +16,7 @@ use App\Support\AttendanceLedger;
 use App\Support\JourneyEvents;
 use App\Support\LearningAccess as Access;
 use App\Support\PortalPdf;
+use App\Support\Workday83;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -27,8 +28,12 @@ class DashboardController extends Controller
         abort_unless(in_array($r->user()->role,['admin','ceo','tutor','apprentice'],true),403);
         $r->validate(['group'=>['nullable','integer','min:1'],'apprentice'=>['nullable','integer','min:1']]);
         $data=$this->data($r,false);
-        $filter=$r->query('priority','all');$page=$r->query('priority_page','1');
-        abort_unless(is_string($filter) && in_array($filter,['all','overdue','today','checks'],true),422,'Choose a recognised work filter.');
+        $filter = $r->query('priority', 'all');
+        $type = $r->query('work_type', 'all');
+        $page = $r->query('priority_page', '1');
+        $types = Workday83::types($r->user());
+        abort_unless(is_string($filter) && isset(Workday83::STATUSES[$filter]), 422, 'Choose a recognised work status.');
+        abort_unless(is_string($type) && isset($types[$type]), 422, 'Choose a recognised work type.');
         abort_unless((is_string($page) || is_int($page)) && ctype_digit((string)$page) && (int)$page>=1 && (int)$page<=1000000,422,'Choose a valid work-list page.');
         $reviewSummary=$r->user()->role==='apprentice'?null:\App\Support\ReviewFollowup::for($r->user(),$data['apprentices']);
         $registerSummary=null;
@@ -42,14 +47,20 @@ class DashboardController extends Controller
             }
         }
         $training=\App\Support\DashboardPriorities::for($r->user(),$data['apprentices'],$data['tasks'],$data['actions']);
-        $priorities=\App\Support\Workday83::combine($r->user(),$training['rows'],$reviewSummary,$registerSummary);
-        $filtered=$filter==='all'?$priorities['rows']:$priorities['rows']->where('bucket',$filter)->values();
-        $page=min((int)$page,max(1,(int)ceil($filtered->count()/15)));
-        $list=new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page,15)->values(),$filtered->count(),15,$page,['path'=>$r->url(),'query'=>$r->except('priority_page'),'pageName'=>'priority_page']);
+        $priorities = Workday83::combine($r->user(), $training['rows'], $reviewSummary, $registerSummary);
+        $typed = $type === 'all' ? $priorities['rows'] : $priorities['rows']->where('kind', $type);
+        $workCounts = Workday83::counts($typed);
+        $filtered = $filter === 'all' ? $typed : $typed->where('bucket', $filter);
+        $filtered = $filtered->values();
+        $page = min((int) $page, max(1, (int) ceil($filtered->count() / 15)));
+        $workScope = Workday83::scope([...$r->query(), 'priority_page'=>$page], $r->user());
+        $list = new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page, 15), $filtered->count(), 15, $page,
+            ['path'=>$r->url(), 'query'=>\Illuminate\Support\Arr::except($workScope, ['priority_page']), 'pageName'=>'priority_page']);
         $weeklyReminderCount = in_array($r->user()->role, ['tutor', 'apprentice'], true)
             ? \App\Support\WeeklyRetention::currentReminderCount($r->user(), $data['apprentices']->pluck('id')->all())
             : 0;
-        return view('dashboard.index',$data+['priorities'=>$priorities,'priorityFilter'=>$filter,'priorityList'=>$list,'reviewSummary'=>$reviewSummary,'registerSummary'=>$registerSummary,'weeklyReminderCount'=>$weeklyReminderCount]);
+        return view('dashboard.index',$data+['priorities'=>$priorities,'priorityFilter'=>$filter,'priorityList'=>$list,'reviewSummary'=>$reviewSummary,'registerSummary'=>$registerSummary,'weeklyReminderCount'=>$weeklyReminderCount,
+            'workType'=>$type, 'workTypes'=>$types, 'workCounts'=>$workCounts, 'workScope'=>$workScope]);
     }
 
     public function report(Request $r): View

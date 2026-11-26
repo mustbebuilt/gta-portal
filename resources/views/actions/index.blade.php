@@ -2,20 +2,24 @@
 @section('title','Action Plan')
 @section('content')
 @include('quick-actions.context')
+@php($workContext = \App\Support\Workday83::returnParameters(request()))
 
-<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Action Plan</h1></div><div class="toolbar"><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a>@if($manage)<a class="button primary" href="{{ route('actions.create', ['apprentice'=>$apprentice, 'review'=>$review?->id]) }}">Add SMART action</a>@endif</div></header>
+<header class="page-heading"><div><p class="eyebrow">{{ $apprentice->first_name }} {{ $apprentice->last_name }}</p><h1>Action Plan</h1></div><div class="toolbar"><a class="button" href="{{ route('apprentices.show',$apprentice) }}">Apprentice profile</a>@if($manage)<a class="button primary" href="{{ route('actions.create', ['apprentice'=>$apprentice, 'review'=>$review?->id, ...$workContext]) }}">Add SMART action</a>@endif</div></header>
 @include('learning.errors')
 @if($review)
-    <p><a class="button" href="{{ route('reviews.edit', [$apprentice, $review]) }}#review-3">Return to review targets</a></p>
+    <p><a class="button" href="{{ route('reviews.edit', [$apprentice, $review, ...$workContext]) }}#review-3">Return to review targets</a></p>
 @endif
 <nav class="toolbar" aria-label="Action status">
     @foreach(['To do', 'With tutor', 'Completed'] as $state)
-        <a class="button" href="{{ route('actions.index', [$apprentice, 'state' => $state, 'review' => $review?->id, ...request()->only(['owner', 'due'])]) }}" @if(request('state') === $state) aria-current="page" @endif>{{ $state }} · {{ $counts[$state] ?? 0 }}</a>
+        <a class="button" href="{{ route('actions.index', [$apprentice, 'state' => $state, 'review' => $review?->id, ...request()->only(['owner', 'due']), ...$workContext]) }}" @if(request('state') === $state) aria-current="page" @endif>{{ $state }} · {{ $counts[$state] ?? 0 }}</a>
     @endforeach
 </nav>
 <details class="panel" @if(request()->filled('owner') || request()->filled('state') || request()->filled('due')) open @endif>
     <summary>Filter actions</summary>
-<form method="get" class="panel search">@if($review)<input type="hidden" name="review" value="{{ $review->id }}">@endif<div><label for="action-owner">Responsible person</label><select id="action-owner" name="owner"><option value="">All owners</option>@foreach(\App\Models\SmartAction::OWNERS as $owner)<option @selected(request('owner')===$owner)>{{ $owner }}</option>@endforeach</select></div><div><label for="action-state">Status</label><select id="action-state" name="state"><option value="">All statuses</option>@foreach(['To do','With tutor','Completed'] as $status)<option @selected(request('state')===$status)>{{ $status }}</option>@endforeach</select></div><div><label for="action-due">Due position</label><select id="action-due" name="due">@foreach([''=>'All dates','overdue'=>'Overdue','today'=>'Due today','checks'=>'Date checks'] as $key=>$label)<option value="{{ $key }}" @selected(request('due','')===$key)>{{ $label }}</option>@endforeach</select></div><button>Apply filters</button><a class="button" href="{{ route('actions.index', ['apprentice'=>$apprentice, 'review'=>$review?->id]) }}">Clear</a></form>
+<form method="get" class="panel search">@if($review)<input type="hidden" name="review" value="{{ $review->id }}">@endif
+    @foreach($workContext['work_today'] ?? [] as $key => $value)
+        <input type="hidden" name="work_today[{{ $key }}]" value="{{ $value }}">
+    @endforeach<div><label for="action-owner">Responsible person</label><select id="action-owner" name="owner"><option value="">All owners</option>@foreach(\App\Models\SmartAction::OWNERS as $owner)<option @selected(request('owner')===$owner)>{{ $owner }}</option>@endforeach</select></div><div><label for="action-state">Status</label><select id="action-state" name="state"><option value="">All statuses</option>@foreach(['To do','With tutor','Completed'] as $status)<option @selected(request('state')===$status)>{{ $status }}</option>@endforeach</select></div><div><label for="action-due">Due position</label><select id="action-due" name="due">@foreach([''=>'All dates','overdue'=>'Overdue','today'=>'Due today','checks'=>'Date checks'] as $key=>$label)<option value="{{ $key }}" @selected(request('due','')===$key)>{{ $label }}</option>@endforeach</select></div><button>Apply filters</button><a class="button" href="{{ route('actions.index', ['apprentice'=>$apprentice, 'review'=>$review?->id, ...$workContext]) }}">Clear</a></form>
 </details>
 @if($open->isNotEmpty())
     <section aria-labelledby="open-targets">

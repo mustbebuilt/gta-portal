@@ -13,7 +13,8 @@ $targets=$editable ? $actions->map(fn($a)=>['title'=>$a->title,'owner'=>$a->owne
 @include('learning.errors')
 @if($preparation && !$preparation['ready'])<details class="panel" open><summary>{{count($preparation['pending'])}} saved items to finish</summary><ul>@foreach(collect($preparation['pending'])->groupBy('section') as $section=>$items)<li><a href="#{{$section}}">{{$labels[$section]}}</a>: {{implode('; ',$items->pluck('label')->all())}}</li>@endforeach</ul><p>Typed changes are checked when saved.</p></details>@endif
 <nav class="section-nav" aria-label="Review sections">@foreach($labels as $id=>$label)<a href="#{{$id}}">{{$label}}</a>@endforeach</nav>
-<form method="post" action="{{$review->exists?route('reviews.update',[$apprentice,$review]):route('reviews.store',$apprentice)}}">@csrf
+@php($workContext = \App\Support\Workday83::returnParameters(request()))
+<form method="post" action="{{ $review->exists ? route('reviews.update', [$apprentice, $review, ...$workContext]) : route('reviews.store', [$apprentice, ...$workContext]) }}">@csrf
 @if($editable)<button type="submit" name="after_save" value="stay" hidden>Save draft</button>@endif
 @if($review->exists)<input type="hidden" name="version" value="{{$review->version}}">@endif
 <input type="hidden" name="fields[format83]" value="simple83">

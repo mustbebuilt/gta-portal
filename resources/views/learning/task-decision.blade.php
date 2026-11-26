@@ -1,6 +1,6 @@
 <section class="panel" id="task-decision">
     <h2>{{ $isKnowledge ? 'Record paper test result' : 'GTA tutor decision' }}</h2>
-    <form method="post" data-marking-decision action="{{ route('tasks.decide', $task) }}">
+    <form method="post" data-marking-decision action="{{ route('tasks.decide', ['task'=>$task, ...\App\Support\Workday83::returnParameters(request())]) }}">
         @csrf
         <input type="hidden" name="version" value="{{ $task->version }}">
         @foreach($queue ?? [] as $key => $value)
@@ -34,7 +34,7 @@
         <label class="check"><input name="confirmed" value="1" type="checkbox" @checked(old('confirmed')) required> I confirm this decision as {{ auth()->user()->name }}.</label>
         <div class="form-actions">
             <button name="after_save" value="stay" @class(['primary'=>$isKnowledge])>Save and stay</button>
-            @unless($isKnowledge)<button name="after_save" value="next" class="primary">Save and open next</button>@endunless
+            @unless($isKnowledge)<button name="after_save" value="next" class="primary">{{ \App\Support\Workday83::returnParameters(request()) ? 'Save and return to Work today' : 'Save and open next' }}</button>@endunless
             @if($task->due_date)<button name="after_save" value="target" data-referral-target>Save and set follow-up target</button>@endif
         </div>
     </form>

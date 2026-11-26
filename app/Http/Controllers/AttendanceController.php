@@ -448,7 +448,13 @@ class AttendanceController extends Controller
         if ($r->input('after_save') === 'next') {
             $next = Workday83::nextRegister($r->user(), $session->id, $nextScope83);
 
-            return $next ? to_route('attendance.show', ['session' => $next['session'], ...$nextScope83])->with('status', 'Register saved.') : to_route('attendance.index', $nextScope83)->with('status', 'Register saved. No further due registers.');
+            if ($next) {
+                return to_route('attendance.show', ['session'=>$next['session'], ...$nextScope83, ...Workday83::returnParameters($r)])
+                    ->with('status', 'Register saved.');
+            }
+
+            return redirect()->to(Workday83::returnUrl($r) ?? route('attendance.index', $nextScope83))
+                ->with('status', 'Register saved. No further due registers.');
         }
 
         return back()->with('status', 'Register saved. Only explicitly confirmed eligible minutes enter the session OTJ subtotal.');
