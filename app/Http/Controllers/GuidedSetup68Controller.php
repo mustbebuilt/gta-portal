@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Apprentice;
 use App\Models\ApprenticeSetupDraft68 as Draft;
 use App\Models\Employer;
-use App\Models\ProgrammeSetupTemplate68 as Template;
 use App\Models\TutorGroup;
 use App\Models\User;
 use App\Support\DirectoryCatalog;
@@ -93,7 +92,14 @@ class GuidedSetup68Controller extends Controller
             $employers = $employers->merge(Employer::whereKey((int) $selectedEmployer)->get())->unique('id');
         }
 
-        return response()->view('setup68.wizard', [...compact('draft', 'step', 'p', 'review', 'ksbs', 'employers', 'employerSearch', 'employerMatchCount', 'ksbTypes', 'ksbFilters'), 'templates' => Template::where('active', true)->get()->filter(fn ($x) => Setup::template(['programme' => ['template_id' => $x->id]]) !== null), 'markers' => json_decode(file_get_contents(resource_path('data/inclusion-markers.json')), true), 'tutors' => User::where('role', 'tutor')->where('active', true)->get(), 'groups' => TutorGroup::where('active', true)->get(), 'staffOptions' => collect(['mentor_id' => 'mentor', 'careers_adviser_id' => 'careers_adviser', 'maths_tutor_id' => 'maths_tutor', 'english_tutor_id' => 'english_tutor'])->mapWithKeys(fn ($role, $field) => [$field => DirectoryCatalog::options(StaffDuties::query(User::query(), $role))])->all(), ...$extra])->header('Cache-Control', 'no-store, private')->header('Referrer-Policy', 'no-referrer');
+        $programmeChoices = $step === 3 && $draft->state === 'Draft' ? Setup::programmeChoices() : [];
+        $finalCheck = $step === 7 ? [
+            'group' => TutorGroup::find($p['programme']['tutor_group_id'] ?? 0),
+            'tutor' => User::find($p['programme']['tutor_id'] ?? 0),
+            'skills' => Setup::functionalSkills($draft),
+        ] : [];
+
+        return response()->view('setup68.wizard', [...$programmeChoices, 'finalCheck' => $finalCheck, ...compact('draft', 'step', 'p', 'review', 'ksbs', 'employers', 'employerSearch', 'employerMatchCount', 'ksbTypes', 'ksbFilters'), 'markers' => json_decode(file_get_contents(resource_path('data/inclusion-markers.json')), true), 'tutors' => User::where('role', 'tutor')->where('active', true)->get(), 'groups' => TutorGroup::where('active', true)->get(), 'staffOptions' => collect(['mentor_id' => 'mentor', 'careers_adviser_id' => 'careers_adviser', 'maths_tutor_id' => 'maths_tutor', 'english_tutor_id' => 'english_tutor'])->mapWithKeys(fn ($role, $field) => [$field => DirectoryCatalog::options(StaffDuties::query(User::query(), $role))])->all(), ...$extra])->header('Cache-Control', 'no-store, private')->header('Referrer-Policy', 'no-referrer');
     }
 
     public function save(Request $r, Draft $draft, int $step)
@@ -156,15 +162,26 @@ return $this->page($r, $draft, 4, ['batch' => $batch, 'batch_calculation' => Rpl
         if ($step === 1 && Setup::matches($d->payload['details'] ?? [], $d->apprentice_id)) {
             $next = 1;
         }
-        if ($step === 5 && $next > 5 && collect(Setup::review($d)['issues'])->contains(fn ($issue) => $issue['step'] === 5)) {
-            $next = 5;
+        if (in_array($step, [3, 5], true) && $next > $step
+            && collect(Setup::review($d)['issues'])->contains(fn ($issue) => $issue['step'] === $step)) {
+            $next = $step;
         }
         $returnFilters = $step === 4 && $next === 4 ? $this->ksbFilters($r) : [];
         if ($step === 5 && $next === 5 && is_string($r->query('employer_search')) && filled($r->query('employer_search'))) {
             $returnFilters['employer_search'] = mb_substr($r->query('employer_search'), 0, 100);
         }
 
-        return to_route('setup68.show', [$d, $next, ...$returnFilters])->with('status', $step === 4 && ($r->input('action') === 'batch_apply') ? 'Reductions saved to this draft. Check the revised OTJ hours before continuing.' : ($next === 1 && $step === 1 ? 'Draft saved. Review any possible existing record before continuing.' : 'Draft saved.'));
+        $status = $next === 1 && $step === 1 ? 'Draft saved. Review any possible existing record before continuing.' : 'Draft saved.';
+        if ($step === 4) {
+            $status = 'Prior learning saved to this draft.';
+            $calculation = Setup::review($d)['calculation'];
+            if ($calculation) {
+                $label = $calculation['unresolved'] ? 'Provisional OTJ' : 'Planned OTJ';
+                $status .= ' '.$label.' '.number_format($calculation['revised_hours'], 2).' hours.';
+            }
+        }
+
+        return to_route('setup68.show', [$d, $next, ...$returnFilters])->with('status', $status);
     }
 
     private function rplEntry(Request $request, Draft $draft): array
@@ -200,11 +217,16 @@ return $this->page($r, $draft, 4, ['batch' => $batch, 'batch_calculation' => Rpl
             Rpl68::fail('Record at least one approved reduction, or choose No relevant prior learning.');
         }
 
+        $assessment = $values['data']['assessment_ref'] ?? null;
+        $saved = $draft->payload['rpl'] ?? [];
+        $sameConfirmation = !empty($saved['remaining_confirmed'])
+            && ($saved['confirmation_hash'] ?? null) === Rpl68::hash([$template->source_hash, 'applies', $assessment, $adjustments]);
+
         return [
             'mode' => 'applies',
-            'assessment_ref' => $values['data']['assessment_ref'] ?? null,
+            'assessment_ref' => $assessment,
             'adjustments' => $adjustments,
-            'remaining_confirmed' => $continuing,
+            'remaining_confirmed' => $continuing || $sameConfirmation,
         ];
     }
 
@@ -220,10 +242,20 @@ return $this->page($r, $draft, 4, ['batch' => $batch, 'batch_calculation' => Rpl
     public function confirm(Request $r, Draft $draft)
     {
         $this->allow($r);
-        $v = $r->validate(['version' => ['required', 'integer'], 'confirmed' => ['accepted'], 'practical_end' => ['nullable', 'date_format:Y-m-d'], 'programme_end' => ['nullable', 'date_format:Y-m-d', 'after:practical_end']]);
-        $d = Setup::confirm($r->user(), (int) $r->session()->get('auth_version'), $draft, (int) $v['version'], $v['practical_end'] ?? null, $v['programme_end'] ?? null);
+        $datesOnly = $r->input('intent') === 'save_dates';
+        $v = $r->validate([
+            'intent' => ['nullable', 'in:save_dates,confirm'],
+            'version' => ['required', 'integer'],
+            'confirmed' => ['accepted'],
+            'practical_end' => [$datesOnly ? 'required' : 'nullable', 'date_format:Y-m-d'],
+            'programme_end' => [$datesOnly ? 'required' : 'nullable', 'date_format:Y-m-d', 'after:practical_end'],
+        ]);
+        $d = Setup::confirm($r->user(), (int) $r->session()->get('auth_version'), $draft, (int) $v['version'],
+            $v['practical_end'] ?? null, $v['programme_end'] ?? null, $datesOnly);
 
-        return to_route('setup68.show', [$d, 7])->with('status', 'Setup complete. The approved training plan and OTJ target are now linked to the apprentice.');
+        return to_route('setup68.show', [$d, 7])->with('status', $datesOnly
+            ? 'Planned dates saved to this draft.'
+            : 'Setup complete. The approved training plan and OTJ target are now linked to the apprentice.');
     }
 
     public function reopen(Request $r, Draft $draft)

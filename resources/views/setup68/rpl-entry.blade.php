@@ -1,9 +1,29 @@
 @if(!$review['template'])
     <p class="warn">Choose an approved programme before recording prior learning.</p>
-    <a class="button" href="{{ route('setup68.show', [$draft, 3]) }}">Choose programme</a>
+    <a class="button" href="{{ route('setup68.show', [$draft, 3]) }}#template">Choose programme</a>
 @else
     <input type="hidden" name="action" value="record_rpl">
-    @php($mode = old('data.mode', $p['rpl']['mode'] ?? ''))
+    @php
+        $savedMode = $p['rpl']['mode'] ?? '';
+        $mode = old('data.mode', $savedMode);
+        $calculation = $review['calculation'];
+        $currentTemplate = $review['template']->source_hash === ($p['programme']['template_hash'] ?? null);
+    @endphp
+    @if(!$currentTemplate)
+        <p class="warn">The programme template changed. <a href="{{ route('setup68.show', [$draft, 3]) }}#template">Save the updated programme</a> before checking prior learning.</p>
+    @elseif($calculation)
+        <div id="rpl-hours">
+            @if($savedMode)
+                <h2>Hours saved to this draft</h2>
+                <p><strong>{{ number_format($calculation['revised_hours'], 2) }} hours</strong>
+                    · {{ $calculation['unresolved'] ? 'Provisional OTJ' : 'Planned OTJ' }}</p>
+                <p>{{ number_format($calculation['original_hours'], 2) }} starting hours · {{ number_format($calculation['removed_hours'], 2) }} hours removed · {{ $calculation['adjusted_count'] }} adjusted KSBs</p>
+                <p data-rpl-unsaved role="status" hidden>Changes on this screen have not been saved. Select Save and check hours to update the figures.</p>
+            @else
+                <p><strong>{{ number_format($calculation['original_hours'], 2) }} starting OTJ hours</strong> · Choose the prior learning outcome below.</p>
+            @endif
+        </div>
+    @endif
     <label for="rpl-mode">Prior learning decision</label>
     <select id="rpl-mode" name="data[mode]" required>
         <option value="">Choose an option</option>
@@ -14,6 +34,16 @@
         <p id="rpl-clear-note">Saving No relevant prior learning clears the current reductions.</p>
     @endif
 
+    @if($currentTemplate && ($calculation['unresolved'] ?? []))
+        <div class="warn" id="rpl-allocation">
+            <p>These hours are provisional. Ask the programme team to check the affected blocks and then reopen this draft.</p>
+            <ul>
+                @foreach($calculation['unresolved'] as $block => $reasons)
+                    <li>Block {{ $block }} · {{ implode(', ', $reasons) }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <details id="rpl-adjustments" @if($mode === 'applies') open @endif>
         <summary>Record assessed prior learning</summary>
         <label for="assessment">Completed assessment reference</label>
@@ -61,8 +91,5 @@
             </table>
         </div>
         <p data-rpl-summary data-other-adjusted="{{ count(array_diff_key($p['rpl']['adjustments'] ?? [], array_flip(array_column($ksbs, 'code')))) }}" aria-live="polite"></p>
-        @if($review['calculation']['unresolved'] ?? [])
-            <p class="warn">Block allocation needs checking before the plan can be confirmed. Ask the curriculum team to check the programme template.</p>
-        @endif
     </details>
 @endif

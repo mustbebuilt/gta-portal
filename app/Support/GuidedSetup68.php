@@ -64,14 +64,54 @@ class GuidedSetup68
     public static function template(array $p): ?Template
     {
         $t = Template::find($p['programme']['template_id'] ?? 0);
-        $pr = $t ? Programme::find($t->programme_id) : null;
-        if (! $t || ! $t->active || ! $pr?->active) {
-            return null;
-        }if (! Rpl68::templateMatches($t) || strtoupper($pr->standard_code) !== strtoupper($t->template['standard_code']) || ltrim(strtolower($pr->version), 'v') !== ltrim(strtolower($t->template['standard_version']), 'v')) {
-            return null;
+        $programme = $t ? Programme::find($t->programme_id) : null;
+
+        return $programme?->active && $t && self::templateMatchesProgramme($t, $programme) ? $t : null;
+    }
+
+    private static function templateMatchesProgramme(Template $template, Programme $programme): bool
+    {
+        return $template->active && Rpl68::templateMatches($template)
+            && strtoupper($programme->standard_code) === strtoupper($template->template['standard_code'] ?? '')
+            && ltrim(strtolower($programme->version), 'v') === ltrim(strtolower($template->template['standard_version'] ?? ''), 'v');
+    }
+
+    public static function programmeChoices(): array
+    {
+        $programmes = Programme::orderBy('name')->orderBy('standard_code')->orderBy('version')->get();
+        $templates = Template::whereIn('programme_id', $programmes->pluck('id'))->get()->keyBy('programme_id');
+        $available = collect();
+        $unavailable = [];
+        $registered = [];
+        foreach ($programmes as $programme) {
+            $key = TaskCatalogue::keyForStandard($programme->standard_code, $programme->version);
+            if ($key) {
+                $registered[$key] = true;
+            }
+            if (! $programme->active) {
+                if ($key) {
+                    $unavailable[] = ['name'=>$programme->name, 'code'=>$programme->standard_code, 'version'=>$programme->version, 'reason'=>'Programme is inactive'];
+                }
+                continue;
+            }
+            $template = $templates->get($programme->id);
+            if ($key && $template && self::templateMatchesProgramme($template, $programme)) {
+                $available->push($template);
+
+                continue;
+            }
+            $reason = match (true) {
+                ! $key => 'Controlled task catalogue missing',
+                ! $template => 'Approved training template missing',
+                default => 'Training template inactive or does not match the programme',
+            };
+            $unavailable[] = ['name'=>$programme->name, 'code'=>$programme->standard_code, 'version'=>$programme->version, 'reason'=>$reason];
+        }
+        foreach (array_diff_key(TaskCatalogue::PROGRAMMES, $registered) as $source) {
+            $unavailable[] = [...$source, 'reason'=>'Programme missing from the directory'];
         }
 
-return $t;
+        return ['templates'=>$available, 'unavailableProgrammes'=>$unavailable];
     }
 
     public static function employerKey(array $e): string
@@ -131,14 +171,26 @@ return $t;
                 $p['markers'] = $v;
             } elseif ($step === 3) {
                 $v = Validator::make($input, ['template_id' => ['nullable', 'integer'], 'start_date' => ['nullable', 'date_format:Y-m-d'], 'tutor_id' => ['nullable', 'integer'], 'tutor_group_id' => ['nullable', 'integer'], 'mentor_id' => ['nullable', 'integer'], 'careers_adviser_id' => ['nullable', 'integer'], 'maths_tutor_id' => ['nullable', 'integer'], 'english_tutor_id' => ['nullable', 'integer']])->validate();
+                $previous = $before['programme'] ?? [];
+                if (empty($v['template_id']) && !empty($previous['template_id'])) {
+                    $v['template_id'] = $previous['template_id'];
+                    $v['template_hash'] = $previous['template_hash'] ?? null;
+                } else {
+                    $t = self::template(['programme' => $v]);
+                    if (!empty($v['template_id']) && ! $t) {
+                        Rpl68::fail('Choose an active, controlled template matching the programme standard/version.');
+                    }
+                    $v['template_hash'] = $t?->source_hash;
+                }
+                $templateChanged = (int) ($previous['template_id'] ?? 0) !== (int) ($v['template_id'] ?? 0);
+                if (! $templateChanged && isset($previous['template_id'])) {
+                    // Keep earlier draft/date bindings stable when an HTML form posts the same ID as a string.
+                    $v['template_id'] = $previous['template_id'];
+                }
                 $p['programme'] = $v;
-                $t = self::template($p);
-                if (($v['template_id'] ?? null) && ! $t) {
-                    Rpl68::fail('Choose an active, controlled template matching the programme standard/version.');
-                }$p['programme']['template_hash'] = $t?->source_hash;
-                if (collect($before['programme'] ?? [])->only(['template_id', 'template_hash'])->all() !== collect($p['programme'])->only(['template_id', 'template_hash'])->all()) {
-                    unset($p['rpl']['remaining_confirmed'],$p['rpl']['confirmation_hash'],$p['employer']['agreement_verified']);
-                    if (($before['programme']['template_id'] ?? null) !== ($v['template_id'] ?? null)) {
+                if ($templateChanged || ($previous['template_hash'] ?? null) !== ($v['template_hash'] ?? null)) {
+                    unset($p['rpl']['remaining_confirmed'], $p['rpl']['confirmation_hash'], $p['employer']['agreement_verified']);
+                    if ($templateChanged) {
                         $p['rpl'] = [];
                     }
                 }
@@ -243,9 +295,19 @@ return $t;
             return $issue['step'];
         }
 
-        $skills = $draft->payload['functional_skills82'] ?? FunctionalSkillsSetup82::current($draft->apprentice_id);
+        $skills = self::functionalSkills($draft);
 
         return isset($skills['maths'], $skills['english']) ? 7 : 6;
+    }
+
+    public static function functionalSkills(Draft $draft): array
+    {
+        $payload = $draft->payload;
+        if (isset($payload['functional_skills82']) && empty($payload['fs_applied82'])) {
+            return $payload['functional_skills82'];
+        }
+
+        return FunctionalSkillsSetup82::current($draft->apprentice_id) ?: ($payload['functional_skills82'] ?? []);
     }
 
     public static function review(Draft $d): array
@@ -280,9 +342,9 @@ return $t;
         $t = self::template($p);
         $calc = null;
         if (! $t) {
-            $add(3, 'Select an active controlled programme template.', 'template');
+            $add(3, 'Choose an available programme or check which template is missing.', 'template');
         } elseif (! TaskCatalogue::keyFor(new Apprentice(['programme_id' => $t->programme_id]))) {
-            $add(3, 'This programme has no loaded task catalogue. Load its controlled source before confirming.');
+            $add(3, 'This programme has no loaded task catalogue. Check the programme sources.', 'programme-availability');
         } elseif ($t->source_hash !== ($p['programme']['template_hash'] ?? null)) {
             $add(3, 'The template changed. Reselect the apprenticeship and confirm RPL again.', 'template');
         }
@@ -294,6 +356,23 @@ return $t;
         }
         if (! filled($p['programme']['start_date'] ?? null)) {
             $add(3, 'Enter the first day in learning.', 'start');
+        }
+        $record = $d->apprentice_id ? Apprentice::find($d->apprentice_id) : null;
+        foreach (['tutor_id'=>'main tutor', 'mentor_id'=>'GTA mentor', 'careers_adviser_id'=>'careers adviser',
+            'maths_tutor_id'=>'maths tutor', 'english_tutor_id'=>'English tutor'] as $field => $label) {
+            $id = $p['programme'][$field] ?? null;
+            if (! $id || (int) $id === $record?->$field) {
+                continue;
+            }
+            $staff = User::whereKey($id);
+            if ($field === 'tutor_id') {
+                $staff->where('active', true)->where('role', 'tutor');
+            } else {
+                StaffDuties::query($staff, str_replace('_id', '', $field));
+            }
+            if (! $staff->exists()) {
+                $add(3, 'Choose a current '.$label.' or leave the role unassigned.', $field === 'tutor_id' ? 'tutor' : $field);
+            }
         }
         $r = $p['rpl'] ?? [];
         if (! in_array($r['mode'] ?? null, ['none', 'applies'], true)) {
@@ -310,17 +389,19 @@ return $t;
             $add(4, 'Enter the completed assessment reference once.', 'assessment');
         }
         if (! ($r['remaining_confirmed'] ?? false) || ($t && ($r['confirmation_hash'] ?? null) !== Rpl68::hash([$t->source_hash, $r['mode'] ?? null, $r['assessment_ref'] ?? null, $r['adjustments'] ?? []]))) {
-            $add(4, 'Confirm the remaining KSBs have no reduction.', 'rpl-mode');
+            if (in_array($r['mode'] ?? null, ['none', 'applies'], true)) {
+                $add(4, 'Review the saved prior learning and select Save and continue.', 'rpl-mode');
+            }
         }
         if ($calc && $calc['unresolved']) {
             $affected = [];
             foreach ($calc['unresolved'] as $number => $reasons) {
                 $affected[] = 'block '.$number.' ('.implode(', ', $reasons).')';
             }
-            $add(4, 'Ask the programme team to check the OTJ allocation for '.implode(', ', $affected).'.');
+            $add(4, 'Ask the programme team to check the OTJ allocation for '.implode(', ', $affected).'.', 'rpl-allocation');
         }
         if ($calc && $calc['revised_hours'] <= 0) {
-            $add(4, 'No training remains; refer this case for programme review rather than enrolling automatically.');
+            $add(4, 'No training remains. Refer this case for programme review.', 'rpl-hours');
         }
         $e = $p['employer'] ?? [];
         $employer = null;
@@ -388,23 +469,30 @@ return $t;
         });
     }
 
-    public static function confirm(User $u, int $auth, Draft $draft, int $version, ?string $practicalEnd = null, ?string $programmeEnd = null): Draft
+    public static function confirm(User $u, int $auth, Draft $draft, int $version, ?string $practicalEnd = null, ?string $programmeEnd = null, bool $datesOnly = false): Draft
     {
-        return DB::transaction(function () use ($u, $auth, $draft, $version, $practicalEnd, $programmeEnd) {
+        return DB::transaction(function () use ($u, $auth, $draft, $version, $practicalEnd, $programmeEnd, $datesOnly) {
             $u = self::actor($u, $auth);
             DB::table('setup68_locks')->where('key', 'commit')->lockForUpdate()->first();
             $d = Draft::whereKey($draft->id)->lockForUpdate()->firstOrFail();
-            if ($d->state === 'Complete') {
+            if ($d->state === 'Complete' && ! $datesOnly) {
                 return $d;
-            }$d = self::lock($d, $version);
+            }
+            $d = self::lock($d, $version);
             abort_unless(in_array($d->state, ['Draft', 'Ready'], true), 409);
             $p = $d->payload;
             $view = self::review($d);
-            if ($view['issues']) {
+            if ($datesOnly) {
+                abort_unless($d->state === 'Draft', 409);
+                if (! $view['dates69'] || $view['calculation']['unresolved']
+                    || collect($view['issues'])->contains(fn ($issue) => $issue['step'] === 3)) {
+                    Rpl68::fail('Check the programme and OTJ allocation before saving the dates.');
+                }
+            } elseif ($view['issues']) {
                 Rpl68::fail($d->state === 'Ready' ? 'Reopen the setup and resolve the items listed in Step 7.' : 'Resolve the items listed in Step 7 before confirming the setup.');
             }$t = $view['template'];
             $calc = $view['calculation'];
-            $e = $p['employer'];
+            $e = $p['employer'] ?? [];
             $employer = $view['employer'];
             $dates69 = $view['dates69'] ?? [];
             $chosenPractical = filled($practicalEnd) ? $practicalEnd : ($dates69['selected']['practical_end'] ?? null);
@@ -417,6 +505,14 @@ return $t;
                     throw ValidationException::withMessages(['practical_end' => $ex->getMessage()]);
                 }
                 $p['plan_dates69'] = [...($p['plan_dates69'] ?? []), 'practical_end' => $agreedDates['practical_end'], 'programme_end' => $agreedDates['programme_end'], 'source' => $p['plan_dates69']['source'] ?? $agreedDates['source'], 'binding' => $agreedDates['binding']];
+            }
+            if ($datesOnly) {
+                $d->payload = $p;
+                $d->version++;
+                self::event($d, $u, 'training_plan_dates_saved', ['previous_dates'=>$view['dates69']['selected'], 'new_dates'=>$p['plan_dates69']]);
+                $d->save();
+
+                return $d;
             }
             if (! $employer) {
                 $employer = EmployerWorkflow68::create($u, $auth, $d->id, $e);

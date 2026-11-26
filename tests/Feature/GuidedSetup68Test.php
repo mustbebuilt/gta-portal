@@ -41,6 +41,71 @@ class GuidedSetup68Test extends TestCase {
   $this->assertDatabaseCount('apprentice_setup_drafts68', 1);
   $this->actingAs($this->actor('tutor'))->get(route('setup68.show', $draft))->assertForbidden();
  }
+ public function test_programme_picker_names_unavailable_sources_and_preserves_draft_reductions(): void
+ {
+  $admin = $this->actor();
+  $this->actingAs($admin);
+  $template = $this->template();
+  Programme::firstOrCreate(['standard_code'=>'ST0068','version'=>'1.5','name'=>'Fictional Heavy Vehicle','level'=>3]);
+  $draft = Setup::start($admin, $admin->auth_version);
+  $programme = route('setup68.show', [$draft, 3]);
+  $this->get($programme)->assertOk()->assertSee('ST0499 v1.3')->assertSee('Fictional Heavy Vehicle · ST0068 v1.5 · Approved training template missing');
+  $draft = $this->save($draft, 3, ['template_id'=>$template->id, 'start_date'=>'2026-11-18']);
+  $this->get($programme)->assertOk()->assertSee('600.00 starting OTJ hours · 50 KSBs · 12 blocks')->assertSee('Training block 1');
+  $draft = $this->save($draft, 4, ['mode'=>'applies','assessment_ref'=>'Fictional RPL','adjustments'=>['K1'=>20],'remaining_confirmed'=>true]);
+  $template->update(['active'=>false]);
+  $this->get($programme)->assertOk()->assertSee('Training template inactive or does not match the programme');
+  $draft = $this->save($draft, 3, ['template_id'=>null,'start_date'=>'2026-11-18']);
+  $this->assertSame($template->id, $draft->payload['programme']['template_id']);
+  $this->assertSame(['K1'=>20], $draft->payload['rpl']['adjustments']);
+ }
+
+ public function test_admin_resumes_one_draft_with_saved_rpl_assignments_and_planned_dates(): void
+ {
+  [$draft, $user, , $template] = $this->ready(true, submit:false);
+  $tutor = $this->actor('tutor');
+  $group = \App\Models\TutorGroup::factory()->create(['name'=>'Fictional Tuesday group','programme_id'=>$template->programme_id,'tutor_id'=>$tutor->id]);
+  $priorLearning = $draft->payload['rpl'];
+  $savedEmployer = $draft->payload['employer'];
+  $draft = $this->save($draft, 3, [...$draft->payload['programme'], 'template_id'=>(string)$template->id,
+   'tutor_id'=>$tutor->id, 'tutor_group_id'=>$group->id]);
+  $this->assertSame($priorLearning, $draft->payload['rpl']);
+  $this->assertSame($savedEmployer, $draft->payload['employer']);
+  $rpl = route('setup68.show',[$draft,4]);
+  $this->get($rpl)->assertOk()->assertSee('Hours saved to this draft')->assertSee('583.20 hours');
+  $this->post(route('setup68.save',[$draft,4]), [
+   'version'=>$draft->version,'action'=>'record_rpl','next'=>4,
+   'data'=>['mode'=>'applies','assessment_ref'=>$priorLearning['assessment_ref']],
+   'reductions'=>$priorLearning['adjustments'],
+  ])->assertRedirect($rpl)->assertSessionHas('status','Prior learning saved to this draft. Planned OTJ 583.20 hours.');
+  $draft->refresh();
+  $this->assertSame($savedEmployer, $draft->payload['employer']);
+  $this->assertSame($priorLearning, $draft->payload['rpl']);
+  $skills = \App\Support\FunctionalSkillsSetup82::defaults($user);
+  $skills['maths'] = [...$skills['maths'],'state'=>'recorded','initial_assessment'=>'Fictional initial','diagnostic'=>'Fictional diagnostic'];
+  $draft = $this->save($draft, 6, $skills);
+  $final = route('setup68.show',[$draft,7]);
+  $this->get(route('setup68.index'))->assertOk()->assertSee('Continue setup');
+  $this->get(route('setup68.show',$draft))->assertOk()->assertViewHas('step',7);
+  $this->get($final)->assertOk()->assertSee('Fictional Tuesday group')->assertSee($tutor->name)
+   ->assertSee('Maths · Assessments recorded')->assertSee('English · Follow-up planned')->assertSee('New Acceptance Workshop')
+   ->assertSee('Save dates to draft')->assertSee(route('setup68.show',[$draft,3]).'#group');
+  $dates = Setup::review($draft)['dates69']['selected'];
+  $dates['programme_end'] = (new \DateTimeImmutable($dates['programme_end']))->modify('+2 days')->format('Y-m-d');
+  $confirm = route('setup68.confirm',$draft);
+  $this->from($final)->post($confirm,[...$dates,'version'=>$draft->version,'intent'=>'save_dates','confirmed'=>1])
+   ->assertRedirect($final)->assertSessionHas('status','Planned dates saved to this draft.');
+  $this->assertDatabaseCount('apprentices',0);
+  $this->assertDatabaseCount('apprentice_setup_drafts68',1);
+  $draft->refresh();
+  $this->get($final)->assertOk()->assertSee($dates['programme_end']);
+  $this->post($confirm,['version'=>$draft->version,'intent'=>'confirm','confirmed'=>1])->assertSessionHasNoErrors();
+  $apprentice = Apprentice::findOrFail($draft->fresh()->apprentice_id);
+  $this->assertSame($group->id, $apprentice->tutor_group_id);
+  $this->assertSame($dates['programme_end'], $apprentice->planned_end_date->toDateString());
+  $this->assertEquals(583.20, OtjPosition::forApprentice($apprentice)['summary']['target_hours']);
+ }
+
  public function test_two_complete_http_setups_feed_the_real_approved_plan_otj_and_training_source():void {
   foreach([false,true] as $partial){[$d,$author,$reviewer,$t]=$this->complete($partial);$a=Apprentice::findOrFail($d->apprentice_id);$expected=$partial?583.2:600.0;
    $this->assertEquals($expected,DeliveryPlan::approved($a)['details']['target_hours']);$this->assertEquals($expected,OtjPosition::forApprentice($a)['summary']['target_hours']);$this->assertEquals($expected,\App\Support\TrainingPlanSource::position(TrainingPlanWorkspace::where('apprentice_id',$a->id)->first())['remaining_hours']);
@@ -165,7 +230,7 @@ class GuidedSetup68Test extends TestCase {
    ->assertSee('<optgroup label="Skills">', false)->assertSee('<optgroup label="Behaviours">', false)
    ->assertSee('Save and continue')
    ->assertSee('<details id="rpl-adjustments"', false)
-   ->assertSee('assets/setup68.js?v=refined-setup')
+   ->assertSee('assets/setup68.js?v=105')
    ->assertDontSee('Saved training-hours preview')
    ->assertSee('Reduction for S1')->assertSee('Reduction for B1')
    ->assertDontSee('Save assessment reference')->assertDontSee('Preview selected changes')

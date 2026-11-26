@@ -9,6 +9,10 @@
     const mode = document.querySelector('#rpl-mode');
     const disclosure = panel.querySelector('summary');
     const clearNote = document.querySelector('#rpl-clear-note');
+    const unsaved = document.querySelector('[data-rpl-unsaved]');
+    document.querySelector('#step-form').addEventListener('input', () => {
+        if (unsaved) unsaved.hidden = false;
+    });
     const tools = panel.querySelector('[data-rpl-tools]');
     const picker = panel.querySelector('#rpl-ksb');
     const table = panel.querySelector('[data-rpl-rows]');
@@ -69,3 +73,40 @@ function revealSetupField() {
 }
 window.addEventListener('hashchange', revealSetupField);
 revealSetupField();
+
+(() => {
+    const source = document.querySelector('#setup-programme-data');
+    if (!source) return;
+
+    const programmes = JSON.parse(source.textContent);
+    const picker = document.querySelector('#template');
+    const group = document.querySelector('#group');
+    const preview = document.querySelector('[data-programme-preview]');
+    const totals = preview.querySelector('[data-programme-totals]');
+    const blocks = preview.querySelector('[data-programme-blocks]');
+
+    function displayProgramme() {
+        const selected = programmes[picker.value];
+        preview.hidden = !selected;
+        totals.textContent = selected
+            ? selected.hours + ' starting OTJ hours · ' + selected.ksbs + ' KSBs · ' + selected.blocks.length + ' blocks'
+            : '';
+        const rows = (selected?.blocks ?? []).map(block => {
+            const item = document.createElement('li');
+            item.textContent = block.number + '. ' + block.name + ' · ' + block.hours + ' hours';
+            return item;
+        });
+        blocks.replaceChildren(...rows);
+
+        const programme = picker.selectedOptions[0]?.dataset.programme;
+        for (const option of group.options) {
+            const incompatible = Boolean(programme && option.dataset.programme && option.dataset.programme !== programme);
+            // Keep an existing selection visible so staff can correct it deliberately.
+            option.hidden = incompatible && !option.selected;
+            option.disabled = incompatible && !option.selected;
+        }
+    }
+    picker.addEventListener('change', displayProgramme);
+    group.addEventListener('change', displayProgramme);
+    displayProgramme();
+})();

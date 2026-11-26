@@ -3,6 +3,11 @@
     $calculation = $review['calculation'];
     $canConfirm = in_array($draft->state, ['Draft', 'Ready'], true);
     $dates = $review['dates69'] ?? [];
+    $draftEditable = $draft->state === 'Draft';
+    $group = $finalCheck['group'];
+    $tutor = $finalCheck['tutor'];
+    $skills = $finalCheck['skills'];
+    $needsDateCheck = collect($issues)->contains(fn ($issue) => $issue['step'] === 3) || !empty($calculation['unresolved']);
 @endphp
 
 <section class="panel" aria-labelledby="setup-check-title">
@@ -39,7 +44,38 @@
         </div>
         <div>
             <dt>Employer</dt>
-            <dd>{{ $review['employer']?->name ?? $p['employer']['name'] ?? 'Not selected' }}</dd>
+            <dd>{{ $review['employer']?->name ?? $p['employer']['name'] ?? 'Not selected' }} @if($draftEditable)<a href="{{ route('setup68.show', [$draft, 5]) }}#employer-search">Edit employer</a>@endif</dd>
+        </div>
+        <div>
+            <dt>Apprentice</dt>
+            <dd>{{ $p['details']['first_name'] ?? 'Not entered' }} {{ $p['details']['last_name'] ?? '' }} · {{ $p['details']['reference'] ?? '' }}</dd>
+        </div>
+        <div><dt>First day in learning</dt><dd>{{ $p['programme']['start_date'] ?? 'Not entered' }}</dd></div>
+        <div>
+            <dt>Tutor group</dt><dd>{{ $group?->name ?? 'Not assigned' }} @if($group && !$group->active) · Inactive @endif
+                @if($draftEditable)<a href="{{ route('setup68.show', [$draft, 3]) }}#group">Edit group</a>@endif</dd>
+        </div>
+        <div>
+            <dt>Main tutor</dt><dd>{{ $tutor?->name ?? 'Not assigned' }} @if($tutor && !$tutor->active) · Inactive @endif
+                @if($draftEditable)<a href="{{ route('setup68.show', [$draft, 3]) }}#tutor">Edit tutor</a>@endif</dd>
+        </div>
+        <div>
+            <dt>Maths and English</dt>
+            <dd>
+                @foreach(['maths'=>'Maths', 'english'=>'English'] as $key => $label)
+                    @php($state = $skills[$key]['state'] ?? null)
+                    <div>{{ $label }} · {{ match($state) { 'recorded' => 'Assessments recorded', 'pending' => 'Follow-up planned', default => 'Assessment status to check' } }}</div>
+                    @if($state === 'pending' && filled($skills[$key]['next_action'] ?? null))
+                        <p>{{ $skills[$key]['next_action'] }}</p>
+                    @endif
+                @endforeach
+                <a href="{{ route('setup68.show', [$draft, 6]) }}">Check assessments and follow-up</a>
+            </dd>
+        </div>
+        <div>
+            <dt>Prior learning</dt>
+            <dd>{{ match($p['rpl']['mode'] ?? null) { 'none'=>'No relevant prior learning', 'applies'=>($calculation['adjusted_count'] ?? 0).' adjusted KSBs', default=>'Decision needed' } }}
+                @if($draftEditable)<a href="{{ route('setup68.show', [$draft, 4]) }}#rpl-mode">Amend in Step 4</a>@endif</dd>
         </div>
     </dl>
 
@@ -67,19 +103,22 @@
                 @if(!empty($dates['saved_source']))<p>Reference: {{ $dates['saved_source'] }}</p>@endif
             @endif
             <div class="actions">
-                <button class="primary" @disabled(count($issues) > 0)>{{ $draft->apprentice_id ? 'Confirm corrections' : 'Confirm and create apprentice' }}</button>
+                <button class="primary" name="intent" value="confirm" @disabled(count($issues) > 0)>{{ $draft->apprentice_id ? 'Confirm corrections' : 'Confirm and create apprentice' }}</button>
+                @if($draftEditable && $dates && !$needsDateCheck)
+                    <button name="intent" value="save_dates">Save dates to draft</button>
+                @endif
             </div>
         </form>
+    @elseif($dates)
+        <dl class="setup-grid">
+            <div><dt>Planned practical end date</dt><dd>{{ $dates['selected']['practical_end'] ?? 'Not recorded' }}</dd></div>
+            <div><dt>Planned apprenticeship end date</dt><dd>{{ $dates['selected']['programme_end'] ?? 'Not recorded' }}</dd></div>
+        </dl>
     @endif
 
     <details>
-        <summary>Other setup details</summary>
-        <dl>
-            <dt>Apprentice</dt><dd>{{ $p['details']['first_name'] ?? 'Not entered' }} {{ $p['details']['last_name'] ?? '' }} · {{ $p['details']['reference'] ?? '' }}</dd>
-            <dt>Functional Skills</dt><dd>{{ collect(\App\Support\FunctionalSkillsSetup82::current($draft->apprentice_id) ?: ($p['functional_skills82'] ?? []))->where('state', 'recorded')->count() }} of 2 subject assessments recorded. <a href="{{ route('setup68.show', [$draft, 6]) }}">Check assessments and follow-up</a></dd>
-            <dt>Inclusion information</dt><dd>{{ $p['markers']['state'] ?? 'Not recorded' }} (authorised support access only)</dd>
-            <dt>Prior learning</dt><dd>{{ ($p['rpl']['mode'] ?? '') === 'none' ? 'No relevant prior learning' : ($calculation['adjusted_count'] ?? 0).' adjusted KSBs' }} @if($draft->state === 'Draft') · <a href="{{ route('setup68.show', [$draft, 4]) }}">Amend in Step 4</a>@endif</dd>
-        </dl>
+        <summary>Inclusion setup status</summary>
+        <p>{{ match($p['markers']['state'] ?? null) { 'selected'=>'Markers recorded', 'none'=>'None apply', 'pending'=>'Pending', default=>'Not recorded' } }} · Authorised support access only.</p>
     </details>
     @if($calculation)
         <details>

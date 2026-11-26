@@ -21,11 +21,13 @@ class TaskCatalogue
             return 'autocare';
         }
         $p = ReportRead85::programme($apprentice);
-        if (! $p || ! $p->active) {
-            return null;
-        }
+        return $p?->active ? self::keyForStandard($p->standard_code, $p->version) : null;
+    }
+
+    public static function keyForStandard(string $code, string $version): ?string
+    {
         foreach (self::PROGRAMMES as $key => $source) {
-            if (strtoupper(trim($p->standard_code)) === $source['code'] && in_array(strtolower(trim($p->version)), [$source['version'], 'v'.$source['version']], true)) {
+            if (strtoupper(trim($code)) === $source['code'] && in_array(strtolower(trim($version)), [$source['version'], 'v'.$source['version']], true)) {
                 return $key;
             }
         }
