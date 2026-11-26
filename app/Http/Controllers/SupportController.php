@@ -204,7 +204,7 @@ class SupportController extends Controller
             'other' => ['nullable', 'string', 'max:250'],
             'frequency' => ['required', 'in:weekly,fortnightly,monthly,quarterly,six-monthly'],
         ]);
-        DB::transaction(function () use ($request, $apprentice, $data): void {
+        $markerId = DB::transaction(function () use ($request, $apprentice, $data): int {
             $profile = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
             abort_unless($this->lead($request, $profile), 403);
             if (SupportConcern::where('apprentice_id',$profile->id)->where('code',$data['code'])->where('status','!=','Closed')->exists()) {
@@ -222,9 +222,16 @@ class SupportController extends Controller
                 'recorded_by'=>$request->user()->id,'created_at'=>now(),'updated_at'=>now()]);
             MarkerHistory::record($profile->id,$request->user()->id,'register_marker',$before);
             $this->audit($request,$profile->id,$marker->id,'register_marker_added');
+
+            return $marker->id;
         });
 
-        return back()->with('status','Marker added for a first review.');
+        if ($request->boolean('return_to_meeting')) {
+            return back()->with('status', 'Marker added for a first review.');
+        }
+
+        return redirect()->to(route('support.index', [$apprentice, 'target_marker' => $markerId]).'#support-actions')
+            ->with('status', 'Marker saved. Add a target if one is needed.');
     }
 
     public function formalMarkerReview(Request $request, SupportConcern $concern): RedirectResponse

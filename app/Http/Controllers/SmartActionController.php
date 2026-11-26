@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Apprentice;
 use App\Models\LearningTask;
+use App\Models\ProgressReviewDraft;
 use App\Models\SmartAction;
 use App\Support\LearningAccess as Access;
 use Illuminate\Http\RedirectResponse;
@@ -37,7 +38,9 @@ class SmartActionController extends Controller
             $action->id,
         ]);
 
-        return view('actions.index', compact('apprentice', 'open', 'completed', 'counts', 'manage'));
+        $review = $this->reviewContext($r, $apprentice);
+
+        return view('actions.index', compact('apprentice', 'open', 'completed', 'counts', 'manage', 'review'));
     }
 
     public function proposals(Request $r, Apprentice $apprentice): View
@@ -58,7 +61,13 @@ class SmartActionController extends Controller
         if ($r->filled('source_task_id')) {
             abort_if($action,404);
             $proposalTask = LearningTask::where('apprentice_id',$apprentice->id)->where('status','Referred')->findOrFail($r->integer('source_task_id'));
-            if (! $proposalTask->due_date || SmartAction::where('learning_task_id',$proposalTask->id)->exists()) { throw ValidationException::withMessages(['learning_task_id'=>'This source needs an agreed deadline or already has an action. Reopen the proposals list.']); }
+            $existing = SmartAction::where('apprentice_id', $apprentice->id)->where('learning_task_id', $proposalTask->id)->first();
+            if ($existing) {
+                return redirect()->to(route('actions.index', $apprentice).'#action-'.$existing->id);
+            }
+            if (! $proposalTask->due_date) {
+                throw ValidationException::withMessages(['learning_task_id' => 'Set a deadline on the task before adding its target.']);
+            }
             $sourceBinding = \App\Support\ActionProposals::binding($proposalTask);
             $action = new SmartAction(['title'=>'Correct and resubmit '.$proposalTask->reference.': '.$proposalTask->title,'owner'=>'Apprentice','method'=>'linked-task','learning_task_id'=>$proposalTask->id,'evidence_method'=>'portal','relevance'=>'correction','learning_reference'=>$proposalTask->reference]);
         }
@@ -76,7 +85,9 @@ class SmartActionController extends Controller
             ]);
         }
 
-        return view('actions.form', ['proposalTask'=>$proposalTask,'sourceBinding'=>$sourceBinding,'apprentice' => $apprentice, 'action' => $action ?? new SmartAction, 'tasks' => LearningTask::where('apprentice_id', $apprentice->id)->where('status', 'Referred')->get()]);
+        $review = $this->reviewContext($r, $apprentice);
+
+        return view('actions.form', ['review'=>$review, 'proposalTask'=>$proposalTask,'sourceBinding'=>$sourceBinding,'apprentice' => $apprentice, 'action' => $action ?? new SmartAction, 'tasks' => LearningTask::where('apprentice_id', $apprentice->id)->where('status', 'Referred')->get()]);
     }
 
     public function save(Request $r, Apprentice $apprentice, ?SmartAction $action = null): RedirectResponse
@@ -145,6 +156,11 @@ class SmartActionController extends Controller
             $this->audit($r, $a, 'target_saved');
         });
 
+        $review = $this->reviewContext($r, $apprentice);
+        if ($review) {
+            return redirect()->to(route('reviews.edit', [$apprentice, $review]).'#review-3')->with('status', 'Target saved.');
+        }
+
         return to_route('actions.index', $apprentice)->with('status', 'SMART action saved. Linked tasks retain their own deadlines and tutor decisions.');
     }
 
@@ -191,6 +207,15 @@ class SmartActionController extends Controller
         });
 
         return back()->with('status', 'Action progress saved.');
+    }
+
+    private function reviewContext(Request $r, Apprentice $apprentice): ?ProgressReviewDraft
+    {
+        if (! $r->filled('review') || ! $this->manage($r, $apprentice)) {
+            return null;
+        }
+
+        return ProgressReviewDraft::where('apprentice_id', $apprentice->id)->where('state', 'Draft')->find($r->integer('review'));
     }
 
     private function version(Request $r, SmartAction $a): void

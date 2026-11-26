@@ -11,25 +11,25 @@
         <p>Attendance and OTJ totals exclude this session.</p>
     </section>
 @endif
-<section class="panel"><h2>Planned learning</h2><p class="recorded-answer">{{ $session->planned_learning }}</p><p>Excluded periods: @forelse($session->breaks as $break){{ $break['start'] }}–{{ $break['end'] }} @empty None recorded @endforelse</p><p class="muted">The roster is a saved snapshot. Changing current group membership does not rewrite past attendance.</p></section>
+<details class="panel"><summary>Session plan and breaks</summary><p class="recorded-answer">{{ $session->planned_learning }}</p><p>Excluded periods: @forelse($session->breaks as $break){{ $break['start'] }}–{{ $break['end'] }} @empty None recorded @endforelse</p><p class="muted">The roster is a saved snapshot. Changing current group membership does not rewrite past attendance.</p></details>
 @if($session->state !== 'Cancelled' && $registerReadiness['ended'])
 <form method="post" data-compact-register data-start="{{ substr($session->start_time,0,5) }}" data-end="{{ substr($session->end_time,0,5) }}" action="{{ route('attendance.save',$session) }}">@csrf @foreach($nextScope83 as $key=>$value)<input type="hidden" name="next_scope[{{$key}}]" value="{{$value}}">@endforeach<input type="hidden" name="version" value="{{ $session->version }}">
 @if($session->marks->isNotEmpty())
-    <section class="panel" aria-labelledby="register-correction">
-        <h2 id="register-correction">Correct this register</h2>
+    <details class="panel" @if($errors->has('correction_reason') || old('correction_reason')) open @endif>
+        <summary>Correct saved entries</summary>
         <p>Change only the entries that need correcting. Confirmed OTJ is recalculated from the corrected record. The original entries stay in the history.</p>
         @include('shared.staff-template-picker', ['pickerLabel'=>'Correction reason template','family'=>'register_corrections','fieldNames'=>['correction_reason']])
         <label for="correction-reason">Reason for correction (when changing saved information)</label>
         <textarea id="correction-reason" name="correction_reason" maxlength="2000" @if($errors->has('correction_reason')) aria-invalid="true" @endif>{{ old('correction_reason') }}</textarea>
-    </section>
+    </details>
 @endif
 @include('attendance.structured-training')
 <section class="panel" data-register-bulk hidden>
     <h2>Full-session attendance</h2>
-    <p>Only unmarked rows are available. Leave exceptions unselected and record them individually. Confirm eligible OTJ in each apprentice’s details.</p>
+    <p>Select apprentices who attended the full session. Record exceptions individually.</p>
     <div class="form-actions">
         <button type="button" data-select-unmarked>Select unmarked</button>
-        <button type="button" data-apply-full-session disabled>Mark selected attended · {{ $session->start_time }}–{{ $session->end_time }}</button>
+        <button type="button" data-apply-full-session disabled>Mark selected as attended</button>
     </div>
     <p data-bulk-attendance-status role="status"></p>
 </section>
@@ -40,7 +40,8 @@
 @endif
 <button type="button" data-full-session hidden>Attended for the full session</button><p class="muted" data-full-session-status role="status"></p>@if($m)<p class="muted">Recorded: {{$m->arrival??'Time not set'}}–{{$m->departure??'Time not set'}} · OTJ {{$m->otj_confirmed?number_format($m->otj_minutes/60,2).' hours':'Not confirmed'}}</p>@endif
 @php($personErrors83=old('marks.'.$a->id)!==null || $errors->has('marks') || collect($errors->keys())->contains(fn($key)=>str_starts_with($key,'marks.'.$a->id.'.')))
-<details @if($personErrors83)open @endif><summary>Actual times, OTJ and other details</summary><div class="form-grid"><div><label for="arrival-{{ $a->id }}">Actual arrival (attended codes)</label><input id="arrival-{{ $a->id }}" name="marks[{{ $a->id }}][arrival]" type="time" value="{{ old('marks.'.$a->id.'.arrival',$m?->arrival) }}"></div><div><label for="departure-{{ $a->id }}">Actual departure (attended codes)</label><input id="departure-{{ $a->id }}" name="marks[{{ $a->id }}][departure]" type="time" value="{{ old('marks.'.$a->id.'.departure',$m?->departure) }}"></div><div><label for="minutes-{{ $a->id }}">Eligible OTJ minutes, if reducing the proposal</label><input id="minutes-{{ $a->id }}" name="marks[{{ $a->id }}][minutes]" type="number" step="1" min="0" value="{{ old('marks.'.$a->id.'.minutes',$m?->otj_confirmed?$m->otj_minutes:null) }}"><p class="muted">Leave blank to use actual attendance less excluded periods. Never rounds up.</p></div><div><label for="adjustment-{{ $a->id }}">Reason for reducing eligible minutes</label><textarea id="adjustment-{{ $a->id }}" name="marks[{{ $a->id }}][adjustment]">{{ old('marks.'.$a->id.'.adjustment',$m?->adjustment) }}</textarea></div><div><label for="comment-{{ $a->id }}">Attendance comment</label><textarea id="comment-{{ $a->id }}" name="marks[{{ $a->id }}][comment]">{{ old('marks.'.$a->id.'.comment',$m?->comment) }}</textarea></div></div><label class="check"><input type="checkbox" name="marks[{{ $a->id }}][otj_confirmed]" value="1" @checked(old('marks.'.$a->id.'.otj_confirmed',$m?->otj_confirmed))>I checked that this apprentice’s recorded minutes are eligible OTJ, actually delivered in paid working time, with excluded activity removed.</label><p>Current confirmed OTJ: {{ $m?->otj_confirmed?number_format($m->otj_minutes/60,2).' hours':'Not confirmed' }}</p></details>
+<details @if($personErrors83)open @endif><summary>Change times, OTJ minutes or notes</summary><div class="form-grid"><div><label for="arrival-{{ $a->id }}">Actual arrival (attended codes)</label><input id="arrival-{{ $a->id }}" name="marks[{{ $a->id }}][arrival]" type="time" value="{{ old('marks.'.$a->id.'.arrival',$m?->arrival) }}"></div><div><label for="departure-{{ $a->id }}">Actual departure (attended codes)</label><input id="departure-{{ $a->id }}" name="marks[{{ $a->id }}][departure]" type="time" value="{{ old('marks.'.$a->id.'.departure',$m?->departure) }}"></div><div><label for="minutes-{{ $a->id }}">Eligible OTJ minutes, if reducing the proposal</label><input id="minutes-{{ $a->id }}" name="marks[{{ $a->id }}][minutes]" type="number" step="1" min="0" value="{{ old('marks.'.$a->id.'.minutes',$m?->otj_confirmed?$m->otj_minutes:null) }}"><p class="muted">Leave blank to use actual attendance less excluded periods. Never rounds up.</p></div><div><label for="adjustment-{{ $a->id }}">Reason for reducing eligible minutes</label><textarea id="adjustment-{{ $a->id }}" name="marks[{{ $a->id }}][adjustment]">{{ old('marks.'.$a->id.'.adjustment',$m?->adjustment) }}</textarea></div><div><label for="comment-{{ $a->id }}">Attendance comment</label><textarea id="comment-{{ $a->id }}" name="marks[{{ $a->id }}][comment]">{{ old('marks.'.$a->id.'.comment',$m?->comment) }}</textarea></div></div></details>
+<label class="check"><input type="checkbox" name="marks[{{ $a->id }}][otj_confirmed]" value="1" @checked(old('marks.'.$a->id) !== null ? old('marks.'.$a->id.'.otj_confirmed') : $m?->otj_confirmed)>Confirm eligible OTJ delivered in paid work time, excluding breaks and ineligible training.</label>
 <details><summary>Individual training exceptions</summary>
 @if($trainingOptions)
 <div data-topic-exceptions="{{ $a->id }}" data-saved-exceptions="{{ json_encode(old('training.topic_exceptions.'.$a->id, $structuredTraining['topicExceptions'][$a->id] ?? []), JSON_THROW_ON_ERROR) }}"></div>
@@ -85,5 +86,5 @@
 @endif
 <details class="panel"><summary>Register history</summary>@forelse(array_reverse($session->history??[]) as $h)<p>{{ $h['event'] === 'session_planned_subjects' ? 'Subjects planned' : $h['event'] }} · {{ $h['at'] }} · User {{ $h['by'] }}</p>@if($h['correction_reason']??$h['reason']??null)<p>{{ $h['correction_reason']??$h['reason'] }}</p>@endif
 @empty<p>No register changes recorded.</p>@endforelse</details>
-<script src="{{ asset('assets/routine-workflows.js') }}?v=87" defer></script>
+<script src="{{ asset('assets/routine-workflows.js') }}?v=104" defer></script>
 @endsection

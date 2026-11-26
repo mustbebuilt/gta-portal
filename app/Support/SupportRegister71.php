@@ -303,7 +303,10 @@ final class SupportRegister71
             }
             $concernId = ! empty($data['support_concern_id']) ? (int) $data['support_concern_id'] : null;
             if ($concernId) {
-                SupportConcern::whereKey($concernId)->where('apprentice_id', $apprentice->id)->firstOrFail();
+                $marker = SupportConcern::whereKey($concernId)->where('apprentice_id', $apprentice->id)->lockForUpdate()->firstOrFail();
+                if (($data['target_type'] ?? null) === 'smart' && ($marker->status === 'Closed' || ! $marker->code)) {
+                    throw ValidationException::withMessages(['support_concern_id' => 'Choose an open marker, or save without a marker.']);
+                }
             }
             $planId = ! empty($data['support_plan_id']) ? (int) $data['support_plan_id'] : null;
             if ($planId) {
@@ -323,6 +326,7 @@ final class SupportRegister71
             $action->details = [
                 'summary' => trim((string) $data['summary']),
                 ...(!empty($data['measure']) ? ['measure' => $data['measure']] : []),
+                ...(!empty($data['target_template']) ? ['template' => $data['target_template']] : []),
                 'outcome' => null,
             ];
             $action->history = [[

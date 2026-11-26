@@ -107,6 +107,13 @@ class ReviewSnapshot
             'training_plan_source' => $plan ? $plan['details']['source_ref'] : 'Reference remains the supplied scheme of work; no substitute individual plan created'];
     }
 
+    public static function factsHash(array $snapshot): string
+    {
+        $facts = \Illuminate\Support\Arr::except($snapshot, ['captured_at', 'otj_position.captured_at', 'monthly_snapshots']);
+
+        return ReviewedImports::hash($facts);
+    }
+
     private static function progress(array $done, array $assigned, ?array $whole): array
     {
         $progress = ApprenticeReviewData::progress($done, $assigned, $whole);

@@ -42,6 +42,9 @@
                     @else Next review {{ $due?->format('j M Y') }}
                     @endif
                 </p>
+                @if(empty($inMeeting))
+                    <a class="button" href="{{ route('support.index', [$apprentice, 'target_marker' => $marker->id]) }}#support-actions">Add target</a>
+                @endif
                 <details @if($restore) open @endif><summary>Record review</summary>
                     <form method="post" action="{{ $form }}">
                         @csrf
@@ -107,6 +110,7 @@
             <form method="post" action="{{ $trackForm }}">
                 @csrf
                 <input type="hidden" name="_support_form" value="{{ $trackForm }}">
+                @if(!empty($inMeeting))<input type="hidden" name="return_to_meeting" value="1">@endif
                 <label>Marker <select name="code" required><option value="">Choose a marker</option>
                     @foreach($codes as $code => $label)<option value="{{ $code }}" @selected($restoreMarker && old('code') === $code)>{{ $code }} · {{ $label }}</option>@endforeach
                 </select></label>

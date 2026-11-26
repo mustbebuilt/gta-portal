@@ -102,6 +102,10 @@ class SupportRegister71Controller extends Controller
             'due_date' => ['required', 'date_format:Y-m-d'],
             'summary' => ['required', 'string', 'max:2000'],
             'target_type' => ['nullable', 'in:smart'],
+            'target_template' => ['nullable', 'string', \Illuminate\Validation\Rule::in([
+                'custom', ...collect(config('staff_templates.support_targets'))->flatMap(fn ($group) => array_keys($group))
+                    ->map(fn ($label) => \Illuminate\Support\Str::slug($label))->all(),
+            ])],
             'measure' => ['nullable', 'required_if:target_type,smart', 'string', 'max:1000'],
             'request_uuid' => ['required', 'uuid'],
             'support_concern_id' => ['nullable', 'integer'],
@@ -109,6 +113,10 @@ class SupportRegister71Controller extends Controller
         ]);
         $apprentice = Apprentice::findOrFail($v['apprentice_id']);
         SupportRegister71::createAction($r->user(), $apprentice, $v);
+
+        if ($r->input('_support_form') === route('support-register71.add-action')) {
+            return redirect()->to(route('support.index', $apprentice).'#support-actions')->with('status', 'Target saved.');
+        }
 
         return back()->with('status', 'Action saved.');
     }

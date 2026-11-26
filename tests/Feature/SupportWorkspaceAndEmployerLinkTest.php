@@ -26,7 +26,7 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $page = route('support.index',$apprentice);
         $this->actingAs($member)->get(route('support.worklist'))->assertOk()
             ->assertSee('Alex Morgan')->assertDontSee($other->reference)->assertDontSee('Travel disruption affected attendance');
-        $this->get($page)->assertOk()->assertSeeInOrder(['Markers and reasons', 'Travel disruption affected attendance', 'Action plan', 'SMART target'])
+        $this->get($page)->assertOk()->assertSeeInOrder(['Markers and reasons', 'Travel disruption affected attendance', 'Action plan', 'What needs to happen?'])
             ->assertSee('Support target template')->assertSee('Continue current support')->assertSee('Resolve a transport barrier')
             ->assertSee('value="custom"', false)->assertSee('name="owner_id"', false);
         $this->get(route('support-register71.index',['view'=>'all']))->assertOk()->assertDontSee($other->reference);
@@ -42,7 +42,12 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $this->assertSame(['IM34'], $due->viewData('rows')->items()[0]['due']->pluck('code')->all());
         $this->assertSame(2, SupportConcern::where('apprentice_id',$apprentice->id)->where('status','!=','Closed')->count());
 
+        $marker = SupportConcern::where('apprentice_id',$apprentice->id)->where('code','IM34')->firstOrFail();
+        $targetPage = route('support.index', [$apprentice, 'target_marker'=>$marker->id]);
+        $this->get($targetPage)->assertOk()->assertSee('Choose a target or select Custom')
+            ->assertSee('value="'.$marker->id.'" selected', false);
         $target = [
+            'support_concern_id'=>$marker->id,'target_template'=>'resolve-a-transport-barrier',
             'request_uuid'=>(string) Str::uuid(),'apprentice_id'=>$apprentice->id,'owner_id'=>$member->id,
             'due_date'=>today()->subDay()->toDateString(),'summary'=>'Arrange next meeting','target_type'=>'smart',
         ];
@@ -52,6 +57,8 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         ])->assertSessionHasNoErrors();
         $action = SupportSharedAction71::sole();
         $this->assertSame('Acceptances from apprentice and tutor', $action->details['measure']);
+        $this->assertSame($marker->id, $action->support_concern_id);
+        $this->assertSame('resolve-a-transport-barrier', $action->details['template']);
         $this->get($page)->assertOk()->assertSee('Acceptances from apprentice and tutor');
         $this->get(route('support.worklist'))->assertOk()->assertSee('Arrange next meeting');
         $this->get(route('support.report'))->assertOk()->assertSee('1 have an overdue support action')->assertDontSee('Arrange next meeting');
@@ -69,8 +76,9 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $marker = ['code' => 'IM40', 'frequency' => 'monthly'];
 
         $this->actingAs($admin)->post($route, $marker)->assertSessionHasErrors('reason');
-        $this->post($route, $marker + ['reason' => 'Temporary travel disruption'])->assertSessionHasNoErrors();
+        $saved = $this->post($route, $marker + ['reason' => 'Temporary travel disruption'])->assertSessionHasNoErrors();
         $record = SupportConcern::sole();
+        $saved->assertRedirect(route('support.index', [$apprentice,'target_marker'=>$record->id]).'#support-actions');
         $this->assertSame('Temporary travel disruption', $record->other_code);
         $this->get(route('support.index', $apprentice))->assertOk()->assertSee('Temporary travel disruption');
     }
@@ -102,8 +110,12 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $this->actingAs($admin)->from($confirm)->put(route('apprentices.update',$person), [
             ...$person->only(['reference','first_name','last_name','version']), 'employer_id'=>$newEmployer->id,
         ])->assertSessionHasErrors('employer_id');
-        $this->from($confirm)->post($change, $payload)
-            ->assertRedirect($confirm)->assertSessionHasNoErrors();
+        $picker = route('employer68.show', ['apprentice'=>$person->id]);
+        $choice = $newEmployer->id.':'.$newEmployer->record_version;
+        $this->get($picker)->assertOk()->assertSee('name="employer_choice"', false)->assertSee($choice);
+        $this->from($picker)->post($change, [
+            'version'=>$person->version, 'employer_choice'=>$choice, 'effective_on'=>$payload['effective_on'],
+        ])->assertRedirect($confirm)->assertSessionHasNoErrors();
         $this->from($confirm)->post($change, $payload)->assertSessionHasErrors('version');
         $this->assertEquals($newEmployer->id, $person->fresh()->employer_id);
         $this->assertEquals($tutor->id, $person->fresh()->tutor_id);
@@ -116,6 +128,9 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $this->assertFalse(\App\Support\EmployerActions::valid($grant->fresh(), $person->fresh()));
         $this->get($confirm)->assertOk()->assertSee('Verify workplace access')->assertSee($newContact->email);
         $this->assertDatabaseMissing('employer_apprentice_grants', ['user_id'=>$newContact->id, 'apprentice_id'=>$person->id]);
+        $accountPicker = route('employer-grants.index', ['apprentice'=>$person,'contact'=>$contact->id]);
+        $this->get($accountPicker)->assertOk()->assertSee('Choose an existing contact or mentor')
+            ->assertSee('name="displayed_employer_id" value="'.$newEmployer->id.'"', false);
         $access = route('employer-grants.save', $person);
         $verification = [
             'user_id'=>$newContact->id, 'version'=>0, 'linked_employer_id'=>$newEmployer->id,
@@ -133,5 +148,21 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $this->get($confirm)->assertOk()->assertSee('Access verified for '.$newContact->name)->assertDontSee('Confirm workplace access');
         $newGrant = \App\Models\EmployerApprenticeGrant::where('user_id', $newContact->id)->sole();
         $this->assertTrue(\App\Support\EmployerActions::valid($newGrant, $person->fresh()));
+
+        $alternate = User::factory()->create(['role'=>'employer']);
+        $alternatePage = route('employer-grants.index', ['apprentice'=>$person, 'contact'=>$alternate->id]);
+        $this->get($alternatePage)->assertOk()->assertSee('Replace access for (optional)');
+        $replacement = [
+            'user_id'=>$alternate->id, 'version'=>0, 'confirmed'=>1, 'displayed_employer_id'=>$newEmployer->id,
+            'displayed_employer_version'=>$newEmployer->record_version, 'identity_reference'=>'Fictional replacement authority confirmed',
+            'replace_access'=>$newGrant->id.':'.$newGrant->version,
+        ];
+        $this->from($alternatePage)->post($access, [...$replacement, 'replace_access'=>$newGrant->id.':'.($newGrant->version+1)])
+            ->assertSessionHasErrors('actions');
+        $this->assertTrue($newGrant->fresh()->active);
+        $this->assertDatabaseMissing('employer_apprentice_grants', ['apprentice_id'=>$person->id, 'user_id'=>$alternate->id]);
+        $this->from($alternatePage)->post($access, $replacement)->assertRedirect($alternatePage)->assertSessionHasNoErrors();
+        $this->assertFalse($newGrant->fresh()->active);
+        $this->assertDatabaseHas('employer_apprentice_grants', ['apprentice_id'=>$person->id, 'user_id'=>$alternate->id, 'active'=>true]);
     }
 }

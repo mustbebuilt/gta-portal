@@ -16,6 +16,32 @@
             <button class="primary">Continue</button>
         </form>
     @else
+        @if($apprentice && $choices->isNotEmpty())
+            <form class="panel" method="post" action="{{ route('employer68.change', $apprentice) }}">
+                @csrf
+                <input type="hidden" name="version" value="{{ $apprentice->version }}">
+                <p>Current employer: {{ $apprentice->employerLabel() ?? 'None linked' }}</p>
+                <div class="form-grid">
+                    <label>Choose employer <select name="employer_choice" required>
+                        <option value="">Choose an employer</option>
+                        @foreach($choices as $choice)
+                            @php($value = $choice->id.':'.$choice->record_version)
+                            <option value="{{ $value }}" @selected(old('employer_choice') === $value)>{{ $choice->name }} · {{ $choice->reference }}</option>
+                        @endforeach
+                    </select></label>
+                    <label>Change date <input name="effective_on" type="date" max="{{ today()->toDateString() }}" value="{{ old('effective_on', today()->toDateString()) }}" required></label>
+                </div>
+                <details @if(old('reason') || $errors->has('reason')) open @endif>
+                    <summary>Add a reason</summary>
+                    <label>Reason (optional) <input name="reason" value="{{ old('reason') }}" maxlength="500"></label>
+                </details>
+                @if($apprentice->employer_id)
+                    <p>Saving ends the previous employer’s access. You can choose who should have access next.</p>
+                @endif
+                <button class="primary">Save employer link</button>
+            </form>
+        @endif
+        @if(!$apprentice || request()->filled('search'))
         <section class="panel">
             <form method="get" class="search">
                 @if($apprentice)<input type="hidden" name="apprentice" value="{{ $apprentice->id }}">@endif
@@ -30,6 +56,7 @@
                 </div>
             @endforeach
         </section>
+        @endif
         <details class="panel" @if(old('data') || (request()->filled('search') && $matches->isEmpty())) open @endif>
             <summary>Add a new employer</summary>
             <form method="post" action="{{ route('employer68.store') }}">

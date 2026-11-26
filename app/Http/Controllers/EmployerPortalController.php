@@ -114,9 +114,21 @@ class EmployerPortalController extends Controller
     public function grants(Request $r, Apprentice $apprentice)
     {
         $this->manager($r);
+        $input = $r->validate(['contact' => ['nullable', 'integer', 'min:1']]);
         $grants = EmployerApprenticeGrant::where('apprentice_id', $apprentice->id)->get()->keyBy('user_id');
+        $accounts = User::where('role', 'employer')->where('active', true)->orderBy('name')->orderBy('id');
+        $contacts = (clone $accounts)->whereNotNull('email_verified_at')->get(['id', 'name', 'email']);
+        if (isset($input['contact'])) {
+            abort_unless($contacts->contains('id', (int) $input['contact']), 404);
+        }
+        $users = $accounts->when(isset($input['contact']), fn ($q) => $q->whereKey($input['contact']))
+            ->paginate(20)->withQueryString();
 
-        return $this->privateView('employer-portal.grants', ['apprentice' => $apprentice, 'grants' => $grants, 'users' => User::where('role', 'employer')->where('active', true)->orderBy('name')->paginate(20)]);
+        $replaceable = $grants->filter(fn ($grant) => $grant->active && $grant->employer_id === $apprentice->employer_id)
+            ->map(fn ($grant) => ['grant' => $grant, 'user' => $contacts->firstWhere('id', $grant->user_id)])
+            ->filter(fn ($row) => $row['user']);
+
+        return $this->privateView('employer-portal.grants', compact('apprentice', 'grants', 'users', 'contacts', 'replaceable'));
     }
 
     public function grant(Request $r, Apprentice $apprentice)
@@ -127,6 +139,9 @@ class EmployerPortalController extends Controller
             'version' => ['required', 'integer', 'min:0'],
             'identity_reference' => ['required', 'string', 'max:2000'],
             'confirmed' => ['accepted'],
+            'replace_access' => ['nullable', 'string', 'regex:/^[1-9][0-9]{0,18}:[1-9][0-9]{0,18}$/D'],
+            'displayed_employer_id' => ['required_with:displayed_employer_version,replace_access', 'integer', 'min:1'],
+            'displayed_employer_version' => ['required_with:displayed_employer_id', 'integer', 'min:1'],
             'linked_employer_id' => ['required_with:linked_employer_version', 'integer', 'min:1'],
             'linked_employer_version' => ['required_with:linked_employer_id', 'integer', 'min:1'],
         ]);

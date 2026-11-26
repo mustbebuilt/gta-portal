@@ -1,6 +1,6 @@
 <section class="panel" id="task-decision">
     <h2>{{ $isKnowledge ? 'Record paper test result' : 'GTA tutor decision' }}</h2>
-    <form method="post" action="{{ route('tasks.decide', $task) }}">
+    <form method="post" data-marking-decision action="{{ route('tasks.decide', $task) }}">
         @csrf
         <input type="hidden" name="version" value="{{ $task->version }}">
         @foreach($queue ?? [] as $key => $value)
@@ -24,7 +24,7 @@
                     <option value="Referred" @selected(old('decision') === 'Referred')>{{ $isKnowledge ? 'Refer' : 'Return for changes' }}</option>
                 </select>
             </div>
-            <div><label for="decision-date">Assessment date</label><input id="decision-date" name="decision_date" type="date" value="{{ old('decision_date', $markingFocus ? today()->toDateString() : null) }}" required max="{{ today()->toDateString() }}"></div>
+            <div><label for="decision-date">Assessment date</label><input id="decision-date" name="decision_date" type="date" value="{{ old('decision_date', $isKnowledge ? null : today()->toDateString()) }}" required max="{{ today()->toDateString() }}"></div>
             @include('shared.reported-choice', ['choiceLabel'=>'Reason for returning work (if referred)','choiceName'=>'referral_reason_code','choices'=>\App\Support\ReportedChoices::MARKING_REFERRAL,'choiceValue'=>old('referral_reason_code'),'choiceWhenReferred'=>true])
             <div class="full">
                 @include('shared.staff-template-picker', ['pickerLabel'=>'Feedback template','family'=>'marking_feedback','fieldNames'=>['feedback'],'focusToken'=>\App\Support\MarkingFeedback::DETAIL])
@@ -35,6 +35,7 @@
         <div class="form-actions">
             <button name="after_save" value="stay" @class(['primary'=>$isKnowledge])>Save and stay</button>
             @unless($isKnowledge)<button name="after_save" value="next" class="primary">Save and open next</button>@endunless
+            @if($task->due_date)<button name="after_save" value="target" data-referral-target>Save and set follow-up target</button>@endif
         </div>
     </form>
 </section>

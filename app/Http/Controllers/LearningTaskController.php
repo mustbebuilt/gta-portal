@@ -327,7 +327,7 @@ class LearningTaskController extends Controller
     public function decide(Request $r, LearningTask $task): RedirectResponse
     {
         abort_unless(Access::tutor($r->user(), $task->apprentice) || Access::manager($r->user()), 403);
-        $decisionData = $r->validate(['version' => ['required', 'integer'], 'decision' => ['required', Rule::in(['Approved', 'Referred'])], 'decision_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'referral_reason_code' => ['exclude_unless:decision,Referred', 'nullable', Rule::in(array_keys(\App\Support\ReportedChoices::MARKING_REFERRAL))], 'feedback' => ['nullable', 'required_if:decision,Referred', 'string'], 'confirmed' => ['accepted'], 'after_save' => ['nullable', Rule::in(['stay', 'next'])]]);
+        $decisionData = $r->validate(['version' => ['required', 'integer'], 'decision' => ['required', Rule::in(['Approved', 'Referred'])], 'decision_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'referral_reason_code' => ['exclude_unless:decision,Referred', 'nullable', Rule::in(array_keys(\App\Support\ReportedChoices::MARKING_REFERRAL))], 'feedback' => ['nullable', 'required_if:decision,Referred', 'string'], 'confirmed' => ['accepted'], 'after_save' => ['nullable', Rule::in(['stay', 'next', 'target'])]]);
         \App\Support\MarkingFeedback::requireSpecificDetail($r->input('feedback'));
         DB::transaction(function () use ($r, $task, $decisionData): void {
             $apprentice = Apprentice::whereKey($task->apprentice_id)->lockForUpdate()->firstOrFail();
@@ -345,6 +345,10 @@ class LearningTaskController extends Controller
             }
             if (! $knowledge && $t->submitted_at && $r->input('decision_date') < $t->submitted_at->toDateString()) {
                 throw ValidationException::withMessages(['decision_date' => 'A tutor decision cannot precede the submitted work.']);
+            }
+            if (($decisionData['after_save'] ?? null) === 'target'
+                && ($decisionData['decision'] !== 'Referred' || ! $t->due_date)) {
+                throw ValidationException::withMessages(['after_save' => 'To set a follow-up target, return the work and make sure the task has a deadline.']);
             }
             $evidence = $this->answers($r, $t, ['trainer', 'observer']);
             if ($knowledge) {
@@ -373,6 +377,11 @@ class LearningTaskController extends Controller
             $t->save();
             $this->audit($r, $t->apprentice_id, $t->id, 'decision_recorded');
         });
+
+        if (($decisionData['after_save'] ?? null) === 'target') {
+            return to_route('actions.create', ['apprentice' => $task->apprentice_id, 'source_task_id' => $task->id])
+                ->with('status', 'Work returned. Agree the follow-up target below.');
+        }
 
         if ($r->input('after_save') === 'next') {
             $filters = MarkingQueueViews::parameters($r->input('queue', []));

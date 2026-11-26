@@ -38,7 +38,11 @@ class EmployerSetup68Controller extends Controller
             return to_route('apprentices.edit', ['apprentice'=>$person, 'link_employer'=>$employer->id]);
         }
 
+        $choices = $person && ! $employer ? Employer::where('active', true)->where('id', '!=', $person->employer_id ?? 0)
+            ->orderBy('name')->orderBy('reference')->get(['id', 'name', 'reference', 'record_version']) : collect();
+
         return response()->view('setup68.employer', [
+            'choices' => $choices,
             'token' => old('token', (string) Str::uuid()),
             'matches' => $matches,
             'apprentice' => $person,
@@ -50,6 +54,11 @@ class EmployerSetup68Controller extends Controller
     public function change(Request $request, Apprentice $apprentice)
     {
         Gate::authorize('update', $apprentice);
+        if ($request->has('employer_choice')) {
+            $choice = $request->validate(['employer_choice' => ['required', 'string', 'regex:/^[1-9][0-9]{0,18}:[1-9][0-9]{0,18}$/D']]);
+            [$id, $version] = explode(':', $choice['employer_choice']);
+            $request->merge(['employer_id' => $id, 'employer_version' => $version]);
+        }
         $input = $request->validate([
             'version' => ['required', 'integer', 'min:1'],
             'employer_id' => ['required', 'integer', 'min:1'],

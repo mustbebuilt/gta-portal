@@ -74,6 +74,46 @@ class ProgressReviewDraftTest extends TestCase
         $this->assertArrayNotHasKey('compliance_score', $row->source_snapshot);
     }
 
+    public function test_reopened_draft_reads_new_register_figures_and_saves_before_opening_targets(): void
+    {
+        $a = Apprentice::factory()->create();
+        $u = $this->actor();
+        $this->actingAs($u)->post(route('reviews.store', $a), ['fields'=>[
+            'format83'=>'simple83', 'reviewDate'=>today()->toDateString(),
+            'trainingFrom'=>today()->subWeek()->toDateString(), 'summary'=>'Original draft',
+        ]])->assertSessionHasNoErrors();
+        $draft = ProgressReviewDraft::sole();
+        $register = TrainingSession::factory()->create([
+            'members'=>[$a->id], 'session_date'=>today()->subDay()->toDateString(),
+        ]);
+        $this->post(route('attendance.save', $register), [
+            'version'=>$register->version, 'delivered_learning'=>'New topic from the submitted register',
+            'marks'=>[$a->id=>['code'=>'O', 'arrival'=>'09:00', 'departure'=>'16:00', 'otj_confirmed'=>1]],
+        ])->assertSessionHasNoErrors();
+        $edit = route('reviews.edit', [$a,$draft]);
+        $targets = route('actions.index', ['apprentice'=>$a, 'review'=>$draft->id]);
+        $opened = $this->get($edit)->assertOk()->assertSee('New topic from the submitted register');
+        $this->assertGreaterThan(0, $opened->viewData('snapshot')['review_summary']['period_otj_minutes']);
+        $this->assertEmpty($draft->fresh()->source_snapshot['delivered']);
+        $this->assertNotSame(\App\Support\ReviewSnapshot::factsHash($draft->source_snapshot), $opened->viewData('factsHash'));
+        $this->post(route('reviews.update', [$a,$draft]), [
+            'version'=>$draft->version, 'after_save'=>'targets',
+            'fields'=>['format83'=>'simple83', 'summary'=>'Notes saved before targets'],
+        ])->assertRedirect($targets)->assertSessionHasNoErrors();
+        $this->get($targets)->assertOk()->assertSee($edit.'#review-3');
+        $this->assertSame('Notes saved before targets', $draft->fresh()->fields['summary']);
+        $this->assertSame('New topic from the submitted register', $draft->fresh()->source_snapshot['delivered'][0]['subjects']);
+        $form = route('actions.create', ['apprentice'=>$a, 'review'=>$draft->id]);
+        $this->get($form)->assertOk()->assertSee('Learning target template');
+        $this->from($form)->post(route('actions.store', $a), [
+            'review'=>$draft->id,'title'=>'Complete two inspection exercises','owner'=>'Apprentice',
+            'due_date'=>today()->addWeek()->toDateString(),'method'=>'quantity','quantity'=>2,'unit'=>'exercises',
+            'evidence_method'=>'worksheet','relevance'=>'review','learning_reference'=>'Fictional workshop',
+            'support'=>'Tutor will demonstrate the first check','achievable'=>1,'agreed'=>1,
+        ])->assertRedirect($edit.'#review-3')->assertSessionHasNoErrors();
+        $this->get($edit)->assertOk()->assertSee('Complete two inspection exercises')->assertSee('Notes saved before targets');
+    }
+
     public function test_training_period_and_future_actual_meeting_dates_are_validated(): void
     {
         $a = Apprentice::factory()->create();

@@ -46,7 +46,7 @@ class TutorRegister72Test extends TestCase
         ]);
 
         $this->actingAs($tutor)->withSession(['auth_version' => $tutor->auth_version]);
-        $this->get(route('attendance.show', $session1))->assertOk()->assertSee('Training delivered to the group');
+        $this->get(route('attendance.show', $session1))->assertOk()->assertSee('What did the group learn?');
 
         // Save attendance + structured subjects in one request: Alex attended, Sam absent
         $this->post(route('attendance.save', $session1), [

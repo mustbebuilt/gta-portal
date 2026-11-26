@@ -14,12 +14,20 @@ $targets=$editable ? $actions->map(fn($a)=>['title'=>$a->title,'owner'=>$a->owne
 @if($preparation && !$preparation['ready'])<details class="panel" open><summary>{{count($preparation['pending'])}} saved items to finish</summary><ul>@foreach(collect($preparation['pending'])->groupBy('section') as $section=>$items)<li><a href="#{{$section}}">{{$labels[$section]}}</a>: {{implode('; ',$items->pluck('label')->all())}}</li>@endforeach</ul><p>Typed changes are checked when saved.</p></details>@endif
 <nav class="section-nav" aria-label="Review sections">@foreach($labels as $id=>$label)<a href="#{{$id}}">{{$label}}</a>@endforeach</nav>
 <form method="post" action="{{$review->exists?route('reviews.update',[$apprentice,$review]):route('reviews.store',$apprentice)}}">@csrf
+@if($editable)<button type="submit" name="after_save" value="stay" hidden>Save draft</button>@endif
 @if($review->exists)<input type="hidden" name="version" value="{{$review->version}}">@endif
 <input type="hidden" name="fields[format83]" value="simple83">
 @if(!$review->exists)<input type="hidden" name="use_recorded_facts" value="1">@endif
+@if($editable)<input type="hidden" name="review_facts_hash" value="{{ $factsHash }}">@endif
 <input type="hidden" name="prepare_plan_hash" value="{{$snapshot['delivery_plan']['hash']??''}}">
 <fieldset @disabled(!$editable)>
 <section class="panel" id="review-1"><h2>1. Progress</h2>
+@if($editable)
+    <p>Current portal records. Review period: {{ $periodPreview['trainingFrom'] ?? 'Start date needed' }} to {{ $periodPreview['reviewDate'] ?? 'Meeting date needed' }}. Save changes to the dates to update this period.</p>
+    @if(\App\Support\LearningAccess::training(auth()->user(), $apprentice))
+        <p><a href="{{ route('attendance.apprentice', $apprentice) }}" target="_blank" rel="noopener">Open attendance and OTJ records (new tab)</a></p>
+    @endif
+@endif
 @if(isset($snapshot['review_summary']))@include('reviews.progress-comparison',['summary'=>$snapshot['review_summary']])@endif
 @include('reviews.programme-dates')
 @if(($snapshot['review_summary']['attendance']??null)!==null)<p>Review-period attendance: {{$snapshot['review_summary']['attendance']['attended']}} attended · {{$snapshot['review_summary']['attendance']['missed']}} missed · {{$snapshot['review_summary']['attendance']['unmarked']}} unmarked.</p>@endif
@@ -29,7 +37,7 @@ $targets=$editable ? $actions->map(fn($a)=>['title'=>$a->title,'owner'=>$a->owne
 @foreach(['tutor'=>'Tutor','mentor'=>'Learning & Progress Mentor','employerRep'=>'Employer representative'] as $key=>$label)<label>{{$label}}<input name="fields[{{$key}}]" value="{{old('fields.'.$key,$f[$key]??$automatedDefaults[$key]??'')}}" maxlength="20000"></label>@endforeach
 <label>Meeting method<select name="fields[method]"><option value="">Choose</option>@foreach(['Face to face','Video meeting','Telephone','Email'] as $method)<option @selected(old('fields.method',$f['method']??'')===$method)>{{$method}}</option>@endforeach</select></label></div><p>Check actual attendees and dates.</p></details>
 <details data-print-expand><summary>Recorded learning and supporting figures</summary>
-<p>Figures are captured when saved; topic completion and qualification achievement remain separate.</p>
+<p>Saving keeps a copy of these figures with the review.</p>
 @include('reviews.formal-ksb-summary')
 @forelse($snapshot['delivered']??[] as $row)<p>{{$row['date']}} · {{$row['name']}} · {{$row['subjects']??'Subjects not recorded'}}</p>@empty<p>No attended-session learning recorded in this period.</p>@endforelse
 @include('reviews.monthly-development')
@@ -64,13 +72,15 @@ $targets=$editable ? $actions->map(fn($a)=>['title'=>$a->title,'owner'=>$a->owne
 <section class="panel" id="review-3"><span id="review-5"></span><h2>3. Targets</h2>
 @if($editable)<p>Open targets carry forward from the Action Plan. Review their owners and dates before agreeing any changes.</p>@endif
 @forelse(collect($targets)->where('status','!=','Completed') as $target)<article class="work-row"><div><h3>{{$target['title']}}</h3>@if(($target['relevance']??null)===\App\Models\SmartAction::OTJ_CATCHUP)<span class="badge">OTJ catch-up</span>@endif<p>{{$target['owner']}} · Due {{$target['due_date']??'Not set'}} · {{$target['status']}}</p></div></article>@empty<p>No unfinished targets recorded.</p>@endforelse
-@if($editable && \App\Support\LearningAccess::training(auth()->user(),$apprentice))<a class="button" href="{{route('actions.index',$apprentice)}}">Add or update targets</a>@endif
+@if($editable && \App\Support\LearningAccess::training(auth()->user(), $apprentice))
+    <button name="after_save" value="targets">Save draft and open Action Plan</button>
+@endif
 <details><summary>Completed targets</summary>@foreach(collect($targets)->where('status','Completed') as $target)<p>{{$target['title']}} · {{$target['owner']}} · Completed {{$target['completion_date']??'Date not recorded'}}</p>@endforeach</details>
 
-@if($editable && $review->exists && !empty($snapshot['action_plan']))
+@if($editable && $review->exists && !empty($review->source_snapshot['action_plan']))
 <details><summary>Action Plan position captured</summary>
 <p>Targets as recorded at the last save.</p>
-@foreach($snapshot['action_plan'] as $target)<p>{{ $target['title'] }} · {{ $target['status'] }} · Due {{ $target['due_date'] ?? 'Not set' }}</p>@endforeach
+@foreach($review->source_snapshot['action_plan'] as $target)<p>{{ $target['title'] }} · {{ $target['status'] }} · Due {{ $target['due_date'] ?? 'Not set' }}</p>@endforeach
 </details>
 @endif
 <p>Targets use the original Action Plan; saving this review does not create copies.</p></section>

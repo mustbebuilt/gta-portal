@@ -60,11 +60,11 @@ final class FurtherSimplification83Test extends TestCase
         AttendanceMark::create(['training_session_id'=>$s->id,'apprentice_id'=>$a->id,'code'=>'O','arrival'=>'09:00','departure'=>'16:00','otj_confirmed'=>true,'otj_minutes'=>360,'recorded_by'=>$u->id]);
         $page=$this->get(route('attendance.show',$s))->assertOk()->assertSee('6.00 hours');
         $dom=new \DOMDocument();@$dom->loadHTML($page->getContent());$xp=new \DOMXPath($dom);
-        $this->assertSame(1,$xp->query('//details[summary="Actual times, OTJ and other details" and not(@open)]')->length);
+        $this->assertSame(1,$xp->query('//details[summary="Change times, OTJ minutes or notes" and not(@open)]')->length);
         $this->assertDatabaseCount('attendance_marks',1);
         $this->from(route('attendance.show',$s))->post(route('attendance.save',$s),['version'=>$s->version,'marks'=>[$a->id=>['code'=>'O','arrival'=>'invalid']]])->assertSessionHasErrors();
         $error=$this->get(route('attendance.show',$s))->assertOk();$doc=new \DOMDocument();@$doc->loadHTML($error->getContent());
-        $this->assertSame(1,(new \DOMXPath($doc))->query('//details[summary="Actual times, OTJ and other details" and @open]')->length);
+        $this->assertSame(1,(new \DOMXPath($doc))->query('//details[summary="Change times, OTJ minutes or notes" and @open]')->length);
     }
 
     public function test_meeting_shows_action_plan_with_marker_reviews_closed_and_does_not_save(): void
@@ -74,7 +74,7 @@ final class FurtherSimplification83Test extends TestCase
         $page=$this->actingAs($u)->get(route('support.worklist',['meeting'=>$a->id]))->assertOk()->assertSee('Change review frequency');
         $dom=new \DOMDocument();@$dom->loadHTML($page->getContent());$xp=new \DOMXPath($dom);
         $this->assertSame(1, $xp->query('//details[not(@open) and summary="Record review"]')->length);
-        $this->assertSame(1, $xp->query('//section[@id="support-actions"]/form//input[@name="measure" and @required]')->length);
+        $this->assertSame(1, $xp->query('//section[@id="support-actions"]//form//input[@name="measure" and @required]')->length);
         $this->assertSame(1,$xp->query('//details[summary="Change review frequency" and not(@open)]')->length);
         $this->assertFalse($s->fresh()->first_review_completed);
     }
@@ -98,6 +98,33 @@ final class FurtherSimplification83Test extends TestCase
         $row=ProgressReviewDraft::sole();$old=$row->source_snapshot;
         $this->post(route('reviews.update',[$a,$row]),['version'=>$row->version,'fields'=>$this->fields(),'after_save'=>'prepare','prepare_confirmed'=>1,'prepare_plan_hash'=>$plan->approved['hash']])->assertSessionHasNoErrors();
         $row->refresh();$this->assertSame('Ready for signatures',$row->state);$this->assertSame('Original draft',$row->history[0]['fields']['summary']);$this->assertSame($old,$row->history[0]['source_snapshot']);
+    }
+
+    public function test_signoff_rejects_a_register_updated_after_the_tutor_opened_the_draft(): void
+    {
+        [$u,$a,$plan] = $this->fixture();
+        $fields = [...$this->fields(), 'format83'=>'simple83', 'checked83'=>1];
+        $this->post(route('reviews.store', $a), ['fields'=>$fields])->assertSessionHasNoErrors();
+        $draft = ProgressReviewDraft::sole();
+        $url = route('reviews.edit', [$a, $draft]);
+        $shown = $this->get($url)->assertOk()->viewData('factsHash');
+        $group = TutorGroup::factory()->create(['tutor_id'=>$u->id]);
+        $register = TrainingSession::factory()->create([
+            'tutor_group_id'=>$group->id, 'members'=>[$a->id], 'session_date'=>'2026-11-23',
+        ]);
+        $this->post(route('attendance.save', $register), [
+            'version'=>$register->version,'delivered_learning'=>'Fictional confirmed workshop activity',
+            'marks'=>[$a->id=>['code'=>'O','arrival'=>'09:00','departure'=>'16:00','otj_confirmed'=>1]],
+        ])->assertSessionHasNoErrors();
+        $post = ['version'=>$draft->version,'fields'=>$fields,'after_save'=>'signoff','prepare_plan_hash'=>$plan->approved['hash']];
+        $this->from($url)->post(route('reviews.update', [$a, $draft]), $post + ['review_facts_hash'=>$shown])
+            ->assertSessionHasErrors('prepare_confirmed');
+        $this->assertSame('Draft', $draft->fresh()->state);
+        $current = $this->get($url)->assertOk()->viewData('factsHash');
+        $this->assertNotSame($shown, $current);
+        $this->post(route('reviews.update', [$a, $draft]), $post + ['review_facts_hash'=>$current])
+            ->assertRedirect(route('electronic-reviews.prepare-form', $draft))->assertSessionHasNoErrors();
+        $this->assertSame('Ready for signatures', $draft->fresh()->state);
     }
 
     public function test_missing_confirmation_or_incomplete_review_does_not_create_or_freeze_records(): void

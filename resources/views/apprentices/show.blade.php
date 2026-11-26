@@ -4,6 +4,9 @@
 <header class="page-heading"><div><p class="eyebrow">{{ $apprentice->reference }}</p><h1>{{ $apprentice->first_name }} {{ $apprentice->last_name }}</h1><p>{{ $apprentice->programmeLabel() ?? 'Programme not recorded' }} · {{ $apprentice->groupLabel() ?? 'Group not assigned' }}</p><p class="muted">{{ $apprentice->employerLabel() ?? 'Employer not recorded' }} · Main tutor {{ $apprentice->tutor?->name ?? 'not assigned' }}</p></div><div class="toolbar"><a class="button" href="{{ $listUrl ?? route('apprentices.index') }}">Back to apprentices</a> @can('update', $apprentice)<a class="button" href="{{ route('apprentices.edit', $apprentice) }}">Edit apprentice</a>
     @unless(\App\Models\ProgrammeOutcome::archived()->where('apprentice_id', $apprentice->id)->exists())
         <a class="button" href="{{ route('employer68.show', ['apprentice' => $apprentice->id]) }}">{{ $apprentice->employerLabel() ? 'Change employer' : 'Link employer' }}</a>
+        @if($apprentice->employerRecord?->active)
+            <a class="button" href="{{ route('apprentices.edit', ['apprentice' => $apprentice, 'link_employer' => $apprentice->employer_id]) }}#workplace-access">Workplace contact or mentor</a>
+        @endif
     @endunless
     <a class="button" href="{{ route('apprentices.close-down', $apprentice) }}">Programme outcome</a>
 @endcan</div></header>

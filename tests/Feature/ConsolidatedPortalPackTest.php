@@ -69,7 +69,7 @@ class ConsolidatedPortalPackTest extends TestCase
         $admin = User::factory()->create(['role'=>'admin']);
         $person = Apprentice::factory()->create(['start_date'=>'2026-09-01']);
         $session = TrainingSession::factory()->create(['session_date'=>'2026-11-01','members'=>[$person->id]]);
-        $this->actingAs($admin)->get(route('attendance.show',$session))->assertOk()->assertSee('Training delivered to the group');
+        $this->actingAs($admin)->get(route('attendance.show',$session))->assertOk()->assertSee('What did the group learn?');
         $this->post(route('attendance.save',$session), [
             'version'=>$session->version,'weekly_confirmed'=>1,
             'training'=>['vocational'=>'Workshop inspection','functional_skills'=>'Reading instructions',

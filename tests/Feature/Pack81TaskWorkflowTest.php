@@ -95,8 +95,13 @@ class Pack81TaskWorkflowTest extends TestCase
         $this->post(route('tasks.decide', $task), $decision + ['feedback' => 'Correct [[add detail]] before resubmitting.'])
             ->assertSessionHasErrors('feedback');
         $this->assertSame('Awaiting marking', $task->fresh()->status);
-        $this->post(route('tasks.decide',$task), $decision + ['feedback'=>'Supply the missing measured value.', 'referral_reason_code'=>'incomplete-work'])
-            ->assertSessionHasNoErrors();
+        $task->update(['due_date'=>today()->addWeek()]);
+        $followup = route('actions.create', ['apprentice'=>$person,'source_task_id'=>$task->id]);
+        $this->post(route('tasks.decide',$task), $decision + [
+            'feedback'=>'Supply the missing measured value.', 'referral_reason_code'=>'incomplete-work', 'after_save'=>'target',
+        ])->assertRedirect($followup)->assertSessionHasNoErrors();
+        $this->get($followup)->assertOk()->assertSee('Supply the missing measured value.')->assertSee('Correct and resubmit');
+        $this->assertDatabaseCount('smart_actions', 0);
         $this->assertSame('incomplete-work', $task->fresh()->submissions[0]['decision']['referral_reason_code']);
         $this->actingAs($learner)->get($route)->assertOk()->assertSee('Supply the missing measured value.');
         $this->post($route, [...$submission,'version'=>4,'activities_present'=>1,'activities'=>['another-task-activity']])

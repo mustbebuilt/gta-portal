@@ -79,6 +79,13 @@ class EmployerActions
             if (! $e?->active || ! $target->active || $target->role !== 'employer' || ! $target->email_verified_at || User::whereRaw('LOWER(email) = ?', [strtolower($target->email)])->count() !== 1) {
                 self::fail('Use a current active linked employer and one verified employer login. Mailbox verification alone does not establish workplace authority.');
             }
+            if (isset($data['displayed_employer_id']) && (
+                $e->id !== (int) $data['displayed_employer_id']
+                || $e->record_version !== (int) $data['displayed_employer_version']
+            )) {
+                self::fail('The linked employer changed. Reopen workplace access and check the current employer.');
+            }
+
             if (isset($data['linked_employer_id']) && (
                 $e->id !== (int) $data['linked_employer_id']
                 || $e->record_version !== (int) $data['linked_employer_version']
@@ -91,12 +98,24 @@ class EmployerActions
             if (($g?->version ?? 0) !== (int) $data['version']) {
                 self::fail('Employer access changed. Reload before verifying.');
             }
+            $previous = null;
+            if (! empty($data['replace_access'])) {
+                [$previousId, $previousVersion] = explode(':', $data['replace_access']);
+                $previous = EmployerApprenticeGrant::where('apprentice_id', $a->id)->where('employer_id', $e->id)
+                    ->where('active', true)->where('user_id', '!=', $target->id)->lockForUpdate()->find($previousId);
+                if (! $previous || (string) $previous->version !== $previousVersion) {
+                    self::fail('The access to replace has changed. Check the current workplace accounts.');
+                }
+            }
             $g ??= new EmployerApprenticeGrant(['apprentice_id' => $a->id, 'user_id' => $target->id]);
             $history = $g->history ?? [];
             $history[] = ['event' => 'identity_and_authority_verified', 'by' => $u->id, 'at' => now()->toIso8601String(), 'reference' => $data['identity_reference']];
             $g->fill(['employer_id' => $e->id, 'identity_hash' => self::identity($target), 'employer_version' => $e->record_version, 'identity_reference' => $data['identity_reference'], 'verified_by' => $u->id, 'active' => true, 'version' => ($g->exists ? $g->version : 0) + 1, 'history' => $history]);
             $g->save();
             self::audit($u, $a, 'employer_access_verified');
+            if ($previous) {
+                self::revoke($u, $authVersion, $previous, $previous->version, 'Workplace access replaced with verified account '.$target->id);
+            }
 
             return $g;
         });

@@ -37,7 +37,7 @@
             <p>Access verified for {{ $access['user']->name }} · {{ $access['user']->email }}</p>
         @elseif($access)
             <p>Suggested account · {{ $access['user']->name }} · {{ $access['user']->email }}</p>
-            <details @if($errors->any()) open @endif>
+            <details open>
                 <summary>Verify workplace access</summary>
                 <form method="post" action="{{ route('employer-grants.save', $apprentice) }}">
                     @csrf
@@ -54,7 +54,7 @@
         @else
             <p>No verified employer login matches the directory contact.</p>
         @endif
-        <p><a href="{{ route('employer-grants.index', $apprentice) }}">{{ $access ? 'Manage other workplace accounts' : 'Choose an existing workplace account' }}</a>
+        <p><a href="{{ route('employer-grants.index', $apprentice) }}">{{ $access ? 'Choose another workplace contact or mentor' : 'Choose a workplace contact or mentor' }}</a>
         @unless($access) · <a href="{{ route('employer-accounts.index') }}">Set up an employer login</a>@endunless</p>
     </section>
 @endif

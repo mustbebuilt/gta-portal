@@ -6,7 +6,7 @@
         ->filter(fn ($break) => is_array($break))->take(10)->values()->all() ?: [[]];
 @endphp
 <details class="panel" id="session-planner" data-reveal-on-link @if($errors->any() || request()->filled('plan_date')) open @endif>
-    <summary>Plan a new session · exceptions</summary>
+    <summary>Plan another session</summary>
     <noscript>
         <form method="get" action="{{ route('attendance.index') }}#session-planner">
             <label>Group <select name="group" required>

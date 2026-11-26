@@ -6,7 +6,7 @@ document.querySelectorAll('[data-compact-register]').forEach(form => {
     row.querySelector('input[name$="[arrival]"]').value = form.dataset.start;
     row.querySelector('input[name$="[departure]"]').value = form.dataset.end;
     row.querySelector('input[name$="[otj_confirmed]"]').checked = false;
-    row.querySelector('[data-full-session-status]').textContent = 'Full-session attendance entered. Check the times and confirm any eligible OTJ separately.';
+    row.querySelector('[data-full-session-status]').textContent = 'Full-session attendance entered. Check any eligible OTJ below.';
     const details = row.querySelector('details:has(input[name$="[arrival]"])');
     if (details && openDetails) details.open = true;
   };
@@ -57,7 +57,7 @@ document.querySelectorAll('[data-compact-register]').forEach(form => {
     const selected = candidates.filter(({checkbox}) => checkbox.checked);
     selected.forEach(({row}) => setFullSession(row, false));
     update();
-    if (selected.length) status.textContent = 'Attendance entered for ' + selected.length + '. Confirm eligible OTJ separately, then save.';
+    if (selected.length) status.textContent = 'Attendance entered for ' + selected.length + '. Check eligible OTJ for each apprentice, then save.';
   });
   bulk.hidden = candidates.length === 0;
   update();
@@ -92,4 +92,14 @@ document.querySelectorAll('[data-evidence-file]').forEach(input => {
   camera?.addEventListener('change', () => update(camera, cameraDetails));
   update(input, fileDetails);
   update(camera, cameraDetails);
+});
+
+// Show the follow-up route when the tutor selects a referral.
+document.querySelectorAll('[data-marking-decision]').forEach(form => {
+  const decision = form.elements.namedItem('decision');
+  const target = form.querySelector('[data-referral-target]');
+  if (!target) return;
+  const update = () => { target.hidden = decision.value !== 'Referred'; };
+  decision.addEventListener('change', update);
+  update();
 });

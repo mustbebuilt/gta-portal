@@ -1,7 +1,7 @@
 <section class="panel">
-    <h2>Training delivered to the group</h2>
+    <h2>What did the group learn?</h2>
     @if($deliveryDraft)
-        <p>Planned subjects are filled in below. Keep the ones delivered in full and amend the notes for anything that changed.</p>
+        <p>The planned subjects are already selected. Keep the topics taught in full and add a custom note for anything else.</p>
     @endif
     @php
         $selected = old('training') !== null ? (array) old('training.subjects', []) : array_column($structuredTraining['items'] ?? $deliveryDraft, 'subjectId');

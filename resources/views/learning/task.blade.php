@@ -30,6 +30,9 @@
 @else
     @include('learning.next-step')
 @endif
+@if($tutor && $task->status === 'Referred' && $task->due_date)
+    <p><a class="button" href="{{ route('actions.create', ['apprentice'=>$apprentice, 'source_task_id'=>$task->id]) }}">Open follow-up target</a></p>
+@endif
 @if(!$release['open'])<p class="notice">{{ $release['label'] }}. Saved work remains available to read. An administrator can record an exception from the training-task list.</p>@endif
 @if($planning->isNotEmpty())<details class="panel" @unless($markingFocus) open @endunless><summary>Approved Block 9 planning guidance</summary><p class="muted">Use the existing answer fields for this guidance.</p>@foreach($planning as $activity)<p><strong>{{ $activity['code'] }}:</strong> {{ $activity['instruction'] }}</p>@endforeach</details>@endif
 <details class="panel" @if(!$markingFocus && ($presentation || (isset($task->template['catalogueId']) && $task->template['catalogueId']!=='autocare')))open @endif><summary>Task instructions and source</summary><p class="recorded-answer">{{ $task->template['instructions'] }}</p><p class="muted">Source: {{ $task->template['filename'] }} · Version {{ $task->template['version'] }}. </p></details>
@@ -117,5 +120,5 @@
     @include('learning.task-decision')
 @endif
 @include('learning.task-history')
-<script src="{{ asset('assets/routine-workflows.js') }}?v=evidence-details" defer></script>
+<script src="{{ asset('assets/routine-workflows.js') }}?v=104" defer></script>
 @endsection

@@ -218,7 +218,7 @@ class RoutineWorkflowSimplificationTest extends TestCase
         $cancel = route('attendance.cancel', $session);
         $this->post(route('attendance.save', $session), $payload)->assertSessionHasNoErrors();
         $recorded = $session->fresh();
-        $this->get($page)->assertOk()->assertSee('Correct this register')->assertSee('Cancellation reason')
+        $this->get($page)->assertOk()->assertSee('Correct saved entries')->assertSee('Cancellation reason')
             ->assertSee('Correction reason template')->assertSee('Room or workshop unavailable');
         $this->from($page)->post($cancel, ['version' => $recorded->version])->assertSessionHasErrors('reason');
         $this->assertSame('Planned', $session->fresh()->state);
@@ -254,7 +254,7 @@ class RoutineWorkflowSimplificationTest extends TestCase
     }
 
     public function test_register_view_has_compact_details_and_explicit_full_session_control():void {
-        [,$s]=$this->register();$page=$this->get(route('attendance.show',$s))->assertOk()->assertSee('Actual times, OTJ and other details')
+        [,$s]=$this->register();$page=$this->get(route('attendance.show',$s))->assertOk()->assertSee('Change times, OTJ minutes or notes')
             ->assertSee('Attended for the full session')->assertSee('routine-workflows.js');
         $this->capture($page,'register');
     }

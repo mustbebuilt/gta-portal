@@ -208,7 +208,7 @@ class AttendanceWorkflowTest extends TestCase
 
         $this->travelTo(Carbon::parse('2026-12-01 17:00'));
         $this->actingAs($tutor)->get(route('attendance.show', $session))->assertOk()
-            ->assertSee('Planned subjects are filled in below')->assertSee('Vehicle safety inspection')
+            ->assertSee('The planned subjects are already selected')->assertSee('Confirm eligible OTJ delivered')->assertSee('Vehicle safety inspection')
             ->assertSee('Basic brake and tyre condition check');
         $this->post(route('attendance.save', $session), [
             'version' => $session->version, 'weekly_confirmed' => 1,
@@ -218,7 +218,7 @@ class AttendanceWorkflowTest extends TestCase
         ])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame([$subjects[0]], array_column(RegisterTrainingRecord::sole()->details['items'], 'subjectId'));
         $this->assertNull(AttendanceMark::sole()->otj_minutes);
-        $this->get(route('attendance.show', $session))->assertOk()->assertDontSee('Planned subjects are filled in below');
+        $this->get(route('attendance.show', $session))->assertOk()->assertDontSee('The planned subjects are already selected');
     }
 
     public function test_subject_planner_only_requires_manual_times_when_no_schedule_applies(): void

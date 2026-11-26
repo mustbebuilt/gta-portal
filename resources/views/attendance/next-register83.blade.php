@@ -12,7 +12,10 @@
         @foreach($scheduledThisWeek as $row)
             <div class="work-row">
                 <p><strong>{{ $row['group']->name }}</strong> · {{ \Carbon\CarbonImmutable::parse($row['occurrence']['date'])->format('D j M Y') }}</p>
-                @include('attendance.open-weekly', ['row' => $row['occurrence'] + ['group' => $row['group']], 'registerUrl' => null])
+                <div class="form-actions">
+                    @include('attendance.open-weekly', ['row' => $row['occurrence'] + ['group' => $row['group']], 'registerUrl' => null])
+                    <a href="{{ route('attendance.index', ['group' => $row['group']->id, 'plan_date' => $row['occurrence']['date']]) }}#session-planner">Plan this week’s subjects</a>
+                </div>
             </div>
         @endforeach
         @if($nextRegister83)</details>@endif
