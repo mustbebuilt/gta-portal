@@ -25,6 +25,7 @@
                 </select>
             </div>
             <div><label for="decision-date">Assessment date</label><input id="decision-date" name="decision_date" type="date" value="{{ old('decision_date', $markingFocus ? today()->toDateString() : null) }}" required max="{{ today()->toDateString() }}"></div>
+            @include('shared.reported-choice', ['choiceLabel'=>'Reason for returning work (if referred)','choiceName'=>'referral_reason_code','choices'=>\App\Support\ReportedChoices::MARKING_REFERRAL,'choiceValue'=>old('referral_reason_code'),'choiceWhenReferred'=>true])
             <div class="full">
                 @include('shared.staff-template-picker', ['pickerLabel'=>'Feedback template','family'=>'marking_feedback','fieldNames'=>['feedback'],'focusToken'=>\App\Support\MarkingFeedback::DETAIL])
             </div>

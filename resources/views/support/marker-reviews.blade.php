@@ -55,8 +55,8 @@
                         <details @if($restore && $errors->has($frequencyKey)) open @endif><summary>Change review frequency</summary><label>Review frequency <select name="{{ $frequencyKey }}" required>
                                 @foreach($intervals as $value=>$label)<option value="{{ $value }}" @selected(($restore ? old($frequencyKey) : $frequency) === $value)>{{ $label }}</option>@endforeach
                             </select></label></details>
-                        @include('shared.staff-template-picker', ['pickerLabel'=>'Review outcome template','family'=>'review_outcomes','fieldNames'=>[$outcomeKey]])
-                        <label>Review outcome <textarea name="{{ $outcomeKey }}" required maxlength="1000">{{ $restore ? old($outcomeKey) : '' }}</textarea></label>
+                        @include('shared.reported-choice', ['choiceLabel'=>'Review outcome','choiceName'=>'review_outcome_code','choices'=>\App\Support\ReportedChoices::SUPPORT_REVIEW,'choiceValue'=>$restore ? old('review_outcome_code') : null,'choiceRequired'=>true])
+                        <label>Review notes (required for Other) <textarea name="{{ $outcomeKey }}" maxlength="1000">{{ $restore ? old($outcomeKey) : '' }}</textarea></label>
                         <details @if($restore && (old('summary') || $errors->hasAny(['summary', 'measure', 'owner_id', 'due_date']))) open @endif>
                             <summary>Add an agreed SMART target</summary>
                             <input type="hidden" name="request_uuid" value="{{ $restore && old('request_uuid') ? old('request_uuid') : (string) \Illuminate\Support\Str::uuid() }}">

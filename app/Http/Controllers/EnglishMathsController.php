@@ -252,6 +252,7 @@ class EnglishMathsController extends Controller
             'status' => [$evidenceOnly ? 'prohibited' : 'required', Rule::in(['Not Started', 'In Progress', 'Completed', 'Secure'])],
             'completion_date' => ['nullable', Rule::prohibitedIf($evidenceOnly), 'required_if:status,Completed', 'date_format:Y-m-d', 'before_or_equal:today'],
             'feedback' => ['required', 'string', 'max:20000'],
+            'referral_reason_code' => ['exclude_unless:decision,Referred', 'nullable', Rule::in(array_keys(\App\Support\ReportedChoices::MARKING_REFERRAL))],
             'decision' => ['nullable', Rule::requiredIf($evidenceOnly || $r->input('after_save') === 'next'), Rule::in(['Accepted', 'Referred'])],
             'after_save' => ['nullable', Rule::in(['next'])],
             'queue' => ['nullable', 'array'],
@@ -274,6 +275,9 @@ class EnglishMathsController extends Controller
                     throw ValidationException::withMessages(['decision' => 'There is no current submission awaiting review.']);
                 }
                 $history[array_key_last($history)]['decision'] = ['outcome' => $decision, 'feedback' => $data['feedback'], 'tutor_id' => $r->user()->id, 'recorded_at' => now()->toIso8601String()];
+                if (isset($data['referral_reason_code'])) {
+                    $history[array_key_last($history)]['decision']['referral_reason_code'] = $data['referral_reason_code'];
+                }
                 $t->evidence_stage = $decision;
             }
             if (! $evidenceOnly) {

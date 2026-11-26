@@ -90,8 +90,9 @@ class SubjectMarkingQueueTest extends TestCase
         $this->assertSame('Fictional checked feedback', $first->submissions[0]['decision']['feedback']);
         $this->from($review)->post(route('topics.update', $first), $data + ['decision' => 'Referred'])
             ->assertSessionHasErrors('version');
-        $this->post(route('topics.update', $second), $data + ['decision' => 'Referred'])
+        $this->post(route('topics.update', $second), $data + ['decision' => 'Referred', 'referral_reason_code' => 'missing-working'])
             ->assertRedirect(SubjectMarkingQueue::indexUrl($filters))->assertSessionHasNoErrors();
+        $this->assertSame('missing-working', $second->fresh()->submissions[0]['decision']['referral_reason_code']);
         $this->get(SubjectMarkingQueue::indexUrl($filters))->assertOk()->assertSee($older->topic)
             ->assertDontSee('Start evidence review');
         $this->assertSame('Awaiting review', $older->fresh()->evidence_stage);

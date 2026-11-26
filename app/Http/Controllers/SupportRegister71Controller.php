@@ -6,11 +6,13 @@ use App\Models\Apprentice;
 use App\Models\SupportMarkerSchedule71;
 use App\Models\SupportSharedAction71;
 use App\Models\User;
+use App\Support\ReportedChoices;
 use App\Support\SupportAccess;
 use App\Support\SupportRegister71;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class SupportRegister71Controller extends Controller
 {
@@ -77,7 +79,8 @@ class SupportRegister71Controller extends Controller
             'kind' => ['required', 'string'],
             'review_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
             'interval_key' => ['nullable', 'string', 'max:20'],
-            'note' => ['nullable', 'string', 'max:2000'],
+            'review_outcome_code' => ['exclude_unless:kind,formal_review', 'nullable', Rule::in(array_keys(ReportedChoices::SUPPORT_REVIEW))],
+            'note' => ['nullable', Rule::requiredIf($r->input('kind') === 'formal_review' && $r->input('review_outcome_code') === 'other'), 'string', 'max:2000'],
             ...SupportRegister71::reviewTargetRules(),
         ]);
         SupportRegister71::recordReview($r->user(), $schedule, $v);

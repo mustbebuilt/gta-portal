@@ -89,6 +89,14 @@ class AttendanceController extends Controller
                     ->sortBy(fn ($row) => [$row['occurrence']['date'], $row['occurrence']['settings']['start'], $row['group']->name])->values();
             }
         }
+        $cancellationCounts = $view === 'cancelled' ? $filtered->countBy(function (array $row) {
+            $event = collect($row['session']->history ?? [])->last(
+                fn ($item) => ($item['event'] ?? null) === 'session_cancelled'
+            );
+
+            return \App\Support\ReportedChoices::REGISTER_CANCELLATION[$event['cancellation_reason_code'] ?? '']
+                ?? 'No standard reason recorded';
+        })->sortKeys() : collect();
         $plannerGroup = $groups->firstWhere('id', (int) $r->old('tutor_group_id', $input['group'] ?? 0));
         $plannerDate = $r->old('session_date', $input['plan_date'] ?? today()->toDateString());
         $plannerDate = is_string($plannerDate) ? $plannerDate : '';
@@ -96,7 +104,7 @@ class AttendanceController extends Controller
             ? $this->sessionOptions($plannerGroup, preg_match('/^\d{4}-\d{2}-\d{2}$/D', $plannerDate) && strtotime($plannerDate) ? $plannerDate : null)
             : ['subjects' => [], 'timing' => null];
 
-        return view('attendance.index', ['plannerDate' => $plannerDate, 'plannerOptions' => $plannerOptions, 'scheduledThisWeek' => $scheduledThisWeek, 'nextScope83' => Workday83::registerScope($input), 'nextRegister83' => Workday83::nextRegister($r->user(), null, $input), 'groups' => $groups, 'sessions' => $registerRows->getCollection()->pluck('session'), 'weeklyGroupSessions' => $sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'), 'monthlyOutstanding' => $monthlyOutstanding, 'todayRegisterRows' => $followup['rows']->filter(fn ($row) => $row['session']->session_date->isToday())->values(), 'registerRows' => $registerRows, 'registerCounts' => $followup['counts'], 'registerView' => $view, 'registerSearch' => $search]);
+        return view('attendance.index', ['cancellationCounts' => $cancellationCounts, 'plannerDate' => $plannerDate, 'plannerOptions' => $plannerOptions, 'scheduledThisWeek' => $scheduledThisWeek, 'nextScope83' => Workday83::registerScope($input), 'nextRegister83' => Workday83::nextRegister($r->user(), null, $input), 'groups' => $groups, 'sessions' => $registerRows->getCollection()->pluck('session'), 'weeklyGroupSessions' => $sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'), 'monthlyOutstanding' => $monthlyOutstanding, 'todayRegisterRows' => $followup['rows']->filter(fn ($row) => $row['session']->session_date->isToday())->values(), 'registerRows' => $registerRows, 'registerCounts' => $followup['counts'], 'registerView' => $view, 'registerSearch' => $search]);
     }
 
     public function planOptions(Request $r, TutorGroup $group): JsonResponse
@@ -449,8 +457,14 @@ class AttendanceController extends Controller
     public function cancel(Request $r, TrainingSession $session): RedirectResponse
     {
         abort_unless($this->sessionAllowed($r, $session), 403);
-        $r->validate(['version' => ['required', 'integer'], 'reason' => ['required', 'string', 'max:2000']]);
-        $cancelled = DB::transaction(function () use ($r, $session): bool {
+        $data = $r->validate([
+            'version' => ['required', 'integer'],
+            'cancellation_reason_code' => ['nullable', Rule::in(array_keys(\App\Support\ReportedChoices::REGISTER_CANCELLATION))],
+            'reason' => ['nullable', 'required_without:cancellation_reason_code', 'required_if:cancellation_reason_code,other', 'string', 'max:2000'],
+        ]);
+        $code = $data['cancellation_reason_code'] ?? null;
+        $reason = $data['reason'] ?? \App\Support\ReportedChoices::REGISTER_CANCELLATION[$code];
+        $cancelled = DB::transaction(function () use ($r, $session, $code, $reason): bool {
             $s = TrainingSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
             abort_unless($this->sessionAllowed($r, $s), 403);
             if ($s->state === 'Cancelled') {
@@ -458,10 +472,10 @@ class AttendanceController extends Controller
             }
             $this->version($r, $s);
             $h = $s->history ?? [];
-            $h[] = ['event' => 'session_cancelled', 'by' => $r->user()->id, 'at' => now()->toIso8601String(), 'reason' => $r->input('reason'), 'before_state' => $s->state];
+            $h[] = ['event' => 'session_cancelled', 'by' => $r->user()->id, 'at' => now()->toIso8601String(), 'reason' => $reason, 'cancellation_reason_code' => $code, 'before_state' => $s->state];
             $s->history = $h;
             $s->state = 'Cancelled';
-            $s->cancellation_reason = $r->input('reason');
+            $s->cancellation_reason = $reason;
             $s->version++;
             $s->save();
             $this->audit($r, $s, 'cancelled');

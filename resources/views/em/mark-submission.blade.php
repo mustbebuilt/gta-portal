@@ -32,6 +32,7 @@
                 <option value="Accepted" @selected(old('decision') === 'Accepted')>Accept evidence</option>
                 <option value="Referred" @selected(old('decision') === 'Referred')>Return for changes</option>
             </select>
+            @include('shared.reported-choice', ['choiceLabel'=>'Reason for returning work (if referred)','choiceName'=>'referral_reason_code','choices'=>\App\Support\ReportedChoices::MARKING_REFERRAL,'choiceValue'=>old('referral_reason_code'),'choiceWhenReferred'=>true])
             @include('shared.staff-template-picker', ['pickerLabel'=>'Feedback template','family'=>'marking_feedback','fieldNames'=>['feedback'],'focusToken'=>\App\Support\MarkingFeedback::DETAIL])
             <label for="topic-feedback">Feedback</label>
             <textarea id="topic-feedback" name="feedback" required>{{ old('feedback') }}</textarea>

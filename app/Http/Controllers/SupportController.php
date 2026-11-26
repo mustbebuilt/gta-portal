@@ -235,7 +235,8 @@ class SupportController extends Controller
             'version' => ['required','integer'],
             'date' => ['required','date_format:Y-m-d','before_or_equal:today'],
             'frequency' => ['required', Rule::in($periods)],
-            'outcome' => ['required','string','max:1000'],
+            'review_outcome_code' => ['nullable', Rule::in(array_keys(\App\Support\ReportedChoices::SUPPORT_REVIEW))],
+            'outcome' => ['nullable', 'required_without:review_outcome_code', 'required_if:review_outcome_code,other', 'string', 'max:1000'],
             'action' => ['nullable','string','max:1000'],
             'owner' => ['nullable','required_with:action,due','integer'],
             'due' => ['nullable','required_with:action,owner','date_format:Y-m-d','after_or_equal:date'],
@@ -277,7 +278,8 @@ class SupportController extends Controller
                 throw ValidationException::withMessages(['action' => 'Enter the follow-up action or clear its owner and due date.']);
             }
             $history[] = ['event' => 'formal_marker_review', 'date' => $data['date'], 'frequency' => $data['frequency'],
-                'outcome' => $data['outcome'], 'next_review' => $next->toDateString(), 'by' => $request->user()->id, 'at' => now()->toIso8601String()];
+                'outcome' => $data['outcome'] ?? \App\Support\ReportedChoices::SUPPORT_REVIEW[$data['review_outcome_code']],
+                'review_outcome_code' => $data['review_outcome_code'] ?? null, 'next_review' => $next->toDateString(), 'by' => $request->user()->id, 'at' => now()->toIso8601String()];
             $marker->history = $history;
             $marker->acknowledged_at ??= now();
             if ($marker->status === 'New') {

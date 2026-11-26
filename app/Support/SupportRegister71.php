@@ -167,7 +167,8 @@ final class SupportRegister71
                     'at' => now()->toIso8601String(),
                     'review_date' => $reviewDate,
                     'next_due_date' => $nextDue,
-                    'note' => $note !== '' ? $note : null,
+                    'review_outcome_code' => $data['review_outcome_code'] ?? null,
+                    'note' => $note !== '' ? $note : (ReportedChoices::SUPPORT_REVIEW[$data['review_outcome_code'] ?? ''] ?? null),
                 ];
                 if ($concern && $concern->status !== 'Closed') {
                     $concern->next_review = $nextDue;

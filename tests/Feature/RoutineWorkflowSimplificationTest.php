@@ -219,14 +219,17 @@ class RoutineWorkflowSimplificationTest extends TestCase
         $this->post(route('attendance.save', $session), $payload)->assertSessionHasNoErrors();
         $recorded = $session->fresh();
         $this->get($page)->assertOk()->assertSee('Correct this register')->assertSee('Cancellation reason')
-            ->assertSee('Correction reason template')->assertSee('Cancellation reason template');
+            ->assertSee('Correction reason template')->assertSee('Room or workshop unavailable');
         $this->from($page)->post($cancel, ['version' => $recorded->version])->assertSessionHasErrors('reason');
         $this->assertSame('Planned', $session->fresh()->state);
-        $this->from($page)->post($cancel, ['version' => $recorded->version, 'reason' => 'Workshop unavailable'])
+        $this->from($page)->post($cancel, ['version' => $recorded->version, 'cancellation_reason_code' => 'room-unavailable'])
             ->assertRedirect($page)->assertSessionHasNoErrors();
         $closed = $session->fresh();
         $this->assertSame('Cancelled', $closed->state);
-        $this->assertSame('Workshop unavailable', $closed->cancellation_reason);
+        $this->assertSame('Room or workshop unavailable', $closed->cancellation_reason);
+        $this->assertSame('room-unavailable', collect($closed->history)->last()['cancellation_reason_code']);
+        $this->get(route('attendance.index', ['view'=>'cancelled']))->assertOk()
+            ->assertSee('Cancelled sessions by reason')->assertSee('Room or workshop unavailable · 1');
         $this->assertSame(390, AttendanceMark::firstOrFail()->otj_minutes);
         $report = \App\Support\AttendanceLedger::forIds([$person->id], false)[$person->id]['report'];
         $this->assertSame(0, $report['minutes']);
@@ -236,7 +239,7 @@ class RoutineWorkflowSimplificationTest extends TestCase
             ->assertRedirect($page)->assertSessionHasNoErrors();
         $this->assertSame($closed->history, $session->fresh()->history);
         $this->assertSame($closed->version, $session->fresh()->version);
-        $this->get($page)->assertOk()->assertSee('Cancelled session')->assertSee('Workshop unavailable')
+        $this->get($page)->assertOk()->assertSee('Cancelled session')->assertSee('Room or workshop unavailable')
             ->assertDontSee('data-compact-register', false);
         $this->post(route('attendance.save', $session), [...$payload, 'version' => $closed->version])
             ->assertSessionHasErrors('marks');

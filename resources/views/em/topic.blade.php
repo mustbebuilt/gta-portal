@@ -26,6 +26,7 @@
                 </select>
             @endif
             @if($topic->evidence_stage === 'Awaiting review')
+                @include('shared.reported-choice', ['choiceLabel'=>'Reason for returning work (if referred)','choiceName'=>'referral_reason_code','choices'=>\App\Support\ReportedChoices::MARKING_REFERRAL,'choiceValue'=>old('referral_reason_code'),'choiceWhenReferred'=>true])
                 @include('shared.staff-template-picker', ['pickerLabel'=>'Feedback template','family'=>'marking_feedback','fieldNames'=>['feedback'],'focusToken'=>\App\Support\MarkingFeedback::DETAIL])
             @endif
             <label for="topic-feedback">Feedback / basis for the training update</label>

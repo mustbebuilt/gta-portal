@@ -27,15 +27,16 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $this->actingAs($member)->get(route('support.worklist'))->assertOk()
             ->assertSee('Alex Morgan')->assertDontSee($other->reference)->assertDontSee('Travel disruption affected attendance');
         $this->get($page)->assertOk()->assertSeeInOrder(['Markers and reasons', 'Travel disruption affected attendance', 'Action plan', 'SMART target'])
-            ->assertSee('Support target template')->assertSee('Review outcome template')->assertSee('Resolve a transport barrier')
+            ->assertSee('Support target template')->assertSee('Continue current support')->assertSee('Resolve a transport barrier')
             ->assertSee('value="custom"', false)->assertSee('name="owner_id"', false);
         $this->get(route('support-register71.index',['view'=>'all']))->assertOk()->assertDontSee($other->reference);
         $this->get(route('support.index',$other))->assertForbidden();
 
         $this->from($page)->post(route('support-register71.review',$schedule), [
             'version'=>$schedule->version,'kind'=>'formal_review','review_date'=>today()->toDateString(),
-            'note'=>'Private outcome from scheduled review',
+            'review_outcome_code'=>'continue-support', 'note'=>'Private outcome from scheduled review',
         ])->assertSessionHasNoErrors()->assertRedirect($page);
+        $this->assertSame('continue-support', collect($schedule->fresh()->history)->last()['review_outcome_code']);
         $this->assertSame(SupportRegister71::addInterval(today()->toDateString(),'six_monthly'), $schedule->refresh()->next_due_date->toDateString());
         $due = $this->get(route('support.worklist',['search'=>'Alex Morgan']))->assertOk()->assertDontSee('Private outcome from scheduled review');
         $this->assertSame(['IM34'], $due->viewData('rows')->items()[0]['due']->pluck('code')->all());

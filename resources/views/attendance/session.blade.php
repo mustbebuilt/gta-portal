@@ -70,15 +70,15 @@
     </section>
 @endif
 @if($session->state !== 'Cancelled')
-    <details class="panel" @if($errors->has('reason')) open @endif>
+    <details class="panel" @if($errors->hasAny(['reason', 'cancellation_reason_code'])) open @endif>
         <summary>Cancel session</summary>
         <p>Attendance and OTJ totals will exclude this session. The register history retains existing entries and the cancellation reason.</p>
         <form method="post" action="{{ route('attendance.cancel', $session) }}">
             @csrf
             <input type="hidden" name="version" value="{{ $session->version }}">
-            @include('shared.staff-template-picker', ['pickerLabel'=>'Cancellation reason template','family'=>'register_cancellations','fieldNames'=>['reason']])
-            <label for="cancel-reason">Cancellation reason</label>
-            <textarea id="cancel-reason" name="reason" maxlength="2000" required>{{ old('reason') }}</textarea>
+            @include('shared.reported-choice', ['choiceLabel'=>'Cancellation reason','choiceName'=>'cancellation_reason_code','choices'=>\App\Support\ReportedChoices::REGISTER_CANCELLATION,'choiceValue'=>old('cancellation_reason_code'),'choiceRequired'=>true])
+            <label for="cancel-reason">Details (required for Other)</label>
+            <textarea id="cancel-reason" name="reason" maxlength="2000">{{ old('reason') }}</textarea>
             <div class="form-actions"><button>Cancel this session</button></div>
         </form>
     </details>

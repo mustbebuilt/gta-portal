@@ -327,9 +327,9 @@ class LearningTaskController extends Controller
     public function decide(Request $r, LearningTask $task): RedirectResponse
     {
         abort_unless(Access::tutor($r->user(), $task->apprentice) || Access::manager($r->user()), 403);
-        $r->validate(['version' => ['required', 'integer'], 'decision' => ['required', Rule::in(['Approved', 'Referred'])], 'decision_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'feedback' => ['nullable', 'required_if:decision,Referred', 'string'], 'confirmed' => ['accepted'], 'after_save' => ['nullable', Rule::in(['stay', 'next'])]]);
+        $decisionData = $r->validate(['version' => ['required', 'integer'], 'decision' => ['required', Rule::in(['Approved', 'Referred'])], 'decision_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'], 'referral_reason_code' => ['exclude_unless:decision,Referred', 'nullable', Rule::in(array_keys(\App\Support\ReportedChoices::MARKING_REFERRAL))], 'feedback' => ['nullable', 'required_if:decision,Referred', 'string'], 'confirmed' => ['accepted'], 'after_save' => ['nullable', Rule::in(['stay', 'next'])]]);
         \App\Support\MarkingFeedback::requireSpecificDetail($r->input('feedback'));
-        DB::transaction(function () use ($r, $task): void {
+        DB::transaction(function () use ($r, $task, $decisionData): void {
             $apprentice = Apprentice::whereKey($task->apprentice_id)->lockForUpdate()->firstOrFail();
             $t = LearningTask::whereKey($task->id)->lockForUpdate()->firstOrFail();
             abort_unless($t->apprentice_id === $apprentice->id
@@ -364,6 +364,9 @@ class LearningTaskController extends Controller
                 throw ValidationException::withMessages(['decision' => 'The locked submission needs checking before it can be marked.']);
             }
             $history[$index]['decision'] = ['status' => $r->input('decision'), 'tutor_id' => $r->user()->id, 'tutor_name' => $r->user()->name, 'date' => $r->input('decision_date'), 'feedback' => $r->input('feedback'), 'recorded_at' => now()->toIso8601String(), 'source_fields' => $evidence];
+            if (isset($decisionData['referral_reason_code'])) {
+                $history[$index]['decision']['referral_reason_code'] = $decisionData['referral_reason_code'];
+            }
             $t->submissions = $history;
             $t->status = $r->input('decision');
             $t->version++;

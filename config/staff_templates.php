@@ -61,15 +61,6 @@ return [
             'Record the feedback discussion' => ['We discussed the work and agreed this next step: [[add detail]].'],
         ],
     ],
-    'review_outcomes' => [
-        'Marker review' => [
-            'Monitor at the next review' => ['Keep the marker open and check progress at the next agreed review.'],
-            'Continue current support' => ['Continue the agreed support and check its impact at the next review.'],
-            'Review a change to support' => ['Review the support with the responsible staff member and record any agreed change.'],
-            'Further information needed' => ['The review needs further information. Record who will obtain it and when it will be checked.'],
-            'Review possible closure' => ['Review the closure criteria and record the reason separately if the marker can be closed.'],
-        ],
-    ],
     'register_corrections' => [
         'Attendance register' => [
             'Attendance code correction' => ['Corrected the attendance code using the checked session record.'],
@@ -77,15 +68,6 @@ return [
             'Eligible OTJ minutes correction' => ['Corrected eligible OTJ minutes after checking actual attendance, learning and exclusions.'],
             'Delivered learning correction' => ['Corrected the delivered learning after checking the tutor’s session record.'],
             'Cover handover correction' => ['Updated the register from the verified cover tutor handover.'],
-        ],
-    ],
-    'register_cancellations' => [
-        'Attendance register' => [
-            'GTA closed' => ['Session cancelled because GTA was closed.'],
-            'Tutor unavailable' => ['Session cancelled because tutor cover could not be arranged.'],
-            'Room or workshop unavailable' => ['Session cancelled because the planned room or workshop was unavailable.'],
-            'Timetable change' => ['Session cancelled following a confirmed timetable change.'],
-            'Severe weather or disruption' => ['Session cancelled due to weather or travel disruption.'],
         ],
     ],
 ];
