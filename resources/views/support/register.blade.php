@@ -9,30 +9,45 @@
     </div>
 </header>
 @include('learning.errors')
-@php($filters = request()->only(['search','by','marker']))
-@if($meetingRows->isNotEmpty())<p><a class="button primary" href="{{route('support.worklist',['view'=>$view,...$filters,'meeting'=>$meetingRows->first()['person']->id])}}">Start meeting · {{$meetingRows->count()}} apprentices</a></p>@endif
-<div class="toolbar register-views" aria-label="Register views">
-    <a class="button" href="{{ route('support.worklist', ['view'=>'needs-review', ...$filters]) }}" @if($view === 'needs-review') aria-current="page" @endif>@if($view==='needs-review')<strong>Needs review · {{ $dueCount }}</strong>@else Needs review · {{ $dueCount }}@endif</a>
-    <a class="button" href="{{ route('support.worklist', ['view'=>'all', ...$filters]) }}" @if($view === 'all') aria-current="page" @endif>@if($view==='all')<strong>All · {{ $allCount }}</strong>@else All · {{ $allCount }}@endif</a>
-</div>
+@if($meetingRows->isNotEmpty())
+    <p><a class="button primary" href="{{ route('support.worklist', [...$meetingFilters, 'meeting'=>$meetingRows->first()['person']->id]) }}">Start meeting · {{ $meetingRows->count() }} {{ \Illuminate\Support\Str::plural('apprentice', $meetingRows->count()) }}</a></p>
+@endif
+<nav class="toolbar register-views" aria-label="Register views">
+    @foreach(\App\Support\SupportRegister71::MEETING_VIEWS as $key => $label)
+        <a class="button" href="{{ route('support.worklist', [...$meetingFilters, 'view'=>$key]) }}" @if($view === $key) aria-current="page" @endif>
+            {{ $label }} · {{ $statusCounts[$key] }}
+        </a>
+    @endforeach
+</nav>
 <form method="get" action="{{ route('support.worklist') }}" class="panel register-filter">
     <input type="hidden" name="view" value="{{ $view }}">
     <div class="search">
         <div><label for="support-search">Apprentice name or reference</label><input type="search" id="support-search" name="search" value="{{ $search }}" maxlength="100"></div>
-        <button>Search</button>
-        @if($search || request('by') || request('marker'))<a class="button" href="{{ route('support.worklist', ['view'=>$view]) }}">Clear</a>@endif
+        @if(count($meetingFilters) > 1)<a class="button" href="{{ route('support.worklist', ['view'=>$view]) }}">Clear</a>@endif
     </div>
-    <details @if(request('by') || request('marker')) open @endif>
+    <details @if(count(\Illuminate\Support\Arr::except($meetingFilters, ['view','search'])) > 0) open @endif>
         <summary>More filters</summary>
         <div class="form-grid">
+            @foreach(['group'=>['Tutor group',$groupOptions], 'tutor'=>['Main tutor',$tutorOptions]] as $key => [$label,$options])
+                <div>
+                    <label for="support-{{ $key }}">{{ $label }}</label>
+                    <select id="support-{{ $key }}" name="{{ $key }}">
+                        <option value="">All</option>
+                        @if(isset($meetingFilters[$key]) && !$options->has((int) $meetingFilters[$key]))
+                            <option value="{{ $meetingFilters[$key] }}" selected>Selection unavailable</option>
+                        @endif
+                        @foreach($options as $id => $name)<option value="{{ $id }}" @selected((int) ($meetingFilters[$key] ?? 0) === $id)>{{ $name }}</option>@endforeach
+                    </select>
+                </div>
+            @endforeach
             <div><label for="review-by">Review by</label><input id="review-by" type="date" name="by" value="{{ request('by') }}"></div>
             <div><label for="register-marker">Marker</label><select id="register-marker" name="marker">
                 <option value="">All markers</option>
                 @foreach($codes as $code => $label)<option value="{{ $code }}" @selected(request('marker') === $code)>{{ $code }} · {{ $label }}</option>@endforeach
             </select></div>
         </div>
-        <button>Apply filters</button>
     </details>
+    <div class="form-actions"><button>Find apprentices</button></div>
 </form>
 @if($employerMeeting)
     <details class="panel" id="employer-patterns"><summary>Employer attendance patterns</summary>@include('support.employer-meeting', ['meeting' => $employerMeeting])</details>
@@ -47,7 +62,7 @@
                 <div class="register-badges">
                     @foreach($row['codes'] as $code)<span class="register-marker" title="{{ $codes[$code] ?? $code }}" aria-label="{{ $code }} {{ $codes[$code] ?? '' }}">{{ $code }} · {{ $codes[$code] ?? 'Marker' }}</span>@endforeach
                 </div>
-                <span class="register-status {{ $row['overdue'] ? 'is-overdue' : ($row['needs_review'] ? 'is-attention' : 'is-positive') }}">{{ $row['overdue'] ? 'Review overdue' : ($row['needs_review'] ? 'Needs review' : 'No review due') }}</span>
+                <span class="register-status {{ $row['overdue'] ? 'is-overdue' : ($row['needs_review'] ? 'is-attention' : 'is-positive') }}">{{ $row['overdue'] ? 'Review overdue' : ($row['first_review'] ? 'First review' : ($row['needs_review'] ? 'Needs review' : 'No review due')) }}</span>
             </div>
             <div class="register-action">
                 @if($action)
@@ -57,7 +72,12 @@
                     <p class="muted">No open action</p>
                 @endif
             </div>
-            <a class="button" href="{{ route('support.index', $person) }}">Open record<span class="sr-only"> for {{ $person->first_name }} {{ $person->last_name }} ({{ $person->reference }})</span></a>
+            <div>
+                @if($row['has_markers'])
+                    <a class="button" href="{{ route('support.worklist', [...$meetingFilters, 'meeting'=>$person->id]) }}">Review in meeting</a>
+                @endif
+                <a class="button" href="{{ route('support.index', $person) }}">Open record<span class="sr-only"> for {{ $person->first_name }} {{ $person->last_name }} ({{ $person->reference }})</span></a>
+            </div>
         </article>
     @empty
         <p>{{ $view === 'needs-review' ? 'No apprentices need a review for these filters.' : 'No apprentices match these filters.' }}</p>

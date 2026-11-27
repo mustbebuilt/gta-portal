@@ -2,10 +2,19 @@
     $frequencies = ['weekly'=>'Weekly','fortnightly'=>'Fortnightly','monthly'=>'Monthly','quarterly'=>'Every three months','six-monthly'=>'Every six months'];
     $openByCode = $concerns->where('status', '!=', 'Closed')->whereNotNull('code')->groupBy('code');
     $markerCodes = collect($markers)->merge($openByCode->keys())->unique()->sort(SORT_NATURAL);
+    $markerGroups = [$markerCodes];
+    if (!empty($inMeeting)) {
+        $priorityCodes = $selected['due']->pluck('code')->merge($selected['unlinked']);
+        $markerGroups = [$markerCodes->intersect($priorityCodes), $markerCodes->diff($priorityCodes)];
+    }
 @endphp
 <section class="panel" id="marker-reviews">
     <h2>Markers and reasons</h2>
-    @forelse($markerCodes as $code)
+    @if($markerCodes->isEmpty())<p>No markers recorded.</p>@endif
+    @foreach($markerGroups as $groupIndex => $codesInGroup)
+        @continue($codesInGroup->isEmpty())
+        @if($groupIndex === 1)<details @if($errors->any()) open @endif><summary>Other markers and notes · {{ $codesInGroup->count() }}</summary>@endif
+        @foreach($codesInGroup as $code)
         <article class="support-item">
             <h3>{{ $code }} · {{ $codes[$code] ?? 'Marker' }}</h3>
             @unless($openByCode->has($code))
@@ -72,12 +81,16 @@
                             <label>Due date <input type="date" name="due_date" value="{{ $restore ? old('due_date') : '' }}"></label>
                         </details>
                         <button class="primary">Save review</button>
-                        @if(!empty($inMeeting) && $nextMeeting && $selected['due']->count() === 1 && $selected['due']->contains('id', $marker->id) && $selected['unlinked']->isEmpty())
-                            @foreach(request()->only(['view','search','by','marker']) as $key => $value)
+                        @if(!empty($inMeeting) && $selected['due']->count() === 1 && $selected['due']->contains('id', $marker->id) && $selected['unlinked']->isEmpty())
+                            @foreach($meetingFilters as $key => $value)
                                 <input type="hidden" name="meeting_filters[{{ $key }}]" value="{{ $value }}">
                             @endforeach
-                            <input type="hidden" name="next_meeting" value="{{ $nextMeeting['person']->id }}">
-                            <button name="after_review" value="next">Save review and open next apprentice</button>
+                            @if($nextMeeting)
+                                <input type="hidden" name="next_meeting" value="{{ $nextMeeting['person']->id }}">
+                                <button name="after_review" value="next">Save review and open next apprentice</button>
+                            @else
+                                <button name="after_review" value="register">Save review and return to register</button>
+                            @endif
                         @endif
                     </form>
                 </details>
@@ -97,9 +110,9 @@
                 @endif
             @endforeach
         </article>
-    @empty
-        <p>No markers recorded.</p>
-    @endforelse
+        @endforeach
+        @if($groupIndex === 1)</details>@endif
+    @endforeach
     @if($concerns->where('status','!=','Closed')->whereNull('code')->isNotEmpty())
         <p><a href="{{ !empty($inMeeting) ? route('support.index', $apprentice).'#support-concerns' : '#support-concerns' }}">Review unclassified concerns</a></p>
     @endif

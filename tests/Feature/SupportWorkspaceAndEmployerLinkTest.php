@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Apprentice, Employer, SupportCapability, SupportConcern, SupportSharedAction71, User};
+use App\Models\{Apprentice, Employer, SupportCapability, SupportConcern, SupportSharedAction71, TutorGroup, User};
 use App\Support\SupportRegister71;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
@@ -66,6 +66,57 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $this->get($page)->assertOk()->assertSee('Meeting arranged');
         $this->get(route('support.worklist'))->assertOk()->assertDontSee('Arrange next meeting');
         $this->get(route('support.report'))->assertOk()->assertSee('0 have an overdue support action');
+    }
+
+    public function test_meeting_filters_prioritise_overdue_reviews_and_keep_the_group_and_tutor_through_save(): void
+    {
+        $admin = User::factory()->create(['role'=>'admin']);
+        $tutor = User::factory()->create(['role'=>'tutor']);
+        $otherTutor = User::factory()->create(['role'=>'tutor']);
+        $group = TutorGroup::factory()->create(['name'=>'Monday Workshop']);
+        $outsideGroup = TutorGroup::factory()->create(['name'=>'Private Workshop']);
+        $scope = ['tutor_group_id'=>$group->id, 'tutor_id'=>$tutor->id];
+        $overdue = Apprentice::factory()->create([...$scope,'last_name'=>'Z Late']);
+        $first = Apprentice::factory()->create([...$scope,'last_name'=>'A New']);
+        $clear = Apprentice::factory()->create([...$scope,'last_name'=>'B No marker']);
+        $outside = Apprentice::factory()->create(['tutor_group_id'=>$outsideGroup->id,'tutor_id'=>$otherTutor->id]);
+        $member = User::factory()->create(['role'=>'inclusion_member']);
+        SupportCapability::create(['user_id'=>$member->id, 'duty'=>'member', 'scope'=>'assigned','group_ids'=>[$group->id]]);
+        $this->travelTo(\Carbon\Carbon::parse('2026-10-01 11:00'));
+        $add = ['code'=>'IM34','interval_key'=>'monthly','owner_id'=>$admin->id];
+        $late = SupportRegister71::addMarker($admin, $overdue, $add);
+        SupportRegister71::recordReview($admin, $late, ['version'=>$late->version, 'review_date'=>today()->toDateString(), 'note'=>'Prior fictional review']);
+        $late->refresh();
+        $this->travelTo(\Carbon\Carbon::parse('2026-11-26 11:00'));
+        $fresh = SupportRegister71::addMarker($admin, $first, $add);
+        SupportRegister71::addMarker($admin, $outside, [...$add, 'note'=>'Private out-of-scope note']);
+        $otherMarker = SupportRegister71::addMarker($admin, $overdue, [...$add, 'code'=>'IM36']);
+        SupportRegister71::recordReview($admin, $otherMarker, ['version'=>$otherMarker->version, 'review_date'=>today()->toDateString(), 'note'=>'Current fictional review']);
+        $filters = ['view'=>'needs-review','group'=>$group->id,'tutor'=>$tutor->id,'marker'=>'IM34'];
+        $url = route('support.worklist', $filters);
+        $page = $this->actingAs($member)->get($url)->assertOk()->assertSee('Monday Workshop')->assertDontSee('Private Workshop');
+        $this->assertSame([$overdue->id,$first->id], $page->viewData('meetingRows')->pluck('person.id')->all());
+        $this->assertSame(['needs-review'=>2,'overdue'=>1,'first-review'=>1,'all'=>2], $page->viewData('statusCounts'));
+        $forged = $this->get(route('support.worklist', ['group'=>$outsideGroup->id,'meeting'=>$outside->id]))
+            ->assertOk()->assertDontSee('Private out-of-scope note')->assertDontSee($outside->reference);
+        $this->assertNull($forged->viewData('selected'));
+
+        $meeting = route('support.worklist', [...$filters,'meeting'=>$overdue->id]);
+        $next = route('support.worklist', ['meeting'=>$first->id,...$filters]);
+        $this->get($meeting)->assertOk()->assertSee('Other markers and notes')->assertSee('1 apprentice after this one')
+            ->assertSee('Save review and open next apprentice');
+        $payload = ['kind'=>'formal_review', 'review_date'=>today()->toDateString(),'interval_key'=>'monthly',
+            'note'=>'Fictional meeting review', 'meeting_filters'=>$filters];
+        $this->from($meeting)->post(route('support-register71.review', $late), [
+            ...$payload,'version'=>$late->version,'after_review'=>'next','next_meeting'=>$first->id,
+        ])->assertSessionHasNoErrors()->assertRedirect($next);
+        $this->get($next)->assertOk()->assertSee('Save review and return to register');
+        $this->from($next)->post(route('support-register71.review', $fresh), [
+            ...$payload,'version'=>$fresh->version,'after_review'=>'register',
+        ])->assertSessionHasNoErrors()->assertRedirect($url);
+        $this->get($url)->assertOk()->assertDontSee('Start meeting');
+        $all = $this->get(route('support.worklist',['view'=>'all','group'=>$group->id]))->assertOk()->assertSee($clear->last_name);
+        $this->assertNotContains($clear->id, $all->viewData('meetingRows')->pluck('person.id')->all());
     }
 
     public function test_marker_other_uses_the_same_reason_field(): void

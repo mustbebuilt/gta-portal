@@ -64,10 +64,19 @@ class SupportController extends Controller
     public function worklist(Request $r): Response
     {
         abort_unless($this->team($r), 403);
-        $data = $r->validate(['meeting'=>['nullable','integer','min:1'],'search' => ['nullable', 'string', 'max:100'], 'view' => ['nullable','in:all,needs-review'], 'by' => ['nullable','date_format:Y-m-d'], 'marker' => ['nullable',Rule::in(array_keys($this->codes()))], 'state' => ['nullable', Rule::in(SupportFollowup::CONCERN_VIEWS)], 'plan_state' => ['nullable', Rule::in(SupportFollowup::PLAN_VIEWS)], 'page' => ['nullable', 'integer', 'min:1'], 'plan_page' => ['nullable', 'integer', 'min:1'], 'apprentice_page' => ['nullable', 'integer', 'min:1']]);
+        $data = $r->validate(['meeting'=>['nullable','integer','min:1'],'search' => ['nullable', 'string', 'max:100'], 'view' => ['nullable', Rule::in(array_keys(SupportRegister71::MEETING_VIEWS))],
+            'group' => ['nullable', 'integer', 'min:1'], 'tutor' => ['nullable', 'integer', 'min:1'], 'by' => ['nullable','date_format:Y-m-d'], 'marker' => ['nullable',Rule::in(array_keys($this->codes()))], 'state' => ['nullable', Rule::in(SupportFollowup::CONCERN_VIEWS)], 'plan_state' => ['nullable', Rule::in(SupportFollowup::PLAN_VIEWS)], 'page' => ['nullable', 'integer', 'min:1'], 'plan_page' => ['nullable', 'integer', 'min:1'], 'apprentice_page' => ['nullable', 'integer', 'min:1']]);
         $search = trim($data['search'] ?? '');
         $allowedIds = SupportAccess::ids($r->user());
-        $people = Apprentice::whereIn('id', $allowedIds)->with('groupRecord')->get();
+        $people = Apprentice::whereIn('id', $allowedIds)->with(['groupRecord', 'tutor:id,name'])->get();
+        $groupOptions = $people->pluck('groupRecord')->filter()->unique('id')->sortBy('name')->pluck('name', 'id');
+        $tutorOptions = $people->pluck('tutor')->filter()->unique('id')->sortBy('name')->pluck('name', 'id');
+        if (isset($data['group'])) {
+            $people = $people->where('tutor_group_id', (int) $data['group']);
+        }
+        if (isset($data['tutor'])) {
+            $people = $people->where('tutor_id', (int) $data['tutor']);
+        }
         if ($search !== '') {
             $people = $people->filter(fn ($a) => Str::contains(Str::lower($a->first_name.' '.$a->last_name.' '.$a->reference), Str::lower($search)));
         }
@@ -75,19 +84,22 @@ class SupportController extends Controller
             ->whereIn('apprentice_id', $people->pluck('id'))->oldest()->orderBy('id')
             ->get(['id', 'apprentice_id', 'owner_id', 'code', 'status', 'action_due', 'next_action', 'next_review', 'acknowledged_at', 'created_at', 'version']);
         $plans = SupportPlan::whereIn('apprentice_id', $people->pluck('id'))->get(['id', 'apprentice_id', 'status', 'active_plan', 'reviews', 'activities']);
-        if (!$r->hasAny(['state', 'plan_state', 'plan_page', 'apprentice_page']) || $r->filled('view')) {
+        if (!$r->hasAny(['state', 'plan_state', 'plan_page', 'apprentice_page']) || $r->filled('view') || $r->filled('meeting')) {
             $data['view'] ??= 'needs-review';
-            $register=$this->registerData($r,$people,$concerns,$plans,$data);
+            $register = $this->registerData($r, $people, $concerns, $plans, $data);
+            $meetingFilters = \Illuminate\Support\Arr::only($data, SupportRegister71::MEETING_FILTERS);
+            $register += compact('meetingFilters', 'groupOptions', 'tutorOptions');
             if (!empty($data['meeting'])) {
                 $selected=$register['meetingRows']->first(fn($row)=>$row['person']->id===(int)$data['meeting']);
                 $position=$register['meetingRows']->search(fn($row)=>$row['person']->id===(int)$data['meeting']);
                 $next=$position===false ? $register['meetingRows']->first() : $register['meetingRows']->get($position+1);
+                $remaining = $position === false ? null : $register['meetingRows']->count() - $position - 1;
                 $record=$selected ? $this->recordData($r,$selected['person']) : [];
-                return response()->view('support.meeting',$record+$register+['selected'=>$selected,'nextMeeting'=>$next,'search'=>$search],200,self::PRIVATE_CACHE);
+                return response()->view('support.meeting',$record+$register+['selected'=>$selected,'nextMeeting'=>$next,'remaining'=>$remaining,'search'=>$search],200,self::PRIVATE_CACHE);
             }
             return response()->view('support.register', $register + [
                 'search' => $search,
-                'employerMeeting' => $data['view'] === 'needs-review' ? $this->employerMeeting($allowedIds) : null,
+                'employerMeeting' => $data['view'] === 'needs-review' ? $this->employerMeeting($people->modelKeys()) : null,
             ], 200, self::PRIVATE_CACHE);
         }
 
@@ -132,23 +144,29 @@ class SupportController extends Controller
             ->get(['apprentice_id', 'code'])->groupBy('apprentice_id');
         $concerns = $concerns->groupBy('apprentice_id');
         $plans = $plans->groupBy('apprentice_id');
-        $rows = $people->sortBy([['last_name','asc'], ['first_name','asc']])->map(function ($person) use ($concerns, $markers, $schedules, $shared, $plans, $by, $today) {
+        $markerChoice = $filters['marker'] ?? null;
+        $rows = $people->sortBy([['last_name','asc'], ['first_name','asc'], ['id','asc']])->map(function ($person) use ($concerns, $markers, $schedules, $shared, $plans, $by, $today, $markerChoice) {
             $cases = $concerns->get($person->id, collect());
             $open = $cases->where('status', '!=', 'Closed');
             $codes = $open->pluck('code')->filter()->merge($markers->get($person->id, collect())->pluck('code'))->unique();
-            $due = $open->filter(function ($marker) use ($schedules, $by) {
+            $reviewable = $markerChoice ? $open->where('code', $markerChoice) : $open;
+            $first = $reviewable->filter(function ($marker) use ($schedules) {
+                $schedule = $schedules->get($marker->id);
+
+                return $schedule ? ! $schedule->first_review_completed : $marker->status === 'New';
+            });
+            $due = $reviewable->filter(function ($marker) use ($schedules, $by) {
                 $schedule = $schedules->get($marker->id);
                 return $schedule
                     ? (!$schedule->first_review_completed || !$schedule->next_due_date || $schedule->next_due_date->toDateString() <= $by)
                     : ($marker->status === 'New' || !$marker->next_review || $marker->next_review->toDateString() <= $by);
             });
-            $overdue = $due->contains(function ($marker) use ($schedules, $today) {
-                $date = $schedules->get($marker->id)?->next_due_date ?? $marker->next_review;
-
-                return $date && $date->toDateString() < $today;
-            });
+            $reviewDate = fn ($marker) => ($schedules->get($marker->id)?->next_due_date ?? $marker->next_review)?->toDateString();
+            $oldest = $due->map($reviewDate)->filter()->sort()->first();
+            $overdue = $oldest !== null && $oldest < $today;
             $unlinked = $codes->diff($cases->pluck('code'))->reject(fn ($code) =>
-                in_array($code, ['IM18','IM19','IM27','IM28','IM32','IM33'], true));
+                in_array($code, ['IM18','IM19','IM27','IM28','IM32','IM33'], true))
+                ->when($markerChoice, fn ($codes) => $codes->filter(fn ($code) => $code === $markerChoice));
             $actions = $open->filter(fn ($marker) => filled($marker->next_action))->map(fn ($marker) => [
                 'title' => $marker->next_action, 'owner' => $marker->owner?->name, 'due' => $marker->action_due?->toDateString(),
             ])->values()->concat($shared->get($person->id, collect())->map(fn ($action) => [
@@ -165,17 +183,32 @@ class SupportController extends Controller
 
             return ['person' => $person, 'open' => $open, 'codes' => $codes, 'due' => $due, 'unlinked' => $unlinked,
                 'next_action' => $actions->sortBy(fn ($action) => $action['due'] ?? '9999-12-31')->first(),
-                'needs_review' => $due->isNotEmpty() || $unlinked->isNotEmpty(), 'overdue' => $overdue];
+                'needs_review' => $due->isNotEmpty() || $unlinked->isNotEmpty(), 'overdue' => $overdue,
+                'first_review' => $first->isNotEmpty(), 'oldest_review' => $oldest,
+                'has_markers' => $reviewable->isNotEmpty() || $unlinked->isNotEmpty()];
         })->when(isset($filters['marker']), fn ($rows) => $rows->filter(fn ($row) => $row['codes']->contains($filters['marker'])));
 
         $dueCount = $rows->where('needs_review', true)->count();
+        $statusCounts = ['needs-review'=>$dueCount, 'overdue'=>$rows->where('overdue', true)->count(),
+            'first-review'=>$rows->where('first_review', true)->count(), 'all'=>$rows->count()];
         $allCount = $rows->count();
         $overdueActions = $rows->filter(fn ($row) => filled($row['next_action']['due'] ?? null) && $row['next_action']['due'] < today()->toDateString())->count();
-        if (($filters['view'] ?? 'all') === 'needs-review') {
-            $rows = $rows->where('needs_review', true)->sortByDesc('overdue');
+        $view = $filters['view'] ?? 'all';
+        $rows = match ($view) {
+            'needs-review' => $rows->where('needs_review', true),
+            'overdue' => $rows->where('overdue', true),
+            'first-review' => $rows->where('first_review', true),
+            default => $rows,
+        };
+        $meetingRows = $rows->where('has_markers', true)->sortBy(fn ($row) => [
+            $row['overdue'] ? 0 : ($row['first_review'] ? 1 : ($row['needs_review'] ? 2 : 3)),
+            $row['oldest_review'] ?? '9999-12-31', $row['person']->last_name, $row['person']->first_name, $row['person']->id,
+        ])->values();
+        if ($view !== 'all') {
+            $rows = $meetingRows;
         }
 
-        return ['meetingRows'=>$rows->values(),'rows' => SupportFollowup::paginate($rows->values(), $request, 'page'), 'allCount' => $allCount,
+        return ['meetingRows'=>$meetingRows, 'statusCounts'=>$statusCounts, 'rows' => SupportFollowup::paginate($rows->values(), $request, 'page'), 'allCount' => $allCount,
             'dueCount' => $dueCount, 'by' => $by, 'codes' => $this->codes(), 'view' => $filters['view'] ?? 'all',
             'overdueActions' => $overdueActions];
     }

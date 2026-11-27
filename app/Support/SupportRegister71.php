@@ -238,6 +238,9 @@ final class SupportRegister71
         });
     }
 
+    public const MEETING_VIEWS = ['needs-review'=>'Needs review', 'overdue'=>'Overdue', 'first-review'=>'First review', 'all'=>'All'];
+    public const MEETING_FILTERS = ['view','search','by','marker','group','tutor'];
+
     public static function reviewTargetRules(): array
     {
         return [
@@ -246,10 +249,12 @@ final class SupportRegister71
             'owner_id' => ['nullable', 'required_with:summary', 'integer'],
             'due_date' => ['nullable', 'required_with:summary', 'date_format:Y-m-d'],
             'request_uuid' => ['nullable', 'required_with:summary', 'uuid'],
-            'after_review' => ['nullable', 'in:next'],
+            'after_review' => ['nullable', 'in:next,register'],
             'next_meeting' => ['nullable', 'required_if:after_review,next', 'integer', 'min:1'],
-            'meeting_filters' => ['nullable', 'array:view,search,by,marker'],
-            'meeting_filters.view' => ['nullable', 'in:all,needs-review'],
+            'meeting_filters' => ['nullable', 'array:'.implode(',', self::MEETING_FILTERS)],
+            'meeting_filters.view' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(self::MEETING_VIEWS))],
+            'meeting_filters.group' => ['nullable', 'integer', 'min:1'],
+            'meeting_filters.tutor' => ['nullable', 'integer', 'min:1'],
             'meeting_filters.search' => ['nullable', 'string', 'max:100'],
             'meeting_filters.by' => ['nullable', 'date_format:Y-m-d'],
             'meeting_filters.marker' => ['nullable', 'string', 'max:8'],
@@ -278,6 +283,9 @@ final class SupportRegister71
 
     public static function reviewReturn(\Illuminate\Http\Request $request, array $data): \Illuminate\Http\RedirectResponse
     {
+        if (($data['after_review'] ?? null) === 'register' && ($data['kind'] ?? 'formal_review') === 'formal_review') {
+            return to_route('support.worklist', $data['meeting_filters'] ?? []);
+        }
         if (($data['after_review'] ?? null) === 'next' && isset($data['next_meeting'])
             && ($data['kind'] ?? 'formal_review') === 'formal_review') {
             return to_route('support.worklist', ['meeting' => $data['next_meeting']] +
