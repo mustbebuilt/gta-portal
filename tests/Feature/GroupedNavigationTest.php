@@ -45,6 +45,9 @@ class GroupedNavigationTest extends TestCase
       && (StaffDuties::has($u, 'maths_tutor') || StaffDuties::has($u, 'english_tutor'))) {
    $expected[] = route('marking.index');
   }
+  if (\App\Support\StaffAttention::allowed($u)) {
+   $expected = array_values(array_diff($expected, [route('dashboard.index'), route('saved-work.index')]));
+  }
   sort($expected);$this->assertSame($expected,$this->links($new),'Unexpected href inventory changed for '.$u->role);
  }
  public function test_daily_and_secondary_navigation_destinations_for_all_primary_roles():void {
@@ -94,8 +97,8 @@ class GroupedNavigationTest extends TestCase
   $skills = User::factory()->create(['role'=>'functional_skills_tutor', 'subject_scope'=>'both']);
 
   foreach ([
-   [$admin, ['Needs attention','Work today','Apprentices','Apprentice register','Reports']],
-   [$tutor, ['Needs attention','Work today','Apprentices','Apprentice register','Work to mark']],
+   [$admin, ['Needs attention','Apprentices','Apprentice register','Reports']],
+   [$tutor, ['Needs attention','Apprentices','Apprentice register','Work to mark']],
    [$apprentice, ['My next step','My progress','My calendar','Review signing']],
    [$employer, ['My employer actions','View progress','Review appointments','Review signing']],
    [$skills, ['Maths and English','Work to mark']],

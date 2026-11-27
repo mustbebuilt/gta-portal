@@ -95,8 +95,13 @@ class ProgressReviewController extends Controller
         if (! $frozen && isset($review->source_snapshot['monthly_snapshots'])) {
             $snapshot['monthly_snapshots'] = $review->source_snapshot['monthly_snapshots'];
         }
+        $appointment = \App\Support\ReviewAppointments::staff($r->user(), $apprentice)
+            ? \App\Models\ReviewAppointment::where('apprentice_id', $apprentice->id)
+                ->whereIn('state', ['Published', 'Draft'])->where('starts_at', '>=', now())->orderBy('starts_at')->first()
+            : null;
+        $signing = $frozen ? \App\Support\ReviewNextAction::forSigning($r->user(), $review, $signedRecords->isNotEmpty(), $signedConfirmed) : null;
         $recordedFacts = !$review?->exists ? \App\Support\ReviewFacts83::fill([], $snapshot) : [];
-        return view($simple83?'reviews.simple83':'reviews.form', ['recordedFacts' => $recordedFacts, 'periodPreview' => $period, 'factsHash' => $frozen ? null : \App\Support\ReviewSnapshot::factsHash($snapshot), 'automatedDefaults'=>$defaults,'preparation'=>($review?->exists&&$review->state==='Draft')?\App\Support\ReviewPreparation::inspect([...($review->fields??[]),'format83'=>'simple83'],$review->source_snapshot??[],DeliveryPlan::approved($apprentice)):null,'signedConfirmed'=>$signedConfirmed,'hasSignedSource'=>$signedRecords->isNotEmpty(),'apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $snapshot, 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
+        return view($simple83?'reviews.simple83':'reviews.form', ['appointment' => $appointment, 'signing' => $signing, 'recordedFacts' => $recordedFacts, 'periodPreview' => $period, 'factsHash' => $frozen ? null : \App\Support\ReviewSnapshot::factsHash($snapshot), 'automatedDefaults'=>$defaults,'preparation'=>($review?->exists&&$review->state==='Draft')?\App\Support\ReviewPreparation::inspect([...($review->fields??[]),'format83'=>'simple83'],$review->source_snapshot??[],DeliveryPlan::approved($apprentice)):null,'signedConfirmed'=>$signedConfirmed,'hasSignedSource'=>$signedRecords->isNotEmpty(),'apprentice' => $apprentice, 'review' => $review ?? new ProgressReviewDraft, 'snapshot' => $snapshot, 'actions' => SmartAction::with('task')->where('apprentice_id', $apprentice->id)->get(), 'existing' => ProgressReviewDraft::where('apprentice_id', $apprentice->id)->orderByDesc('updated_at')->get()]);
     }
 
     public function pdf(Request $r, Apprentice $apprentice, ProgressReviewDraft $review): Response

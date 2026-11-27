@@ -27,6 +27,8 @@ if (planner) {
     for (const [id, title] of available) {
       if (!selected.includes(id)) subject.add(new Option(title, id));
     }
+    subject.add(new Option('Other…', ''));
+    subject.options[subject.options.length - 1].dataset.custom = 'true';
     list.replaceChildren();
     for (const id of selected) {
       const row = document.createElement('li');
@@ -120,6 +122,12 @@ if (planner) {
   }
 
   subject.addEventListener('change', () => {
+    if (subject.selectedOptions[0]?.dataset.custom) {
+      planner.querySelector('[data-plan-other]').open = true;
+      other.focus();
+      subject.selectedIndex = 0;
+      return;
+    }
     if (subject.value && selected.length < 50) selected.push(subject.value);
     renderSubjects();
   });

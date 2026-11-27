@@ -13,5 +13,5 @@
 @include('visual-reports.otj-followup')
 @endif
 @include('visual-reports.tables')
-<section class="panel"><h2>Definitions and limits</h2><ul>@foreach($report['definitions'] as $text)<li>{{ $text }}</li>@endforeach</ul></section>
+<details class="panel" data-print-expand><summary>Definitions and limits</summary><ul>@foreach($report['definitions'] as $text)<li>{{ $text }}</li>@endforeach</ul></details>
 @endsection

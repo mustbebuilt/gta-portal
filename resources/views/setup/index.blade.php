@@ -2,10 +2,35 @@
 @section('title','Portal setup')
 @section('content')
 <header class="page-heading"><div><h1>Portal setup</h1><p>Add people once, then assign them to the apprentices they support.</p></div></header>
-<section class="panel"><h2>1. Your administrator account</h2><p>You are signed in as <strong>{{ $owner->name }}</strong> ({{ $owner->email }}) with {{ $owner->role==='ceo'?'CEO':'Administrator' }} access.</p><p>Use your own named account. Martin must provision your first named Admin/CEO account through the deployment's account administration process. The ordinary Staff screen does not create these privileged accounts. Do not keep using shared demonstration credentials.</p><p>A staff role called Manager is not an administrator account. Admin and CEO access allow the setup screens linked below.</p></section>
-<section class="panel"><h2>2. Add staff</h2><p>{{ $counts['staff'] }} active staff records. Add people who need a portal login or will be assigned to apprentices. Add each person once with their name, work email, primary role and active status. Primary Maths/English tutors also need a subject scope. You do not need a full HR file to make these assignments.</p><p>Choose Tutor / trainer, Careers adviser, Learning &amp; Progress Mentor, Maths / English tutor, Inclusion lead/member or the appropriate staff role. Keep one primary role per account. Open the staff record to grant additional Careers adviser, Learning &amp; Progress Mentor, Maths tutor or English tutor duties, then select that person on the apprentice. Inclusion duties remain separate under Support permissions. A primary tutor gains no additional Careers access until explicitly granted and assigned. Do not create duplicate accounts.</p><a class="button primary" href="{{ route('directories.index','staff') }}">Manage staff</a> <a class="button" href="{{ route('support.permissions') }}">Manage Inclusion duties and access</a></section>
-<section class="panel"><h2>3. Arrange staff sign-in separately</h2><p>Saving a staff record does not send an invitation or give the person a known password. Use Staff onboarding only when Martin has configured and tested the invitation service for the intended environment. Do not share another person's account or email passwords.</p><a class="button" href="{{ route('onboarding.index') }}">Staff onboarding</a></section>
-<section class="panel"><h2>4. Add the directories</h2><p>{{ $counts['employers'] }} active employers · {{ $counts['programmes'] }} active programmes · {{ $counts['groups'] }} active tutor groups.</p><p>Add employers and the correct apprenticeship standard/version, then groups and their main tutor. A group choice does not automatically replace an apprentice's individual programme or tutor.</p><div class="toolbar"><a class="button" href="{{ route('directories.index','employers') }}">Employers</a><a class="button" href="{{ route('directories.index','programmes') }}">Programmes</a><a class="button" href="{{ route('directories.index','groups') }}">Tutor groups</a></div></section>
-<section class="panel"><h2>5. Assign people on each apprentice</h2><p>{{ $counts['apprentices'] }} apprentice records. Open an apprentice and choose Edit. Select the main tutor, Careers adviser, Learning &amp; Progress Mentor, maths tutor and English tutor as appropriate. Select from existing active staff rather than entering their details again.</p><p>Careers and subject selectors include staff with the matching primary or additional duty. Primary Maths/English scope is respected; extra subject grants require the matching apprentice assignment. Inclusion case duties and support-plan review coordinators are managed in their own restricted support screens.</p><a class="button primary" href="{{ route('apprentices.index') }}">Open apprentices</a></section>
-<section class="panel"><h2>6. Check assignments and access</h2><p><a class="button" href="{{ route('assignment-checks.index') }}">Assignment checks</a> Review inactive or changed-duty assignments here, then make deliberate changes on the staff or apprentice record. Unassigned responsibilities are shown separately and may be appropriate.</p><p>Verify an apprentice record and their assigned staff after setup. Verify the right records, tasks, Careers and support pages appear. A role label alone does not create a personal account, assign a caseload or prove the hosted setup has been accepted.</p></section>
+<details class="panel"><summary>Your administrator account</summary><p>You are signed in as <strong>{{ $owner->name }}</strong> ({{ $owner->email }}) with {{ $owner->role==='ceo'?'CEO':'Administrator' }} access.</p><p>Use your own named account. Martin must provision your first named Admin/CEO account through the deployment's account administration process. The ordinary Staff screen does not create these privileged accounts. Do not keep using shared demonstration credentials.</p><p>A staff role called Manager is not an administrator account. Admin and CEO access allow the setup screens linked below.</p>
+    <p>Use one primary role per account. Saving a staff record does not send an invitation.</p>
+</details>
+<div class="dashboard-grid">
+    <section class="panel">
+        <h2>Staff accounts</h2>
+        <p>{{ $counts['staff'] }} active staff records.</p>
+        <div class="toolbar">
+            <a class="button primary" href="{{ route('directories.index', 'staff') }}">Manage staff</a>
+            <a href="{{ route('onboarding.index') }}">Invite staff</a>
+            <a href="{{ route('support.permissions') }}">Support permissions</a>
+        </div>
+    </section>
+    <section class="panel">
+        <h2>Apprentice assignments</h2>
+        <p>{{ $counts['apprentices'] }} apprentice records. Choose staff from the directory when making an assignment.</p>
+        <div class="toolbar">
+            <a class="button primary" href="{{ route('apprentices.index') }}">Open apprentices</a>
+            <a href="{{ route('assignment-checks.index') }}">Check assignments</a>
+        </div>
+    </section>
+</div>
+<details class="panel">
+    <summary>Directories and programme settings</summary>
+    <p>{{ $counts['employers'] }} active employers · {{ $counts['programmes'] }} active programmes · {{ $counts['groups'] }} active tutor groups.</p>
+    <div class="toolbar">
+        <a href="{{ route('directories.index', 'employers') }}">Employers</a>
+        <a href="{{ route('directories.index', 'programmes') }}">Programmes</a>
+        <a href="{{ route('directories.index', 'groups') }}">Tutor groups</a>
+    </div>
+</details>
 @endsection

@@ -52,7 +52,10 @@ class StaffWorkflowController extends Controller
                 ->whereNotNull('open_key')->get()->keyBy('source_key');
         }
 
-        return response()->view('staff-workflow.attention', ['position' => $position, 'rows' => $list, 'view' => $view, 'reason' => $reason, 'q' => $q, 'ownersBySource' => $ownersBySource, 'openFollowups' => $openFollowups])->header('Cache-Control', 'no-store, private');
+        $nextRegister = in_array($r->user()->role, ['admin', 'ceo', 'tutor'], true)
+            ? \App\Support\Workday83::nextRegister($r->user()) : null;
+
+        return response()->view('staff-workflow.attention', ['nextRegister' => $nextRegister, 'position' => $position, 'rows' => $list, 'view' => $view, 'reason' => $reason, 'q' => $q, 'ownersBySource' => $ownersBySource, 'openFollowups' => $openFollowups])->header('Cache-Control', 'no-store, private');
     }
 
     private function check(Request $r, Apprentice $a, ProgressReviewDraft $review): void

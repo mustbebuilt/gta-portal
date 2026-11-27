@@ -21,8 +21,13 @@ class CentrePlanningController extends Controller {
          ->keyBy(fn (Entry $entry) => 'p'.$entry->plan_id.':'.$entry->work_date->toDateString());
      $nearby = OccurrenceRegisters::nearbyRegisters($entries);
      $groups = TutorGroup::whereIn('id', $entries->pluck('group_id'))->get()->keyBy('id');
+     $weeks = $entries->map(fn (Entry $entry) => $entry->work_date->copy()->startOfWeek()->toDateString())->unique();
+     $regular = TrainingSession::whereIn('tutor_group_id', $groups->keys())->whereIn('regular_week', $weeks)
+         ->get(['tutor_group_id', 'regular_week'])->keyBy(fn (TrainingSession $s) => $s->tutor_group_id.':'.$s->regular_week);
      $board['registerLinks'] = [];
      $board['weeklyRegisterEntries'] = [];
+     $board['registerChecks'] = [];
+     $board['occurrenceLinks'] = [];
      foreach ($planned as $item) {
          $entry = $entries->get($item['key']);
          if (!$entry) {
@@ -31,14 +36,25 @@ class CentrePlanningController extends Controller {
          $overlaps = OccurrenceRegisters::overlaps($entry, $nearby);
          $group = $groups->get($entry->group_id);
          $weekly = $group ? OccurrenceRegisters::weeklyDefaults($entry, $group) : null;
-         $thisWeek = $weekly && $weekly['date'] === (WeeklyRegisters::thisWeek($group)['date'] ?? null);
+         $scheduledWeek = $weekly && (
+             $weekly['date'] === (WeeklyRegisters::thisWeek($group)['date'] ?? null)
+             || $weekly['date'] === (WeeklyRegisters::next($group)['date'] ?? null)
+         );
          $session = OccurrenceRegisters::matchingRegister($r->user(), $entry, $plans[$entry->plan_id], $overlaps);
          if ($session) {
              $board['registerLinks'][$item['key']] = route('attendance.show', $session);
          }
-         if ($thisWeek && ($session || ($overlaps->isEmpty() && !$entry->training_session_id && !$entry->link_proof
-             && RegisterCreation::allowed($r->user(), $group)))) {
+         $canCreate = !$board['safe_shared'] && $group && RegisterCreation::allowed($r->user(), $group);
+         $existingWeek = $weekly && $regular->has($entry->group_id.':'.$weekly['week']);
+         if ($scheduledWeek && ($session || ($canCreate && !$existingWeek && $overlaps->isEmpty()
+             && !$entry->training_session_id && !$entry->link_proof))) {
              $board['weeklyRegisterEntries'][$item['key']] = $weekly + ['group' => $group];
+         } elseif (!$session && !$board['safe_shared'] && $canCreate) {
+             // Different timings and an overlapping register require a source check.
+             $board['registerChecks'][$item['key']] = true;
+             if (P::allowed($r->user())) {
+                 $board['occurrenceLinks'][$item['key']] = route('centre-planning.show', $entry->plan_id).'#occurrence-register-'.$entry->id;
+             }
          }
      }
 

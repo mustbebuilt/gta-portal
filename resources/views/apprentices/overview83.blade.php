@@ -1,6 +1,6 @@
 <section class="panel" aria-labelledby="record-overview-title">
     <h2 id="record-overview-title">At a glance</h2>
-    <div class="metrics">
+    <div class="record-metrics">
         @foreach(['Apprenticeship tasks'=>null, 'Maths'=>'maths', 'English'=>'english'] as $label => $subject)
             @php($item = $overview83['learning'][$label])
             <div class="metric">
@@ -22,15 +22,7 @@
         </div>
         @if($otjHeadline)
             <div class="metric">
-                Recorded OTJ
-                <strong>{{ $otjHeadline['recorded_hours'] === null ? 'Not available' : number_format($otjHeadline['recorded_hours'], 2).' hours' }}</strong>
-                @if($otjHeadline['expected_hours'] !== null)
-                    <small>{{ number_format($otjHeadline['expected_hours'], 2) }} hours expected to date</small>
-                @endif
-                @if($otjHeadline['gap_hours'] > 0)
-                    <small>{{ number_format($otjHeadline['gap_hours'], 2) }} hours below expected to date</small>
-                @endif
-                @if($otjHeadline['needs_check'])<small>Some records need checking</small>@endif
+                @include('attendance.otj-headline', ['recordedLabel' => 'Recorded OTJ'])
                 <a href="{{ route('otj.show', $apprentice) }}">Open OTJ record</a>
             </div>
         @endif

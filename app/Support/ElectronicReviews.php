@@ -280,6 +280,14 @@ class ElectronicReviews
         return Packet::where(fn ($q) => $q->whereIn('apprentice_id', $ids)->orWhereHas('signers', fn ($q) => $q->where('user_id', $u->id)));
     }
 
+    public static function nextSignature(User $user): ?Packet
+    {
+        return Packet::where('state', 'Released')->whereDate('expires_on', '>=', today()->toDateString())
+            ->whereHas('signers', fn ($q) => $q->where('user_id', $user->id)->where('state', 'Pending'))
+            ->orderBy('expires_on')->orderBy('id')->cursor()
+            ->first(fn (Packet $packet) => self::participantView($user, $packet) && self::current($packet));
+    }
+
     public static function signerIntact(Signer $s, Packet $p): bool
     {
         try {

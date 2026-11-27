@@ -1,5 +1,8 @@
 <section class="panel">
     <h2>What did the group learn?</h2>
+    @if(filled($plannedOtherSubject) && !session()->hasOldInput())
+        <p>Other planned subject: <strong>{{ $plannedOtherSubject }}</strong>. Add it as a custom note in the right area if it was delivered.</p>
+    @endif
     @if($deliveryDraft)
         <p>The planned subjects are already selected. Keep the topics taught in full and add a custom note for anything else.</p>
     @endif
@@ -28,7 +31,7 @@
                     </details>
                 @endif
                 <details data-training-custom @if(filled($custom)) open @endif>
-                    <summary>Custom</summary>
+                    <summary>Custom or partial delivery</summary>
                     @if($area === 'vocational' && !$session->planned_subjects)
                         <button type="button" data-use-planned-training hidden>Use planned vocational training</button>
                         <template id="planned-training-copy">{{ $session->planned_learning }}</template>
@@ -48,4 +51,4 @@
         <p class="muted">Check that the note reflects eligible learning delivered in paid time. Exclude English and maths, breaks and other ineligible activity.</p>
     </details>
 </section>
-<script src="{{ asset('assets/register-training.js') }}?v=87" defer></script>
+<script src="{{ asset('assets/register-training.js') }}?v=110" defer></script>

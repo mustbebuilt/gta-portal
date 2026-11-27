@@ -244,7 +244,9 @@ class EmployerPortalController extends Controller
             ->orderByRaw("CASE WHEN state = 'Pending' THEN 0 ELSE 1 END")
             ->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END')->orderBy('due_date')->orderBy('id')->paginate(15);
 
-        return $this->privateView('employer-portal.index', compact('actions', 'pendingCount'));
+        $nextSignature = \App\Support\ElectronicReviews::nextSignature($r->user());
+
+        return $this->privateView('employer-portal.index', compact('actions', 'pendingCount', 'nextSignature'));
     }
 
     public function show(Request $r, EmployerPortalAction $action)

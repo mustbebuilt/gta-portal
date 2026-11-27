@@ -2,6 +2,13 @@
 @section('title','My employer actions')
 @section('content')
 <header class="page-heading"><h1>My employer actions</h1></header>
+@if($nextSignature)
+    <section class="panel">
+        <h2>Progress review ready to sign</h2>
+        <p>Respond by {{ $nextSignature->expires_on->format('j M Y') }}.</p>
+        <a class="button primary" href="{{ route('electronic-reviews.show', $nextSignature) }}">Read and sign the review</a>
+    </section>
+@endif
 <section class="panel">
     <h2>Requests to answer</h2>
     @if($pendingCount)

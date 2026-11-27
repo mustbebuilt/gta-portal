@@ -30,3 +30,44 @@
  .portal-page .topbar .toolbar { inline-size: 100%; }
  .portal-page .page-actions64 .toolbar > .button { flex: 1 1 12rem; text-align: center; }
 }
+
+.portal-page .record-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: .75rem;
+}
+
+.portal-page .record-metrics > .metric {
+    min-inline-size: 0;
+    border: 1px solid var(--line);
+    border-radius: .5rem;
+    padding: .75rem;
+}
+
+.portal-page .record-metrics :is(strong, small, .metric > a) {
+    display: block;
+}
+
+@media screen and (max-width: 600px) {
+    .portal-page :is(.page-heading, .topbar, .toolbar, .work-row, .form-actions, .search) > *,
+    .portal-page :is(.dashboard-grid, .score-grid, .record-metrics, .p66-personal-grid) > * {
+        min-inline-size: 0;
+        max-inline-size: 100%;
+    }
+
+    .portal-page :is(.form-grid, .details-grid, .dashboard-grid, .record-metrics) {
+        grid-template-columns: minmax(0, 1fr);
+        gap: .75rem;
+    }
+
+    .portal-page :is(.table-wrap, .table-scroll, .p66-table-scroll, .visual-table, .visual-chart, .planning-scroll) {
+        inline-size: 100%;
+        max-inline-size: 100%;
+        overscroll-behavior-x: contain;
+    }
+
+    .portal-page :is(.section-nav, .toolbar, .form-actions) :is(a, button) {
+        max-inline-size: 100%;
+        overflow-wrap: anywhere;
+    }
+}

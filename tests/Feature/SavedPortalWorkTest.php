@@ -33,6 +33,35 @@ class SavedPortalWorkTest extends TestCase
   [$u,$a]=$this->f();$p=IndividualDeliveryPlan::create(['apprentice_id'=>$a->id,'history'=>[],'draft'=>['private'=>'PRIVATE-DELIVERY-DRAFT']]);
   $this->assertSame(route('delivery.show',$a),W::read($u)['items']->first()['url']);$p->forceFill(['active'=>true])->save();$this->assertCount(0,W::read($u)['items']);
  }
+ public function test_staff_home_resumes_an_existing_setup_in_its_original_wizard(): void
+ {
+  $admin = User::factory()->create(['role' => 'admin']);
+  $draft = \App\Models\ApprenticeSetupDraft68::create([
+   'id' => (string) \Illuminate\Support\Str::uuid(), 'owner_id' => $admin->id, 'history' => [],
+   'payload' => ['details' => ['first_name' => 'Fictional', 'last_name' => 'Setupperson', 'email' => 'private@example.invalid']],
+  ]);
+  $this->actingAs($admin)->get(route('attention.index'))->assertOk()
+   ->assertSee('Continue a draft')->assertSee(route('saved-work.index'), false);
+  $this->get('/saved-work?kind=setup&search=Setupperson')->assertOk()->assertSee('Fictional Setupperson')
+   ->assertSee(route('setup68.show', $draft), false)->assertDontSee('private@example.invalid');
+  $this->get(route('setup68.show', $draft))->assertOk()->assertSee('Setupperson');
+  $this->actingAs(User::factory()->create(['role' => 'tutor']))->get('/saved-work?kind=setup')
+   ->assertOk()->assertDontSee('Setupperson');
+ }
+
+ public function test_admin_can_resume_a_changed_approved_plan_but_the_unchanged_copy_is_hidden(): void
+ {
+  [$tutor, $apprentice] = $this->f();
+  $admin = User::factory()->create(['role' => 'admin']);
+  $draft = ['details' => ['source_ref' => 'Original plan']];
+  $plan = IndividualDeliveryPlan::create(['apprentice_id' => $apprentice->id, 'draft' => $draft, 'history' => []]);
+  $plan->forceFill(['active' => true, 'approved' => ['draft_hash' => \App\Support\DeliveryPlan::draftHash($draft)]])->save();
+  $this->assertCount(0, W::read($admin, 'delivery')['items']);
+  $plan->forceFill(['draft' => ['details' => ['source_ref' => 'Fictional revision']]])->save();
+  $this->assertSame([$plan->id], W::read($admin, 'delivery')['items']->pluck('id')->all());
+  $this->assertCount(0, W::read($tutor, 'delivery')['items']);
+ }
+
  public function test_empty_saved_delivery_plan_still_needs_source_review():void{
   [$u,$a]=$this->f();IndividualDeliveryPlan::create(['apprentice_id'=>$a->id,'draft'=>[],'history'=>[]]);$this->assertCount(1,W::read($u)['items']);
  }

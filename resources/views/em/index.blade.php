@@ -24,7 +24,9 @@
         @unless(in_array($subject, $subjectsWithFunctionalSkillsRecord, true))
             <a class="button primary" href="{{ route('qualifications.create', ['apprentice'=>$apprentice, 'subject'=>$subject]) }}">Add {{ ucfirst($subject) }} training</a>
         @endunless
-        <a class="button" href="#assessment-{{ $subject }}">Assessments and topic planning</a>
+        <a href="#assigned-topics">Assigned topics</a>
+        <a href="#em-qualification-results">Qualification results</a>
+        <a href="#assessment-{{ $subject }}">Assessments and topic planning</a>
     </div>
 @endif
 </section>

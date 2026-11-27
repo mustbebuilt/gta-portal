@@ -35,6 +35,7 @@
         <h2 id="workplace-access">Workplace access</h2>
         @if($access && $access['verified'])
             <p>Access verified for {{ $access['user']->name }} · {{ $access['user']->email }}</p>
+            <p><a class="button" href="{{ route('review-authority.index', $apprentice) }}">Manage review signing authority</a></p>
         @elseif($access)
             <p>Suggested account · {{ $access['user']->name }} · {{ $access['user']->email }}</p>
             <details open>

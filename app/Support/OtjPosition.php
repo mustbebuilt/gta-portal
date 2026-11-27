@@ -74,6 +74,7 @@ class OtjPosition
         $summary = ['captured_at' => now()->toIso8601String(), 'date' => today()->toDateString(), 'session_minutes' => array_sum(array_column(array_filter($rows, fn ($r) => $r['kind'] === 'session'), 'minutes')), 'historical_minutes' => array_sum(array_column($historical, 'minutes')), 'extra_minutes' => array_sum(array_column(array_filter($rows, fn ($r) => $r['kind'] === 'extra'), 'minutes')), 'recorded_minutes' => $cumulative, 'pending_sources' => $pending, 'invalid_sources' => $invalid, 'target_hours' => $target, 'plan_hash' => $plan['hash'] ?? null, 'plan_source' => $plan['details']['source_ref'] ?? null, 'planned_due_hours' => $due, 'recorded_percent' => $target > 0 ? $cumulative / 60 / $target * 100 : null, 'loaded_record_gap_hours' => $due !== null ? max(0, $due - $cumulative / 60) : null, 'historical_completeness' => 'Not verified; loaded source records only', 'pace_basis' => 'Planned hours in blocks ending before today; no assumed daily distribution or historic target reconstruction'];
 
         $expected = self::progressiveHours($plan, today()->toDateString());
+        $summary['has_source_records'] = $rows !== [];
         $summary['progressive_expected_hours'] = $expected;
         $summary['progressive_gap_hours'] = $expected === null ? null : round(max(0, $expected - $cumulative / 60), 2);
         $summary['progressive_basis'] = 'Indicative pace by elapsed calendar days within each dated training block. Includes time up to the start of today.';
@@ -84,13 +85,20 @@ class OtjPosition
     /** Common read-only headline for the register history, progress and OTJ ledger. */
     public static function headline(array $position): array
     {
-        $summary = $position['summary'];
+        return self::summaryHeadline($position['summary'], $position['rows'] !== []);
+    }
+
+    public static function summaryHeadline(array $summary, ?bool $hasRecords = null): array
+    {
+        // Older frozen review snapshots already displayed their saved subtotal.
+        $hasRecords ??= $summary['has_source_records'] ?? isset($summary['recorded_minutes']);
+
         return [
-            'recorded_hours' => $position['rows'] ? round($summary['recorded_minutes'] / 60, 2) : null,
-            'expected_hours' => $summary['progressive_expected_hours'],
-            'gap_hours' => $position['rows'] ? $summary['progressive_gap_hours'] : null,
-            'target_hours' => $summary['target_hours'],
-            'needs_check' => $summary['pending_sources'] > 0 || $summary['invalid_sources'] > 0,
+            'recorded_hours' => $hasRecords ? round($summary['recorded_minutes'] / 60, 2) : null,
+            'expected_hours' => $summary['progressive_expected_hours'] ?? null,
+            'gap_hours' => $hasRecords ? ($summary['progressive_gap_hours'] ?? null) : null,
+            'target_hours' => $summary['target_hours'] ?? null,
+            'needs_check' => ($summary['pending_sources'] ?? 0) > 0 || ($summary['invalid_sources'] ?? 0) > 0,
         ];
     }
 

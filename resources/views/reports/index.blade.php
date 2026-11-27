@@ -1,7 +1,7 @@
 @extends('layout')
 @section('title','Reports')
 @section('content')
-<header class="page-heading"><h1>Reports</h1></header>
+<header class="page-heading"><div><h1>Reports</h1><p>Choose a report, then open the records behind the figures.</p></div></header>
 @php
     $categories = [
         'Who needs attention?' => ['dashboard.report', 'training-gaps72.index', 'support.report', 'retention.employer-attendance'],

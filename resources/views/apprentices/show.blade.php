@@ -21,15 +21,27 @@
                 <h2 id="record-next">Next action</h2>
                 <p>{{ $next['title'] }} · {{ \App\Support\Workday83::STATUSES[$next['bucket']] }}</p>
             </div>
-            <a class="button primary" href="{{ $next['url'] }}">Open next action</a>
+            <a class="button primary" href="{{ $next['url'] }}">{{ match ($next['kind']) {
+                'review' => 'Open review', 'marking' => 'Mark work', 'task' => 'Open task',
+                'action' => 'Open target', default => 'Open next action',
+            } }}</a>
         </div>
     </section>
 @endif
 @include('apprentices.overview83')
 <nav aria-label="Common apprentice actions" class="toolbar">
     <a @class(['button','primary'=>!$next]) href="{{ $progressUrl }}">View progress</a>
-    <a class="button" href="{{ route('journey.show', $apprentice) }}">Apprenticeship journey</a>
+    @if(\App\Support\LearningAccess::training(auth()->user(), $apprentice))
+        <a class="button" href="{{ route('journey.show', $apprentice) }}">Apprenticeship journey</a>
+    @endif
     <a class="button" href="{{ route('actions.index', $apprentice) }}">Action plan</a>
+    @if(\App\Support\LearningAccess::manager(auth()->user()) && !$archived)
+        <a class="button" href="{{ $apprentice->employerRecord?->active
+            ? route('apprentices.edit', ['apprentice' => $apprentice, 'link_employer' => $apprentice->employer_id]).'#workplace-access'
+            : route('employer68.show', ['apprentice' => $apprentice->id]) }}">
+            {{ $apprentice->employerRecord?->active ? 'Set up workplace access' : 'Link employer' }}
+        </a>
+    @endif
 </nav>
 <details class="panel action-disclosure64"><summary>More record options</summary>
 @include('apprentices.page-actions64')

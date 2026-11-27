@@ -6,6 +6,7 @@ use App\Models\Apprentice;
 use App\Models\EmployerPortalAction;
 use App\Models\LearningTask;
 use App\Models\ProgrammeOutcome;
+use App\Models\ProgressReviewDraft;
 use App\Models\SmartAction;
 use App\Models\User;
 
@@ -50,6 +51,8 @@ class StaffAttention
         $outcomes = ProgrammeOutcome::whereIn('apprentice_id', $ids)->get()->keyBy('apprentice_id');
         // Private requests and their counts never enter this combined view.
         $entries = ApprenticeExperience::queue($u)->where('kind', '!=', 'help_private')->where('state', 'New')->orderBy('id')->get(['id', 'apprentice_id', 'kind', 'created_at'])->groupBy('apprentice_id');
+        $reviewDrafts = ProgressReviewDraft::whereIn('apprentice_id', $ids)->where('state', 'Draft')
+            ->orderByDesc('updated_at')->orderByDesc('id')->get(['id', 'apprentice_id'])->groupBy('apprentice_id')->map->first();
         $rows = [];
         $employerReplies = EmployerPortalAction::whereIn('apprentice_id', $training)->where('state', 'Responded')->get(['id', 'apprentice_id', 'responded_at'])->groupBy('apprentice_id');
         foreach ($people as $a) {
@@ -60,7 +63,8 @@ class StaffAttention
             $context = $outcomes->get($a->id)?->context ?? [];
             $known = in_array($context['status'] ?? null, ['Active', 'Break in learning', 'Completed', 'Withdrawn', 'Transferred'], true) && filled($context['sourceRef'] ?? null);
             $active = $known && $context['status'] === 'Active';
-            $reviewUrl = route('reviews.create', $a);
+            $reviewUrl = ($draft = $reviewDrafts->get($a->id))
+                ? route('reviews.edit', [$a, $draft]) : route('reviews.create', $a);
             if (! $known) {
                 $add('programme', 'checks', 'Programme status/source needs checking', null, $reviewUrl);
             }

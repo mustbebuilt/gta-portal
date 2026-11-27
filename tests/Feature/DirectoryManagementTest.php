@@ -127,7 +127,7 @@ class DirectoryManagementTest extends TestCase
         $this->actingAs($this->actor());
         $this->put('/directories/employers/'.$e->id, [...$this->payload('employers'), 'active' => 0, 'record_version' => 1])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame($e->id, $a->fresh()->employer_id);
-        $this->get('/apprentices/'.$a->id.'/edit')->assertOk()->assertSee('inactive, current selection');
+        $this->get('/apprentices/'.$a->id.'/edit')->assertOk()->assertSee('Inactive employer')->assertSee('Change employer');
         $this->get('/directories/employers/'.$e->id)->assertOk()->assertSee('Inactive');
         $this->get('/directories/employers?state=active')->assertOk()->assertDontSee('EMP-001');
     }

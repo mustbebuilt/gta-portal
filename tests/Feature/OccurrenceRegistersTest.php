@@ -108,6 +108,30 @@ class OccurrenceRegistersTest extends TestCase {
      $this->assertDatabaseCount('attendance_marks', 0);
  }
 
+ public function test_timetable_timeline_opens_the_same_first_weekly_register_as_the_register_menu(): void
+ {
+     $f = $this->fixture();
+     $f['group']->forceFill(['weekly_register' => ['revisions' => [[
+         'first_day' => $f['date'], 'start' => '09:00', 'end' => '16:00',
+         'planned_learning' => 'Fictional weekly learning', 'breaks' => [],
+     ]]]])->save();
+     $this->plan($f);
+     $this->travelTo(\Carbon\Carbon::parse($f['date'].' 08:00'));
+     $board = route('centre-planning.index', ['layout' => 'timeline', 'week' => $f['date']]);
+     $open = route('attendance.weekly.open', $f['group']);
+     $page = $this->actingAs($f['tutor'])->get($board)->assertOk();
+     $this->assertMatchesRegularExpression('~class="planning-card[^>]+>.*?<form[^>]+action="'.preg_quote($open, '~').'"~s', $page->getContent());
+     $this->get(route('attendance.index'))->assertOk()->assertSee($open, false);
+     $data = ['date' => $f['date'], 'week' => today()->startOfWeek()->toDateString()];
+     $first = $this->post($open, $data);
+     $session = TrainingSession::sole();
+     $first->assertRedirect(route('attendance.show', $session));
+     $this->post($open, $data)->assertRedirect(route('attendance.show', $session));
+     $this->get($board)->assertOk()->assertSee(route('attendance.show', $session), false);
+     $this->get($board.'&scope=staff')->assertOk()->assertDontSee($open, false);
+     $this->assertDatabaseCount('training_sessions', 1);
+ }
+
  public function test_opening_unlinked_exact_register_requires_no_planning_link_or_data_changes(): void
  {
      $f = $this->fixture();

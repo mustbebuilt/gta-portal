@@ -96,7 +96,8 @@ class AccountOnboardingController extends Controller
     public function acceptForm(Request $request, int $user, string $token)
     {
         $target = User::find($user);
-        abort_unless($target && AccountOnboarding::valid($target, 'invite', $token), 403);
+        abort_unless($target && AccountOnboarding::valid($target, 'invite', $token), 403,
+            'This invitation is unavailable. Ask GTA for a new invitation, or sign in if you have already set your password.');
         return response()->view('auth.invitation', ['user' => $user, 'token' => $token])->header('Referrer-Policy', 'no-referrer');
     }
     public function accept(Request $request, int $user, string $token): RedirectResponse

@@ -51,9 +51,9 @@
                     @else Next review {{ $due?->format('j M Y') }}
                     @endif
                 </p>
-                @if(empty($inMeeting))
-                    <a class="button" href="{{ route('support.index', [$apprentice, 'target_marker' => $marker->id]) }}#support-actions">Add target</a>
-                @endif
+                <a class="button" href="{{ !empty($inMeeting)
+                    ? route('support.worklist', [...$meetingFilters, 'meeting' => $apprentice->id, 'target_marker' => $marker->id])
+                    : route('support.index', [$apprentice, 'target_marker' => $marker->id]) }}#support-actions">Add target</a>
                 <details @if($restore) open @endif><summary>Record review</summary>
                     <form method="post" action="{{ $form }}">
                         @csrf

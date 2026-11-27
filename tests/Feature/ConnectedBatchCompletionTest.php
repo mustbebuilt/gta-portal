@@ -43,11 +43,17 @@ class ConnectedBatchCompletionTest extends TestCase
         $data = ['reference' => 'HIST-001', 'first_name' => 'Fictional', 'last_name' => 'History', 'employer_id' => $e1->id, 'tutor_id' => $old->id];
         $this->post('/apprentices', $data)->assertRedirect()->assertSessionHasNoErrors();
         $a = Apprentice::firstOrFail();
-        $this->put('/apprentices/'.$a->id, [...$data, 'version' => 1, 'employer_id' => $e2->id, 'tutor_id' => $new->id])->assertRedirect()->assertSessionHasNoErrors();
-        $events = DB::table('assignment_change_events')->get();
-        $this->assertCount(2, $events);
-        $this->assertSame($old->id, json_decode($events[1]->before_links, true)['tutor_id']);
-        $this->assertArrayNotHasKey('email', json_decode($events[1]->after_links, true));
+        $this->post(route('employer68.change', $a), [
+            'version' => $a->version, 'employer_id' => $e2->id,
+            'employer_version' => $e2->record_version, 'effective_on' => today()->toDateString(),
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $this->put('/apprentices/'.$a->id, [...$data, 'version' => $a->fresh()->version,
+            'employer_id' => $e2->id, 'tutor_id' => $new->id])->assertRedirect()->assertSessionHasNoErrors();
+        $events = DB::table('assignment_change_events')->orderBy('id')->get();
+        $this->assertCount(3, $events);
+        $this->assertSame($e1->id, json_decode($events[1]->before_links, true)['employer_id']);
+        $this->assertSame($old->id, json_decode($events[2]->before_links, true)['tutor_id']);
+        $this->assertArrayNotHasKey('email', json_decode($events[2]->after_links, true));
         $summary = AssignmentHistory::summary($a->fresh(), $events);
         $this->assertSame(2, $summary['employers']);
         $this->assertSame(2, $summary['tutors']);

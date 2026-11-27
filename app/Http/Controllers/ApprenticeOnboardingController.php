@@ -57,7 +57,8 @@ class ApprenticeOnboardingController extends Controller
   });return back()->with('status','Any outstanding apprentice invitation revoked. You can revoke even while the mail pilot is switched off.');
  }
  public function acceptForm(Request $r,int $user,string $token) {
-  $u=User::find($user);abort_unless($u&&AccountOnboarding::valid($u,'learner_invite',$token),403);return $this->privateView('invitation',compact('user','token'));
+  $u=User::find($user);abort_unless($u&&AccountOnboarding::valid($u,'learner_invite',$token),403,
+   'This invitation is unavailable. Ask GTA for a new invitation, or sign in if you have already set your password.');return $this->privateView('invitation',compact('user','token'));
  }
  public function accept(Request $r,int $user,string $token) {
   $key='learner-accept:'.hash('sha256',$r->ip());abort_if(RateLimiter::tooManyAttempts($key,10),429);RateLimiter::hit($key,300);

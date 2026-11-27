@@ -19,6 +19,10 @@
     $canRecordEpa = !$closure && !$endedWithoutAchievement && $number;
 @endphp
 
+@if(\App\Support\LeaverDestinations::can(auth()->user(), $apprentice) && \App\Support\LeaverDestinations::anchor($apprentice, $outcome))
+    <p><a class="button" href="{{ route('destinations.show', $apprentice) }}">Open leaver follow-up</a></p>
+@endif
+
 @if($canRecordLeaving || $canRecordEpa)
     <nav class="toolbar" aria-label="Choose a programme outcome">
         @if($canRecordEpa)

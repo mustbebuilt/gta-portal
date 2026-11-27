@@ -1,12 +1,12 @@
 @php
-    $selectedGroup = (int) old('tutor_group_id', request('group'));
+    $selectedGroup = (int) old('tutor_group_id', $plannerGroupId);
     $selectedSubjects = array_values(array_filter((array) old('subjects', []), 'is_string'));
     $useWeekly = $plannerOptions['timing'] && old('timing') !== 'custom';
     $customBreaks = collect(old('breaks', $plannerOptions['timing']['breaks'] ?? []))
         ->filter(fn ($break) => is_array($break))->take(10)->values()->all() ?: [[]];
 @endphp
 <details class="panel" id="session-planner" data-reveal-on-link @if($errors->any() || request()->filled('plan_date')) open @endif>
-    <summary>Plan another session</summary>
+    <summary>Plan a session</summary>
     <noscript>
         <form method="get" action="{{ route('attendance.index') }}#session-planner">
             <label>Group <select name="group" required>
@@ -20,6 +20,7 @@
         </form>
     </noscript>
     <form method="post" action="{{ route('attendance.create') }}" data-session-planner>
+        <p>Choose the subjects. The weekly schedule supplies the times and breaks where it applies.</p>
         @csrf
         <input type="hidden" name="planner" value="subjects">
         <input type="hidden" name="timing" value="{{ $useWeekly ? 'weekly' : 'custom' }}" data-plan-timing>
@@ -46,7 +47,7 @@
             </select></label>
             <p>Use Load subjects and schedule after changing group or date.</p>
         </noscript>
-        <details @if(old('other_subject')) open @endif>
+        <details data-plan-other @if(old('other_subject')) open @endif>
             <summary>Other subject</summary>
             <label>Subject outside the scheme of work <input name="other_subject" maxlength="250" value="{{ old('other_subject') }}"></label>
         </details>
@@ -76,4 +77,4 @@
         <script type="application/json" data-plan-initial>@json($selectedSubjects, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
     </form>
 </details>
-<script src="{{ asset('assets/session-planner.js') }}?v=87" defer></script>
+<script src="{{ asset('assets/session-planner.js') }}?v=110" defer></script>

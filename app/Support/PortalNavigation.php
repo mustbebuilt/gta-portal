@@ -13,7 +13,7 @@ class PortalNavigation
             'label'=>$label,'href'=>route($route,$parameters),'current'=>$current??$request->routeIs(...($patterns?:[$route]))];
         $primary=[];$groups=[];
         if($u->role==='employer') {$primary[]=$item('Getting started','employer-start.index',[],['employer-start.*']);$primary[]=$item('My employer actions','employer-actions.index',[],['employer-actions.index','employer-actions.show','employer-actions.respond']);}
-        if(StaffAttention::allowed($u)) {$primary[]=$item('Needs attention','attention.index',[],['attention.index','operations-desk.*']);}
+        if(StaffAttention::allowed($u)) {$primary[]=$item('Needs attention','attention.index',[],['attention.index','operations-desk.*','saved-work.*','dashboard.index']);}
         if($u->role==='apprentice') {$primary[]=$item('My next step','experience.home');$primary[]=$item('Getting started','getting-started.index',[],['getting-started.*']);}
         $group=function(string $id,string $label,array $links)use(&$groups):void {
             if(!$links) {return;}
@@ -21,7 +21,7 @@ class PortalNavigation
         };
         if(StaffHandover::recipientAllowed($u)) {$primary[]=$item('Staff handovers','incoming-handovers.index',[],['incoming-handovers.*']);}
         if(MyResponsibilities::allowed($u)) {$primary[]=$item('My responsibilities','responsibilities.index',[],['responsibilities.*']);}
-        if(in_array($u->role,['admin','ceo','tutor','apprentice'],true)) {$primary[]=$item($u->role === 'apprentice' ? 'My dashboard' : 'Work today','dashboard.index',[],['dashboard.index']);}
+        if($u->role === 'apprentice') {$primary[]=$item('My dashboard','dashboard.index');}
         $reports = ReportDirectory::links($u);
         if ($reports) {
             $primary[] = $item('Reports','reports.index',[],['reports.index', ...array_keys($reports), 'dashboard.pdf', 'visual-reports.pdf', 'historical-cohorts.*', ... (isset($reports['timetable-management.index']) ? ['timetable-management.*'] : [])]);
@@ -77,7 +77,7 @@ class PortalNavigation
         if(!in_array($u->role,['apprentice','employer'],true)) {$links[]=$item('Staff development','staff.index',[],['staff.*']);}
         if($u->role!=='apprentice') {$links[]=$item('Case studies','cases.index',[],['cases.*']);}
         if($manage) {$links[]=$item('Curriculum source checks','curriculum-sources.index',[],['curriculum-sources.*']);}
-        if(SavedPortalWork::allowed($u)){$links[]=$item('Saved work','saved-work.index',[],['saved-work.*']);}
+        if(SavedPortalWork::allowed($u) && !StaffAttention::allowed($u)){$links[]=$item('Saved work','saved-work.index');}
         if($u->role==='apprentice') {$primary[]=$item('Quick actions','quick-actions.index',[],['quick-actions.*']);}
         else {$links[]=$item('Quick actions','quick-actions.index',[],['quick-actions.*']);}
         $group('staff-quality','Other work',$links);
@@ -147,8 +147,8 @@ class PortalNavigation
     {
         $menu = self::build($user, $request);
         $labels = match ($user->role) {
-            'admin', 'ceo' => ['Needs attention', 'Work today', 'Apprentices', 'Apprentice register', 'Reports'],
-            'tutor' => ['Needs attention', 'Work today', 'Apprentices', 'Apprentice register', 'Work to mark'],
+            'admin', 'ceo' => ['Needs attention', 'Apprentices', 'Apprentice register', 'Reports'],
+            'tutor' => ['Needs attention', 'Apprentices', 'Apprentice register', 'Work to mark'],
             'apprentice' => ['My next step', 'My progress', 'My calendar', 'Review signing'],
             'employer' => ['My employer actions', 'View progress', 'Review appointments', 'Review signing'],
             'inclusion_lead', 'inclusion_member' => ['Support and Retention Register', 'Reports'],

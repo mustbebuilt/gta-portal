@@ -21,9 +21,9 @@ class PortalVisualReport
   foreach($source['apprentices']as$a){
    $p=$a->programmeLabel()??'Programme not recorded';$programmes[$p]=($programmes[$p]??0)+1;
    $rows=array_values(array_filter($source['attendanceLedger'][$a->id]['rows'],fn($row)=>$row['date']>=$from&&$row['date']<=$to));
-   $attendanceRows=[...$attendanceRows,...$rows];$attendance=AttendanceMath::report($rows);$otj=OtjPosition::forApprentice($a)['summary'];$cycle=SignedReviews::cycle($a);
+   $attendanceRows=[...$attendanceRows,...$rows];$attendance=AttendanceMath::report($rows);$position=OtjPosition::forApprentice($a);$otj=$position['summary'];$headline=OtjPosition::headline($position);$cycle=SignedReviews::cycle($a);
    $tasks=$source['tasks']->where('apprentice_id',$a->id);$decisions=PortalVisuals::tasks($tasks)['rows'];
-   $details[]=['id'=>$a->id,'reference'=>$a->reference,'name'=>$a->first_name.' '.$a->last_name,'programme'=>$p,'tasks'=>$tasks->count(),'approved'=>collect($decisions)->firstWhere('label','Approved')['value'],'attendance'=>$attendance,'recorded_hours'=>round($otj['recorded_minutes']/60,2),'target_hours'=>$otj['target_hours'],'planned_due_hours'=>$otj['planned_due_hours'],'progressive_expected_hours'=>$otj['progressive_expected_hours'],'progressive_gap_hours'=>$otj['progressive_gap_hours'],'otj_pending'=>$otj['pending_sources'],'otj_checks'=>$otj['invalid_sources'],'review_due'=>$cycle['next_due']];
+   $details[]=['id'=>$a->id,'reference'=>$a->reference,'name'=>$a->first_name.' '.$a->last_name,'programme'=>$p,'tasks'=>$tasks->count(),'approved'=>collect($decisions)->firstWhere('label','Approved')['value'],'attendance'=>$attendance,'recorded_hours'=>$headline['recorded_hours'],'target_hours'=>$headline['target_hours'],'planned_due_hours'=>$otj['planned_due_hours'],'progressive_expected_hours'=>$headline['expected_hours'],'progressive_gap_hours'=>$headline['gap_hours'],'otj_pending'=>$otj['pending_sources'],'otj_checks'=>$otj['invalid_sources'],'review_due'=>$cycle['next_due']];
   }
   $otjFollowup = [];
   if ($u->role !== 'apprentice') {

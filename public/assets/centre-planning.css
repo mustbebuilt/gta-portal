@@ -6,3 +6,28 @@
 .planning-section th{padding:12px;text-transform:uppercase;letter-spacing:1px}.planning-measures td,.planning-measures th{vertical-align:top}.planning-measures small{display:block}.planning-focus-gaps .planning-gap{outline:3px solid #147a58;outline-offset:-3px;font-weight:700}
 /* Optional drag targets; normal buttons/forms remain the primary accessible route. */
 .workload-drop-enabled{outline:2px dashed var(--accent);outline-offset:-4px}[data-workload-palette]{margin:12px 0}[data-workload-palette] button{min-height:44px}[data-move-workload][draggable=true]{cursor:grab}.planning-card small{color:inherit}.planning-card a{color:inherit;text-decoration:underline}
+
+.planning-card .button,
+.planning-card form button {
+    margin-block-start: .4rem;
+    max-inline-size: 100%;
+}
+
+@media screen and (max-width: 600px) {
+    .planning-scroll .planning-day {
+        display: flex;
+        flex-direction: column;
+        gap: .4rem;
+        height: auto !important;
+        min-height: 3rem;
+        background: none;
+    }
+
+    .planning-scroll :is(.planning-card, .planning-gap) {
+        position: static;
+        inline-size: 100% !important;
+        height: auto !important;
+        overflow: visible;
+        padding: .45rem;
+    }
+}

@@ -84,6 +84,10 @@ class ElectronicReviewTest extends TestCase
         $this->assertSame('simple83',$f['p']->snapshot['document']['layout83']);
         $this->assertStringNotContainsString('PRIVATE-SUPPORT-NEVER-SHARE',json_encode($f['p']->snapshot['document']));
         $this->assertSame(E::FIELDS,E::displayFields(['fields'=>[]]));
+        $packetUrl = route('electronic-reviews.show', $f['p']);
+        $this->get(route('reviews.edit', [$a, $r]))->assertOk()
+            ->assertSee('Check and release for signatures')->assertSee($packetUrl, false);
+        $this->actingAs($f['learner'])->get(route('experience.home'))->assertOk()->assertDontSee($packetUrl, false);
         $this->release($f);
         foreach(['learner','employer','mentor'] as $role)E::respond($f[$role],$f[$role]->auth_version,$f['p']->fresh(),$this->data($f,$f[$role]));
         $this->assertSame(3,Signer::where('packet_id',$f['p']->id)->where('state','Signed')->count());
@@ -251,7 +255,16 @@ class ElectronicReviewTest extends TestCase
         $f = $this->fixture();
         extract($f);
         $before = $review->getAttributes();
-        $this->allSigned($f);
+        $this->release($f);
+        $url = route('electronic-reviews.show', $p);
+        $this->actingAs($learner)->get(route('experience.home'))->assertOk()
+            ->assertSee('Read and sign your review')->assertSee($url, false);
+        $this->actingAs($employer)->get(route('employer-actions.index'))->assertOk()
+            ->assertSee('Read and sign the review')->assertSee($url, false);
+        foreach ([$learner, $employer, $mentor] as $participant) {
+            E::respond($participant, $participant->auth_version, $p->fresh(), $this->data($f, $participant));
+        }
+        $this->actingAs($learner)->get(route('experience.home'))->assertOk()->assertDontSee($url, false);
         $this->assertSame('All signed', $p->fresh()->state);
         $this->assertNull(SignedReviews::cycle($a)['next_due']);
         $record = $this->confirm($f);

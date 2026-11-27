@@ -13,7 +13,7 @@
                         <tr>
                             <td><strong>{{ $row['name'] }}</strong><br>{{ $row['reference'] }}</td>
                             <td>{{ isset($row['progressive_expected_hours']) ? number_format($row['progressive_expected_hours'], 2).' hrs' : 'Unavailable' }}</td>
-                            <td>{{ number_format($row['recorded_hours'], 2) }} hrs</td>
+                            <td>{{ isset($row['recorded_hours']) ? number_format($row['recorded_hours'], 2).' hrs' : 'Unavailable' }}</td>
                             <td>{{ isset($row['progressive_gap_hours']) ? number_format($row['progressive_gap_hours'], 2).' hrs' : 'Unavailable' }}</td>
                             <td>
                                 @if($row['catchup'])

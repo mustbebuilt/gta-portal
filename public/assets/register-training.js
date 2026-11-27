@@ -87,7 +87,7 @@ document.querySelectorAll('[data-training-area]').forEach(area => {
             item.append(label + ' ', remove);
             list.append(item);
         }
-        select.add(new Option('Custom…', 'custom'));
+        select.add(new Option('Custom or partial delivery…', 'custom'));
         list.hidden = list.childElementCount === 0;
     }
 

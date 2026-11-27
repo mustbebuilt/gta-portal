@@ -11,6 +11,20 @@ $targets=$editable ? $actions->map(fn($a)=>['title'=>$a->title,'owner'=>$a->owne
 @endphp
 <header class="page-heading"><div><p class="eyebrow">{{$apprentice->first_name}} {{$apprentice->last_name}} · {{$apprentice->reference}}</p><h1>Apprentice Progress Review</h1><p>{{$review->state??'Draft'}}@if($review->exists) · Version {{$review->version}}@endif · {{$signedConfirmed?'Checked signed evidence retained':'Not a completed review'}}</p></div><a class="button" href="{{route('reviews.index')}}">Back to reviews</a></header>
 @include('learning.errors')
+@if($signing)
+    <section class="panel" aria-label="Next review action">
+        <h2>Participant signatures</h2>
+        <a class="button primary" href="{{ $signing['url'] }}">{{ $signing['label'] }}</a>
+    </section>
+@elseif(\App\Support\ReviewAppointments::staff(auth()->user(), $apprentice))
+    <p>
+        @if($appointment)
+            <a href="{{ route('review-appointments.show', $appointment) }}">{{ $appointment->state === 'Published' ? 'Booked review' : 'Continue booking draft' }} · {{ $appointment->starts_at->timezone(config('app.timezone'))->format('d M Y H:i') }}</a>
+        @else
+            <a href="{{ route('review-appointments.form', $apprentice) }}">Arrange review meeting</a>
+        @endif
+    </p>
+@endif
 @if($preparation && !$preparation['ready'])<details class="panel" open><summary>{{count($preparation['pending'])}} saved items to finish</summary><ul>@foreach(collect($preparation['pending'])->groupBy('section') as $section=>$items)<li><a href="#{{$section}}">{{$labels[$section]}}</a>: {{implode('; ',$items->pluck('label')->all())}}</li>@endforeach</ul><p>Typed changes are checked when saved.</p></details>@endif
 <nav class="section-nav" aria-label="Review sections">@foreach($labels as $id=>$label)<a href="#{{$id}}">{{$label}}</a>@endforeach</nav>
 @php($workContext = \App\Support\Workday83::returnParameters(request()))
@@ -89,12 +103,12 @@ $targets=$editable ? $actions->map(fn($a)=>['title'=>$a->title,'owner'=>$a->owne
 <input type="hidden" name="fields[checked83]" value="0">
 <label class="check"><input type="checkbox" name="fields[checked83]" value="1" @checked(old('fields.checked83',$f['checked83']??false))>I checked the progress figures and current plan, agreed realistic targets with the responsible people, and checked the review content.</label>
 <p>Next review reference: {{$f['nextReview']??'Calculated after saving the actual meeting date'}} · not a booked appointment.</p>
-@if($editable)<div class="form-actions"><button class="primary" name="after_save" value="stay">Save draft</button><button name="after_save" value="signoff">Save and continue to sign-off</button></div><p>Preparing signatures freezes this checked version. Participants still need to sign.</p>@endif
+@if($editable)<div class="form-actions"><button class="primary" name="after_save" value="signoff">Save and continue to sign-off</button><button name="after_save" value="stay">Save draft</button></div><p>Preparing signatures freezes this checked version. Participants still need to sign.</p>@endif
 </section></fieldset></form>
 @if(collect($f)->only(['previousNotes','sharedSupport'])->filter(fn($value)=>filled($value))->isNotEmpty())<details class="panel no-print"><summary>Additional recorded notes</summary>@foreach(['previousNotes'=>'Previous action notes','sharedSupport'=>'Restricted proposed support summary'] as $key=>$label)@if(filled($f[$key]??null))<h3>{{$label}}</h3><p class="recorded-answer">{{$f[$key]}}</p>@endif @endforeach</details>@endif
 @if($editable && !($snapshot['delivery_plan']??null) && \App\Support\LearningAccess::manager(auth()->user()))<details class="panel"><summary>Complete missing apprentice setup</summary><form method="post" action="{{route('setup68.resume-existing',$apprentice)}}">@csrf<button>Continue setup for this apprentice</button></form><p>Uses this existing record. Check the programme, prior learning, employer and agreed plan before returning to the review.</p></details>@endif
 @if($review->exists)<details class="panel"><summary>Saved copies and other tools</summary><a class="button" href="{{route('reviews.pdf',[$apprentice,$review])}}">Download review PDF</a><button type="button" data-print>Print review</button>@if($editable)<a class="button" href="{{route('review-briefs.index',[$apprentice,$review])}}">Prepare factual review notes</a>@endif<a class="button" href="{{route('reviews.signed.form',$review)}}">Signed-copy record</a>@foreach($existing as $item)@if($item->id!==$review->id)<p><a href="{{route('reviews.edit',[$apprentice,$item])}}">Review {{$item->id}} · {{$item->fields['reviewDate']??'Date not recorded'}} · {{$item->state}}</a></p>@endif @endforeach</details>@endif
-@if(!$editable)<section class="panel"><h2>Participant signatures</h2><a class="button primary" href="{{route('electronic-reviews.prepare-form',$review)}}">Continue to sign-off</a>
+@if(!$editable)<section class="panel"><h2>Review options</h2>
 @if($review->exists && $review->state === 'Ready for signatures' && \App\Support\EmployerActions::staff(auth()->user(), $apprentice))
     <p><a href="{{ route('employer-actions.staff', ['apprentice' => $apprentice, 'source' => 'review:'.$review->id]) }}#publish-employer-request">Request employer feedback</a></p>
 @endif

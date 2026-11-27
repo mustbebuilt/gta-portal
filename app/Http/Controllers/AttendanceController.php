@@ -97,14 +97,16 @@ class AttendanceController extends Controller
             return \App\Support\ReportedChoices::REGISTER_CANCELLATION[$event['cancellation_reason_code'] ?? '']
                 ?? 'No standard reason recorded';
         })->sortKeys() : collect();
-        $plannerGroup = $groups->firstWhere('id', (int) $r->old('tutor_group_id', $input['group'] ?? 0));
+        $activeGroups = $groups->where('active', true);
+        $plannerGroup = $groups->firstWhere('id', (int) $r->old('tutor_group_id',
+            $input['group'] ?? ($activeGroups->count() === 1 ? $activeGroups->first()->id : 0)));
         $plannerDate = $r->old('session_date', $input['plan_date'] ?? today()->toDateString());
         $plannerDate = is_string($plannerDate) ? $plannerDate : '';
         $plannerOptions = $plannerGroup?->active && RegisterCreation::allowed($r->user(), $plannerGroup)
             ? $this->sessionOptions($plannerGroup, preg_match('/^\d{4}-\d{2}-\d{2}$/D', $plannerDate) && strtotime($plannerDate) ? $plannerDate : null)
             : ['subjects' => [], 'timing' => null];
 
-        return view('attendance.index', ['cancellationCounts' => $cancellationCounts, 'plannerDate' => $plannerDate, 'plannerOptions' => $plannerOptions, 'scheduledThisWeek' => $scheduledThisWeek, 'nextScope83' => Workday83::registerScope($input), 'nextRegister83' => Workday83::nextRegister($r->user(), null, $input), 'groups' => $groups, 'sessions' => $registerRows->getCollection()->pluck('session'), 'weeklyGroupSessions' => $sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'), 'monthlyOutstanding' => $monthlyOutstanding, 'todayRegisterRows' => $followup['rows']->filter(fn ($row) => $row['session']->session_date->isToday())->values(), 'registerRows' => $registerRows, 'registerCounts' => $followup['counts'], 'registerView' => $view, 'registerSearch' => $search]);
+        return view('attendance.index', ['cancellationCounts' => $cancellationCounts, 'plannerDate' => $plannerDate, 'plannerGroupId' => $plannerGroup?->id, 'plannerOptions' => $plannerOptions, 'scheduledThisWeek' => $scheduledThisWeek, 'nextScope83' => Workday83::registerScope($input), 'nextRegister83' => Workday83::nextRegister($r->user(), null, $input), 'groups' => $groups, 'sessions' => $registerRows->getCollection()->pluck('session'), 'weeklyGroupSessions' => $sessions->whereNotNull('regular_week')->groupBy('tutor_group_id'), 'monthlyOutstanding' => $monthlyOutstanding, 'todayRegisterRows' => $followup['rows']->filter(fn ($row) => $row['session']->session_date->isToday())->values(), 'registerRows' => $registerRows, 'registerCounts' => $followup['counts'], 'registerView' => $view, 'registerSearch' => $search]);
     }
 
     public function planOptions(Request $r, TutorGroup $group): JsonResponse
@@ -178,7 +180,7 @@ class AttendanceController extends Controller
             ], $breaks);
             $session->history = [[
                 'event' => 'session_planned_subjects', 'at' => now()->toIso8601String(),
-                'by' => $actor->id, 'subjects' => $subjects,
+                'by' => $actor->id, 'subjects' => $subjects, 'other_subject' => $data['other_subject'] ?? null,
             ]];
             $session->regular_week = $weekly['week'] ?? null;
             $session->save();
@@ -261,6 +263,8 @@ class AttendanceController extends Controller
             'structuredTraining' => $training,
             'trainingOptions' => SessionPlanning::deliveryOptions($session, $members, $training),
             'deliveryDraft' => $deliveryDraft,
+            'plannedOtherSubject' => !$training && $session->marks->isEmpty() && $session->delivered_learning === null
+                ? collect($session->history ?? [])->firstWhere('event', 'session_planned_subjects')['other_subject'] ?? null : null,
             'members' => $members,
             'registerReadiness' => $readiness,
             'monthlyCards' => $monthlyCards,

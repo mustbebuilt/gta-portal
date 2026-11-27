@@ -28,6 +28,11 @@ class DeliveryPlan
         return hash('sha256', file_get_contents(resource_path('data/'.$key.'-tasks.json')).file_get_contents(resource_path('data/'.$key.'-catalogue.json')));
     }
 
+    public static function draftHash(array $draft): string
+    {
+        return hash('sha256', json_encode($draft, JSON_THROW_ON_ERROR));
+    }
+
     public static function approved(Apprentice $a): ?array
     {
         $row = ReportRead85::rows(IndividualDeliveryPlan::class, $a->id, fn () => IndividualDeliveryPlan::where('apprentice_id', $a->id)->get())->first();

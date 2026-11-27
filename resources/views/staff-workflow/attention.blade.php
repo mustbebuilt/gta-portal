@@ -3,15 +3,14 @@
 @section('content')
 <header class="page-heading"><div><p class="eyebrow">Staff follow-up · {{ today()->format('d M Y') }}</p><h1>Who needs attention today?</h1><p>Start with the next action for each apprentice. Open the other reasons when you need them.</p></div></header>
 @include('learning.errors')
+@include('staff-workflow.daily-tools')
 @if($nextRow = $rows->first())
     @include('staff-workflow.attention-row', ['row'=>$nextRow, 'nextAction'=>true])
 @endif
-@include('setup68.home-actions')
 <details class="panel" @if($view !== 'all' || $reason !== 'all' || $q !== '') open @endif>
 <summary>Filter apprentices</summary>
 <form method="get"><div class="form-grid"><div><label for="attention-view">Priority</label><select id="attention-view" name="view">@foreach(\App\Support\StaffAttention::VIEWS as $v)<option value="{{ $v }}" @selected($view===$v)>{{ ucfirst($v) }}</option>@endforeach</select></div><div><label for="attention-reason">Reason</label><select id="attention-reason" name="reason">@foreach(\App\Support\StaffAttention::REASONS as $v)<option value="{{ $v }}" @selected($reason===$v)>{{ ucfirst($v) }}</option>@endforeach</select></div><div><label for="attention-search">Name or apprentice reference</label><input id="attention-search" name="q" value="{{ $q }}" maxlength="100"></div></div><button>Show apprentices</button></form>
 </details>
-<p><a href="{{ route('operations-desk.index', ['q'=>$q]) }}">Recorded staff follow-ups</a></p>
 <p>{{ $rows->total() }} apprentices match these filters.</p>
 @foreach($rows->skip(1) as $row)
     @include('staff-workflow.attention-row', ['nextAction'=>false])
@@ -20,6 +19,7 @@
     <section class="panel"><h2>No matching follow-up reasons</h2><p>Try a different filter or open another work list.</p></section>
 @endif
 {{ $rows->links() }}
+@include('setup68.home-actions')
 <details class="panel"><summary>Counts and how the list is prioritised</summary>
 <div class="kpi-grid">@foreach($position['counts'] as $key=>$count)<section class="panel"><strong>{{ $count }}</strong><p>{{ ucfirst($key) }} · apprentices</p></section>@endforeach</div>
 <p>Counts cover the authorised caseload before filters. {{ $position['scope_count'] }} profiles checked.</p>

@@ -50,7 +50,7 @@
                 @include('attendance.otj-headline', ['otjHeadline' => $p['otj_headline']])
             @else
             <p><strong>{{ $otj['recorded_hours'] === null ? 'Not available' : $hours($otj['recorded_hours']).' hours recorded' }}</strong></p>
-            <p>{{ $otj['planned_due_hours'] === null ? 'Target to date unavailable' : $hours($otj['planned_due_hours']).' hours planned in blocks finished to date' }}</p>
+            <p>{{ $otj['planned_due_hours'] === null ? 'Target to date unavailable' : $hours($otj['planned_due_hours']).' hours planned for blocks already due' }}</p>
             @if($variance !== null)
                 <p>{{ $variance === 0.0 ? 'Recorded hours match the plan to date.' : $hours(abs($variance)).' hours '.($variance < 0 ? 'below' : 'above').' the plan to date.' }}</p>
             @endif

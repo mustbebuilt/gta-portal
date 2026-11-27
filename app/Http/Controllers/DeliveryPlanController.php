@@ -186,9 +186,9 @@ class DeliveryPlanController extends Controller
                 $p = DeliveryPlan::rplPosition($a, $d['rpl_binding'], true);
                 if (!$p || !DeliveryPlan::targetMatches($p, $details['target_hours'])) { throw ValidationException::withMessages(['version' => 'The RPL assessment approval changed. Reconcile the plan first.']); }
             }
-            if ($row->active && ($row->approved['draft_hash'] ?? null) === hash('sha256', json_encode($d, JSON_THROW_ON_ERROR))) { throw ValidationException::withMessages(['version' => 'This draft revision is already approved.']); }
+            if ($row->active && ($row->approved['draft_hash'] ?? null) === DeliveryPlan::draftHash($d)) { throw ValidationException::withMessages(['version' => 'This draft revision is already approved.']); }
             $before = $row->approved;
-            $snapshot = [...$d, 'draft_hash' => hash('sha256', json_encode($d, JSON_THROW_ON_ERROR)), 'draft_version' => $row->version, 'approved_by' => $r->user()->id, 'approved_at' => now()->toIso8601String(), 'approval_scope' => 'Provider operational delivery plan; participant signatures, funding compliance and KSB achievement separate'];
+            $snapshot = [...$d, 'draft_hash' => DeliveryPlan::draftHash($d), 'draft_version' => $row->version, 'approved_by' => $r->user()->id, 'approved_at' => now()->toIso8601String(), 'approval_scope' => 'Provider operational delivery plan; participant signatures, funding compliance and KSB achievement separate'];
             $snapshot['hash'] = hash('sha256', json_encode($snapshot, JSON_THROW_ON_ERROR));
             $row->approved = $snapshot; $row->active = true;
             $this->commit($r, $row, 'delivery_plan_approved', ['before' => $before, 'approved_hash' => $snapshot['hash']]);
