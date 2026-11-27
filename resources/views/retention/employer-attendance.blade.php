@@ -12,6 +12,14 @@
     <div><label for="attendance-to">Session dates to</label><input id="attendance-to" type="date" name="to" value="{{ $through }}" required></div>
     <button>Apply dates</button>
 </form>
+@include('reports.headline', [
+    'title' => 'Recorded kept-at-work sessions',
+    'basis' => 'Whole reporting period across employers. Selecting an employer narrows the register records below.',
+    'items' => [
+        ["Missed sessions", $groups->sum('sessions')],
+        ["Employer needs checking", $groups->firstWhere('id', 'unknown')['sessions'] ?? 0, 'exceptions']
+    ],
+])
 <section class="panel">
     <h2>Employer totals</h2>
     <div class="table-scroll"><table><thead>

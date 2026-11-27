@@ -14,10 +14,15 @@
     </select></label>
     <button>Update report</button>
 </form>
-<div class="priority-summary">
-    <span><strong>{{ $achievers->count() }}</strong> achievers</span>
-    <span><strong>{{ $earlyLeavers->count() }}</strong> early leavers</span>
-</div>
+@include('reports.headline', [
+    'title' => 'Confirmed outcomes',
+    'basis' => 'Use the achievement or withdrawal date shown for the selected period.',
+    'items' => [
+        ["Achievers", $achievers->count()],
+        ["Early leavers", $earlyLeavers->count()],
+        ["Outcome source checks", $checks->count(), 'exceptions']
+    ],
+])
 <section class="panel"><h2>Achievers</h2>
 <div class="table-scroll"><table><thead><tr><th>Apprentice</th><th>Programme</th><th>Achievement date</th><th>Grade</th><th>EPA attempt</th><th>Employment at exit</th></tr></thead><tbody>
 @forelse($achievers as $row)

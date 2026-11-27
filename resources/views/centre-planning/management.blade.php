@@ -6,6 +6,16 @@
 <h1>Tutor workload & register measures</h1>
 @include('centre-planning.links')
 <form method="get"><label>From <input type="date" name="from" value="{{ $report['from'] }}" required></label><label>To <input type="date" name="to" value="{{ $report['to'] }}" required></label><label>Programme <select name="programme"><option value="">All programmes</option>@foreach($programmes as $p)<option value="{{ $p->id }}" @selected($report['programme']===$p->id)>{{ $p->name }} · L{{ $p->level }}</option>@endforeach</select></label><button>Compare selected interval</button></form>
+@include('reports.headline', [
+    'title' => 'Register position',
+    'basis' => 'Register outcomes in the selected reporting interval.',
+    'items' => [
+        ["Complete registers", $report['counts']['recorded']],
+        ["Incomplete registers", $report['counts']['needs-register'], 'exceptions'],
+        ["Register source checks", $report['counts']['checks'], 'exceptions'],
+        ["Cancelled sessions", $report['counts']['cancelled']]
+    ],
+])
 <p>Captured {{ $report['captured_at'] }}. Teaching dates count each date once, including part days; they are not full-day equivalents. Cover dates are included in confirmed delivery, not added again.</p>
 <p>{{ $report['stale_plans'] }} stale planned teaching occurrence(s) excluded pending reconciliation.</p>
 <p>Planned figures use current verified published planning only. Register figures use canonical records; missing or changed attribution remains unconfirmed. No delivery is inferred from the current group owner or the staff member entering marks.</p>

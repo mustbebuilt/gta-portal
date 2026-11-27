@@ -3,6 +3,16 @@
 @section('content')
 <p><a class="button" href="{{ route('achievers-leavers.index') }}">Achievers and Early Leavers</a></p><p><a class="button" href="{{ route('historical-cohorts.index') }}">Historical staff comparisons - reviewed cohorts</a></p>@include('learning.errors')<h1>Apprentice progress and forecasts</h1><p>Start-date cohorts with current recorded context captured now. These are operational counts, not a reconstructed historical return, official QAR or tutor ranking. Tutor filtering means current assignment.</p><form method="get"><label>Cohort starts from <input type="date" name="from" value="{{ $filters['from'] }}" required></label><label>To <input type="date" name="to" value="{{ $filters['to'] }}" required></label><label>Programme <select name="programme"><option value="">All</option>@foreach($programmes as $p)<option value="{{ $p->id }}" @selected($filters['programme']===$p->id)>{{ $p->name }} · {{ $p->standard_code }} v{{ $p->version }}</option>@endforeach</select></label><label>Current assigned tutor <select name="tutor"><option value="">All</option>@foreach($tutors as $t)<option value="{{ $t->id }}" @selected($filters['tutor']===$t->id)>{{ $t->name }}</option>@endforeach</select></label><button>Show current cohort context</button></form>
 <p>Captured {{ $report['aggregate']['captured_at'] }}. {{ $report['aggregate']['missing_start_outside_cohort'] }} matching record(s) have no usable start date and are outside this date-defined cohort.</p><h2>What the figures include</h2>@include('visuals.controls')
+@include('reports.headline', [
+    'title' => 'Cohort position',
+    'basis' => 'Selected start-date cohort. The recorded end-date follow-up count uses portal records.',
+    'items' => [
+        ["Confirmed active", $report['aggregate']['counts']['active']],
+        ["Recorded completed", $report['aggregate']['counts']['completed']],
+        ["Past recorded end date", $report['aggregate']['counts']['past_recorded_end'], 'exceptions'],
+        ["Source checks", $report['aggregate']['counts']['source_checks'], 'exceptions']
+    ],
+])
 @foreach(\App\Support\PortalVisuals::cohort($report['aggregate']) as $chart)@include('visuals.panel')@endforeach
 @include('cohort-insights.counts',['counts'=>$report['aggregate']['counts']])<p>Confirmed achievement among recorded completions: {{ $report['aggregate']['confirmed_completion_result_percent']===null?'Unknown / incomplete results':number_format($report['aggregate']['confirmed_completion_result_percent'],1).'%' }}. This percentage covers recorded completions and is left blank while any result is unknown or awaited. It is not a provider achievement or retention return.</p>
 <h2>Programme and training stage</h2>@foreach($report['aggregate']['groups'] as $g)<section class="panel"><h3>{{ $g['programme'] }} · {{ $g['standard']??'Code unknown' }} v{{ $g['version']??'Unknown' }} · level {{ $g['level']??'Unknown' }}</h3><p>Cohort {{ $g['counts']['cohort'] }} · active {{ $g['counts']['active'] }} · break {{ $g['counts']['break'] }} · completed {{ $g['counts']['completed'] }} · withdrawn {{ $g['counts']['withdrawn'] }} · transferred {{ $g['counts']['transferred'] }} · unknown {{ $g['counts']['unknown'] }}.</p>@foreach($g['stages'] as $stage=>$n)<p>{{ $stage }}: {{ $n }}</p>@endforeach</section>@endforeach

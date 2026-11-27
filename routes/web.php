@@ -615,7 +615,9 @@ Route::middleware(['auth', ActiveAccount::class, RequireSecondFactor::class, Req
         $reports = ReportDirectory::links($request->user());
         abort_unless($reports, 403);
 
-        return response()->view('reports.index', compact('reports'))->header('Cache-Control', 'private, no-store');
+        $headlines = \App\Support\ReportHeadlines::for($request->user(), $reports);
+
+        return response()->view('reports.index', compact('reports', 'headlines'))->header('Cache-Control', 'private, no-store');
     })->name('reports.index');
     Route::get('/reports/support-and-retention', [SupportController::class, 'registerReport'])->name('support.report');
     Route::post('/apprentices/{apprentice}/support/track-marker', [SupportController::class, 'trackMarker'])->name('support.track-marker');

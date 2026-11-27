@@ -3,6 +3,17 @@
 @section('content')
 @if(\App\Support\LeaverDestinations::allowed(auth()->user()))<p><a href="{{ route('destinations.index') }}">Leaver follow-up and destination checks</a></p>@endif
 <header class="page-heading"><div><h1>Retention and early-leaver report</h1><p>Compare recorded outcomes and context. Identify themes to investigate.</p></div><button type="button" data-print>Print / Save PDF</button></header>
+@include('reports.headline', [
+    'title' => 'Overall cohort findings',
+    'basis' => 'Selected first-learning-day cohort. Withdrawals include early leavers. The portal figures describe recorded outcomes.',
+    'items' => [
+        ["Confirmed active", $headlines['active']],
+        ["Achievers", $headlines['achievers']],
+        ["Withdrawals", $headlines['withdrawals']],
+        ["Early leavers", $headlines['early-leavers']],
+        ["Records to check", $headlines['checks'], 'exceptions']
+    ],
+])
 <section class="panel">
     <h2>Cohort outcomes</h2>
     <p>First day in learning · {{ request('from') ?: 'Any start date' }} to {{ request('to') ?: 'Latest recorded starts' }}. {{ $cohortCount }} apprentices in scope.</p>

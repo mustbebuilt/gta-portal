@@ -8,6 +8,22 @@ use App\Models\TrainingSession;
 
 class AttendanceLedger
 {
+    private const ROSTER_CHECK = 'Attendance totals are unavailable until saved source rosters have been checked by an administrator.';
+
+    /** A damaged roster holds attendance only. Other reports retain the stricter ledger behaviour. */
+    public static function reportPeriod(array $ids, string $from, string $to): ?array
+    {
+        try {
+            return self::forIds($ids, false, $from, $to);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $error) {
+            if ($error->getStatusCode() !== 422 || $error->getMessage() !== self::ROSTER_CHECK) {
+                throw $error;
+            }
+
+            return null;
+        }
+    }
+
     public static function forIds(array $ids, bool $includeOtj = true, ?string $from = null, ?string $through = null, ?string $code = null): array
     {
         if(!$ids){return [];}
@@ -23,7 +39,7 @@ class AttendanceLedger
                 continue;
             }
             $roster=RegisterFollowup::roster($s);
-            abort_unless($roster['shape'] && !$roster['duplicates'],422,'Attendance totals are unavailable until saved source rosters have been checked by an administrator.');
+            abort_unless($roster['shape'] && !$roster['duplicates'],422,self::ROSTER_CHECK);
             $marks = $s->marks->keyBy('apprentice_id');
             foreach ($s->members as $id) {
                 if (! isset($allowed[$id])) {

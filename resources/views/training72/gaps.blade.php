@@ -17,6 +17,17 @@
         <button class="primary">Apply</button>
         @if($search !== '' || $groupId)<a class="button" href="{{ route('training-gaps72.index') }}">Clear</a>@endif
     </form>
+</section>
+@include('reports.headline', [
+    'title' => 'Training coverage',
+    'basis' => 'Individual training topics and recorded delivery are in the breakdown.',
+    'items' => [
+        ["Apprentices in scope", $totals['apprentices']],
+        ["Apprentices with overdue subjects", $totals['with_overdue'], 'exceptions'],
+        ["Apprentices with unmapped sessions", $totals['with_legacy'], 'exceptions']
+    ],
+])
+<section class="panel">
     <p class="muted">{{ $totals['apprentices'] }} apprentice(s) in scope · <strong>{{ $totals['with_overdue'] }}</strong> with overdue subjects ({{ $totals['total_overdue'] }} overdue total) · {{ $totals['with_legacy'] }} with legacy unmapped sessions.</p>
     <div class="table-scroll">
         <table>
