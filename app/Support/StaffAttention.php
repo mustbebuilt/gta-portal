@@ -46,7 +46,23 @@ class StaffAttention
         $people = self::people($u);
         $ids = $people->pluck('id');
         $training = $people->filter(fn ($a) => LearningAccess::manager($u) || LearningAccess::tutor($u, $a))->pluck('id');
-        $tasks = LearningTask::whereIn('apprentice_id', $training)->orderBy('id')->get()->groupBy('apprentice_id');
+        $tasks = LearningTask::whereIn('apprentice_id', $training)
+            ->orderBy('id')
+            ->get([
+                'id', 'apprentice_id', 'reference', 'block', 'status', 'due_date', 'submitted_at',
+                'template->kind as template_kind', 'template->catalogueId as template_catalogue_id',
+            ])
+            ->each(function (LearningTask $task): void {
+                $template = [];
+                if ($task->template_kind !== null) {
+                    $template['kind'] = $task->template_kind;
+                }
+                if ($task->template_catalogue_id !== null) {
+                    $template['catalogueId'] = $task->template_catalogue_id;
+                }
+                $task->setAttribute('template', $template);
+            })
+            ->groupBy('apprentice_id');
         $actions = SmartAction::with('task')->whereIn('apprentice_id', $training)->whereNull('learning_task_id')->orderBy('id')->get()->groupBy('apprentice_id');
         $outcomes = ProgrammeOutcome::whereIn('apprentice_id', $ids)->get()->keyBy('apprentice_id');
         // Private requests and their counts never enter this combined view.
@@ -55,6 +71,55 @@ class StaffAttention
             ->orderByDesc('updated_at')->orderByDesc('id')->get(['id', 'apprentice_id'])->groupBy('apprentice_id')->map->first();
         $rows = [];
         $employerReplies = EmployerPortalAction::whereIn('apprentice_id', $training)->where('state', 'Responded')->get(['id', 'apprentice_id', 'responded_at'])->groupBy('apprentice_id');
+
+        $trainingSet = array_flip($training->all());
+        $activeTrainingIds = [];
+        $dueTasks = collect();
+        $approvedCheckIds = [];
+        foreach ($people as $a) {
+            $context = $outcomes->get($a->id)?->context ?? [];
+            $known = in_array($context['status'] ?? null, ['Active', 'Break in learning', 'Completed', 'Withdrawn', 'Transferred'], true) && filled($context['sourceRef'] ?? null);
+            if ($known && $context['status'] === 'Active' && isset($trainingSet[$a->id])) {
+                $activeTrainingIds[] = $a->id;
+                $own = $tasks->get($a->id, collect());
+                foreach ($own as $task) {
+                    if ($task->status !== 'Awaiting marking' && ($task->editable() || $task->status === 'Source required')
+                        && ($task->template['kind'] ?? 'source-pending') !== 'source-pending'
+                        && $task->due_date && $task->due_date->lte(today())) {
+                        $dueTasks->push($task);
+                    }
+                }
+                $approvedCount = $own->where('status', 'Approved')->count();
+                if ($approvedCount > 0 && $approvedCount < $own->count()) {
+                    $approvedCheckIds[] = $a->id;
+                }
+            }
+        }
+        $blockReleases = BlockRelease::states($dueTasks);
+        $approvedSummary = [];
+        if ($approvedCheckIds) {
+            LearningTask::whereIn('apprentice_id', $approvedCheckIds)
+                ->where('status', 'Approved')
+                ->orderBy('id')
+                ->select(['id', 'apprentice_id', 'submissions'])
+                ->chunkById(200, function ($chunk) use (&$approvedSummary): void {
+                    foreach ($chunk as $t) {
+                        $date = collect($t->submissions ?? [])->last()['decision']['date'] ?? null;
+                        $approvedSummary[$t->apprentice_id] ??= ['dates' => [], 'unknown' => false];
+                        if (! StaffTrainingRecords::validDate($date)) {
+                            $approvedSummary[$t->apprentice_id]['unknown'] = true;
+                        } else {
+                            $approvedSummary[$t->apprentice_id]['dates'][] = $date;
+                        }
+                    }
+                });
+        }
+        $attendanceByApprentice = StaffTrainingRecords::attendanceForMany(
+            $activeTrainingIds,
+            today()->subWeeks(6)->startOfWeek()->toDateString(),
+            today()->toDateString()
+        );
+
         foreach ($people as $a) {
             $reasons = [];
             $add = function (string $kind, string $bucket, string $text, ?string $date, string $url) use (&$reasons): void {
@@ -69,15 +134,14 @@ class StaffAttention
                 $add('programme', 'checks', 'Programme status/source needs checking', null, $reviewUrl);
             }
             if ($active) {
-                $p = ReviewReminders::position($a);
-                $due = $p['cycle']['next_due'];
+                $due = SignedReviews::cycle($a)['next_due'];
                 if (! $due) {
                     $add('review', 'checks', 'Completed-review history needs checking; no reliable due reference', null, $reviewUrl);
                 } elseif ($due <= today()->toDateString()) {
                     $add('review', $due < today()->toDateString() ? 'overdue' : 'today', 'Review due reference from latest checked signed copy', $due, $reviewUrl);
                 }
             }
-            if ($active && $training->contains($a->id)) {
+            if ($active && isset($trainingSet[$a->id])) {
                 $own = $tasks->get($a->id, collect());
                 foreach ($own as $task) {
                     $url = route('tasks.show', $task);
@@ -106,8 +170,8 @@ class StaffAttention
                         continue;
                     }
                     if ($task->due_date->lte(today())) {
-                        $state=TaskAvailability::for($task);
-                        $add('task', !$state['available'] ? 'checks' : ($task->due_date->lt(today()) ? 'overdue' : 'today'), (!$state['available'] ? $state['label'].'; check the plan: ' : 'Task due: ').$task->reference, $task->due_date->toDateString(), $url);
+                        $state = TaskAvailability::for($task, $blockReleases[$task->id] ?? null);
+                        $add('task', ! $state['available'] ? 'checks' : ($task->due_date->lt(today()) ? 'overdue' : 'today'), (! $state['available'] ? $state['label'].'; check the plan: ' : 'Task due: ').$task->reference, $task->due_date->toDateString(), $url);
                     }
                 }
                 foreach ($actions->get($a->id, collect()) as $x) {
@@ -118,7 +182,7 @@ class StaffAttention
                         $add('action', ! $date ? 'checks' : ($date < today()->toDateString() ? 'overdue' : 'today'), 'Agreed action: '.$x->title, $date, route('actions.index', $a).'#action-'.$x->id);
                     }
                 }
-                $sessions = StaffTrainingRecords::attendance($a, today()->subWeeks(6)->startOfWeek()->toDateString(), today()->toDateString());
+                $sessions = $attendanceByApprentice[$a->id] ?? [];
                 $report = StaffTrainingRecords::report($sessions);
                 $pair = collect($report['pairs'])->last();
                 $attendanceUrl = route('attendance.index');
@@ -137,16 +201,8 @@ class StaffAttention
                     }
                 }
                 if ($own->isNotEmpty() && $own->where('status', 'Approved')->count() < $own->count()) {
-                    $dates = [];
-                    $unknown = false;
-                    foreach ($own->where('status', 'Approved') as $t) {
-                        $date = collect($t->submissions ?? [])->last()['decision']['date'] ?? null;
-                        if (! StaffTrainingRecords::validDate($date)) {
-                            $unknown = true;
-                        } else {
-                            $dates[] = $date;
-                        }
-                    }
+                    $dates = $approvedSummary[$a->id]['dates'] ?? [];
+                    $unknown = $approvedSummary[$a->id]['unknown'] ?? false;
                     if ($unknown || ! $a->start_date || $a->start_date->gt(today())) {
                         $add('progress', 'checks', 'Task-approval/start dates need checking before a progress-gap flag', null, route('learning.index', $a));
                     } else {

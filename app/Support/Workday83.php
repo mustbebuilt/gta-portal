@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use App\Models\{Apprentice, LearningTask, SmartAction, TrainingTopic, User};
+use App\Models\{Apprentice, LearningTask, SmartAction, TrainingSession, TrainingTopic, TutorGroup, User};
 use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -109,16 +109,78 @@ final class Workday83
         return ['rows'=>$rows, 'counts'=>self::counts($rows)];
     }
 
-    public static function nextRegister(User $actor, ?int $except=null, array $scope=[]): ?array
+    public static function nextRegister(User $actor, ?int $except = null, array $scope = []): ?array
     {
-        $access=RegisterFollowup::visible($actor, includeInactive:true);
-        $sessions=$access['sessions'];
-        if (!empty($scope['group'])) $sessions=$sessions->where('tutor_group_id',(int)$scope['group']);
-        if (!empty($scope['apprentice'])) $sessions=$sessions->filter(fn($s)=>in_array((int)$scope['apprentice'],RegisterFollowup::roster($s)['ids'],true));
-        if (filled($scope['search']??null)) $sessions=$sessions->filter(fn($s)=>mb_stripos($s->name,$scope['search'])!==false || mb_stripos($s->group->name,$scope['search'])!==false);
-        return RegisterFollowup::for($sessions)['rows']->first(fn($row)=>
-            $row['session']->id!==$except && $row['can_open'] &&
-            ($row['bucket']==='needs-register' || ($row['bucket']==='not-ended' && $row['session']->session_date->isToday())));
+        abort_unless($actor->active && (LearningAccess::manager($actor) || $actor->role === 'tutor'), 403);
+        $manager = LearningAccess::manager($actor);
+        $groups = TutorGroup::where(fn ($q) => $q->where('active', true)->orWhereNotNull('weekly_register'))
+            ->when(! $manager, fn ($q) => $q->where('tutor_id', $actor->id))
+            ->when(! empty($scope['group']), fn ($q) => $q->whereKey((int) $scope['group']))
+            ->orderBy('name')
+            ->get(['id', 'name', 'tutor_id', 'active', 'weekly_register']);
+        if ($groups->isEmpty()) {
+            return null;
+        }
+
+        $today = today()->toDateString();
+        $search = filled($scope['search'] ?? null) ? $scope['search'] : null;
+        $apprenticeId = ! empty($scope['apprentice']) ? (int) $scope['apprentice'] : null;
+        $query = TrainingSession::whereIn('tutor_group_id', $groups->pluck('id'))
+            ->where('state', 'Planned')
+            ->whereDate('session_date', '<=', $today)
+            ->when($except !== null, fn ($q) => $q->where('id', '!=', $except))
+            ->orderBy('session_date')
+            ->orderBy('start_time')
+            ->orderBy('id')
+            ->select(['id', 'tutor_group_id', 'name', 'session_date', 'start_time', 'end_time', 'state', 'members', 'version']);
+
+        $groupsById = $groups->keyBy('id');
+        $firstNeedsRegister = null;
+        $firstTodayNotEnded = null;
+
+        $query->chunk(100, function (Collection $chunk) use (
+            $actor, $groupsById, $search, $apprenticeId, &$firstNeedsRegister, &$firstTodayNotEnded
+        ): bool {
+            $chunk->each(fn (TrainingSession $s) => $s->setRelation('group', $groupsById->get($s->tutor_group_id)));
+            $filtered = $chunk->filter(function (TrainingSession $s) use ($actor, $search, $apprenticeId): bool {
+                if (! RegisterFollowup::canOpen($actor, $s)) {
+                    return false;
+                }
+                if ($apprenticeId !== null && ! in_array($apprenticeId, RegisterFollowup::roster($s)['ids'], true)) {
+                    return false;
+                }
+                if ($search !== null && mb_stripos($s->name, $search) === false && mb_stripos($s->group->name, $search) === false) {
+                    return false;
+                }
+
+                return true;
+            });
+            if ($filtered->isEmpty()) {
+                return true;
+            }
+            $filtered->load(['marks' => fn ($q) => $q->select('id', 'training_session_id', 'apprentice_id', 'code')]);
+            $ids = $filtered->flatMap(fn ($s) => RegisterFollowup::roster($s)['ids'])->unique()->values();
+            $known = $ids->isEmpty() ? [] : Apprentice::whereIn('id', $ids)->pluck('id')->all();
+
+            foreach ($filtered as $s) {
+                $r = RegisterFollowup::readiness($s, $known);
+                if (! $r['can_open']) {
+                    continue;
+                }
+                if ($r['bucket'] === 'needs-register') {
+                    $firstNeedsRegister = ['session' => $s, ...$r];
+
+                    return false;
+                }
+                if ($firstTodayNotEnded === null && $r['bucket'] === 'not-ended' && $s->session_date->isToday()) {
+                    $firstTodayNotEnded = ['session' => $s, ...$r];
+                }
+            }
+
+            return true;
+        });
+
+        return $firstNeedsRegister ?? $firstTodayNotEnded;
     }
 
     public static function registerScope(mixed $input): array
