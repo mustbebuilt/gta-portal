@@ -134,10 +134,26 @@ return $result;
         return ReportRead85::run($people, function () use ($people, $u, $f, $role) {
             $ids = $people->pluck('id');
             $ledger = AttendanceLedger::forIds($ids->all(), false);
-            $tasks = LearningTask::whereIn('apprentice_id', $ids)->get()->groupBy('apprentice_id');
+            $tasks = LearningTask::whereIn('apprentice_id', $ids)
+                ->get(['id', 'apprentice_id', 'reference', 'block', 'title', 'status', 'due_date', 'submitted_at', 'template->kind as summary_kind', 'template->catalogueId as summary_catalogue'])
+                ->each(function (LearningTask $task): void {
+                    $template = [];
+                    if ($task->summary_kind !== null) {
+                        $template['kind'] = $task->summary_kind;
+                    }
+                    if ($task->summary_catalogue !== null) {
+                        $template['catalogueId'] = $task->summary_catalogue;
+                    }
+                    $task->setAttribute('template', $template);
+                })
+                ->groupBy('apprentice_id');
+            $referredSubmissions = LearningTask::whereIn('apprentice_id', $ids)
+                ->where('status', 'Referred')
+                ->get(['id', 'submissions'])
+                ->keyBy('id');
             $topics = TrainingTopic::whereIn('apprentice_id', $ids)->get()->groupBy('apprentice_id');
             $quals = Qualification::whereIn('apprentice_id', $ids)->get()->groupBy('apprentice_id');
-            $actions = SmartAction::with('task')->whereIn('apprentice_id', $ids)->get()->groupBy('apprentice_id');
+            $actions = SmartAction::with(['task' => fn ($q) => $q->select('id', 'apprentice_id', 'reference', 'block', 'title', 'status', 'due_date', 'submitted_at')])->whereIn('apprentice_id', $ids)->get()->groupBy('apprentice_id');
             $rows = [];
             foreach ($people as $a) {
                 $set = $tasks->get($a->id, collect());
@@ -196,7 +212,7 @@ return $result;
                 }
                 $feedback = [];
                 foreach ($known->where('status', 'Referred')->take(3) as $t) {
-                    $latest = collect($t->submissions ?? [])->last();
+                    $latest = collect($referredSubmissions->get($t->id)?->submissions ?? [])->last();
                     if (isset($latest['decision']['feedback'])) {
                         $feedback[] = ['date' => substr($latest['decision']['date'] ?? '', 0, 10), 'text' => $latest['decision']['feedback']];
                     }

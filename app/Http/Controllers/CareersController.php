@@ -53,10 +53,26 @@ class CareersController extends Controller
         $blockPrompts = [];
         if ($r->user()->role !== 'apprentice') {
             $controls = LearningBlockControl::whereIn('apprentice_id', $apprentices->pluck('id'))->where('enabled', true)->pluck('apprentice_id')->all();
-            $blockTasks = LearningTask::whereIn('apprentice_id', $controls)->where('block', 10)->orderBy('id')->get()->groupBy('apprentice_id');
+            $blockTasks = LearningTask::whereIn('apprentice_id', $controls)
+                ->where('block', 10)
+                ->orderBy('id')
+                ->get(['id', 'apprentice_id', 'block', 'reference', 'status', 'template->catalogueId as summary_catalogue', 'template->kind as summary_kind'])
+                ->each(function (LearningTask $task): void {
+                    $template = [];
+                    if ($task->summary_kind !== null) {
+                        $template['kind'] = $task->summary_kind;
+                    }
+                    if ($task->summary_catalogue !== null) {
+                        $template['catalogueId'] = $task->summary_catalogue;
+                    }
+                    $task->setAttribute('template', $template);
+                })
+                ->groupBy('apprentice_id');
+            $firstBlockTasks = $apprentices->map(fn ($a) => $blockTasks->get($a->id)?->first())->filter()->values();
+            $blockStates = BlockRelease::states($firstBlockTasks);
             foreach ($apprentices as $a) {
                 $task = $blockTasks->get($a->id)?->first();
-                if ($task && BlockRelease::state($task)['open']) {
+                if ($task && ($blockStates[$task->id]['open'] ?? false)) {
                     $blockPrompts[] = ['apprentice' => $a, 'discussion' => CareerDiscussion::where('apprentice_id', $a->id)->where('type', 'progression')->orderByDesc('discussion_date')->first()];
                 }
             }

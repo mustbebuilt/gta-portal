@@ -65,7 +65,10 @@ class DashboardController extends Controller
 
     public function report(Request $r): View
     {
-        return view('dashboard.report', $this->data($r));
+        $data = $this->data($r);
+        $data['reviewCycles'] = \App\Support\SignedReviews::cyclesSummaryByApprentice($data['apprentices']->pluck('id')->all());
+
+        return view('dashboard.report', $data);
     }
 
     public function pdf(Request $r): Response
@@ -102,23 +105,23 @@ class DashboardController extends Controller
             $scope = collect([$a]);
         }
         $ids = $scope->pluck('id');
-        $taskQuery = LearningTask::with('apprentice')->whereIn('apprentice_id', $ids);
-        if ($includeAttendance) {
-            $tasks = $taskQuery->get();
-        } else {
-            // The dashboard needs decision metadata, not complete task instructions, answers or evidence history.
-            // This projection is used only for this read response; task forms and writes fetch their original records.
-            $tasks = $taskQuery->get(['id','apprentice_id','reference','block','title','theme','status','due_date','submitted_at','template->kind as summary_kind','template->catalogueId as summary_catalogue']);
-            foreach ($tasks as $task) {
-                $attributes = $task->getAttributes();
-                $attributes['template'] = json_encode(['kind'=>$task->summary_kind??'source-pending','catalogueId'=>$task->summary_catalogue??'autocare'], JSON_THROW_ON_ERROR);
-                unset($attributes['summary_kind'],$attributes['summary_catalogue']);
-                $task->setRawAttributes($attributes, true);
-            }
+        // Dashboard and operational reports need decision metadata, not complete task instructions, answers or evidence history.
+        // This projection is used only for read responses; task forms and writes fetch their original records.
+        $tasks = LearningTask::with('apprentice')
+            ->whereIn('apprentice_id', $ids)
+            ->get(['id', 'apprentice_id', 'reference', 'block', 'title', 'theme', 'status', 'due_date', 'submitted_at', 'template->kind as summary_kind', 'template->catalogueId as summary_catalogue']);
+        foreach ($tasks as $task) {
+            $attributes = $task->getAttributes();
+            $attributes['template'] = json_encode(['kind' => $task->summary_kind ?? 'source-pending', 'catalogueId' => $task->summary_catalogue ?? 'autocare'], JSON_THROW_ON_ERROR);
+            unset($attributes['summary_kind'], $attributes['summary_catalogue']);
+            $task->setRawAttributes($attributes, true);
         }
         $topics = TrainingTopic::whereIn('apprentice_id', $ids)->get();
         $qualifications = Qualification::whereIn('apprentice_id', $ids)->get();
-        $actions = SmartAction::with(['task', 'apprentice'])->whereIn('apprentice_id', $ids)->get();
+        $actions = SmartAction::with([
+            'task' => fn ($q) => $q->select('id', 'apprentice_id', 'reference', 'block', 'title', 'status', 'due_date', 'submitted_at'),
+            'apprentice',
+        ])->whereIn('apprentice_id', $ids)->get();
         $metrics = ['apprentices' => $scope->count(), 'approved' => $tasks->where('status', 'Approved')->count(), 'tasks' => $tasks->count(), 'awaiting' => $tasks->where('status', 'Awaiting marking')->count(), 'overdue_marking' => $tasks->filter(fn ($t) => $t->markingOverdue())->count(), 'marking_date_checks' => $tasks->filter(fn ($t) => $t->status === 'Awaiting marking' && ! $t->submitted_at)->count(), 'overdue_actions' => $actions->filter(fn ($a) => $a->overdue())->count(), 'qualifications_achieved' => $qualifications->filter(fn ($q) => $q->achieved())->count(), 'qualifications_overdue' => $qualifications->filter(fn ($q) => $q->position() === 'Overdue')->count(), 'qualification_date_checks' => $qualifications->filter(fn ($q) => $q->position() === 'Date check')->count()];
 
         $tutorMarking = [];

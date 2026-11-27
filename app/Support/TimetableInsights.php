@@ -156,7 +156,7 @@ class TimetableInsights
         foreach($rows as$id=>&$x){
             $people=Apprentice::where('tutor_id',$id)->when($programme,fn($q)=>$q->where('programme_id',$programme))->get();
             $x['current_caseload']=$people->count();
-            $tasks=LearningTask::whereIn('apprentice_id',$people->pluck('id'))->get();
+            $tasks=LearningTask::whereIn('apprentice_id',$people->pluck('id'))->get(['id','apprentice_id','status','submitted_at','due_date']);
             $x['current_tasks']=['assigned'=>$tasks->count(),'approved'=>$tasks->where('status','Approved')->count(),
                 'awaiting'=>$tasks->where('status','Awaiting marking')->count(),
                 'overdue_marking'=>$tasks->filter(fn($t)=>$t->markingOverdue())->count(),

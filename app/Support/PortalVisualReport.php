@@ -24,7 +24,11 @@ class PortalVisualReport
   abort_if((clone $scope)->count() > 200, 422, 'This report covers more than 200 records, including any historic records in the selection. Choose a tutor group or an apprentice.');
   $people = $scope->with('programmeRecord')->orderBy('last_name')->get();
   $ids = $people->pluck('id')->all();
-  $tasks = LearningTask::whereIn('apprentice_id', $ids)->get(['id', 'apprentice_id', 'status', 'template']);
+  $tasks = LearningTask::whereIn('apprentice_id', $ids)
+   ->get(['id', 'apprentice_id', 'status', 'template->kind as summary_kind'])
+   ->each(function (LearningTask $task): void {
+    $task->setAttribute('template', $task->summary_kind !== null ? ['kind' => $task->summary_kind] : []);
+   });
   $topics = TrainingTopic::whereIn('apprentice_id', $ids)->get(['id', 'subject', 'status', 'planned_hours']);
   $ledger = AttendanceLedger::reportPeriod($ids, $from, $to);
   $charts = [PortalVisuals::tasks($tasks), PortalVisuals::topics($topics)];

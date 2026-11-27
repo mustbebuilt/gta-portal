@@ -15,9 +15,19 @@ class ManagementSnapshot
     {
         $ids=$people->pluck('id')->all();$attendance=AttendanceLedger::forIds($ids);$rows=[];$checks=[];
         foreach($people as $a){
-            $tasks=LearningTask::where('apprentice_id',$a->id)->get();$qualifications=Qualification::where('apprentice_id',$a->id)->get();
-            $topics=TrainingTopic::where('apprentice_id',$a->id)->get();$actions=SmartAction::with('task')->where('apprentice_id',$a->id)->get();
-            $reviews=ProgressReviewDraft::where('apprentice_id',$a->id)->get();$reviewCycle=SignedReviews::cycle($a);$signedRecords=\App\Models\SignedReviewRecord::where('apprentice_id',$a->id)->get();$confirmedReviewIds=$signedRecords->filter(fn($r)=>$r->checked_at && !$r->withdrawn_at && SignedReviews::intact($r))->pluck('progress_review_draft_id')->all();$otjPosition=OtjPosition::forApprentice($a);$otj=$otjPosition['summary'];$plan=DeliveryPlan::approved($a);
+            $tasks = LearningTask::where('apprentice_id', $a->id)
+                ->get(['id', 'apprentice_id', 'version', 'status', 'due_date', 'submitted_at', 'template->sha256 as template_sha256']);
+            $qualifications = Qualification::where('apprentice_id', $a->id)->get();
+            $topics = TrainingTopic::where('apprentice_id', $a->id)->get(['id', 'apprentice_id', 'status', 'planned_hours']);
+            $actions = SmartAction::with(['task' => fn ($q) => $q->select('id', 'apprentice_id', 'reference', 'block', 'title', 'status', 'due_date', 'submitted_at')])
+                ->where('apprentice_id', $a->id)->get();
+            $reviews = ProgressReviewDraft::where('apprentice_id', $a->id)->get(['id', 'apprentice_id', 'version', 'state']);
+            $reviewCycle = SignedReviews::cycle($a);
+            $signedRecords = \App\Models\SignedReviewRecord::where('apprentice_id', $a->id)->get();
+            $confirmedReviewIds = $signedRecords->filter(fn ($r) => $r->checked_at && ! $r->withdrawn_at && SignedReviews::intact($r))->pluck('progress_review_draft_id')->all();
+            $otjPosition = OtjPosition::forApprentice($a);
+            $otj = $otjPosition['summary'];
+            $plan = DeliveryPlan::approved($a);
             $issues=[];
             if(!$a->start_date){$issues[]='First learning date missing';}
             if(!$a->programme_id || !TaskCatalogue::keyFor($a)){$issues[]='Explicit loaded programme/version needs checking';}
@@ -35,7 +45,7 @@ class ManagementSnapshot
                 'topics'=>['assigned'=>$topics->filter(fn($t)=>(float)$t->planned_hours>0)->count(),'completed'=>$topics->filter(fn($t)=>(float)$t->planned_hours>0 && $t->status==='Completed')->count()],
                 'actions'=>['open'=>$actions->filter(fn($x)=>$x->currentStatus()!=='Completed')->count(),'overdue'=>$actions->filter(fn($x)=>$x->overdue())->count()],
                 'reviews'=>['draft'=>$reviews->where('state','Draft')->count(),'ready_for_signatures'=>$reviews->where('state','Ready for signatures')->whereNotIn('id',$confirmedReviewIds)->count(),'confirmed_copies'=>$reviewCycle['confirmed_count'],'cycle'=>$reviewCycle,'completed_history'=>'Confirmed external signed copies only; whole-history compliance not verified'],
-                'outcome'=>collect(ProgrammeOutcome::where('apprentice_id',$a->id)->first()?->context??[])->only('status','achievement')->all(),'source_versions'=>['signed_copies'=>$signedRecords->map(fn($r)=>$r->only('id','version','snapshot_hash','checked_at','withdrawn_at'))->all(),'reviews'=>$reviews->map(fn($r)=>$r->only('id','version','state'))->all(),'apprentice'=>$a->version,'tasks'=>$tasks->map(fn($t)=>['id'=>$t->id,'version'=>$t->version,'template_hash'=>$t->template['sha256']??null])->all()]];
+                'outcome'=>collect(ProgrammeOutcome::where('apprentice_id',$a->id)->first()?->context??[])->only('status','achievement')->all(),'source_versions'=>['signed_copies'=>$signedRecords->map(fn($r)=>$r->only('id','version','snapshot_hash','checked_at','withdrawn_at'))->all(),'reviews'=>$reviews->map(fn($r)=>$r->only('id','version','state'))->all(),'apprentice'=>$a->version,'tasks'=>$tasks->map(fn($t)=>['id'=>$t->id,'version'=>$t->version,'template_hash'=>$t->template_sha256])->all()]];
         }
         return ['captured_at'=>now()->toIso8601String(),'scope_apprentice_ids'=>$ids,'apprentices'=>$rows,'checks'=>$checks,'summary'=>['apprentices'=>count($rows),'waiting_tasks'=>array_sum(array_column(array_column($rows,'task_counts'),'awaiting')),'overdue_marking'=>array_sum(array_column(array_column($rows,'task_counts'),'overdue_marking')),'overdue_actions'=>array_sum(array_column(array_column($rows,'actions'),'overdue')),'records_with_checks'=>count(array_filter($checks,fn($c)=>count($c['issues'])>0))],
             'limits'=>['Current recorded operational evidence, captured at the stated time; not reconstructed historical performance.','No official retention/achievement rate, Ofsted grade, efficiency score or additional RAG threshold is inferred.','Electronic signing, whole-history review compliance, historic OTJ completeness and formal KSB/gateway assurance remain separate.','Private Careers discussions, support/safeguarding details, evidence files and staff HR are excluded.','Missing requirements and incomplete source records need checking; an empty list is not whole-portal assurance.']];

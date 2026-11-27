@@ -29,34 +29,50 @@ class AttendanceLedger
         if(!$ids){return [];}
         $rows = array_fill_keys($ids, []);
         $allowed = array_flip($ids);
-        $sessions = TrainingSession::with(['marks' => fn ($q) => $q->whereIn('apprentice_id', $ids)])->whereDate('session_date', '<=', $through ?? today())
+        TrainingSession::whereDate('session_date', '<=', $through ?? today())
             ->when($from, fn ($query) => $query->whereDate('session_date', '>=', $from))
             ->when($code, fn ($query) => $query->whereIn('id', AttendanceMark::whereIn('apprentice_id', $ids)
                 ->where('code', $code)->select('training_session_id')))
-            ->get();
-        foreach ($sessions as $s) {
-            if (! $s->ended()) {
-                continue;
-            }
-            $roster=RegisterFollowup::roster($s);
-            abort_unless($roster['shape'] && !$roster['duplicates'],422,self::ROSTER_CHECK);
-            $marks = $s->marks->keyBy('apprentice_id');
-            foreach ($s->members as $id) {
-                if (! isset($allowed[$id])) {
-                    continue;
-                }$m = $marks->get($id);
-                if ($code && $m?->code !== $code) {
-                    continue;
+            ->orderBy('id')
+            ->select(['id', 'name', 'session_date', 'start_time', 'end_time', 'state', 'members', 'delivered_learning'])
+            ->chunkById(200, function ($sessions) use ($ids, $allowed, $code, &$rows): void {
+                $sessions->load(['marks' => fn ($q) => $q
+                    ->whereIn('apprentice_id', $ids)
+                    ->select('id', 'training_session_id', 'apprentice_id', 'code', 'otj_confirmed', 'otj_minutes')]);
+                foreach ($sessions as $s) {
+                    if (! $s->ended()) {
+                        continue;
+                    }
+                    $roster = RegisterFollowup::roster($s);
+                    abort_unless($roster['shape'] && ! $roster['duplicates'], 422, self::ROSTER_CHECK);
+                    $marks = $s->marks->keyBy('apprentice_id');
+                    foreach ($s->members as $id) {
+                        if (! isset($allowed[$id])) {
+                            continue;
+                        }
+                        $m = $marks->get($id);
+                        if ($code && $m?->code !== $code) {
+                            continue;
+                        }
+                        $rows[$id][] = ['id' => $s->id, 'name' => $s->name, 'date' => $s->session_date->toDateString(), 'code' => $m?->code, 'minutes' => $s->state === 'Cancelled' ? 0 : ($m?->otj_confirmed ? $m->otj_minutes : null), 'cancelled' => $s->state === 'Cancelled', 'delivered' => $s->delivered_learning];
+                    }
                 }
-                $rows[$id][] = ['id' => $s->id, 'name' => $s->name, 'date' => $s->session_date->toDateString(), 'code' => $m?->code, 'minutes' => $s->state === 'Cancelled' ? 0 : ($m?->otj_confirmed ? $m->otj_minutes : null), 'cancelled' => $s->state === 'Cancelled', 'delivered' => $s->delivered_learning];
-            }
-        }
+            });
         $extras = ExtraTraining::whereIn('apprentice_id', $ids)->whereNull('withdrawn_at')->whereNotNull('approval')->get()->filter(fn ($e) => $e->occurred())->groupBy('apprentice_id');
+        $historicalMinutes = [];
+        if ($includeOtj) {
+            $people = \App\Models\Apprentice::whereIn('id', $ids)->get();
+            ReportRead85::run($people, function () use ($people, &$historicalMinutes): void {
+                foreach ($people as $person) {
+                    $historicalMinutes[$person->id] = array_sum(array_column(HistoricalOtj::ledger($person), 'minutes'));
+                }
+            });
+        }
         $out = [];
         foreach ($rows as $id => $v) {
             usort($v, fn ($a, $b) => strcmp($a['date'], $b['date']));
             $report = AttendanceMath::report($v);
-            $out[$id] = ['rows' => $v, 'report' => $report, 'extraMinutes' => $extras->get($id, collect())->sum('minutes'), 'historicalMinutes'=>$includeOtj?array_sum(array_column(HistoricalOtj::ledger(\App\Models\Apprentice::findOrFail($id)),'minutes')):null];
+            $out[$id] = ['rows' => $v, 'report' => $report, 'extraMinutes' => $extras->get($id, collect())->sum('minutes'), 'historicalMinutes' => $includeOtj ? ($historicalMinutes[$id] ?? 0) : null];
         }
 
         return $out;

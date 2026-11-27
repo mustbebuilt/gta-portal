@@ -89,8 +89,11 @@ class AttendanceController extends Controller
                     ->sortBy(fn ($row) => [$row['occurrence']['date'], $row['occurrence']['settings']['start'], $row['group']->name])->values();
             }
         }
-        $cancellationCounts = $view === 'cancelled' ? $filtered->countBy(function (array $row) {
-            $event = collect($row['session']->history ?? [])->last(
+        $cancelledHistories = $view === 'cancelled' && $filtered->isNotEmpty()
+            ? TrainingSession::whereIn('id', $filtered->pluck('session.id'))->get(['id', 'history'])->keyBy('id')
+            : collect();
+        $cancellationCounts = $view === 'cancelled' ? $filtered->countBy(function (array $row) use ($cancelledHistories) {
+            $event = collect($cancelledHistories->get($row['session']->id)?->history ?? [])->last(
                 fn ($item) => ($item['event'] ?? null) === 'session_cancelled'
             );
 

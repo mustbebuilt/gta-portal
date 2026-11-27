@@ -12,6 +12,6 @@ class DashboardReadProjectionTest extends TestCase {
   $response=$this->actingAs($admin)->get(route('dashboard.index'))->assertOk()->assertViewHas('metrics',fn($m)=>$m['tasks']===2&&$m['approved']===1)->assertDontSee('FICTIONAL_ANSWER61');
   $task=$response->viewData('tasks')->firstWhere('id',$own->id);$this->assertSame(['kind'=>'practical','catalogueId'=>'autocare'],$task->template);$this->assertArrayNotHasKey('answers',$task->getAttributes());$this->assertFalse($task->isDirty());$this->assertSame($before,$own->fresh()->getAttributes());
   $this->actingAs($tutor)->get(route('dashboard.index'))->assertOk()->assertViewHas('metrics',fn($m)=>$m['tasks']===1&&$m['approved']===0)->assertViewHas('tasks',fn($rows)=>$rows->pluck('id')->all()===[$own->id]);
-  $report=$this->actingAs($admin)->get(route('dashboard.report'))->assertOk();$this->assertSame($full,$report->viewData('tasks')->firstWhere('id',$own->id)->template);$this->assertSame($before,$own->fresh()->getAttributes());
+  $report=$this->actingAs($admin)->get(route('dashboard.report'))->assertOk()->assertDontSee('FICTIONAL_ANSWER61');$reportTask=$report->viewData('tasks')->firstWhere('id',$own->id);$this->assertSame(['kind'=>'practical','catalogueId'=>'autocare'],$reportTask->template);$this->assertArrayNotHasKey('answers',$reportTask->getAttributes());$this->assertFalse($reportTask->isDirty());$this->assertSame($before,$own->fresh()->getAttributes());
  }
 }

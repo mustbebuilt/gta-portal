@@ -396,7 +396,7 @@ class StaffDevelopmentController extends Controller
         DB::transaction(function () use ($r, $target): void {
             $p = $this->locked($r, $target);
             $ids = Apprentice::where('tutor_id', $target->id)->pluck('id');
-            $tasks = LearningTask::whereIn('apprentice_id', $ids)->get();
+            $tasks = LearningTask::whereIn('apprentice_id', $ids)->get(['id', 'apprentice_id', 'status', 'submitted_at']);
             $v = $p->payload;
             $v['months'][] = ['id' => (string) Str::uuid(), 'month' => today()->format('Y-m'), 'at' => now()->toIso8601String(), 'by' => $r->user()->id, 'summary' => ['caseload' => $ids->count(), 'approved' => $tasks->where('status', 'Approved')->count(), 'tasks' => $tasks->count(), 'waiting' => $tasks->where('status', 'Awaiting marking')->count(), 'overdue_marking' => $tasks->filter(fn ($t) => $t->markingOverdue())->count(), 'full_plan_on_target' => null, 'full_otj_on_target' => null, 'review_compliance' => null]];
             $p->payload = $v;

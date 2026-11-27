@@ -40,7 +40,9 @@ class RegisterFollowup
     {
         abort_unless($u->active && (LearningAccess::manager($u) || $u->role==='tutor'),403);
         $manager=LearningAccess::manager($u);$groups=TutorGroup::where(fn ($q) => $q->where('active', true)->when($includeInactive, fn ($q) => $q->orWhereNotNull('weekly_register')))->when(!$manager,fn($q)=>$q->where('tutor_id',$u->id))->orderBy('name')->get();
-        $sessions=TrainingSession::with(['group','marks'=>fn($q)=>$q->select('id','training_session_id','apprentice_id','code')])->whereIn('tutor_group_id',$groups->pluck('id'))->get();
+        $sessions = TrainingSession::with(['group', 'marks' => fn ($q) => $q->select('id', 'training_session_id', 'apprentice_id', 'code')])
+            ->whereIn('tutor_group_id', $groups->pluck('id'))
+            ->get(['id', 'tutor_group_id', 'name', 'session_date', 'start_time', 'end_time', 'state', 'members', 'version', 'regular_week']);
         $sessions = $sessions->filter(fn (TrainingSession $session): bool => self::canOpen($u, $session));
         return ['groups'=>$groups,'sessions'=>$sessions];
     }

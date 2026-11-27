@@ -218,6 +218,63 @@ class SignedReviews
         return $due;
     }
 
+    public static function cyclesSummaryByApprentice(array $apprenticeIds): array
+    {
+        if (! $apprenticeIds) {
+            return [];
+        }
+        $state = [];
+        SignedReviewRecord::whereIn('apprentice_id', $apprenticeIds)
+            ->whereNotNull('checked_at')
+            ->whereNull('withdrawn_at')
+            ->orderBy('id')
+            ->chunkById(100, function ($chunk) use (&$state): void {
+                $packetIds = $chunk
+                    ->filter(fn ($r) => ($r->snapshot['origin'] ?? null) === 'electronic' && ! empty($r->snapshot['electronic_packet_id']))
+                    ->map(fn ($r) => $r->snapshot['electronic_packet_id'])
+                    ->unique()
+                    ->values();
+                $packets = $packetIds->isEmpty()
+                    ? collect()
+                    : ElectronicReviewPacket::whereIn('id', $packetIds)->get()->keyBy('id');
+
+                foreach ($chunk as $r) {
+                    $aid = $r->apprentice_id;
+                    $state[$aid] ??= ['invalid' => 0, 'latest_key' => null, 'latest_date' => null];
+                    $packet = ($r->snapshot['origin'] ?? null) === 'electronic'
+                        ? $packets->get($r->snapshot['electronic_packet_id'] ?? null)
+                        : null;
+                    if (! self::intact($r, $packet)) {
+                        $state[$aid]['invalid']++;
+
+                        continue;
+                    }
+                    $key = [$r->meeting_date->toDateString(), $r->id];
+                    if ($state[$aid]['latest_key'] === null || $key > $state[$aid]['latest_key']) {
+                        $state[$aid]['latest_key'] = $key;
+                        $state[$aid]['latest_date'] = $r->meeting_date->copy();
+                    }
+                }
+            });
+
+        $out = [];
+        foreach ($apprenticeIds as $aid) {
+            $entry = $state[$aid] ?? null;
+            $invalid = $entry['invalid'] ?? 0;
+            $latestDate = $entry['latest_date'] ?? null;
+            $due = $latestDate && ! $invalid ? $latestDate->copy()->addDays(70) : null;
+            $out[$aid] = [
+                'last_meeting' => $latestDate?->toDateString(),
+                'next_due' => $due?->toDateString(),
+                'status' => $invalid
+                    ? 'Evidence integrity needs checking'
+                    : (! $due ? 'History to check' : ($due->lt(today()) ? 'Overdue tracked reference' : ($due->isToday() ? 'Due today' : 'Future tracked reference'))),
+            ];
+        }
+
+        return $out;
+    }
+
     private static function event(SignedReviewRecord $r,User $u,string $event): void
     {
         DB::table('signed_review_events')->insert(['signed_review_record_id' => $r->id, 'actor_id' => $u->id, 'event' => $event, 'created_at' => now()]);
