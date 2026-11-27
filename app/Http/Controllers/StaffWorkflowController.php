@@ -38,18 +38,51 @@ class StaffWorkflowController extends Controller
         $ownersBySource = [];
         $openFollowups = collect();
         if ($position['scope_count'] <= 1000 && $list->isNotEmpty()) {
-            $owners = User::where('active', true)->orderBy('name')->get()->filter(fn ($user) => StaffAttention::allowed($user));
-            foreach ($list as $row) {
-                foreach ($row['reasons'] as $item) {
+            $staffRoles = [...\App\Support\DirectoryCatalog::STAFF_ROLES, 'admin', 'ceo'];
+            $candidates = User::where('active', true)->whereIn('role', $staffRoles)->orderBy('name')->get();
+            $candidateIds = $candidates->pluck('id')->all();
+            $mentorDuties = \App\Models\StaffDuty::whereIn('user_id', $candidateIds)->where('mentor', true)->pluck('user_id')->flip();
+            $lifecycleStates = \App\Models\AccountLifecycleState::whereIn('user_id', [...$candidateIds, $r->user()->id])->get()->keyBy('user_id');
+            $isBlocked = function (User $user) use ($lifecycleStates): bool {
+                $state = $lifecycleStates->get($user->id);
+
+                return $state && (! \App\Support\AccountLifecycle::stateIntact($state) || in_array($state->status, ['Restricted', 'Archived'], true));
+            };
+            $hasMentorDuty = fn (User $user): bool => $user->active && in_array($user->role, \App\Support\DirectoryCatalog::STAFF_ROLES, true)
+                && ($user->role === 'mentor' || $mentorDuties->has($user->id));
+            $canAttend = fn (User $user): bool => $user->active && (in_array($user->role, ['admin', 'ceo', 'tutor'], true) || $hasMentorDuty($user));
+            $owners = $candidates->filter($canAttend)->reject($isBlocked)->values();
+            $trainingKinds = ['attendance', 'task', 'marking', 'action', 'progress', 'employer'];
+            $canOwn = function (User $user, Apprentice $person, bool $trainingKind) use ($hasMentorDuty): bool {
+                if (\App\Support\LearningAccess::manager($user)) {
+                    return true;
+                }
+                if ($trainingKind) {
+                    return \App\Support\LearningAccess::tutor($user, $person);
+                }
+
+                return ($person->tutor_id === $user->id && $user->role === 'tutor')
+                    || ($person->mentor_id === $user->id && $hasMentorDuty($user));
+            };
+
+            if ($r->user()->active && ! $isBlocked($r->user()) && $canAttend($r->user())) {
+                $ownerCache = [];
+                foreach ($list as $row) {
                     $person = $row['apprentice'];
-                    if (OperationalFollowups::allowed($r->user(), $person, $item['kind'])) {
-                        $ownersBySource[OperationalFollowups::sourceKey($person, $item)] = $owners
-                            ->filter(fn ($owner) => OperationalFollowups::allowed($owner, $person, $item['kind']));
+                    foreach ($row['reasons'] as $item) {
+                        $trainingKind = in_array($item['kind'], $trainingKinds, true);
+                        if (! $canOwn($r->user(), $person, $trainingKind)) {
+                            continue;
+                        }
+                        $cacheKey = $person->id.':'.($trainingKind ? '1' : '0');
+                        $ownerCache[$cacheKey] ??= $owners->filter(fn (User $owner) => $canOwn($owner, $person, $trainingKind));
+                        $ownersBySource[OperationalFollowups::sourceKey($person, $item)] = $ownerCache[$cacheKey];
                     }
                 }
             }
-            $openFollowups = OperationalFollowup::whereIn('source_key', array_keys($ownersBySource))
-                ->whereNotNull('open_key')->get()->keyBy('source_key');
+            $openFollowups = $ownersBySource
+                ? OperationalFollowup::whereIn('source_key', array_keys($ownersBySource))->whereNotNull('open_key')->get()->keyBy('source_key')
+                : collect();
         }
 
         $nextRegister = in_array($r->user()->role, ['admin', 'ceo', 'tutor'], true)

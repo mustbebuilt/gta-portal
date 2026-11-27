@@ -137,9 +137,10 @@ final class Workday83
         $groupsById = $groups->keyBy('id');
         $firstNeedsRegister = null;
         $firstTodayNotEnded = null;
+        $knownCache = [];
 
-        $query->chunk(100, function (Collection $chunk) use (
-            $actor, $groupsById, $search, $apprenticeId, &$firstNeedsRegister, &$firstTodayNotEnded
+        $query->chunk(200, function (Collection $chunk) use (
+            $actor, $groupsById, $search, $apprenticeId, &$firstNeedsRegister, &$firstTodayNotEnded, &$knownCache
         ): bool {
             $chunk->each(fn (TrainingSession $s) => $s->setRelation('group', $groupsById->get($s->tutor_group_id)));
             $filtered = $chunk->filter(function (TrainingSession $s) use ($actor, $search, $apprenticeId): bool {
@@ -160,7 +161,14 @@ final class Workday83
             }
             $filtered->load(['marks' => fn ($q) => $q->select('id', 'training_session_id', 'apprentice_id', 'code')]);
             $ids = $filtered->flatMap(fn ($s) => RegisterFollowup::roster($s)['ids'])->unique()->values();
-            $known = $ids->isEmpty() ? [] : Apprentice::whereIn('id', $ids)->pluck('id')->all();
+            $unchecked = $ids->reject(fn ($id) => array_key_exists($id, $knownCache))->values();
+            if ($unchecked->isNotEmpty()) {
+                $found = array_flip(Apprentice::whereIn('id', $unchecked)->pluck('id')->all());
+                foreach ($unchecked as $id) {
+                    $knownCache[$id] = isset($found[$id]);
+                }
+            }
+            $known = $ids->filter(fn ($id) => $knownCache[$id] ?? false)->values()->all();
 
             foreach ($filtered as $s) {
                 $r = RegisterFollowup::readiness($s, $known);

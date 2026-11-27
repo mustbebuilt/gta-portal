@@ -34,10 +34,12 @@ class SignedReviews
         return ReviewedImports::hash(['id' => $r->id, 'version' => $r->version, 'fields' => $r->fields, 'source_snapshot' => $r->source_snapshot]);
     }
 
-    public static function intact(SignedReviewRecord $r): bool
+    public static function intact(SignedReviewRecord $r, ElectronicReviewPacket|null|false $packet = false): bool
     {
         if (($r->snapshot['origin'] ?? null) === 'electronic') {
-            $packet = ElectronicReviewPacket::find($r->snapshot['electronic_packet_id'] ?? null);
+            if ($packet === false) {
+                $packet = ElectronicReviewPacket::find($r->snapshot['electronic_packet_id'] ?? null);
+            }
             if (! $packet || $packet->signed_review_record_id !== $r->id || ($r->snapshot['packet_hash'] ?? null) !== $packet->snapshot_hash || ($packet->completion['file_sha256'] ?? null) !== ($r->file['sha256'] ?? null) || ! ElectronicReviews::recordIntact($packet, $r)) {
                 return false;
             }
@@ -164,6 +166,56 @@ class SignedReviews
         $due = $latest && ! $invalid ? $latest->meeting_date->copy()->addDays(70) : null;
 
         return ['confirmed_count' => $records->count() - $invalid, 'integrity_checks' => $invalid, 'latest_record_id' => $latest?->id, 'last_meeting' => $latest?->meeting_date->toDateString(), 'next_due' => $due?->toDateString(), 'status' => $invalid ? 'Evidence integrity needs checking' : (! $due ? 'History to check' : ($due->lt(today()) ? 'Overdue tracked reference' : ($due->isToday() ? 'Due today' : 'Future tracked reference'))), 'first_review_reference' => $a->start_date?->copy()->addDays(70)->toDateString(), 'basis' => $due ? 'Latest unwithdrawn independently checked signed copy in this portal' : 'No reliable completed-copy reference; check historical records', 'history_completeness' => 'Not verified; no whole-cohort compliance rate inferred'];
+    }
+
+    public static function nextDueByApprentice(array $apprenticeIds): array
+    {
+        if (! $apprenticeIds) {
+            return [];
+        }
+        $state = [];
+        SignedReviewRecord::whereIn('apprentice_id', $apprenticeIds)
+            ->whereNotNull('checked_at')
+            ->whereNull('withdrawn_at')
+            ->orderBy('id')
+            ->chunkById(100, function ($chunk) use (&$state): void {
+                $packetIds = $chunk
+                    ->filter(fn ($r) => ($r->snapshot['origin'] ?? null) === 'electronic' && ! empty($r->snapshot['electronic_packet_id']))
+                    ->map(fn ($r) => $r->snapshot['electronic_packet_id'])
+                    ->unique()
+                    ->values();
+                $packets = $packetIds->isEmpty()
+                    ? collect()
+                    : ElectronicReviewPacket::whereIn('id', $packetIds)->get()->keyBy('id');
+
+                foreach ($chunk as $r) {
+                    $aid = $r->apprentice_id;
+                    $state[$aid] ??= ['invalid' => false, 'latest_key' => null, 'latest_date' => null];
+                    $packet = ($r->snapshot['origin'] ?? null) === 'electronic'
+                        ? $packets->get($r->snapshot['electronic_packet_id'] ?? null)
+                        : null;
+                    if (! self::intact($r, $packet)) {
+                        $state[$aid]['invalid'] = true;
+
+                        continue;
+                    }
+                    $key = [$r->meeting_date->toDateString(), $r->id];
+                    if ($state[$aid]['latest_key'] === null || $key > $state[$aid]['latest_key']) {
+                        $state[$aid]['latest_key'] = $key;
+                        $state[$aid]['latest_date'] = $r->meeting_date->copy();
+                    }
+                }
+            });
+
+        $due = [];
+        foreach ($apprenticeIds as $aid) {
+            $entry = $state[$aid] ?? null;
+            $due[$aid] = ($entry && ! $entry['invalid'] && $entry['latest_date'])
+                ? $entry['latest_date']->addDays(70)->toDateString()
+                : null;
+        }
+
+        return $due;
     }
 
     private static function event(SignedReviewRecord $r,User $u,string $event): void

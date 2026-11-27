@@ -73,28 +73,33 @@ class StaffAttention
         $employerReplies = EmployerPortalAction::whereIn('apprentice_id', $training)->where('state', 'Responded')->get(['id', 'apprentice_id', 'responded_at'])->groupBy('apprentice_id');
 
         $trainingSet = array_flip($training->all());
+        $activeIds = [];
         $activeTrainingIds = [];
         $dueTasks = collect();
         $approvedCheckIds = [];
         foreach ($people as $a) {
             $context = $outcomes->get($a->id)?->context ?? [];
             $known = in_array($context['status'] ?? null, ['Active', 'Break in learning', 'Completed', 'Withdrawn', 'Transferred'], true) && filled($context['sourceRef'] ?? null);
-            if ($known && $context['status'] === 'Active' && isset($trainingSet[$a->id])) {
-                $activeTrainingIds[] = $a->id;
-                $own = $tasks->get($a->id, collect());
-                foreach ($own as $task) {
-                    if ($task->status !== 'Awaiting marking' && ($task->editable() || $task->status === 'Source required')
-                        && ($task->template['kind'] ?? 'source-pending') !== 'source-pending'
-                        && $task->due_date && $task->due_date->lte(today())) {
-                        $dueTasks->push($task);
+            if ($known && $context['status'] === 'Active') {
+                $activeIds[] = $a->id;
+                if (isset($trainingSet[$a->id])) {
+                    $activeTrainingIds[] = $a->id;
+                    $own = $tasks->get($a->id, collect());
+                    foreach ($own as $task) {
+                        if ($task->status !== 'Awaiting marking' && ($task->editable() || $task->status === 'Source required')
+                            && ($task->template['kind'] ?? 'source-pending') !== 'source-pending'
+                            && $task->due_date && $task->due_date->lte(today())) {
+                            $dueTasks->push($task);
+                        }
                     }
-                }
-                $approvedCount = $own->where('status', 'Approved')->count();
-                if ($approvedCount > 0 && $approvedCount < $own->count()) {
-                    $approvedCheckIds[] = $a->id;
+                    $approvedCount = $own->where('status', 'Approved')->count();
+                    if ($approvedCount > 0 && $approvedCount < $own->count()) {
+                        $approvedCheckIds[] = $a->id;
+                    }
                 }
             }
         }
+        $reviewDueByApprentice = SignedReviews::nextDueByApprentice($activeIds);
         $blockReleases = BlockRelease::states($dueTasks);
         $approvedSummary = [];
         if ($approvedCheckIds) {
@@ -134,7 +139,7 @@ class StaffAttention
                 $add('programme', 'checks', 'Programme status/source needs checking', null, $reviewUrl);
             }
             if ($active) {
-                $due = SignedReviews::cycle($a)['next_due'];
+                $due = $reviewDueByApprentice[$a->id] ?? null;
                 if (! $due) {
                     $add('review', 'checks', 'Completed-review history needs checking; no reliable due reference', null, $reviewUrl);
                 } elseif ($due <= today()->toDateString()) {
