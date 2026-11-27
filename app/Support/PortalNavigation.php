@@ -21,7 +21,7 @@ class PortalNavigation
         };
         if(StaffHandover::recipientAllowed($u)) {$primary[]=$item('Staff handovers','incoming-handovers.index',[],['incoming-handovers.*']);}
         if(MyResponsibilities::allowed($u)) {$primary[]=$item('My responsibilities','responsibilities.index',[],['responsibilities.*']);}
-        if(in_array($u->role,['admin','ceo','tutor','apprentice'],true)) {$primary[]=$item('Dashboard','dashboard.index',[],['dashboard.index']);}
+        if(in_array($u->role,['admin','ceo','tutor','apprentice'],true)) {$primary[]=$item($u->role === 'apprentice' ? 'My dashboard' : 'Work today','dashboard.index',[],['dashboard.index']);}
         $reports = ReportDirectory::links($u);
         if ($reports) {
             $primary[] = $item('Reports','reports.index',[],['reports.index', ...array_keys($reports), 'dashboard.pdf', 'visual-reports.pdf', 'historical-cohorts.*', ... (isset($reports['timetable-management.index']) ? ['timetable-management.*'] : [])]);
@@ -136,11 +136,48 @@ class PortalNavigation
             unset($section);
         }
         $primary = array_values($primary);
-        $daily = ['My next step', 'Needs attention', 'Dashboard', 'Apprentices', 'Add apprentice', 'Add or link employer',
+        $daily = ['My next step', 'Needs attention', 'Work today', 'Apprentices', 'Add apprentice', 'Add or link employer',
             'View progress', 'My progress', 'Apprentice register', 'Work to mark', 'Reviews', 'Support and Retention Register', 'Reports'];
         $priority = array_flip($daily);
         usort($primary, fn ($first, $second) =>
             ($priority[$first['label']] ?? count($daily)) <=> ($priority[$second['label']] ?? count($daily)));
         return ['primary'=>$primary,'groups'=>$groups,'help'=>$item('Help and how to','help.index',[],['help.*'])];
     }
+    public static function forDisplay(User $user, Request $request): array
+    {
+        $menu = self::build($user, $request);
+        $labels = match ($user->role) {
+            'admin', 'ceo' => ['Needs attention', 'Work today', 'Apprentices', 'Apprentice register', 'Reports'],
+            'tutor' => ['Needs attention', 'Work today', 'Apprentices', 'Apprentice register', 'Work to mark'],
+            'apprentice' => ['My next step', 'My progress', 'My calendar', 'Review signing'],
+            'employer' => ['My employer actions', 'View progress', 'Review appointments', 'Review signing'],
+            'inclusion_lead', 'inclusion_member' => ['Support and Retention Register', 'Reports'],
+            'mentor' => ['Needs attention', 'Reviews', 'View progress'],
+            'functional_skills_tutor' => ['Maths and English', 'Work to mark'],
+            'careers_adviser' => ['Careers', 'Leaver follow-up'],
+            default => ['Centre oversight', 'Needs attention', 'Staff development', 'Maths and English', 'Careers'],
+        };
+        $sections = [['id'=>'other-pages', 'label'=>'Other pages', 'links'=>$menu['primary']], ...$menu['groups']];
+        $links = collect($sections)->pluck('links')->collapse();
+        $byLabel = $links->keyBy('label');
+        $daily = collect($labels)->map(fn ($label) => $byLabel->get($label))->filter()->values();
+        if ($daily->isEmpty()) {
+            $daily = collect($menu['primary'])->take(3);
+        }
+        $dailyUrls = $daily->pluck('href')->all();
+        $active = $links->firstWhere('current', true) ?? ($menu['help']['current'] ?? false ? $menu['help'] : null);
+        foreach ($sections as &$section) {
+            $section['links'] = array_values(array_filter($section['links'], fn ($link) => ! in_array($link['href'], $dailyUrls, true)));
+        }
+        unset($section);
+
+        return [
+            'daily'=>$daily,
+            'sections'=>array_values(array_filter($sections, fn ($section) => $section['links'])),
+            'currentUrl'=>$active['href'] ?? null,
+            'currentTool'=>$active && ! in_array($active['href'], $dailyUrls, true) && $active['href'] !== ($menu['help']['href'] ?? null) ? $active['label'] : null,
+            'help'=>$menu['help'],
+        ];
+    }
+
 }

@@ -4,13 +4,17 @@
 <header class="page-heading"><h1>My employer actions</h1></header>
 <section class="panel">
     <h2>Requests to answer</h2>
-    <p>{{ $pendingCount }} {{ \Illuminate\Support\Str::plural('request', $pendingCount) }} awaiting a reply.</p>
+    @if($pendingCount)
+        <p>{{ $pendingCount }} {{ \Illuminate\Support\Str::plural('request', $pendingCount) }} awaiting a reply.</p>
+    @else
+        <p>No requests awaiting a reply.</p>
+    @endif
     @foreach($actions->where('state', 'Pending') as $request)
         @include('employer-portal.request-row', ['request' => $request, 'reply' => true])
     @endforeach
 </section>
 @if($actions->where('state', '!=', 'Pending')->isNotEmpty())
-    <details class="panel" @if(!$pendingCount || $actions->where('state', 'Pending')->isEmpty()) open @endif>
+    <details class="panel" @if($actions->currentPage() > 1 && $actions->where('state', 'Pending')->isEmpty()) open @endif>
         <summary>Earlier requests and replies</summary>
         @foreach($actions->where('state', '!=', 'Pending') as $request)
             @include('employer-portal.request-row', ['request' => $request, 'reply' => false])

@@ -79,9 +79,39 @@ class GroupedNavigationTest extends TestCase
  public function test_rendered_markup_has_native_disclosures_current_section_and_no_empty_headers():void {
   $u=User::factory()->create(['role'=>'admin']);$this->actingAs($u);$this->app->instance('request',$this->requestFor('marking.index'));$html=view('navigation.menu')->render();
   $dom=new \DOMDocument();$dom->loadHTML($html,LIBXML_NONET|LIBXML_NOERROR|LIBXML_NOWARNING);$xpath=new \DOMXPath($dom);
-  $this->assertSame(8,$xpath->query('//details[@data-navigation-group]')->length);$this->assertSame(0,$xpath->query('//details[@open]')->length);
-  $this->assertSame(1,$xpath->query('//a[@aria-current="page"]')->length);$this->assertSame(0,$xpath->query('//details[not(summary)]')->length);$this->assertSame(0,$xpath->query('//details[not(.//a)]')->length);$this->assertSame(1,$xpath->query('//nav/a[contains(@class,"navigation-help")]')->length);
+  $this->assertSame(1,$xpath->query('//nav/details')->length);
+  $this->assertSame(0,$xpath->query('//details//details | //details[@open]')->length);
+  $this->assertSame(1,$xpath->query('//a[@aria-current="page"]')->length);
+  $this->assertSame(0,$xpath->query('//section[@data-navigation-group][not(h2) or not(.//a)]')->length);
+  $this->assertSame(1,$xpath->query('//nav/a[contains(@class,"navigation-help")]')->length);
  }
+ public function test_role_shortcuts_are_direct_and_the_current_secondary_page_is_named(): void
+ {
+  $admin = User::factory()->create(['role'=>'admin']);
+  $tutor = User::factory()->create(['role'=>'tutor']);
+  $apprentice = User::factory()->create(['role'=>'apprentice']);
+  $employer = User::factory()->create(['role'=>'employer']);
+  $skills = User::factory()->create(['role'=>'functional_skills_tutor', 'subject_scope'=>'both']);
+
+  foreach ([
+   [$admin, ['Needs attention','Work today','Apprentices','Apprentice register','Reports']],
+   [$tutor, ['Needs attention','Work today','Apprentices','Apprentice register','Work to mark']],
+   [$apprentice, ['My next step','My progress','My calendar','Review signing']],
+   [$employer, ['My employer actions','View progress','Review appointments','Review signing']],
+   [$skills, ['Maths and English','Work to mark']],
+  ] as [$actor, $expected]) {
+   $menu = PortalNavigation::forDisplay($actor, $this->requestFor('help.index'));
+   $this->assertSame($expected, $menu['daily']->pluck('label')->all());
+  }
+
+  $page = $this->actingAs($admin)->get(route('task-library.index'))->assertOk()
+   ->assertSeeInOrder(['More tools','Task library'])->assertDontSee('id="navigation-toggle"', false);
+  $dom = new \DOMDocument();
+  $dom->loadHTML($page->getContent(), LIBXML_NONET|LIBXML_NOERROR|LIBXML_NOWARNING);
+  $xpath = new \DOMXPath($dom);
+  $this->assertSame('Task library', trim($xpath->query('//nav[@id="portal-navigation"]//a[@aria-current="page"]')->item(0)->textContent));
+ }
+
  public function test_inactive_account_does_not_build_navigation_and_guest_has_no_sidebar_links():void {
   $u=User::factory()->create(['role'=>'admin','active'=>false]);$this->assertSame(['primary'=>[],'groups'=>[],'help'=>null],PortalNavigation::build($u,$this->requestFor('help.index')));
   $this->get('/login')->assertOk()->assertDontSee('data-navigation-group=',false)->assertDontSee('id="portal-navigation"',false);

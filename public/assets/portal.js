@@ -84,47 +84,6 @@ window.addEventListener('beforeprint',()=>{
   }
 });
 
-// Progressive enhancement: navigation remains visible if JavaScript is unavailable.
-(() => {
-  const button = document.getElementById('navigation-toggle');
-  const navigation = document.getElementById('portal-navigation');
-  if (!button || !navigation) return;
-  const compact = window.matchMedia('(max-width: 850px)');
-  const show = (expanded) => {
-    navigation.hidden = !expanded;
-    button.setAttribute('aria-expanded', String(expanded));
-    button.textContent = expanded ? 'Hide menu' : 'Show menu';
-  };
-  const resize = () => {
-    const focusInside = navigation.contains(document.activeElement);
-    // Never hide the focused navigation item when the viewport shrinks.
-    // When expanding to desktop, move focus away from the disappearing toggle.
-    const toggleFocused = document.activeElement === button;
-    show(!compact.matches || focusInside);
-    if (!compact.matches && toggleFocused) {
-      const target = navigation.querySelector('[aria-current="page"]') || navigation.querySelector('a');
-      // A user may have closed the current group manually. Reveal it before focus.
-      let group = target?.closest?.('details');
-      while (group) {
-        group.open = true;
-        group = group.parentElement?.closest?.('details');
-      }
-      target?.focus();
-    }
-    button.hidden = !compact.matches;
-  };
-  button.addEventListener('click', () => show(navigation.hidden));
-  navigation.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && compact.matches && !navigation.hidden) {
-      event.preventDefault();
-      button.focus();
-      show(false);
-    }
-  });
-  compact.addEventListener('change', resize);
-  resize();
-})();
-
 // A rejected apprentice/directory submission lands at the server-rendered summary.
 // Its native fragment links remain usable when JavaScript is unavailable.
 document.querySelector('[data-error-summary]')?.focus();

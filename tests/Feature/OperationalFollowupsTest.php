@@ -45,6 +45,7 @@ class OperationalFollowupsTest extends TestCase {
      $attention = route('attention.index', ['reason' => 'task']);
      $start = route('operations-desk.start', $f['a']);
      $this->actingAs($f['tutor'])->get($attention)->assertOk()
+         ->assertSeeInOrder(['Next action', 'Open task record', 'Filter apprentices'])
          ->assertSee($start)->assertSee('Start a staff follow-up');
      $this->get(route('operations-desk.index'))->assertOk()
          ->assertSee('No recorded follow-ups')->assertDontSee($start);

@@ -9,10 +9,11 @@
     );
 @endphp
 <section class="panel">
+    @if($nextAction ?? false)<p class="eyebrow">Next action</p>@endif
     <h2>{{ $person->first_name }} {{ $person->last_name }}</h2>
     <p>{{ $person->reference }}</p>
     <p><strong>{{ ucfirst($primary['bucket']) }} · {{ ucfirst($primary['kind']) }}</strong> · {{ $primary['text'] }} @if($primary['date']) · {{ $primary['date'] }}@endif</p>
-    <p><a class="button primary" href="{{ $primary['url'] }}">Open {{ $primary['kind'] }} record</a></p>
+    <p><a @class(['button', 'primary'=>($nextAction ?? false)]) href="{{ $primary['url'] }}">Open {{ $primary['kind'] }} record</a></p>
     @if($others->isNotEmpty() || $hasPrimaryTools)
         <details @if($showTools) open @endif>
             <summary>{{ $others->isNotEmpty() ? 'Other reasons and follow-up' : 'Staff follow-up' }}</summary>
