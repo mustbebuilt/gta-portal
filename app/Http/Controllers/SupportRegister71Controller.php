@@ -110,6 +110,7 @@ class SupportRegister71Controller extends Controller
             'request_uuid' => ['required', 'uuid'],
             'support_concern_id' => ['nullable', 'integer'],
             'support_plan_id' => ['nullable', 'integer'],
+            'lead_team' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(SupportRegister71::LEAD_TEAMS))],
         ]);
         $apprentice = Apprentice::findOrFail($v['apprentice_id']);
         SupportRegister71::createAction($r->user(), $apprentice, $v);

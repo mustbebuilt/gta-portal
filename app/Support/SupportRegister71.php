@@ -19,6 +19,23 @@ final class SupportRegister71
         'six_monthly' => 'Six-monthly (maximum)',
     ];
 
+    public const LEAD_TEAMS = ['inclusion' => 'Inclusion', 'marketing' => 'Marketing'];
+
+    public static function leadTeam(?string $markerCode, ?string $explicit = null): ?string
+    {
+        if (isset(self::LEAD_TEAMS[$explicit])) {
+            return self::LEAD_TEAMS[$explicit];
+        }
+
+        return match ($markerCode) {
+            'IM34', 'IM35', 'IM36', 'IM39' => self::LEAD_TEAMS['marketing'],
+            'IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6', 'IM7', 'IM8', 'IM9', 'IM10',
+            'IM11', 'IM12', 'IM13', 'IM14', 'IM15', 'IM16', 'IM17',
+            'IM26', 'IM29', 'IM30', 'IM31', 'IM38' => self::LEAD_TEAMS['inclusion'],
+            default => null,
+        };
+    }
+
     public static function codes(): array
     {
         return json_decode(file_get_contents(resource_path('data/inclusion-markers.json')), true, 512, JSON_THROW_ON_ERROR);
@@ -335,6 +352,7 @@ final class SupportRegister71
                 'summary' => trim((string) $data['summary']),
                 ...(!empty($data['measure']) ? ['measure' => $data['measure']] : []),
                 ...(!empty($data['target_template']) ? ['template' => $data['target_template']] : []),
+                ...(!empty($data['lead_team']) ? ['lead_team' => $data['lead_team']] : []),
                 'outcome' => null,
             ];
             $action->history = [[

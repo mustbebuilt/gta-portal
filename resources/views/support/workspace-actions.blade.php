@@ -1,5 +1,6 @@
 <section class="panel" id="support-actions">
     <h2>Action plan</h2>
+    <p class="muted">One register for Inclusion and Marketing.</p>
     @php
         $actionForm = route('support-register71.add-action');
         $restoreAction = old('_support_form') === $actionForm;
@@ -30,6 +31,12 @@
                 <option value="">Choose owner</option>
                 @foreach($owners as $owner)<option value="{{ $owner->id }}" @selected((int) ($restoreAction ? old('owner_id') : auth()->id()) === $owner->id)>{{ $owner->name }}</option>@endforeach
             </select></label>
+            <label>Lead team <select name="lead_team">
+                <option value="">Use marker responsibility, if known</option>
+                @foreach(\App\Support\SupportRegister71::LEAD_TEAMS as $key => $label)
+                    <option value="{{ $key }}" @selected($restoreAction && old('lead_team') === $key)>{{ $label }}</option>
+                @endforeach
+            </select></label>
             <label>Due date <input type="date" name="due_date" required value="{{ $restoreAction ? old('due_date') : '' }}"></label>
         </div>
         <button class="primary">Save target</button>
@@ -37,26 +44,29 @@
     </details>
     @php($openActions = collect())
     @foreach($concerns->where('status','!=','Closed')->filter(fn ($marker) => filled($marker->next_action)) as $marker)
-        @php($openActions->push(['title'=>$marker->next_action, 'owner'=>$marker->owner?->name, 'due'=>$marker->action_due?->toDateString(), 'route'=>route('support.complete-action',$marker), 'version'=>$marker->version]))
+        @php($openActions->push(['title'=>$marker->next_action, 'marker'=>$marker->code, 'team'=>\App\Support\SupportRegister71::leadTeam($marker->code), 'owner'=>$marker->owner?->name, 'due'=>$marker->action_due?->toDateString(), 'route'=>route('support.complete-action',$marker), 'version'=>$marker->version]))
     @endforeach
     @foreach($sharedActions->where('state','Open') as $action)
-        @php($openActions->push(['title'=>$action->details['summary'] ?? 'Follow-up action', 'marker'=>$concerns->firstWhere('id', $action->support_concern_id)?->code, 'measure'=>$action->details['measure'] ?? null, 'owner'=>$action->owner?->name, 'due'=>$action->due_date->toDateString(), 'route'=>route('support-register71.complete-action',$action)]))
+        @php($code = $concerns->firstWhere('id', $action->support_concern_id)?->code)
+        @php($openActions->push(['title'=>$action->details['summary'] ?? 'Follow-up action', 'marker'=>$code, 'team'=>\App\Support\SupportRegister71::leadTeam($code, $action->details['lead_team'] ?? null), 'measure'=>$action->details['measure'] ?? null, 'owner'=>$action->owner?->name, 'due'=>$action->due_date->toDateString(), 'route'=>route('support-register71.complete-action',$action)]))
     @endforeach
     @foreach($plans->where('status','Active') as $plan)
         @foreach($plan->activities ?? [] as $activity)
             @if(!empty($activity['followup']) && empty($activity['followup']['completed_at']))
                 @php($followup = $activity['followup'])
-                @php($openActions->push(['title'=>$followup['note'], 'owner'=>$followup['owner_name'], 'due'=>$followup['due'], 'route'=>route('support.activity.followup',[$plan,$activity['id']]), 'version'=>$plan->version]))
+                @php($openActions->push(['title'=>$followup['note'], 'team'=>'Inclusion', 'owner'=>$followup['owner_name'], 'due'=>$followup['due'], 'route'=>route('support.activity.followup',[$plan,$activity['id']]), 'version'=>$plan->version]))
             @endif
         @endforeach
     @endforeach
     @forelse($openActions->sortBy(fn ($action) => $action['due'] ?? '9999-12-31') as $action)
         <div class="support-item">
-            <p><strong>{{ $action['title'] }}</strong></p>
+            <p><strong>{{ $action['title'] }}</strong>
+                @if($action['due'] && $action['due'] < today()->toDateString()) <span class="status red">Overdue</span> @endif
+            </p>
             @if(!empty($action['marker'])) <p>Marker {{ $action['marker'] }}</p> @endif
             @if(filled($action['measure'] ?? null)) <p>{{ $action['measure'] }}</p> @endif
-            <p class="muted">{{ $action['owner'] ?? 'Owner to assign' }} · {{ $action['due'] ? 'Due '.$action['due'] : 'Due date to set' }}</p>
-            <details @if(old('_support_form') === $action['route']) open @endif><summary>Complete action</summary>
+            <p class="muted">{{ $action['team'] ?? 'Lead team to confirm' }} · {{ $action['owner'] ?? 'Owner to assign' }} · {{ $action['due'] ? 'Due '.$action['due'] : 'Due date to set' }}</p>
+            <details @if(old('_support_form') === $action['route']) open @endif><summary>Update action</summary>
                 <form method="post" action="{{ $action['route'] }}">
                     @csrf
                     <input type="hidden" name="_support_form" value="{{ $action['route'] }}">
@@ -69,14 +79,14 @@
     @empty
         <p>No open actions.</p>
     @endforelse
-    <details><summary>Completed action history</summary>
+    <details><summary>Support history</summary>
         @foreach($concerns as $marker)
             @foreach(collect($marker->history ?? [])->where('event','marker_action_completed') as $event)
                 <p><strong>{{ $event['before']['next_action'] ?? 'Marker action' }}</strong> · {{ $event['outcome'] }}</p>
             @endforeach
         @endforeach
         @foreach($sharedActions->where('state','Completed') as $action)
-            <p><strong>{{ $action->details['summary'] ?? 'Follow-up action' }}</strong> · {{ $action->owner?->name ?? 'Former staff member' }} · {{ $action->completed_at?->format('j M Y') }} · {{ $action->details['outcome'] ?? 'Completed' }}</p>
+            <p><strong>{{ $action->details['summary'] ?? 'Follow-up action' }}</strong> · {{ \App\Support\SupportRegister71::leadTeam($concerns->firstWhere('id', $action->support_concern_id)?->code, $action->details['lead_team'] ?? null) ?? 'Lead team unrecorded' }} · {{ $action->owner?->name ?? 'Former staff member' }} · {{ $action->completed_at?->format('j M Y') }} · {{ $action->details['outcome'] ?? 'Completed' }}</p>
         @endforeach
         @foreach($plans as $plan)
             @foreach($plan->activities ?? [] as $activity)

@@ -11,8 +11,12 @@
 @if($team)
 @php($currentPlan=$plans->where('status','!=','Closed')->sortByDesc('id')->first())
 @php($planConcerns=$concerns->filter(fn($c)=>$c->code && !in_array($c->code,['IM18','IM19','IM27','IM28','IM32','IM33'],true)))
+@include('support.record-progress')
 @include('support.marker-reviews')
 @include('support.workspace-actions')
+@if($progress['otherActions'] !== null)
+    @include('support.other-actions', ['otherActions' => $progress['otherActions']])
+@endif
 @include('support.quick-log')
 <details class="panel" name="support-record-detail"><summary>Support plans and marker settings</summary>
 <section class="panel" id="support-markers"><h2>Inclusion markers</h2><a class="button" href="{{ route('surveys.index',$apprentice) }}">Wellbeing survey follow-up</a>@if(array_diff($markers,['IM18','IM19','IM27','IM28','IM32','IM33']))<p><strong>Apprentice Support Plan required.</strong> A selected marker is not an approved plan.</p>@else<p>No marker currently requires a support plan.</p>@endif

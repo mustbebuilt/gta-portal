@@ -393,7 +393,12 @@ class SupportController extends Controller
 
     public function index(Request $r, Apprentice $apprentice): Response
     {
-        return response()->view('support.index',$this->recordData($r,$apprentice),200,self::PRIVATE_CACHE);
+        $record = $this->recordData($r, $apprentice);
+        if ($record['team']) {
+            $record['progress'] = \App\Support\SupportRecordProgress::forApprentice($r->user(), $apprentice);
+        }
+
+        return response()->view('support.index', $record, 200, self::PRIVATE_CACHE);
     }
 
     private function recordData(Request $r, Apprentice $apprentice): array

@@ -1,0 +1,9 @@
+.support-progress{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem;margin:.75rem 0 0}
+.support-progress>div{min-width:0;padding:.65rem .75rem;border-radius:.6rem;background:#e2efff;color:#152e47}
+.support-progress>div:last-child{background:#eee7fa;color:#382854}
+.support-progress>.support-progress-behind{background:#ffe0e3;color:#631f2b}
+.support-progress>.support-progress-warning{background:#fff1cd;color:#553b06}
+.support-progress>.support-progress-on-track{background:#dcf6e7;color:#174632}
+.support-progress dd{margin:0;overflow-wrap:anywhere}
+.support-progress small{display:block}
+@media(max-width:40rem){.support-progress{grid-template-columns:1fr}}
