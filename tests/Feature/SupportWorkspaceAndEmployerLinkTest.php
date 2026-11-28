@@ -61,11 +61,11 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $this->assertSame('resolve-a-transport-barrier', $action->details['template']);
         $this->get($page)->assertOk()->assertSee('Acceptances from apprentice and tutor');
         $this->get(route('support.worklist'))->assertOk()->assertSee('Arrange next meeting');
-        $this->get(route('support.report'))->assertOk()->assertSee('1 have an overdue support action')->assertDontSee('Arrange next meeting');
+        $this->get(route('support.report'))->assertOk()->assertViewHas('summary', fn ($counts) => $counts['overdue-actions'] === 1)->assertDontSee('Arrange next meeting');
         $this->from($page)->post(route('support-register71.complete-action',$action), ['outcome'=>'Meeting arranged'])->assertSessionHasNoErrors();
         $this->get($page)->assertOk()->assertSee('Meeting arranged');
         $this->get(route('support.worklist'))->assertOk()->assertDontSee('Arrange next meeting');
-        $this->get(route('support.report'))->assertOk()->assertSee('0 have an overdue support action');
+        $this->get(route('support.report'))->assertOk()->assertViewHas('summary', fn ($counts) => $counts['overdue-actions'] === 0);
     }
 
     public function test_meeting_filters_prioritise_overdue_reviews_and_keep_the_group_and_tutor_through_save(): void
@@ -96,7 +96,7 @@ class SupportWorkspaceAndEmployerLinkTest extends TestCase
         $url = route('support.worklist', $filters);
         $page = $this->actingAs($member)->get($url)->assertOk()->assertSee('Monday Workshop')->assertDontSee('Private Workshop');
         $this->assertSame([$overdue->id,$first->id], $page->viewData('meetingRows')->pluck('person.id')->all());
-        $this->assertSame(['needs-review'=>2,'overdue'=>1,'first-review'=>1,'all'=>2], $page->viewData('statusCounts'));
+        $this->assertSame(['needs-review'=>2,'overdue'=>1,'first-review'=>1,'all'=>2,'overdue-actions'=>0], $page->viewData('statusCounts'));
         $forged = $this->get(route('support.worklist', ['group'=>$outsideGroup->id,'meeting'=>$outside->id]))
             ->assertOk()->assertDontSee('Private out-of-scope note')->assertDontSee($outside->reference);
         $this->assertNull($forged->viewData('selected'));

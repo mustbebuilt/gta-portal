@@ -5,7 +5,7 @@
     <h1>Support and Retention Register</h1>
     <div class="toolbar">
         <a href="{{ route('weekly-retention.index') }}">Weekly early warnings</a>
-        <a href="{{ route('support.report') }}">Support and Retention report</a>
+        <a href="{{ route('support.report', \Illuminate\Support\Arr::only($meetingFilters, ['group', 'tutor', 'by'])) }}">Support and Retention report</a>
     </div>
 </header>
 @include('learning.errors')
@@ -73,10 +73,10 @@
                 @endif
             </div>
             <div>
-                @if($row['has_markers'])
+                @if($row['has_markers'] && $view !== 'overdue-actions')
                     <a class="button" href="{{ route('support.worklist', [...$meetingFilters, 'meeting'=>$person->id]) }}">Review in meeting</a>
                 @endif
-                <a class="button" href="{{ route('support.index', $person) }}">Open record<span class="sr-only"> for {{ $person->first_name }} {{ $person->last_name }} ({{ $person->reference }})</span></a>
+                <a class="button" href="{{ route('support.index', $person) }}{{ $view === 'overdue-actions' ? '#support-actions' : '' }}">{{ $view === 'overdue-actions' ? 'Open action plan' : 'Open record' }}<span class="sr-only"> for {{ $person->first_name }} {{ $person->last_name }} ({{ $person->reference }})</span></a>
             </div>
         </article>
     @empty
