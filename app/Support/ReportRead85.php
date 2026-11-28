@@ -42,6 +42,11 @@ class ReportRead85
         return $person->programmeRecord()->first();
     }
 
+    public static function ids(): ?array
+    {
+        return self::$frame['ids'] ?? null;
+    }
+
     public static function remember(string $key, callable $read): mixed
     {
         if (self::$frame === null) {

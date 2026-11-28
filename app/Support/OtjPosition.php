@@ -11,40 +11,118 @@ class OtjPosition
 {
     public static function forApprentice(Apprentice $a): array
     {
-        $rows = [];
-        $pending = 0;
-        $invalid = 0;
-        $sessions = TrainingSession::with(['marks' => fn ($q) => $q->where('apprentice_id', $a->id)])->where(fn ($query) => $query->whereJsonContains('members', $a->id)->orWhereJsonContains('members', (string) $a->id))->orderBy('session_date')->orderBy('id')->get();
-        foreach ($sessions as $s) {
-            if (! $s->ended()) {
-                continue;
-            }
-            $roster = RegisterFollowup::roster($s);
-            if (!$roster['shape'] || $roster['duplicates']) {
-                $invalid++;
-                continue;
-            }
-            $mark = $s->marks->first();
-            $minutes = 0;
-            $state = 'Excluded';
-            if ($s->state === 'Cancelled') {
-                $state = 'Cancelled';
-            } elseif (! $mark || ! $mark->code) {
-                $state = 'Register not marked';
-                $pending++;
-            } elseif (in_array($mark->code, ['O', 'T'], true)) {
-                if (! $mark->otj_confirmed) {
-                    $state = 'OTJ not confirmed';
-                    $pending++;
-                } elseif ($mark->otj_minutes === null || $mark->otj_minutes < 0) {
-                    $state = 'Minutes need checking';
-                    $invalid++;
-                } else {
-                    $minutes = (int) $mark->otj_minutes;
-                    $state = 'Confirmed';
+        $frameIds = ReportRead85::ids();
+        if ($frameIds !== null && in_array($a->id, $frameIds, true)) {
+            $batched = ReportRead85::remember('otj_sessions_v1', function () use ($frameIds): array {
+                $allowed = array_flip($frameIds);
+                $byApprentice = [];
+                foreach ($frameIds as $id) {
+                    $byApprentice[$id] = ['rows' => [], 'pending' => 0, 'invalid' => 0];
                 }
+                TrainingSession::orderBy('session_date')
+                    ->orderBy('id')
+                    ->select(['id', 'name', 'session_date', 'start_time', 'end_time', 'state', 'members', 'version'])
+                    ->chunk(200, function ($sessions) use ($frameIds, $allowed, &$byApprentice): void {
+                        $endedSessions = $sessions->filter(fn (TrainingSession $s) => $s->ended())->values();
+                        if ($endedSessions->isEmpty()) {
+                            return;
+                        }
+                        $endedSessions->load(['marks' => fn ($q) => $q
+                            ->whereIn('apprentice_id', $frameIds)
+                            ->select('id', 'training_session_id', 'apprentice_id', 'code', 'otj_confirmed', 'otj_minutes')]);
+                        foreach ($endedSessions as $s) {
+                            $raw = $s->members;
+                            if (! is_array($raw)) {
+                                continue;
+                            }
+                            $matchedIds = [];
+                            foreach ($raw as $member) {
+                                if (is_int($member) && isset($allowed[$member])) {
+                                    $matchedIds[$member] = true;
+                                } elseif (is_string($member) && ctype_digit($member) && isset($allowed[(int) $member])) {
+                                    $matchedIds[(int) $member] = true;
+                                }
+                            }
+                            if (! $matchedIds) {
+                                continue;
+                            }
+                            $roster = RegisterFollowup::roster($s);
+                            if (! $roster['shape'] || $roster['duplicates']) {
+                                foreach (array_keys($matchedIds) as $aid) {
+                                    $byApprentice[$aid]['invalid']++;
+                                }
+
+                                continue;
+                            }
+                            $marksByApprentice = $s->marks->keyBy('apprentice_id');
+                            foreach (array_keys($matchedIds) as $aid) {
+                                $mark = $marksByApprentice->get($aid);
+                                $minutes = 0;
+                                $state = 'Excluded';
+                                if ($s->state === 'Cancelled') {
+                                    $state = 'Cancelled';
+                                } elseif (! $mark || ! $mark->code) {
+                                    $state = 'Register not marked';
+                                    $byApprentice[$aid]['pending']++;
+                                } elseif (in_array($mark->code, ['O', 'T'], true)) {
+                                    if (! $mark->otj_confirmed) {
+                                        $state = 'OTJ not confirmed';
+                                        $byApprentice[$aid]['pending']++;
+                                    } elseif ($mark->otj_minutes === null || $mark->otj_minutes < 0) {
+                                        $state = 'Minutes need checking';
+                                        $byApprentice[$aid]['invalid']++;
+                                    } else {
+                                        $minutes = (int) $mark->otj_minutes;
+                                        $state = 'Confirmed';
+                                    }
+                                }
+                                $byApprentice[$aid]['rows'][] = ['kind' => 'session', 'id' => $s->id, 'date' => $s->session_date->toDateString(), 'title' => $s->name, 'minutes' => $minutes, 'state' => $state, 'code' => $mark?->code, 'source_version' => $s->version];
+                            }
+                        }
+                    });
+
+                return $byApprentice;
+            });
+            $rows = $batched[$a->id]['rows'] ?? [];
+            $pending = $batched[$a->id]['pending'] ?? 0;
+            $invalid = $batched[$a->id]['invalid'] ?? 0;
+        } else {
+            $rows = [];
+            $pending = 0;
+            $invalid = 0;
+            $sessions = TrainingSession::with(['marks' => fn ($q) => $q->where('apprentice_id', $a->id)])->where(fn ($query) => $query->whereJsonContains('members', $a->id)->orWhereJsonContains('members', (string) $a->id))->orderBy('session_date')->orderBy('id')->get();
+            foreach ($sessions as $s) {
+                if (! $s->ended()) {
+                    continue;
+                }
+                $roster = RegisterFollowup::roster($s);
+                if (! $roster['shape'] || $roster['duplicates']) {
+                    $invalid++;
+
+                    continue;
+                }
+                $mark = $s->marks->first();
+                $minutes = 0;
+                $state = 'Excluded';
+                if ($s->state === 'Cancelled') {
+                    $state = 'Cancelled';
+                } elseif (! $mark || ! $mark->code) {
+                    $state = 'Register not marked';
+                    $pending++;
+                } elseif (in_array($mark->code, ['O', 'T'], true)) {
+                    if (! $mark->otj_confirmed) {
+                        $state = 'OTJ not confirmed';
+                        $pending++;
+                    } elseif ($mark->otj_minutes === null || $mark->otj_minutes < 0) {
+                        $state = 'Minutes need checking';
+                        $invalid++;
+                    } else {
+                        $minutes = (int) $mark->otj_minutes;
+                        $state = 'Confirmed';
+                    }
+                }
+                $rows[] = ['kind' => 'session', 'id' => $s->id, 'date' => $s->session_date->toDateString(), 'title' => $s->name, 'minutes' => $minutes, 'state' => $state, 'code' => $mark?->code, 'source_version' => $s->version];
             }
-            $rows[] = ['kind' => 'session', 'id' => $s->id, 'date' => $s->session_date->toDateString(), 'title' => $s->name, 'minutes' => $minutes, 'state' => $state, 'code' => $mark?->code, 'source_version' => $s->version];
         }
         foreach (ReportRead85::rows(ExtraTraining::class, $a->id, fn () => ExtraTraining::where('apprentice_id', $a->id)->orderBy('training_date')->orderBy('id')->get())->sortBy(fn ($row) => [$row->training_date->toDateString(), $row->id]) as $e) {
             if (! $e->occurred()) {

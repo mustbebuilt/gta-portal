@@ -154,6 +154,21 @@ return $result;
             $topics = TrainingTopic::whereIn('apprentice_id', $ids)->get()->groupBy('apprentice_id');
             $quals = Qualification::whereIn('apprentice_id', $ids)->get()->groupBy('apprentice_id');
             $actions = SmartAction::with(['task' => fn ($q) => $q->select('id', 'apprentice_id', 'reference', 'block', 'title', 'status', 'due_date', 'submitted_at')])->whereIn('apprentice_id', $ids)->get()->groupBy('apprentice_id');
+            $outcomes = \App\Models\ProgrammeOutcome::whereIn('apprentice_id', $ids)->get()->keyBy('apprentice_id');
+            $forecasts = CohortForecast::whereIn('apprentice_id', $ids)->get()->keyBy('apprentice_id');
+            $allConcerns = $u->role === 'apprentice'
+                ? collect()
+                : SupportConcern::with('owner:id,name')->whereIn('apprentice_id', $ids)->where('status', '!=', 'Closed')->get(['id', 'apprentice_id', 'owner_id', 'action_due', 'status', 'raised_by'])->groupBy('apprentice_id');
+            $allActivePlans = $u->role === 'apprentice'
+                ? collect()
+                : SupportPlan::whereIn('apprentice_id', $ids)->where('status', 'Active')->get()->groupBy('apprentice_id');
+            $upcomingAppointments = ReviewAppointment::whereIn('apprentice_id', $ids)
+                ->where('state', 'Published')
+                ->where('ends_at', '>', now()->utc())
+                ->orderBy('starts_at')
+                ->orderBy('id')
+                ->get()
+                ->groupBy('apprentice_id');
             $rows = [];
             foreach ($people as $a) {
                 $set = $tasks->get($a->id, collect());
@@ -176,11 +191,14 @@ return $result;
                 }
                 $attendance = array_values(array_filter($ledger[$a->id]['rows'] ?? [], fn ($v) => $v['date'] >= $f['from'] && $v['date'] <= $f['to']));
                 $o = OtjPosition::forApprentice($a);
-                $reviewPosition = ReviewReminders::position($a);
-                $cycle = $reviewPosition['cycle'];
-                if ($reviewPosition['programme_check'] || $reviewPosition['paused']) {
+                $cycle = SignedReviews::cycle($a);
+                $outcomeRow = $outcomes->get($a->id);
+                $programmeStatus = $outcomeRow?->context['status'] ?? 'Unknown';
+                $programmeCheck = ! in_array($programmeStatus, ['Active', 'Break in learning', 'Completed', 'Withdrawn', 'Transferred'], true) || ! filled($outcomeRow?->context['sourceRef'] ?? null);
+                $programmePaused = ! $programmeCheck && $programmeStatus !== 'Active';
+                if ($programmeCheck || $programmePaused) {
                     $cycle['next_due'] = null;
-                    $checks[] = $reviewPosition['paused'] ? 'Review cycle paused for the recorded programme status' : 'Programme status needed to confirm review cycle';
+                    $checks[] = $programmePaused ? 'Review cycle paused for the recorded programme status' : 'Programme status needed to confirm review cycle';
                 }
                 $topicRows = [];
                 foreach (['english', 'maths'] as $subject) {
@@ -219,12 +237,15 @@ return $result;
                 }
                 if ($u->role !== 'apprentice') {
                     $team = SupportAccess::team($u, $a);
-                    $concerns = SupportConcern::with('owner:id,name')->where('apprentice_id', $a->id)->where('status', '!=', 'Closed')->when(! $team, fn ($q) => $q->where('raised_by', $u->id))->get(['id', 'apprentice_id', 'owner_id', 'action_due', 'status']);
+                    $concerns = $allConcerns->get($a->id, collect());
+                    if (! $team) {
+                        $concerns = $concerns->where('raised_by', $u->id);
+                    }
                     foreach ($concerns as $c) {
                         $act[] = ['title' => 'Check an authorised support follow-up', 'owner' => $c->owner?->name ?? 'Owner not recorded', 'due' => $c->action_due?->toDateString(), 'state' => $c->status, 'kind' => 'support', 'url' => route('support.index', $a)];
                     }
                     if ($team) {
-                        $plans = SupportFollowup::plans(SupportPlan::where('apprentice_id', $a->id)->where('status', 'Active')->get(), collect([$a]));
+                        $plans = SupportFollowup::plans($allActivePlans->get($a->id, collect()), collect([$a]));
                         foreach ($plans['rows'] as $pr) {
                             $act[] = ['title' => 'Review an authorised support plan', 'owner' => 'Authorised Inclusion Team', 'due' => $pr['due'], 'state' => 'Support review', 'kind' => 'support', 'url' => route('support.index', $a)];
                         }
@@ -248,12 +269,22 @@ return $result;
                 $forecast = 'Not available';
                 $outcome = 'Not recorded';
                 if (CohortForecasts::allowed($u, $a)) {
-                    $source = CohortForecasts::source($a);
-                    $outcome = $source['context']['status'] ?? 'Not recorded';
-                    $estimate = CohortForecast::find($a->id);
-                    $forecast = $estimate && CohortForecasts::current($estimate, $source) ? 'Estimate '.$estimate->details['target_date'].' — '.$estimate->details['basis'] : ($estimate ? 'Estimate needs review' : 'Not recorded');
+                    $outcome = $outcomeRow?->context['status'] ?? 'Not recorded';
+                    $estimate = $forecasts->get($a->id);
+                    if ($estimate) {
+                        $source = CohortForecasts::source($a);
+                        $forecast = CohortForecasts::current($estimate, $source) ? 'Estimate '.$estimate->details['target_date'].' — '.$estimate->details['basis'] : 'Estimate needs review';
+                    } else {
+                        $forecast = 'Not recorded';
+                    }
                 }
-                $appointment = class_exists(ReviewNextStep::class) ? ReviewNextStep::for($u, $a)['appointment'] : ReviewAppointment::where('apprentice_id', $a->id)->where('state', 'Published')->where('ends_at', '>', now()->utc())->orderBy('starts_at')->limit(50)->get()->first(fn ($meeting) => ReviewAppointments::published($meeting) && ReviewAppointments::current($meeting) && ReviewAppointments::visible($u, $meeting));
+                $appointment = null;
+                foreach ($upcomingAppointments->get($a->id, collect())->take(50) as $meeting) {
+                    if (ReviewAppointments::published($meeting) && ReviewAppointments::current($meeting) && ReviewAppointments::visible($u, $meeting)) {
+                        $appointment = $meeting;
+                        break;
+                    }
+                }
 
                 $roadmap = ($u->role === 'apprentice' || $people->count() === 1) ? ApprenticeRoadmap67::live($u, $a, $home['blocks'] ?? ApprenticeExperience::blocks($a, $set), $o['rows']) : null;
                 $rows[] = [...$personal, 'id' => (string) $a->id, 'reference' => $a->reference, 'name' => $a->first_name.' '.$a->last_name, 'group_id' => $a->tutor_group_id, 'programme' => $a->programmeLabel() ?? 'Not recorded', 'group' => $a->groupLabel() ?? 'Not recorded', 'tutor' => $a->tutor?->name ?? 'Not recorded', 'scenario' => '', 'task_status' => $set->count() ? $status : null, 'expected_tasks' => $expected, 'attendance_rows' => $attendance, 'attendance' => AttendanceMath::report($attendance), 'otj' => ['recorded_hours' => count($o['rows']) ? round($o['summary']['recorded_minutes'] / 60, 2) : null, 'target_hours' => $o['summary']['target_hours'], 'planned_due_hours' => $o['summary']['planned_due_hours'], 'pending_sources' => $o['summary']['pending_sources'], 'invalid_sources' => $o['summary']['invalid_sources'], 'delivered_hours' => null, 'approved_extra_hours' => count($o['rows']) ? round($o['summary']['extra_minutes'] / 60, 2) : null], 'review_due' => $cycle['next_due'], 'review_state' => $cycle['status'] ?? 'Not available', 'topics' => $topicRows, 'actions' => $act, 'checks' => $checks, 'feedback' => $feedback, 'roadmap' => $roadmap, 'milestones' => array_values(array_filter($roadmap['events'] ?? [], fn ($e) => $e['status'] === 'Recorded')), 'blocks' => $home['blocks'] ?? ApprenticeExperience::blocks($a, $set), 'next_title' => $home['next']['title'] ?? 'Open your training tasks', 'next_url' => $home['next']['url'] ?? route('learning.index', $a), 'url' => route('progress66.index', ['apprentice' => $a->id]).'#records', 'review_url' => $u->role === 'apprentice' ? route('electronic-reviews.index', ['filter' => 'mine']) : route('reviews.create', $a), 'outcome' => $outcome, 'forecast' => $forecast, 'otj_ledger' => $o['rows'], 'otj_plan' => DeliveryPlan::approved($a)['blocks'] ?? [], 'appointment' => $appointment ? $appointment->starts_at->timezone('Europe/London')->format('d M Y H:i') : 'Not recorded'];
