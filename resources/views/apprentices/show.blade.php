@@ -36,6 +36,7 @@
     @endif
     <a class="button" href="{{ route('actions.index', $apprentice) }}">Action plan</a>
     @if(\App\Support\LearningAccess::manager(auth()->user()) && !$archived)
+        <a class="button" href="{{ route('apprentice-onboarding.show', $apprentice) }}">Apprentice login and password help</a>
         <a class="button" href="{{ $apprentice->employerRecord?->active
             ? route('apprentices.edit', ['apprentice' => $apprentice, 'link_employer' => $apprentice->employer_id]).'#workplace-access'
             : route('employer68.show', ['apprentice' => $apprentice->id]) }}">

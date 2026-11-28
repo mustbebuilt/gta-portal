@@ -28,6 +28,25 @@ class ApprenticeOnboardingTest extends TestCase
  }
  private function postPilot(string $path,array $data=[]) {return $this->withSession(['_token'=>'fictional-csrf'])->post('https://staging.example.test'.$path,[...$data,'_token'=>'fictional-csrf']);}
  private function password():array{return ['password'=>'Fictional-apprentice-passphrase-28!','password_confirmation'=>'Fictional-apprentice-passphrase-28!'];}
+ public function test_apprentice_record_links_authorised_staff_to_password_help():void {
+  [$admin,$login,$apprentice]=$this->fixture(false);
+  $tutor=User::factory()->create(['role'=>'tutor']);
+  $apprentice->update(['tutor_id'=>$tutor->id]);
+  $record=route('apprentices.show',$apprentice);
+  $help=route('apprentice-onboarding.show',$apprentice);
+  $this->actingAs($admin)->get($record)->assertOk()->assertSee('Apprentice login and password help')->assertSee($help);
+  $this->get($help)->assertOk()->assertSee('Set up first-time access');
+  $this->actingAs($tutor)->get($record)->assertOk()->assertDontSee('Apprentice login and password help');
+  $this->get($help)->assertForbidden();
+
+  $apprentice->forceFill(['user_id'=>$login->id])->save();
+  $this->actingAs($admin)->get($help)->assertOk()->assertSee('Login invitation unavailable');
+  $login->forceFill(['email_verified_at'=>now()])->save();
+  config(['account_access.recovery_enabled'=>true,'mail.default'=>'array']);
+  $this->get($help)->assertOk()->assertSee('Forgotten your password?')->assertDontSee('Send login invitation');
+  $login->forceFill(['active'=>false])->save();
+  $this->get($help)->assertOk()->assertSee('Check the account link');
+ }
  public function test_create_login_requires_identity_confirmation_and_separate_invitation():void {
   [$m,$u,$a]=$this->fixture();$u->delete();Notification::fake();$before=$a->fresh()->getAttributes();$this->actingAs($m)->post($this->linkUrl($a),$this->data($a))->assertSessionHasNoErrors();
   $a->refresh();$account=User::findOrFail($a->user_id);$this->assertSame('apprentice',$account->role);$this->assertNull($account->email_verified_at);$this->assertTrue($account->active);$this->assertSame($a->email,$account->email);$this->assertSame(2,$a->version);$this->assertDatabaseCount('apprentice_onboarding_events',1);Notification::assertNothingSent();$this->assertDatabaseCount('account_onboarding_tokens',0);
