@@ -5,14 +5,14 @@
 @if(request()->routeIs('support.index'))
 <link rel="stylesheet" href="{{ asset('assets/support-record-progress.css') }}">
 @endif
-</head>
-<body class="{{ request()->routeIs('login')?'signin-page':'portal-page' }}"><a class="skip-link" href="#main-content">Skip to main content</a><div class="shell">
+<script src="{{ asset('assets/friendly-theme117-boot.js') }}?v=117"></script><link rel="stylesheet" href="{{ asset('assets/friendly-theme117.css') }}?v=117"><script src="{{ asset('assets/friendly-theme117.js') }}?v=117" defer></script></head>
+<body data-portal-theme="117" class="theme117 {{ request()->routeIs('login')?'signin-page':'portal-page' }}"><a class="skip-link" href="#main-content">Skip to main content</a><div class="shell">
 <aside class="sidebar"><a class="brand" href="{{ url('/') }}"><img src="{{ asset('assets/gta-logo.jpg') }}?v=53" width="48" height="48" alt="GTA"><span>GTA Portal<br><small>Learning and progress</small></span></a>
 @auth @include('navigation.menu') @endauth
 @if(app()->environment('local', 'testing', 'staging'))
     <p class="release">{{ app()->environment('staging') ? 'Staging' : 'Local development' }}<br>{{ config('portal_release.build') }}</p>
 @endif</aside>
-<div class="workspace"><header class="topbar"><span>{{ auth()->user()?->name ?? 'GTA sign in' }} @auth<small>{{ \App\Support\PortalLanguage::role(auth()->user()->role) }}</small>@endauth</span><div class="toolbar"><button type="button" id="theme-toggle">Dark mode</button>@auth<form action="{{ route('logout') }}" method="post">@csrf<button>Sign out</button></form>@endauth</div></header>
+<div class="workspace"><header class="topbar">@auth @can('viewAny',\App\Models\Apprentice::class)<form class="theme117-search" action="{{route('apprentices.index')}}" method="get"><label class="sr-only" for="theme117-search">Find an apprentice</label><input type="search" id="theme117-search" name="search" placeholder="Find an apprentice" value="{{request()->routeIs('apprentices.index')?request('search'):''}}"><button type="submit">Search</button></form>@endcan @endauth<span class="theme117-account">{{ auth()->user()?->name ?? 'GTA sign in' }} @auth<small>{{ \App\Support\PortalLanguage::role(auth()->user()->role) }}</small>@endauth</span><div class="toolbar"><button type="button" id="theme-toggle">Dark mode</button>@auth<form action="{{ route('logout') }}" method="post">@csrf<button>Sign out</button></form>@endauth</div></header>
 <main id="main-content" tabindex="-1">@if(app()->environment('local','testing'))<div class="test-notice">Local development environment — do not enter real apprentice data.</div>@endif
 @if(session('status'))<div class="notice" role="status">{{ session('status') }}</div>@endif
 @if(auth()->user()?->role==='ceo'&&\App\Support\ExecutiveAccess::enabled(request()))<div class="errors" role="status">CEO emergency override is on for this session. Uses are recorded. <a href="{{ route('executive.index') }}" @if(request()->routeIs('executive.*'))aria-current="page"@endif>Review or end override</a></div>@endif

@@ -1,8 +1,8 @@
-@php($menu = \App\Support\PortalNavigation::forDisplay(auth()->user(), request()))
+@php($menu = \App\Support\FriendlyTheme117::menu(auth()->user(), request()))
 <nav id="portal-navigation" class="grouped-navigation" aria-label="Main navigation">
     <div class="navigation-shortcuts">
         @foreach($menu['daily'] as $link)
-            <a href="{{ $link['href'] }}" @if($link['href'] === $menu['currentUrl']) aria-current="page" @endif>{{ $link['label'] }}</a>
+            <a href="{{ $link['href'] }}" aria-label="{{ $link['label'] }}" @if($link['href'] === $menu['currentUrl']) aria-current="page" @endif><span class="theme117-nav-icon">@include('navigation.theme117-icon',['icon'=>\App\Support\FriendlyTheme117::icon($link['label'])])</span><span>{{ \App\Support\FriendlyTheme117::label($link['label']) }}</span></a>
         @endforeach
     </div>
     @if($menu['sections'])
