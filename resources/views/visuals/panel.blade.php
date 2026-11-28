@@ -1,5 +1,14 @@
 <section class="panel visual-panel" data-visual-panel="{{ $chart['key'] }}"><h2>{{ $chart['title'] }}</h2><details class="figure-help"><summary>About this measure</summary><p>{{ $chart['note'] }}</p></details><p class="visual-unit">Unit: {{ $chart['unit'] }}.@if(($chart['type']??'')==='grouped') {{ $chart['first'] }} / {{ $chart['second'] }}.@endif</p>
 @php($hasChartValues=collect($chart['rows'])->contains(fn($row)=>($row['value']??0)>0||($row['second']??0)>0))
 @if(!$hasChartValues)<div class="visual-empty"><strong>No positive recorded values in this scope</strong>See the table for zero and unknown values.</div>@endif
-<div class="visual-chart" data-visual-chart>{!! \App\Support\PortalCharts::svg($chart) !!}</div>
-<div class="table-scroll visual-table" data-visual-table><table><caption>{{ $chart['title'] }} — exact values ({{ $chart['unit'] }})</caption><thead><tr><th scope="col">Measure</th><th scope="col">{{ $chart['first']??'Recorded value' }}</th>@if(($chart['type']??'')==='grouped')<th scope="col">{{ $chart['second'] }}</th>@endif</tr></thead><tbody>@forelse($chart['rows'] as $row)<tr><th scope="row">{{ $row['label'] }}</th><td>{{ $row['value']===null?'Unknown / not established':$row['value'] }}</td>@if(($chart['type']??'')==='grouped')<td>{{ ($row['second']??null)===null?'Unknown / not established':$row['second'] }}</td>@endif</tr>@empty<tr><td colspan="3">No source records in this scope.</td></tr>@endforelse</tbody></table></div></section>
+<div class="visual-chart" data-visual-chart>
+    @if(!empty($chart['compact']))
+        @include('visuals.metric-bars')
+    @else
+        {!! \App\Support\PortalCharts::svg($chart) !!}
+    @endif
+</div>
+<div class="table-scroll visual-table" data-visual-table>
+    @include('visuals.exact-table')
+</div>
+</section>

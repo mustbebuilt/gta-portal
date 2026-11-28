@@ -1,6 +1,6 @@
 <?php
 namespace App\Support;
-use App\Models\{Apprentice,LearningTask,Qualification,SmartAction,TrainingTopic};
+use App\Models\{Apprentice,LearningTask,ProgrammeOutcome,Qualification,SmartAction,TrainingTopic};
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 class PortalVisualReport
@@ -62,6 +62,8 @@ class PortalVisualReport
   }
   $charts[]=['key'=>'attendance-trend','title'=>'Weekly apprentice-session attendance','type'=>'line','max'=>100,'unit'=>'% of expected apprentice-session records','note'=>'Ended saved-roster sessions in the selected attendance period. Aggregate attended / expected, not an average of individual percentages. Missing marks or no expected records give Unknown and a break in the line. The available weeks use the same register basis as the period total.','rows'=>$weekly];
   if(count($details)===1){$a=$details[0];$charts[]=['key'=>'otj','title'=>'Recorded main-aim training and approved plan','type'=>'bars','unit'=>'hours','note'=>'Current loaded source records, separate from the attendance date filter. Recorded hours, approved target and planned hours in blocks already ended are different measures. No daily interpolation or historical completeness is inferred. Maths/English topic hours are not added.','rows'=>[['label'=>'Recorded loaded-source hours','value'=>$a['recorded_hours']],['label'=>'Current approved total target','value'=>$a['target_hours']],['label'=>'Approved blocks ended to date','value'=>$a['planned_due_hours']]]];}
+  $outcomes = ProgrammeOutcome::whereIn('apprentice_id', $ids)->get(['apprentice_id', 'context'])->keyBy('apprentice_id');
+  $charts = [...ReportComparisons::charts(collect($details), $outcomes), ...$charts];
   $peopleById = $people->keyBy('id');
   $quals=Qualification::whereIn('apprentice_id',$ids)->get()->map(fn($q)=>['reference'=>$peopleById->get($q->apprentice_id)?->reference,'subject'=>$q->subject,'title'=>$q->title,'status'=>$q->status,'result'=>$q->result??'Not recorded'])->values()->all();
   $attendanceTotal = $ledger === null ? null : AttendanceMath::report($attendanceRows);

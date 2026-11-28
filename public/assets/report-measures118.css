@@ -1,0 +1,58 @@
+/* Shared report and progress presentation layered over the portal theme. */
+.theme117 #main-content {
+    --gta-measure: var(--accent);
+    --gta-measure-comparison: #596887;
+    --gta-measure-track: var(--line);
+}
+html[data-theme="dark"] .theme117 #main-content {
+    --gta-measure-comparison: #a8b5ce;
+}
+.theme117 :is(.visual-chart,.report-card,.report-headline,.p66-chart,.p66-metric) {
+    color: var(--text);
+    border-color: var(--line);
+    background: var(--panel);
+}
+.theme117 :is(.visual-chart,.p66-chart,.report-card) { border-radius: 10px; }
+.theme117 .visual-chart svg text { fill: var(--text); }
+.theme117 .visual-chart svg :is(.chart-axis,.chart-grid) { stroke: var(--line); }
+.theme117 .visual-chart svg [stroke="#147b9a"] { stroke: var(--gta-measure); }
+.theme117 .visual-chart svg :is([fill="#147b9a"],[fill="#1789a6"]) { fill: var(--gta-measure); }
+.theme117 .visual-chart svg [stroke="#1789a6"] { stroke: var(--gta-measure); }
+.theme117 .report-bar-track,
+.theme117 .report-measure-track { background: var(--gta-measure-track); }
+.theme117 .report-bar-track > span { background: var(--gta-measure); }
+.theme117 .progress66 :is(.p66-column,.p66-dot) { fill: var(--gta-measure); }
+.theme117 .progress66 .p66-line { stroke: var(--gta-measure); }
+.theme117 .progress66 .p66-line.p66-planned { stroke: var(--gta-measure-comparison); }
+.theme117 .progress66 .p66-plan-dot { fill: var(--gta-measure-comparison); }
+.theme117 .progress66 progress { accent-color: var(--gta-measure); }
+.theme117 .progress66 .p66-gridline { stroke-dasharray: none; }
+.theme117 :is(.visual-table,.report-headline-table,.p66-table-scroll) caption {
+    padding-block: .65rem;
+    text-align: start;
+    color: var(--text);
+}
+.report-measures-bars { display: grid; gap: .55rem; }
+.report-measure-row {
+    display: grid;
+    grid-template-columns: minmax(0,1.35fr) minmax(1.5rem,1fr) auto;
+    gap: .5rem;
+    align-items: center;
+    overflow-wrap: anywhere;
+    font-size: .875rem;
+}
+.report-measure-row strong { text-align: end; font-variant-numeric: tabular-nums; }
+.report-measure-track { display: block; height: .625rem; border-radius: 1rem; }
+.report-measure-track > span {
+    display: block;
+    width: var(--measure-width);
+    height: 100%;
+    border-radius: inherit;
+    background: var(--gta-measure);
+}
+.report-measure-track > .report-measure-reference { background: var(--gta-measure-comparison); }
+.report-measures-bars > p { margin-block: .25rem 0; }
+@media (max-width: 36rem) {
+    .theme117 .visual-chart { padding: .6rem; }
+    .report-measure-row { grid-template-columns: minmax(0,1.35fr) minmax(1rem,.8fr) auto; }
+}

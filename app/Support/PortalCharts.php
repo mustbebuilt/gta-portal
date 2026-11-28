@@ -25,10 +25,15 @@ class PortalCharts
    return self::wrap($title,720,240,$parts.$marks);
   }
   if(!in_array($type,['bars','grouped'],true)){throw new \InvalidArgumentException('Unknown chart type.');}
-  if(count($rows)>14){$tail=array_slice($rows,13);$more=['label'=>'Further entries (see table)','value'=>collect($tail)->contains(fn($r)=>($r['value']??null)===null)?null:array_sum(array_column($tail,'value'))];if($type==='grouped'){$more['second']=collect($tail)->contains(fn($r)=>($r['second']??null)===null)?null:array_sum(array_column($tail,'second'));}$rows=[...array_slice($rows,0,13),$more];}
-  $max=max([1,...array_map(fn($r)=>max((float)($r['value']??0),(float)($r['second']??0)),$rows)]);$step=$type==='grouped'?58:44;$height=max(115,count($rows)*$step+50);$parts=self::grid(245,645,15,$height-30,$max,false);
+  if(!empty($chart['compact'])){
+   $rows=array_slice($rows,0,14);
+  }elseif(count($rows)>14){$tail=array_slice($rows,13);$more=['label'=>'Further entries (see table)','value'=>collect($tail)->contains(fn($r)=>($r['value']??null)===null)?null:array_sum(array_column($tail,'value'))];if($type==='grouped'){$more['second']=collect($tail)->contains(fn($r)=>($r['second']??null)===null)?null:array_sum(array_column($tail,'second'));}$rows=[...array_slice($rows,0,13),$more];}
+  $knownMax=max([0,...array_map(fn($r)=>max((float)($r['value']??0),(float)($r['second']??0)),$rows)]);
+  $max=$chart['max']??max(1,$knownMax);
+  if(!is_numeric($max)||!is_finite((float)$max)||(float)$max<=0||(float)$max>1e12||(float)$max<$knownMax){throw new \InvalidArgumentException('Chart maximum must include every known value.');}
+  $step=$type==='grouped'?58:44;$height=max(115,count($rows)*$step+50);$parts=self::grid(245,645,15,$height-30,$max,false);
   foreach($rows as$i=>$row){$y=34+$i*$step;$parts.='<text x="4" y="'.$y.'">'.e(mb_strimwidth($row['label'],0,31,'…')).'</text>';
-   foreach($type==='grouped'?['value','second']:['value']as$j=>$key){$v=$row[$key]??null;$at=$y-14+$j*19;$colour=$type==='grouped'?['#7865d1','#147b9a'][$j]:self::COLOURS[0];if($v!==null){$width=400*$v/$max;$parts.='<rect x="245" y="'.$at.'" width="'.self::n($width).'" height="14" rx="3" fill="'.$colour.'"><title>'.e($row['label']).': '.e((string)$v).'</title></rect><text x="710" y="'.($at+12).'" text-anchor="end" font-size="12">'.e(self::n((float)$v)).'</text>';}else{$parts.='<text x="710" y="'.($at+12).'" text-anchor="end" font-size="11">Unknown</text>';}}
+   foreach($type==='grouped'?['value','second']:['value']as$j=>$key){$v=$row[$key]??null;$at=$y-14+$j*19;$colour=$type==='grouped'?['#7865d1','#147b9a'][$j]:(!empty($row['comparison'])?'#596887':self::COLOURS[0]);if($v!==null){$width=400*$v/$max;$parts.='<rect x="245" y="'.$at.'" width="'.self::n($width).'" height="14" rx="3" fill="'.$colour.'"><title>'.e($row['label']).': '.e((string)$v).'</title></rect><text x="710" y="'.($at+12).'" text-anchor="end" font-size="12">'.e(self::n((float)$v)).'</text>';}else{$parts.='<text x="710" y="'.($at+12).'" text-anchor="end" font-size="11">Unknown</text>';}}
   }
   return self::wrap($title,720,$height,$parts);
  }

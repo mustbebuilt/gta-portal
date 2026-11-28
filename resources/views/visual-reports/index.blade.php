@@ -21,10 +21,16 @@
         <details><summary>GTA attendance thresholds</summary><p>{{ $rating['rule'] }}</p></details>
     </section>
 @endif
+@include('visuals.controls')
+<h2 id="report-comparisons">Review and training measures</h2>
+<div class="visual-grid" aria-labelledby="report-comparisons">
+    @foreach(collect($report['charts'])->where('compact', true) as $chart)
+        @include('visuals.panel')
+    @endforeach
+</div>
 @php($taskChart=collect($report['charts'])->firstWhere('key','tasks'))
 @if($taskChart)@include('visuals.task-summary')@endif
-@include('visuals.controls')
-<div class="visual-grid">@foreach($report['charts'] as $chart)@continue($chart['key'] === 'attendance-trend')@include('visuals.panel')@endforeach</div>
+<div class="visual-grid">@foreach($report['charts'] as $chart)@continue($chart['key'] === 'attendance-trend' || !empty($chart['compact']))@include('visuals.panel')@endforeach</div>
 @include('reports.headline', [
     'title' => 'Off-the-job training follow-up',
     'basis' => 'Source checks on the current occupational training ledger.',

@@ -5,7 +5,7 @@
 @if(request()->routeIs('support.index'))
 <link rel="stylesheet" href="{{ asset('assets/support-record-progress.css') }}">
 @endif
-<script src="{{ asset('assets/friendly-theme117-boot.js') }}?v=117"></script><link rel="stylesheet" href="{{ asset('assets/friendly-theme117.css') }}?v=117"><script src="{{ asset('assets/friendly-theme117.js') }}?v=117" defer></script></head>
+<script src="{{ asset('assets/friendly-theme117-boot.js') }}?v=117"></script><link rel="stylesheet" href="{{ asset('assets/friendly-theme117.css') }}?v=117"><link rel="stylesheet" href="{{ asset('assets/report-measures118.css') }}?v=118"><script src="{{ asset('assets/friendly-theme117.js') }}?v=117" defer></script></head>
 <body data-portal-theme="117" class="theme117 {{ request()->routeIs('login')?'signin-page':'portal-page' }}"><a class="skip-link" href="#main-content">Skip to main content</a><div class="shell">
 <aside class="sidebar"><a class="brand" href="{{ url('/') }}"><img src="{{ asset('assets/gta-logo.jpg') }}?v=53" width="48" height="48" alt="GTA"><span>GTA Portal<br><small>Learning and progress</small></span></a>
 @auth @include('navigation.menu') @endauth
