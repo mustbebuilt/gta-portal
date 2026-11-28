@@ -65,7 +65,7 @@
                     </label>
                     <label>Expected headcount <input type="number" min="1" max="200" name="headcount" value="{{ old('headcount', $d['headcount'] ?? '') }}"></label>
                 </div>
-                <p class="muted">The group name, for example Autocare Year 1, will appear on the timetable. Choose the group’s primary tutor and a suitable room.</p>
+                <p class="muted">The group name appears on the timetable. Choose its primary tutor and room. The draft check flags apprentices from the same employer on the same teaching day.</p>
             </fieldset>
         </div>
         <details @if((int) old('weeks', $d['weeks'] ?? 1) !== 1 || old('excluded_dates_text', $d['excluded_dates'] ?? []) || $errors->hasAny(['weeks', 'excluded_dates_text'])) open @endif>

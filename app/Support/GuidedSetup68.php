@@ -521,6 +521,7 @@ class GuidedSetup68
             $fields = [...$fields, ...collect($p['programme'])->only(['tutor_id', 'tutor_group_id', 'mentor_id', 'careers_adviser_id', 'maths_tutor_id', 'english_tutor_id'])->all(), 'programme_id' => $t->programme_id, 'employer_id' => $employer->id, 'start_date' => $p['programme']['start_date']];
             $end = CarbonImmutable::parse($fields['start_date'])->addDays(collect($t->template['blocks'])->max('end_day'))->toDateString();
             $fields['planned_end_date'] = $agreedDates['programme_end'] ?? $end;
+            if (!empty($fields['tutor_group_id'])) TeachingAllocationChecks::lock();
             $a = $d->apprentice_id ? Apprentice::whereKey($d->apprentice_id)->lockForUpdate()->firstOrFail() : new Apprentice;
             if ($a->exists && $a->version !== ($p['apprentice_version'] ?? null)) {
                 Rpl68::fail('The apprentice changed since this setup was opened; reconcile the record first.');
@@ -537,10 +538,12 @@ class GuidedSetup68
             $fields = Validator::make($fields, $rules)->validate();
             $before = $a->exists ? $a->only(AssignmentHistory::KEYS) : null;
             $a->fill($fields);
+            $recheckAllocation = $a->isDirty(['tutor_group_id', 'programme_id', 'start_date', 'employer_id']);
             $a->inclusion_status68 = $p['markers']['state'];
             if ($a->exists) {
                 $a->version++;
             }$a->save();
+            if ($recheckAllocation) TeachingAllocationChecks::checkAssignment($a);
             AssignmentHistory::record($a, $u->id, $before);
             abort_unless(SupportAccess::lead($u, $a), 403);
             $old = MarkerHistory::codes($a->id);

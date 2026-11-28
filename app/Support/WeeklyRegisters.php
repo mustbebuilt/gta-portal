@@ -57,6 +57,7 @@ final class WeeklyRegisters
     {
         return DB::transaction(function () use ($actor, $auth, $group, $occurrence): TrainingSession {
             $user = User::whereKey($actor->id)->lockForUpdate()->firstOrFail();
+            TeachingAllocationChecks::lock();
             $group = TutorGroup::whereKey($group->id)->lockForUpdate()->firstOrFail();
             abort_unless($user->auth_version === $auth && RegisterCreation::allowed($user, $group), 403);
 

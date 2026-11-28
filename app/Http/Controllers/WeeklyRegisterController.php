@@ -27,6 +27,7 @@ final class WeeklyRegisterController extends Controller
             'break_end' => ['nullable', 'required_with:break_start', 'date_format:H:i', 'after:break_start', 'before_or_equal:end'],
         ]);
         DB::transaction(function () use ($r, $group, $data): void {
+            \App\Support\TeachingAllocationChecks::lock();
             $group = TutorGroup::whereKey($group->id)->lockForUpdate()->firstOrFail();
             $this->version($group, $data['record_version']);
             abort_unless($group->active, 422);
@@ -56,10 +57,13 @@ final class WeeklyRegisterController extends Controller
                 'configured_by' => $r->user()->id,
                 'configured_at' => now()->toIso8601String(),
             ];
+            $members = \App\Models\Apprentice::where('tutor_group_id', $group->id)->pluck('id')->all();
+            \App\Support\TeachingAllocationChecks::checkDates($group, $members,
+                \App\Support\TeachingAllocationChecks::weeks($data['first_day']), 'first_day');
             $group->weekly_register = ['revisions' => [...$previous, $revision]];
             $group->record_version++;
             $group->save();
-        });
+        }, 3);
 
         return to_route('attendance.index', ['group'=>$group->id])->with('status', 'Weekly register schedule saved.');
     }

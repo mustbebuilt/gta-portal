@@ -81,8 +81,10 @@ class ApprenticeController extends Controller
     public function store(SaveApprenticeRequest $request): RedirectResponse
     {
         $record = DB::transaction(function () use ($request) {
+            if ($request->filled('tutor_group_id')) \App\Support\TeachingAllocationChecks::lock();
             $recruitmentFields = array_keys(EntryContext::RECRUITMENT_FIELDS);
             $record = Apprentice::create($request->safe()->except(['version', ...$recruitmentFields, ...\App\Support\ApprenticeAlerts::INPUTS]));
+            \App\Support\TeachingAllocationChecks::checkAssignment($record);
             $recruitment = array_filter($request->safe()->only($recruitmentFields), fn ($value) => $value !== null);
             if ($recruitment !== []) {
                 EntryContext::save($request->user(), $record, ['stage' => 'Application', ...$recruitment], 0);
@@ -92,7 +94,7 @@ class ApprenticeController extends Controller
             $this->audit($request, $record, 'created');
 
             return $record;
-        });
+        }, 3);
 
         \App\Support\DestinationMilestones::sync($record);
         return to_route('apprentices.show', $record)->with('status', 'Apprentice record saved.');
@@ -149,6 +151,7 @@ class ApprenticeController extends Controller
     public function update(SaveApprenticeRequest $request, Apprentice $apprentice): RedirectResponse
     {
         DB::transaction(function () use ($request, $apprentice) {
+            \App\Support\TeachingAllocationChecks::lock();
             $locked = Apprentice::whereKey($apprentice->id)->lockForUpdate()->firstOrFail();
             if ($locked->version !== (int) $request->validated('version')) {
                 throw ValidationException::withMessages(['version' => 'This record changed while you were editing. Reopen it before making further changes.']);
@@ -162,11 +165,13 @@ class ApprenticeController extends Controller
                 throw ValidationException::withMessages(['programme_id' => 'Assigned programme task history cannot be transferred to another programme automatically. Keep the current mapping until a controlled programme transfer is available.']);
             }
             if($request->boolean('change_alert_preferences')) { \App\Support\ApprenticeAlerts::apply($locked,$request->user(),$request->session()->get('auth_version'),$request->validated()); }
+            $recheckAllocation = $locked->isDirty(['tutor_group_id', 'programme_id', 'start_date']);
             $locked->version++;
             $locked->save();
+            if ($recheckAllocation) \App\Support\TeachingAllocationChecks::checkAssignment($locked);
             AssignmentHistory::record($locked, $request->user()->id, $beforeLinks);
             $this->audit($request, $locked, 'updated');
-        });
+        }, 3);
 
         \App\Support\DestinationMilestones::sync($apprentice);
         return to_route('apprentices.show', $apprentice)->with('status', 'Changes saved.');

@@ -54,7 +54,13 @@ class ApprenticeIntakes {
  public static function applied(Batch $b):bool {try{$p=$b->receipt;return self::intact($b)&&$b->state==='Applied'&&$b->reviewed_by&&$b->reviewed_by!==$b->created_by&&$b->reviewed_at&&$p&&$p['source_hash']===$b->source_hash&&$p['version']===$b->version&&$p['by']===$b->reviewed_by&&$p['at']===$b->reviewed_at->toIso8601String()&&count($p['created'])===count($b->source['rows']);}catch(\Throwable){return false;}}
  public static function decide(User $actor,int $auth,Batch $record,int $version,string $decision,string $note):void {
   DB::transaction(function()use($actor,$auth,$record,$version,$decision,$note):void {User::whereIn('id',[$actor->id,$record->created_by])->orderBy('id')->lockForUpdate()->get();$m=self::actor($actor,$auth);$b=Batch::whereKey($record->id)->lockForUpdate()->firstOrFail();if(!self::intact($b)||$b->state!=='Pending'||$b->version!==$version||!in_array($decision,['apply','reject','withdraw'],true)){self::fail('Use the current intact pending intake.');}if($decision!=='withdraw'&&$m->id===$b->created_by){self::fail('A different administrator/CEO must check and apply/reject.');}$created=[];
-   if($decision==='apply'){if(!self::fresh($b,true)){self::fail('Intake has errors, expired or its catalogue/source/identity changed. Upload a fresh corrected file.');}foreach($b->source['rows']as$row){$a=Apprentice::create($row['data']);AssignmentHistory::record($a,$m->id,null);DB::table('audit_events')->insert(['user_id'=>$m->id,'apprentice_id'=>$a->id,'event'=>'intake_profile_created','created_at'=>now()]);$created[]=['id'=>$a->id,'reference'=>$a->reference,'profile_hash'=>ReviewedImports::hash($a->getAttributes())];}}
+   if($decision==='apply'){TeachingAllocationChecks::lock();if(!self::fresh($b,true)){self::fail('Intake has errors, expired or its catalogue/source/identity changed. Upload a fresh corrected file.');}foreach($b->source['rows']as$row){$a=Apprentice::create($row['data']);
+    try {
+        TeachingAllocationChecks::checkAssignment($a);
+    } catch (\Illuminate\Validation\ValidationException $error) {
+        self::fail('CSV row '.$row['line'].' ('.$a->reference.'): '.implode(' ', $error->errors()['tutor_group_id']));
+    }
+    AssignmentHistory::record($a,$m->id,null);DB::table('audit_events')->insert(['user_id'=>$m->id,'apprentice_id'=>$a->id,'event'=>'intake_profile_created','created_at'=>now()]);$created[]=['id'=>$a->id,'reference'=>$a->reference,'profile_hash'=>ReviewedImports::hash($a->getAttributes())];}}
    $b->state=['apply'=>'Applied','reject'=>'Rejected','withdraw'=>'Withdrawn'][$decision];$b->version++;$b->reviewed_by=$m->id;$b->reviewed_at=now()->setMicrosecond(0);$b->review_note=$note;$b->receipt=$decision==='apply'?['source_hash'=>$b->source_hash,'version'=>$b->version,'by'=>$m->id,'at'=>$b->reviewed_at->toIso8601String(),'created'=>$created]:null;$b->save();self::event($b,$m,'preview_'.$decision,['created'=>$created,'note'=>$note]);
   },3);
  }

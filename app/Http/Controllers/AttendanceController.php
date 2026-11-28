@@ -150,6 +150,7 @@ class AttendanceController extends Controller
 
         $session = DB::transaction(function () use ($r, $data) {
             $actor = User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();
+            \App\Support\TeachingAllocationChecks::lock();
             $group = TutorGroup::whereKey($data['tutor_group_id'])->lockForUpdate()->firstOrFail();
             $auth = (int) $r->session()->get('auth_version');
             abort_unless($actor->auth_version === $auth && $group->active && RegisterCreation::allowed($actor, $group), 403);
@@ -218,6 +219,7 @@ class AttendanceController extends Controller
         }
         $s = DB::transaction(function () use ($r, $data, $breaks, $group) {
             $currentActor = User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();
+            \App\Support\TeachingAllocationChecks::lock();
             abort_unless($currentActor->active && $currentActor->auth_version === (int) $r->session()->get('auth_version'), 403);
             $locked = TutorGroup::whereKey($group->id)->lockForUpdate()->firstOrFail();
             abort_unless($locked->active && $this->groupAllowed($r, $locked), 403);
@@ -236,7 +238,7 @@ class AttendanceController extends Controller
             }
 
             return $first;
-        });
+        }, 3);
 
         return to_route('attendance.show', $s)->with('status', 'Session plan saved. Repeated weeks keep separate registers; no attendance, delivery or OTJ hours inferred.');
     }
